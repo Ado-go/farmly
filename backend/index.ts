@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import prisma from "./prisma.js";
+import prisma from "./prisma.ts";
 
 const app = express();
 app.use(cors());
