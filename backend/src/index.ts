@@ -20,7 +20,7 @@ app.use("/api/auth", authRoutes);
 app.get("/profile", authenticateToken, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: req.user!.userId },
+      where: { id: req.user!.id },
       select: { id: true, email: true, role: true },
     });
 
@@ -28,7 +28,7 @@ app.get("/profile", authenticateToken, async (req, res) => {
 
     res.json({ message: "Profile loaded", user });
   } catch (err) {
-    res.status(500).json({ message: "Error loading profile" });
+    res.status(500).json({ message: "Error loading profile: " + err });
   }
 });
 
@@ -39,7 +39,7 @@ app.get(
   async (req, res) => {
     try {
       const user = await prisma.user.findUnique({
-        where: { id: req.user!.userId },
+        where: { id: req.user!.id },
         select: {
           id: true,
           role: true,
