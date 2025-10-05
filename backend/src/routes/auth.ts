@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import prisma from "../prisma.ts";
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || "";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Register
 router.post("/register", async (req, res) => {
@@ -42,18 +42,30 @@ router.post("/login", async (req, res) => {
   if (!valid) return res.status(401).json({ error: "Invalid credentials" });
 
   const token = jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
-    JWT_SECRET,
+    { userId: user.id, role: user.role },
+    process.env.JWT_SECRET!,
     {
       expiresIn: "15m",
     }
   );
 
-  res.json({ token });
+  res.cookie("access_token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 15 * 60 * 1000, // 15 minút
+  });
+
+  res.json({ message: "Logged in", user });
 });
 
 // Logout
 router.post("/logout", (_req, res) => {
-  res.json({ message: "Logged out (client should delete token)" });
+  res.clearCookie("access_token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+  res.json({ message: "Logged out" });
 });
 export default router;
