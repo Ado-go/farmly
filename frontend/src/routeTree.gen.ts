@@ -13,6 +13,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FarmRouteImport } from './routes/farm'
 import { Route as IndexRouteImport } from './routes/index'
 
 const RegisterRoute = RegisterRouteImport.update({
@@ -35,6 +36,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FarmRoute = FarmRouteImport.update({
+  id: '/farm',
+  path: '/farm',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -43,6 +49,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/farm': typeof FarmRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/farm': typeof FarmRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/farm': typeof FarmRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
@@ -65,14 +74,22 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/products' | '/profile' | '/register'
+  fullPaths: '/' | '/farm' | '/login' | '/products' | '/profile' | '/register'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/products' | '/profile' | '/register'
-  id: '__root__' | '/' | '/login' | '/products' | '/profile' | '/register'
+  to: '/' | '/farm' | '/login' | '/products' | '/profile' | '/register'
+  id:
+    | '__root__'
+    | '/'
+    | '/farm'
+    | '/login'
+    | '/products'
+    | '/profile'
+    | '/register'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FarmRoute: typeof FarmRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
   ProfileRoute: typeof ProfileRoute
@@ -109,6 +126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/farm': {
+      id: '/farm'
+      path: '/farm'
+      fullPath: '/farm'
+      preLoaderRoute: typeof FarmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -121,6 +145,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FarmRoute: FarmRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
   ProfileRoute: ProfileRoute,
