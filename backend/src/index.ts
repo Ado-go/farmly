@@ -17,7 +17,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 
-app.get("/profile", authenticateToken, async (req, res) => {
+app.get("/api/profile", authenticateToken, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.id },
@@ -33,7 +33,7 @@ app.get("/profile", authenticateToken, async (req, res) => {
 });
 
 app.get(
-  "/farm",
+  "/api/farm",
   authenticateToken,
   authorizeRole("FARMER"),
   async (req, res) => {
@@ -58,7 +58,7 @@ app.get("/api/hello", (req, res) => {
   res.json({ message: "Hello from backend!" });
 });
 
-app.get("/products", async (req, res) => {
+app.get("/api/products", async (req, res) => {
   const products = await prisma.product.findMany();
   res.json(products);
 });

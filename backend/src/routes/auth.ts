@@ -85,7 +85,13 @@ router.post("/login", async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dní
   });
 
-  res.json({ message: "Login successful" });
+  res.json({
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    },
+  });
 });
 
 // REFRESH token
@@ -130,6 +136,7 @@ router.post("/logout", async (req, res) => {
     } catch {}
   }
 
-  res.clearCookie("refreshToken").json({ message: "Logged out" });
+  res.clearCookie("refreshToken");
+  res.clearCookie("accessToken").json({ message: "Logged out" });
 });
 export default router;
