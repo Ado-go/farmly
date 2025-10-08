@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../lib/api";
@@ -54,6 +54,9 @@ function LoginPage() {
         <button type="submit" disabled={mutation.isPending}>
           Login
         </button>
+        <p>
+          Zabudol si heslo? <Link to="/forgot-password">Obnoviť</Link>
+        </p>
       </form>
       {mutation.isError && (
         <p style={{ color: "red" }}>{(mutation.error as Error).message}</p>
