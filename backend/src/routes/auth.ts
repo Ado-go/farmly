@@ -3,22 +3,35 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma.ts";
 import { sendEmail } from "../utils/sendEmails.ts";
+import { type User } from "@prisma/client";
 
 const router = Router();
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 const RESET_TOKEN_SECRET = process.env.RESET_TOKEN_SECRET;
 
-function generateTokens(user) {
+if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET || !RESET_TOKEN_SECRET) {
+  throw new Error("Missing JWT secrets in environment variables");
+}
+
+function generateTokens(user: User) {
+  if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET) {
+    throw new Error("Missing JWT secrets in environment variables");
+  }
+
   const accessToken = jwt.sign(
     { id: user.id, role: user.role },
     ACCESS_TOKEN_SECRET,
     { expiresIn: "15m" }
   );
 
-  const refreshToken = jwt.sign({ id: user.id }, REFRESH_TOKEN_SECRET, {
-    expiresIn: "7d",
-  });
+  const refreshToken = jwt.sign(
+    { id: user.id, role: user.role },
+    REFRESH_TOKEN_SECRET,
+    {
+      expiresIn: "7d",
+    }
+  );
 
   return { accessToken, refreshToken };
 }
@@ -171,7 +184,10 @@ router.post("/refresh", (req, res) => {
     return res.status(401).json({ message: "Missing refresh token" });
 
   try {
-    const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET!);
+    const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET!) as {
+      id: number;
+      role: string;
+    };
     const newAccessToken = jwt.sign(
       { id: decoded.id, role: decoded.role },
       ACCESS_TOKEN_SECRET!,
@@ -198,7 +214,10 @@ router.post("/logout", async (req, res) => {
   const token = req.cookies?.refreshToken;
   if (token) {
     try {
-      const payload = jwt.verify(token, REFRESH_TOKEN_SECRET);
+      const payload = jwt.verify(token, REFRESH_TOKEN_SECRET) as {
+        id: number;
+        role: string;
+      };
       await prisma.user.update({
         where: { id: payload.id },
         data: { refreshToken: null },
