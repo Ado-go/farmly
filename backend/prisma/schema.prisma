@@ -28,6 +28,7 @@ model User {
   role          Role    @default(CUSTOMER)
   orders        Order[]
   refreshToken  String?
+  resetToken    String?
 }
 
 model Product {
