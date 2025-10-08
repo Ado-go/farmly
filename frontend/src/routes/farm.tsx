@@ -18,7 +18,7 @@ function FarmPage() {
 
   return (
     <div>
-      <h2>your Farm is here:</h2>
+      <h2>Farm: </h2>
     </div>
   );
 }

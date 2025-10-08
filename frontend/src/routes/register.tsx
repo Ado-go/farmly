@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import type { User } from "../types/user";
 
 export const Route = createFileRoute("/register")({
   component: RegisterPage,
@@ -30,14 +31,14 @@ function RegisterPage() {
         method: "POST",
         body: JSON.stringify({ email, password }),
       }),
-    onSuccess: (data: any) => {
+    onSuccess: (data: { user: User }) => {
       setUser(data.user);
-      qc.invalidateQueries(["profile"]);
+      qc.invalidateQueries({ queryKey: ["profile"] });
       navigate({ to: "/" });
     },
   });
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     await registerMut.mutateAsync();
     await loginMut.mutateAsync();

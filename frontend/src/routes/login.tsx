@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import type { User } from "../types/user";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -21,10 +22,10 @@ function LoginPage() {
         method: "POST",
         body: JSON.stringify({ email, password }),
       }),
-    onSuccess: (data: any) => {
+    onSuccess: (data: { user: User }) => {
       // Backend returns user and sets cookies (access/refresh)
       setUser(data.user);
-      qc.invalidateQueries(["profile"]);
+      qc.invalidateQueries({ queryKey: ["profile"] });
       navigate({ to: "/" });
     },
   });

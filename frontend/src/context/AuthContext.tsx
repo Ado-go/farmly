@@ -7,8 +7,7 @@ import {
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../lib/api";
-
-export type User = { id: number; email: string; role: string } | null;
+import { type User } from "../types/user";
 
 type AuthContextType = {
   user: User;
@@ -34,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await apiFetch("/auth/refresh", { method: "POST" });
           const res = await apiFetch("/profile");
           setUser(res.user);
-        } catch (err) {
+        } catch {
           console.log("Not logged in");
           setUser(null);
         }

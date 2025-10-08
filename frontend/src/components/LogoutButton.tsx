@@ -19,7 +19,7 @@ export default function LogoutButton() {
 
   return (
     <button onClick={() => mut.mutate()} disabled={mut.isPending}>
-      Logout
+      Odhlásiť sa
     </button>
   );
 }

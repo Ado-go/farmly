@@ -17,13 +17,13 @@ function ForgotPasswordPage() {
     setError("");
 
     try {
-      const res = await apiFetch("/auth/forgot-password", {
+      await apiFetch("/auth/forgot-password", {
         method: "POST",
         body: JSON.stringify({ email }),
       });
 
       setMessage("Email s inštrukciami bol odoslaný.");
-    } catch (err) {
+    } catch {
       setError("Nepodarilo sa odoslať email. Skús to znova.");
     }
   };

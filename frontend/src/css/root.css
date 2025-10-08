@@ -1,0 +1,7 @@
+nav {
+  display: flex;
+  gap: 2em;
+  margin-bottom: 2em;
+  padding: 1em;
+  background-color: #317a36;
+}
