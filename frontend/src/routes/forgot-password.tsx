@@ -1,48 +1,60 @@
-import { useState, type FormEvent } from "react";
-import { apiFetch } from "../lib/api";
 import { createFileRoute } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { apiFetch } from "../lib/api";
 
 export const Route = createFileRoute("/forgot-password")({
   component: ForgotPasswordPage,
 });
 
+const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .min(1, "Email je povinný")
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Zadaj platný email"),
+});
+
+type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
+
 function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<ForgotPasswordForm>({
+    resolver: zodResolver(forgotPasswordSchema),
+  });
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setMessage("");
-    setError("");
-
+  const onSubmit = async (values: ForgotPasswordForm) => {
     try {
       await apiFetch("/auth/forgot-password", {
         method: "POST",
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(values),
       });
-
-      setMessage("Email s inštrukciami bol odoslaný.");
+      alert("Email s inštrukciami bol odoslaný.");
+      reset();
     } catch {
-      setError("Nepodarilo sa odoslať email. Skús to znova.");
+      alert("Nepodarilo sa odoslať email. Skús to znova.");
     }
   };
 
   return (
     <div>
       <h1>Zabudnuté heslo</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <input
           type="email"
           placeholder="Zadaj svoj email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          {...register("email")}
         />
-        <button type="submit">Odoslať</button>
+        {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
+
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Odosielam..." : "Odoslať"}
+        </button>
       </form>
-      {message && <p style={{ color: "green" }}>{message}</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 }
