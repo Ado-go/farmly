@@ -63,5 +63,9 @@ app.get("/api/products", async (req, res) => {
   res.json(products);
 });
 
+export default app;
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+if (process.env.NODE_ENV !== "test") {
+  app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+}
