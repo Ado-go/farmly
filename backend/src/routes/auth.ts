@@ -115,7 +115,6 @@ router.post("/forgot-password", async (req, res) => {
     { expiresIn: "15m" }
   );
 
-  // ulož token do DB
   await prisma.user.update({
     where: { id: user.id },
     data: {
