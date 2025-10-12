@@ -4,4 +4,10 @@ export const Role = {
 } as const;
 
 export type Role = (typeof Role)[keyof typeof Role];
-export type User = { id: number; email: string; role: Role } | null;
+export type User = {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  role: Role;
+} | null;

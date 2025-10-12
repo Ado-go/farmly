@@ -28,15 +28,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const res = await apiFetch("/profile");
         setUser(res.user);
       } catch {
-        try {
-          // refresh token if possible
-          await apiFetch("/auth/refresh", { method: "POST" });
-          const res = await apiFetch("/profile");
-          setUser(res.user);
-        } catch {
-          console.log("Not logged in");
-          setUser(null);
-        }
+        console.log("Not logged in");
+        setUser(null);
       }
     };
     initAuth();

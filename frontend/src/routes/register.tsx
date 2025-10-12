@@ -12,6 +12,11 @@ export const Route = createFileRoute("/register")({
 });
 
 const registerSchema = z.object({
+  name: z.string().min(2, "Meno musí mať aspoň 2 znaky"),
+  phone: z
+    .string()
+    .min(6, "Telefónne číslo musí mať aspoň 6 číslic")
+    .regex(/^\+?\d{6,15}$/, "Zadaj platné telefónne číslo"),
   email: z
     .string()
     .min(1, "Email je povinný")
@@ -67,27 +72,31 @@ function RegisterPage() {
 
   return (
     <div>
-      <h2>Register</h2>
+      <h2>Registrácia</h2>
       <form onSubmit={handleSubmit(onSubmit)}>
+        <input placeholder="Meno" {...register("name")} />
+        {errors.name && <p style={{ color: "red" }}>{errors.name.message}</p>}
+        <br />
+
+        <input placeholder="Telefónne číslo" {...register("phone")} />
+        {errors.phone && <p style={{ color: "red" }}>{errors.phone.message}</p>}
+        <br />
+
         <input placeholder="Email" {...register("email")} />
         {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
         <br />
 
-        <input
-          type="password"
-          placeholder="Password"
-          {...register("password")}
-        />
+        <input type="password" placeholder="Heslo" {...register("password")} />
         {errors.password && (
           <p style={{ color: "red" }}>{errors.password.message}</p>
         )}
         <br />
 
         <label>
-          <input type="radio" value="CUSTOMER" {...register("role")} /> Customer
+          <input type="radio" value="CUSTOMER" {...register("role")} /> Zákazník
         </label>
         <label style={{ marginLeft: 8 }}>
-          <input type="radio" value="FARMER" {...register("role")} /> Farmer
+          <input type="radio" value="FARMER" {...register("role")} /> Farmár
         </label>
         <br />
 
@@ -95,7 +104,7 @@ function RegisterPage() {
           type="submit"
           disabled={registerMut.isPending || loginMut.isPending}
         >
-          Register
+          Registrovať sa
         </button>
       </form>
 

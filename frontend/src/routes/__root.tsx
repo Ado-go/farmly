@@ -17,7 +17,7 @@ function RootLayout() {
         {!user && <Link to="/register">Register</Link>}
         {user && (
           <span>
-            Signed in as {user.email} ({user.role})
+            Signed in as {user.name} ({user.role})
           </span>
         )}
         {user && <LogoutButton />}
