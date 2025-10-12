@@ -44,40 +44,55 @@ describe("Auth routes", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
   // === REGISTER TESTS ===
   test("POST /auth/register - creates user successfully", async () => {
     prisma.user.findUnique.mockResolvedValue(null);
     prisma.user.create.mockResolvedValue({
       id: 1,
       email: "test@test.com",
+      name: "John Johnson",
+      phone: "+421940123456",
       role: "FARMER",
     });
 
-    const res = await request(app)
-      .post("/auth/register")
-      .send({ email: "test@test.com", password: "123456", role: "FARMER" });
+    const res = await request(app).post("/auth/register").send({
+      email: "test@test.com",
+      name: "John Johnson",
+      phone: "+421940123456",
+      password: "123456",
+      role: "FARMER",
+    });
 
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.user).toMatchObject({
       email: "test@test.com",
+      name: "John Johnson",
+      phone: "+421940123456",
       role: "FARMER",
     });
   });
 
-  test("POST /auth/register - missing data returns 400", async () => {
-    const res = await request(app)
-      .post("/auth/register")
-      .send({ email: "test@test.com" });
+  test("POST /auth/register - missing fields returns 400", async () => {
+    const res = await request(app).post("/auth/register").send({
+      email: "missing@test.com",
+      password: "123456",
+      role: "FARMER",
+    });
     expect(res.status).toBe(400);
-    expect(res.body.error).toBe("Missing email or password or role");
+    expect(res.body.error).toBe("Missing email, password, role, name or phone");
   });
 
   test("POST /auth/register - user already exists returns 400", async () => {
     prisma.user.findUnique.mockResolvedValue({ id: 1, email: "test@test.com" });
 
-    const res = await request(app)
-      .post("/auth/register")
-      .send({ email: "test@test.com", password: "123456", role: "FARMER" });
+    const res = await request(app).post("/auth/register").send({
+      email: "test@test.com",
+      password: "123456",
+      role: "FARMER",
+      name: "John",
+      phone: "+421900000000",
+    });
 
     expect(res.status).toBe(400);
     expect(res.body.message).toBe("User already exists");
@@ -91,6 +106,8 @@ describe("Auth routes", () => {
       email: "test@test.com",
       password: await argon2.hash("123456"),
       role: "FARMER",
+      name: "John",
+      phone: "+421900000000",
     };
 
     prisma.user.findUnique.mockResolvedValue(mockUser);
@@ -153,6 +170,14 @@ describe("Auth routes", () => {
     expect(sendEmail).toHaveBeenCalledTimes(1);
   });
 
+  test("POST /auth/forgot-password - user not found", async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+    const res = await request(app)
+      .post("/auth/forgot-password")
+      .send({ email: "missing@test.com" });
+    expect(res.status).toBe(404);
+  });
+
   // === RESET PASSWORD ===
   test("POST /auth/reset-password - valid token resets password", async () => {
     const jwt = await import("jsonwebtoken");
@@ -163,7 +188,6 @@ describe("Auth routes", () => {
       email: "test@test.com",
       resetToken: token,
     });
-
     prisma.user.update.mockResolvedValue({});
 
     const res = await request(app)
@@ -174,13 +198,33 @@ describe("Auth routes", () => {
     expect(res.body.message).toBe("Password successfully reset");
   });
 
+  test("POST /auth/reset-password - invalid token", async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 1,
+      email: "test@test.com",
+      resetToken: "different-token",
+    });
+
+    const res = await request(app)
+      .post("/auth/reset-password")
+      .send({ token: "invalid-token", newPassword: "pass123" });
+
+    expect(res.status).toBe(403);
+  });
+
   // === REFRESH TOKEN ===
-  test("POST /auth/refresh - returns new access token", async () => {
+  test("POST /auth/refresh - returns new access token when token matches DB", async () => {
     const jwt = await import("jsonwebtoken");
     const refreshToken = jwt.sign(
       { id: 1, role: "FARMER" },
       process.env.REFRESH_TOKEN_SECRET!
     );
+
+    prisma.user.findUnique.mockResolvedValue({
+      id: 1,
+      email: "test@test.com",
+      refreshToken,
+    });
 
     const res = await request(app)
       .post("/auth/refresh")
@@ -188,6 +232,31 @@ describe("Auth routes", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe("Access token refreshed");
+  });
+
+  test("POST /auth/refresh - invalid or missing token returns 401", async () => {
+    const res = await request(app).post("/auth/refresh");
+    expect(res.status).toBe(401);
+  });
+
+  test("POST /auth/refresh - token not in DB returns 403", async () => {
+    const jwt = await import("jsonwebtoken");
+    const refreshToken = jwt.sign(
+      { id: 2, role: "FARMER" },
+      process.env.REFRESH_TOKEN_SECRET!
+    );
+
+    prisma.user.findUnique.mockResolvedValue({
+      id: 2,
+      email: "no@db.com",
+      refreshToken: "different-token",
+    });
+
+    const res = await request(app)
+      .post("/auth/refresh")
+      .set("Cookie", [`refreshToken=${refreshToken}`]);
+
+    expect(res.status).toBe(403);
   });
 
   // === LOGOUT ===

@@ -3,7 +3,7 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma.ts";
 import { sendEmail } from "../utils/sendEmails.ts";
-import { type User } from "@prisma/client";
+import type { User } from "@prisma/client";
 
 const router = Router();
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
@@ -38,10 +38,12 @@ function generateTokens(user: User) {
 
 // Register
 router.post("/register", async (req, res) => {
-  const { email, password, role } = req.body;
+  const { email, password, role, name, phone } = req.body;
 
-  if (!email || !password || !role) {
-    return res.status(400).json({ error: "Missing email or password or role" });
+  if (!email || !password || !role || !name || !phone) {
+    return res
+      .status(400)
+      .json({ error: "Missing email, password, role, name or phone" });
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -53,9 +55,18 @@ router.post("/register", async (req, res) => {
     const hashed = await argon2.hash(password);
 
     const user = await prisma.user.create({
-      data: { email, password: hashed, role },
+      data: { email, password: hashed, role, name, phone },
     });
-    res.json({ id: user.id, email: user.email, role: user.role });
+
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        name: user.name,
+        phone: user.phone,
+      },
+    });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
@@ -97,6 +108,8 @@ router.post("/login", async (req, res) => {
       id: user.id,
       email: user.email,
       role: user.role,
+      name: user.name,
+      phone: user.phone,
     },
   });
 });
@@ -177,16 +190,26 @@ router.post("/reset-password", async (req, res) => {
 });
 
 // REFRESH token
-router.post("/refresh", (req, res) => {
+router.post("/refresh", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
-  if (!refreshToken)
+  if (!refreshToken) {
     return res.status(401).json({ message: "Missing refresh token" });
+  }
 
   try {
     const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET!) as {
       id: number;
       role: string;
     };
+
+    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+
+    if (!user || user.refreshToken !== refreshToken) {
+      return res
+        .status(403)
+        .json({ message: "Invalid or revoked refresh token" });
+    }
+
     const newAccessToken = jwt.sign(
       { id: decoded.id, role: decoded.role },
       ACCESS_TOKEN_SECRET!,
@@ -197,11 +220,12 @@ router.post("/refresh", (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 15 * 60 * 1000, // 15 minút
     });
 
     res.json({ message: "Access token refreshed" });
   } catch (err) {
+    console.error("Refresh token error:", err);
     return res
       .status(403)
       .json({ message: "Invalid or expired refresh token" });
