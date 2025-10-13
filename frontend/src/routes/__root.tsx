@@ -2,6 +2,7 @@ import { Outlet, Link } from "@tanstack/react-router";
 import { createRootRoute } from "@tanstack/react-router";
 import { useAuth } from "../context/AuthContext";
 import LogoutButton from "../components/LogoutButton";
+import { ModeToggle } from "@/components/mode-toggle";
 import "../css/root.css";
 
 function RootLayout() {
@@ -21,6 +22,7 @@ function RootLayout() {
           </span>
         )}
         {user && <LogoutButton />}
+        <ModeToggle />
       </nav>
       <Outlet />
     </div>
