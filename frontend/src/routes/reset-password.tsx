@@ -3,18 +3,25 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiFetch } from "../lib/api";
+import { Field } from "@/components/ui/field";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@radix-ui/react-label";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
 });
 
 const resetSchema = z.object({
-  newPassword: z.string().min(6, "Heslo musí mať aspoň 6 znakov"),
+  newPassword: z.string().min(6, "resetPasswordPage.errors.shortPassword"),
 });
 
 type ResetForm = z.infer<typeof resetSchema>;
 
 function ResetPasswordPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(window.location.search);
   const token = searchParams.get("token");
@@ -22,11 +29,15 @@ function ResetPasswordPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ResetForm>({ resolver: zodResolver(resetSchema) });
 
   if (!token) {
-    return <p style={{ color: "red" }}>Token v URL chýba alebo je neplatný.</p>;
+    return (
+      <p className="text-red-500 text-center mt-10">
+        {t("resetPasswordPage.errors.missingToken")}
+      </p>
+    );
   }
 
   const onSubmit = async (values: ResetForm) => {
@@ -35,27 +46,51 @@ function ResetPasswordPage() {
         method: "POST",
         body: JSON.stringify({ token, ...values }),
       });
-      alert("Heslo bolo zmenené. Presmerovávam na login...");
-      setTimeout(() => navigate({ to: "/login" }), 3000);
+
+      toast.success(t("resetPasswordPage.successTitle"), {
+        description: t("resetPasswordPage.success"),
+      });
+
+      setTimeout(() => navigate({ to: "/login" }), 2000);
     } catch {
-      alert("Chyba pri zmene hesla. Token je neplatný alebo expirovaný.");
+      toast.error(t("resetPasswordPage.errorTitle"), {
+        description: t("resetPasswordPage.error"),
+      });
     }
   };
 
   return (
-    <div>
-      <h1>Obnov heslo</h1>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <input
-          type="password"
-          placeholder="Nové heslo"
-          {...register("newPassword")}
-        />
-        {errors.newPassword && (
-          <p style={{ color: "red" }}>{errors.newPassword.message}</p>
-        )}
-        <button type="submit">Zmeniť heslo</button>
-      </form>
+    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+      <div className="w-full max-w-sm space-y-6">
+        <h1 className="text-2xl font-semibold text-center">
+          {t("resetPasswordPage.title")}
+        </h1>
+        <p className="text-center text-sm text-muted-foreground">
+          {t("resetPasswordPage.subtitle")}
+        </p>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <Field>
+            <Label>{t("resetPasswordPage.passwordLabel")}</Label>
+            <Input
+              type="password"
+              placeholder={t("resetPasswordPage.passwordPlaceholder")}
+              {...register("newPassword")}
+            />
+            {errors.newPassword && (
+              <p className="text-red-500 text-sm">
+                {t(errors.newPassword.message!)}
+              </p>
+            )}
+          </Field>
+
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting
+              ? t("resetPasswordPage.sending")
+              : t("resetPasswordPage.submit")}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }

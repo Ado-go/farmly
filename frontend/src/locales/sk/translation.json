@@ -6,5 +6,77 @@
   "logout": "Odhlásiť sa",
   "profile": "Profil",
   "farm": "Farma",
-  "signedIn": "Prihlásený ako:"
+  "signedIn": "Prihlásený ako:",
+  "loginPage": {
+    "title": "Prihlásenie",
+    "subtitle": "Zadaj svoje prihlasovacie údaje",
+    "email_label": "Email",
+    "email_placeholder": "Email",
+    "password_label": "Heslo",
+    "password_placeholder": "Heslo",
+    "button": "Prihlásiť sa",
+    "loading": "Prihlasujem...",
+    "forgot": "Zabudol si heslo?",
+    "reset": "Obnoviť",
+    "required_email": "Email je povinný",
+    "invalid_email": "Zadaj platný email",
+    "required_password": "Heslo je povinné"
+  },
+
+  "registerPage": {
+    "title": "Registrácia",
+    "subtitle": "Vytvor si svoj účet",
+    "name_label": "Meno",
+    "name_placeholder": "Tvoje meno",
+    "phone_label": "Telefónne číslo",
+    "phone_placeholder": "+421 900 123 456",
+    "email_label": "Email",
+    "email_placeholder": "napr. tvoj@email.sk",
+    "password_label": "Heslo",
+    "password_placeholder": "Heslo",
+    "role_label": "Vyber si rolu",
+    "role_customer": "Zákazník",
+    "role_farmer": "Farmár",
+    "button": "Registrovať sa",
+    "loading": "Registrujem...",
+    "name_min": "Meno musí mať aspoň 2 znaky",
+    "phone_min": "Telefónne číslo musí mať aspoň 6 číslic",
+    "phone_invalid": "Zadaj platné telefónne číslo",
+    "email_required": "Email je povinný",
+    "email_invalid": "Zadaj platný email",
+    "password_min": "Heslo musí mať aspoň 6 znakov"
+  },
+
+  "forgotPasswordPage": {
+    "title": "Zabudnuté heslo",
+    "subtitle": "Zadaj svoj email a pošleme ti inštrukcie na obnovenie hesla.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Zadaj svoj email",
+    "submit": "Odoslať",
+    "sending": "Odosielam...",
+    "successTitle": "Email odoslaný!",
+    "success": "Email s inštrukciami bol úspešne odoslaný.",
+    "errorTitle": "Chyba pri odosielaní",
+    "error": "Nepodarilo sa odoslať email. Skús to znova.",
+    "errors": {
+      "requiredEmail": "Email je povinný.",
+      "invalidEmail": "Zadaj platný email."
+    }
+  },
+  "resetPasswordPage": {
+    "title": "Obnova hesla",
+    "subtitle": "Zadaj svoje nové heslo a potvrď zmenu.",
+    "passwordLabel": "Nové heslo",
+    "passwordPlaceholder": "Zadaj nové heslo",
+    "submit": "Zmeniť heslo",
+    "sending": "Mením heslo...",
+    "successTitle": "Heslo zmenené!",
+    "success": "Tvoje heslo bolo úspešne obnovené. Presmerovávam na prihlásenie.",
+    "errorTitle": "Chyba pri obnove",
+    "error": "Nepodarilo sa zmeniť heslo. Token je neplatný alebo expirovaný.",
+    "errors": {
+      "shortPassword": "Heslo musí mať aspoň 6 znakov.",
+      "missingToken": "Token v URL chýba alebo je neplatný."
+    }
+  }
 }

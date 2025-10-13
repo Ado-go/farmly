@@ -6,5 +6,77 @@
   "logout": "Logout",
   "profile": "Profile",
   "farm": "Farm",
-  "signedId": "Signed in as"
+  "signedId": "Signed in as",
+  "loginPage": {
+    "title": "Login",
+    "subtitle": "Enter your login credentials",
+    "email_label": "Email",
+    "email_placeholder": "Email",
+    "password_label": "Password",
+    "password_placeholder": "Password",
+    "button": "Login",
+    "loading": "Logging in...",
+    "forgot": "Forgot your password?",
+    "reset": "Reset",
+    "required_email": "Email is required",
+    "invalid_email": "Enter a valid email",
+    "required_password": "Password is required"
+  },
+
+  "registerPage": {
+    "title": "Registration",
+    "subtitle": "Create your account",
+    "name_label": "Name",
+    "name_placeholder": "Your name",
+    "phone_label": "Phone number",
+    "phone_placeholder": "+1 555 123 456",
+    "email_label": "Email",
+    "email_placeholder": "e.g. your@email.com",
+    "password_label": "Password",
+    "password_placeholder": "Password",
+    "role_label": "Choose your role",
+    "role_customer": "Customer",
+    "role_farmer": "Farmer",
+    "button": "Register",
+    "loading": "Registering...",
+    "name_min": "Name must have at least 2 characters",
+    "phone_min": "Phone number must have at least 6 digits",
+    "phone_invalid": "Enter a valid phone number",
+    "email_required": "Email is required",
+    "email_invalid": "Enter a valid email",
+    "password_min": "Password must have at least 6 characters"
+  },
+
+  "forgotPasswordPage": {
+    "title": "Forgot Password",
+    "subtitle": "Enter your email and we’ll send you instructions to reset your password.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Enter your email",
+    "submit": "Send",
+    "sending": "Sending...",
+    "successTitle": "Email Sent!",
+    "success": "An email with instructions has been successfully sent.",
+    "errorTitle": "Sending Error",
+    "error": "Failed to send the email. Please try again.",
+    "errors": {
+      "requiredEmail": "Email is required.",
+      "invalidEmail": "Please enter a valid email address."
+    }
+  },
+  "resetPasswordPage": {
+    "title": "Reset Password",
+    "subtitle": "Enter your new password and confirm the change.",
+    "passwordLabel": "New Password",
+    "passwordPlaceholder": "Enter your new password",
+    "submit": "Change Password",
+    "sending": "Changing password...",
+    "successTitle": "Password Changed!",
+    "success": "Your password has been successfully reset. Redirecting to login.",
+    "errorTitle": "Reset Error",
+    "error": "Failed to change password. The token is invalid or expired.",
+    "errors": {
+      "shortPassword": "Password must be at least 6 characters long.",
+      "missingToken": "Token in the URL is missing or invalid."
+    }
+  }
 }
