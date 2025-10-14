@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import prisma from "../prisma.ts";
 import { sendEmail } from "../utils/sendEmails.ts";
 import type { User } from "@prisma/client";
+import { validateRequest } from "../middleware/validateRequest.ts";
+import { loginSchema, registerSchema } from "../schemas/authSchemas.ts";
 
 const router = Router();
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
@@ -37,7 +39,7 @@ function generateTokens(user: User) {
 }
 
 // Register
-router.post("/register", async (req, res) => {
+router.post("/register", validateRequest(registerSchema), async (req, res) => {
   const { email, password, role, name, phone } = req.body;
 
   if (!email || !password || !role || !name || !phone) {
@@ -73,7 +75,7 @@ router.post("/register", async (req, res) => {
 });
 
 // Login
-router.post("/login", async (req, res) => {
+router.post("/login", validateRequest(loginSchema), async (req, res) => {
   const { email, password } = req.body;
 
   const user = await prisma.user.findUnique({ where: { email } });
@@ -142,10 +144,19 @@ router.post("/forgot-password", async (req, res) => {
     <p>Klikni na tento odkaz pre obnovenie hesla (platný 15 minút):</p>
     <a href="${resetLink}" target="_blank">${resetLink}</a>
     <p>Ak si o reset nežiadal, ignoruj tento email.</p>
+    <br>
+    <h2>Password reset</h2>
+    <p>Click this link to reset your password (valid for 15 minutes):</p>
+    <a href="${resetLink}" target="_blank">${resetLink}</a>
+    <p>If you did not request a reset, please ignore this email.</p>
   `;
 
   try {
-    await sendEmail(user.email, "Resetovanie hesla – Farmly", html);
+    await sendEmail(
+      user.email,
+      "Resetovanie hesla(Password reset) - Farmly",
+      html
+    );
     res.json({ message: "Password reset email sent" });
   } catch (error) {
     console.error(error);

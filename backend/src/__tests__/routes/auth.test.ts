@@ -80,7 +80,7 @@ describe("Auth routes", () => {
       role: "FARMER",
     });
     expect(res.status).toBe(400);
-    expect(res.body.error).toBe("Missing email, password, role, name or phone");
+    expect(res.body.error).toBe("Invalid request data");
   });
 
   test("POST /auth/register - user already exists returns 400", async () => {
