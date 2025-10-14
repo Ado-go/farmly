@@ -8,3 +8,7 @@ export const updateProfileSchema = z.object({
     .regex(/^\+?\d{6,15}$/, "invalid phone number"),
   role: z.enum(["CUSTOMER", "FARMER"]),
 });
+
+export const deleteProfileSchema = z.object({
+  password: z.string().min(6, "password must be at least 6 char long"),
+});

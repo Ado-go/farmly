@@ -1,8 +1,12 @@
 import { Router } from "express";
 import prisma from "../prisma.ts";
+import argon2 from "argon2";
 import { authenticateToken } from "../middleware/auth.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
-import { updateProfileSchema } from "../schemas/profileSchema.ts";
+import {
+  deleteProfileSchema,
+  updateProfileSchema,
+} from "../schemas/profileSchema.ts";
 
 const router = Router();
 
@@ -63,20 +67,34 @@ router.put(
 );
 
 // DELETE /profile
-router.delete("/", authenticateToken, async (req, res) => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+router.delete(
+  "/",
+  authenticateToken,
+  validateRequest(deleteProfileSchema),
+  async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      const { password } = req.body;
 
-    await prisma.user.delete({ where: { id: userId } });
-    res.clearCookie("accessToken");
-    res.clearCookie("refreshToken");
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-    res.json({ message: "User deleted successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) return res.status(404).json({ message: "User not found" });
+
+      const valid = await argon2.verify(user.password, password);
+      if (!valid)
+        return res.status(403).json({ message: "Incorrect password" });
+
+      await prisma.user.delete({ where: { id: userId } });
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+
+      res.json({ message: "User deleted successfully" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
+    }
   }
-});
+);
 
 export default router;

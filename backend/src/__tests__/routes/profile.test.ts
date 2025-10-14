@@ -82,10 +82,11 @@ describe("Profile Routes", () => {
     expect(res.body).toHaveProperty("error", "Invalid request data");
   });
 
-  it("DELETE /profile - should delete user", async () => {
+  it("DELETE /profile - should delete user with correct password", async () => {
     const res = await request(app)
       .delete("/api/profile")
-      .set("Cookie", [`accessToken=${accessToken}`]);
+      .set("Cookie", [`accessToken=${accessToken}`])
+      .send({ password: "password123" });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty("message", "User deleted successfully");
@@ -94,6 +95,34 @@ describe("Profile Routes", () => {
       where: { id: testUserId },
     });
     expect(deletedUser).toBeNull();
+  });
+
+  it("DELETE /profile - should fail with incorrect password", async () => {
+    const hashedPassword = await argon2.hash("password123");
+    const user = await prisma.user.create({
+      data: {
+        email: "profile2@test.com",
+        password: hashedPassword,
+        name: "Test User 2",
+        phone: "+421940123457",
+        role: "CUSTOMER",
+      },
+    });
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.ACCESS_TOKEN_SECRET!,
+      { expiresIn: "15m" }
+    );
+
+    const res = await request(app)
+      .delete("/api/profile")
+      .set("Cookie", [`accessToken=${token}`])
+      .send({ password: "wrongpassword" });
+
+    expect(res.statusCode).toBe(403);
+    expect(res.body).toHaveProperty("message", "Incorrect password");
+
+    await prisma.user.delete({ where: { id: user.id } });
   });
 
   it("GET /profile - should return 401 without token", async () => {
