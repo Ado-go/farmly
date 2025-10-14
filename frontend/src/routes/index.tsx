@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -8,7 +7,7 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   return (
     <>
-      <h1>Welcome to Farmly 🌱</h1> <Button>Stlač ma</Button>
+      <h1>Welcome to Farmly 🌱</h1>
     </>
   );
 }

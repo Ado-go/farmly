@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
+import { Button } from "./ui/button";
 
 export default function LogoutButton() {
   const qc = useQueryClient();
@@ -20,8 +21,12 @@ export default function LogoutButton() {
   });
 
   return (
-    <button onClick={() => mut.mutate()} disabled={mut.isPending}>
+    <Button
+      onClick={() => mut.mutate()}
+      disabled={mut.isPending}
+      className="w-full text-left"
+    >
       {t("logout")}
-    </button>
+    </Button>
   );
 }
