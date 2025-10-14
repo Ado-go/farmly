@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.ts";
+import profileRoutes from "./routes/profile.ts";
 import cookieParser from "cookie-parser";
 import prisma from "./prisma.ts";
 import { authenticateToken, authorizeRole } from "./middleware/auth.ts";
@@ -17,20 +18,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 
-app.get("/api/profile", authenticateToken, async (req, res) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user!.id },
-      select: { id: true, email: true, role: true, name: true, phone: true },
-    });
-
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    res.json({ message: "Profile loaded", user });
-  } catch (err) {
-    res.status(500).json({ message: "Error loading profile: " + err });
-  }
-});
+app.use("/api/profile", profileRoutes);
 
 app.get(
   "/api/farm",
