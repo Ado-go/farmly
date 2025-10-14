@@ -78,5 +78,23 @@
       "shortPassword": "Password must be at least 6 characters long.",
       "missingToken": "Token in the URL is missing or invalid."
     }
+  },
+  "profilePage": {
+    "loading": "Loading profile…",
+    "loadError": "Cannot load profile",
+    "name_label": "Name",
+    "email_label": "Email",
+    "role_label": "Role",
+    "phone_label": "Phone",
+    "edit": "Edit Profile",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete Account",
+    "deleteTitle": "Confirm Account Deletion",
+    "deletePasswordLabel": "Enter your password to confirm",
+    "updateSuccess": "Profile updated successfully",
+    "updateError": "Failed to update profile",
+    "deleteSuccess": "Account deleted successfully",
+    "deleteError": "Incorrect password or deletion failed"
   }
 }

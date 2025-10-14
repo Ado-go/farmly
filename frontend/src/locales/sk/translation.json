@@ -78,5 +78,23 @@
       "shortPassword": "Heslo musí mať aspoň 6 znakov.",
       "missingToken": "Token v URL chýba alebo je neplatný."
     }
+  },
+  "profilePage": {
+    "loading": "Načítavam profil…",
+    "loadError": "Nepodarilo sa načítať profil",
+    "name_label": "Meno",
+    "email_label": "Email",
+    "role_label": "Rola",
+    "phone_label": "Telefón",
+    "edit": "Upraviť profil",
+    "save": "Uložiť",
+    "cancel": "Zrušiť",
+    "delete": "Zmazať účet",
+    "deleteTitle": "Potvrdiť zmazanie účtu",
+    "deletePasswordLabel": "Zadajte svoje heslo pre potvrdenie",
+    "updateSuccess": "Profil bol úspešne aktualizovaný",
+    "updateError": "Nepodarilo sa aktualizovať profil",
+    "deleteSuccess": "Účet bol úspešne zmazaný",
+    "deleteError": "Nesprávne heslo alebo zmazanie zlyhalo"
   }
 }
