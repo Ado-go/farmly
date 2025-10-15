@@ -2,9 +2,9 @@ import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.ts";
 import profileRoutes from "./routes/profile.ts";
+import farmRoutes from "./routes/farm.ts";
 import cookieParser from "cookie-parser";
 import prisma from "./prisma.ts";
-import { authenticateToken, authorizeRole } from "./middleware/auth.ts";
 
 const app = express();
 app.use(cookieParser());
@@ -20,27 +20,7 @@ app.use("/api/auth", authRoutes);
 
 app.use("/api/profile", profileRoutes);
 
-app.get(
-  "/api/farm",
-  authenticateToken,
-  authorizeRole("FARMER"),
-  async (req, res) => {
-    try {
-      const user = await prisma.user.findUnique({
-        where: { id: req.user!.id },
-        select: {
-          id: true,
-          role: true,
-        },
-      });
-
-      if (!user) return res.status(404).json({ message: "User not found" });
-      res.json({ message: "Farm info", farm: user });
-    } catch (err) {
-      res.status(500).json({ message: "Error loading farm" });
-    }
-  }
-);
+app.use("/api/farm", farmRoutes);
 
 app.get("/api/hello", (req, res) => {
   res.json({ message: "Hello from backend!" });
