@@ -66,6 +66,7 @@ router.put(
   }
 );
 
+// TODO: Delete products and farms and offers and deal with everything that comes with it.
 // DELETE /profile
 router.delete(
   "/",

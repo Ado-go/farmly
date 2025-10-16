@@ -48,7 +48,11 @@ router.get(
         select: {
           id: true,
           name: true,
+          city: true,
+          street: true,
           region: true,
+          postalCode: true,
+          country: true,
           description: true,
         },
       });
@@ -83,7 +87,11 @@ router.get(
         select: {
           id: true,
           name: true,
+          city: true,
+          street: true,
           region: true,
+          postalCode: true,
+          country: true,
           description: true,
         },
       });
@@ -143,6 +151,7 @@ router.put(
   }
 );
 
+// TODO: Delete products and deal with everything that comes with it.
 // DELETE /farm/:id
 router.delete(
   "/:id",
