@@ -25,13 +25,8 @@ function RootLayout() {
       <nav className="flex items-center justify-between p-4 border-b bg-background">
         <div className="flex items-center gap-4">
           <Link to="/" className="font-semibold text-lg">
-            {t("farmly")} 🌱
+            {t("farmly")}
           </Link>
-          {user && user.role === "FARMER" && (
-            <Link to="/farm" className="text-sm hover:underline">
-              {t("farm")}
-            </Link>
-          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -53,6 +48,11 @@ function RootLayout() {
                   <DropdownMenuItem asChild>
                     <Link to="/profile">{t("profile")}</Link>
                   </DropdownMenuItem>
+                  {user.role === "FARMER" && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/farm">{t("farms")}</Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild>
                     <LogoutButton />
                   </DropdownMenuItem>
