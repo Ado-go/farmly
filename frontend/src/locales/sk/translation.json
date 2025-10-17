@@ -95,7 +95,16 @@
     "updateSuccess": "Profil bol úspešne aktualizovaný",
     "updateError": "Nepodarilo sa aktualizovať profil",
     "deleteSuccess": "Účet bol úspešne zmazaný",
-    "deleteError": "Nesprávne heslo alebo zmazanie zlyhalo"
+    "deleteError": "Nesprávne heslo alebo zmazanie zlyhalo",
+    "changePassword": "Zmeniť heslo",
+    "changePasswordTitle": "Zmeňte svoje heslo",
+    "oldPasswordLabel": "Aktuálne heslo",
+    "newPasswordLabel": "Nové heslo",
+    "savePassword": "Uložiť nové heslo",
+    "oldPasswordRequired": "Zadajte svoje aktuálne heslo",
+    "newPasswordMin": "Nové heslo musí mať aspoň 6 znakov",
+    "passwordChangeSuccess": "Heslo bolo úspešne zmenené",
+    "passwordChangeError": "Zmena hesla zlyhala"
   },
   "farmPage": {
     "title": "Moje farmy",

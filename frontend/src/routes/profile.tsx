@@ -39,6 +39,12 @@ const deleteProfileSchema = z.object({
   password: z.string().min(1, "profilePage.deletePasswordLabel"),
 });
 
+const changePasswordSchema = z.object({
+  oldPassword: z.string().min(6, "profilePage.oldPasswordRequired"),
+  newPassword: z.string().min(6, "profilePage.newPasswordMin"),
+});
+
+type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 type UpdateProfileForm = z.infer<typeof updateProfileSchema>;
 type DeleteProfileForm = z.infer<typeof deleteProfileSchema>;
 
@@ -47,12 +53,37 @@ function ProfilePage() {
   const { setUser } = useAuth();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["profile"],
     queryFn: () => apiFetch("/profile"),
     retry: false,
+  });
+
+  const {
+    register: changePasswordRegister,
+    handleSubmit: handleChangePasswordSubmit,
+    formState: { errors: changePasswordErrors },
+    reset: resetChangePassword,
+  } = useForm<ChangePasswordForm>({
+    resolver: zodResolver(changePasswordSchema),
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: (values: ChangePasswordForm) =>
+      apiFetch("/auth/change-password", {
+        method: "POST",
+        body: JSON.stringify(values),
+        headers: { "Content-Type": "application/json" },
+      }),
+    onSuccess: () => {
+      toast.success(t("profilePage.passwordChangeSuccess"));
+      resetChangePassword();
+      setOpen(false);
+    },
+    onError: () => toast.error(t("profilePage.passwordChangeError")),
   });
 
   useEffect(() => {
@@ -249,6 +280,62 @@ function ProfilePage() {
               disabled={deleteMutation.isPending}
             >
               {t("profilePage.delete")}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline" className="w-full">
+            {t("profilePage.changePassword")}
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("profilePage.changePasswordTitle")}</DialogTitle>
+          </DialogHeader>
+
+          <form
+            onSubmit={handleChangePasswordSubmit((values) =>
+              changePasswordMutation.mutate(values)
+            )}
+            className="space-y-4"
+          >
+            <div>
+              <Label>{t("profilePage.oldPasswordLabel")}</Label>
+              <Input
+                type="password"
+                {...changePasswordRegister("oldPassword")}
+                placeholder=""
+              />
+              {changePasswordErrors.oldPassword && (
+                <p className="text-red-500">
+                  {t(changePasswordErrors.oldPassword.message!)}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label>{t("profilePage.newPasswordLabel")}</Label>
+              <Input
+                type="password"
+                {...changePasswordRegister("newPassword")}
+                placeholder=""
+              />
+              {changePasswordErrors.newPassword && (
+                <p className="text-red-500">
+                  {t(changePasswordErrors.newPassword.message!)}
+                </p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={changePasswordMutation.isPending}
+            >
+              {t("profilePage.savePassword")}
             </Button>
           </form>
         </DialogContent>

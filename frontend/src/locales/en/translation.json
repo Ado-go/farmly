@@ -95,7 +95,16 @@
     "updateSuccess": "Profile updated successfully",
     "updateError": "Failed to update profile",
     "deleteSuccess": "Account deleted successfully",
-    "deleteError": "Incorrect password or deletion failed"
+    "deleteError": "Incorrect password or deletion failed",
+    "changePassword": "Change password",
+    "changePasswordTitle": "Change your password",
+    "oldPasswordLabel": "Current password",
+    "newPasswordLabel": "New password",
+    "savePassword": "Save new password",
+    "oldPasswordRequired": "Please enter your current password",
+    "newPasswordMin": "New password must be at least 6 characters",
+    "passwordChangeSuccess": "Password changed successfully",
+    "passwordChangeError": "Failed to change password"
   },
   "farmPage": {
     "title": "My Farms",
