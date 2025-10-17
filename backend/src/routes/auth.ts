@@ -6,6 +6,7 @@ import { sendEmail } from "../utils/sendEmails.ts";
 import type { User } from "@prisma/client";
 import { validateRequest } from "../middleware/validateRequest.ts";
 import { loginSchema, registerSchema } from "../schemas/authSchemas.ts";
+import { authenticateToken } from "../middleware/auth.ts";
 
 const router = Router();
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
@@ -200,6 +201,40 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
+//CHANGE password
+router.post("/change-password", authenticateToken, async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const userId = req.user?.id;
+
+  if (!oldPassword || !newPassword)
+    return res.status(400).json({ message: "Missing data" });
+
+  if (oldPassword === newPassword)
+    return res
+      .status(400)
+      .json({ message: "New password must differ from old password" });
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return res.status(401).json({ message: "Invalid user id" });
+  const valid = await argon2.verify(user.password, oldPassword);
+  if (!valid) return res.status(401).json({ message: "Invalid password" });
+
+  try {
+    const hashedPassword = await argon2.hash(newPassword);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    res.json({ message: "Password successfully changed" });
+  } catch (err) {
+    res.status(403).json({ message: "Invalid or expired token" });
+  }
+});
+
 // REFRESH token
 router.post("/refresh", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
@@ -231,7 +266,7 @@ router.post("/refresh", async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000, // 15 minút
+      maxAge: 15 * 60 * 1000, // 15 min
     });
 
     res.json({ message: "Access token refreshed" });

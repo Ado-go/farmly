@@ -259,6 +259,101 @@ describe("Auth routes", () => {
     expect(res.status).toBe(403);
   });
 
+  // === CHANGE PASSWORD ===
+  test("POST /auth/change-password - successfully changes password", async () => {
+    const jwt = await import("jsonwebtoken");
+    const argon2 = await import("argon2");
+
+    const accessToken = jwt.sign(
+      { id: 1, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
+
+    const oldHashed = await argon2.hash("oldPassword123");
+
+    prisma.user.findUnique.mockResolvedValue({
+      id: 1,
+      email: "test@test.com",
+      password: oldHashed,
+    });
+    prisma.user.update.mockResolvedValue({});
+
+    const res = await request(app)
+      .post("/auth/change-password")
+      .set("Cookie", [`accessToken=${accessToken}`])
+      .send({
+        oldPassword: "oldPassword123",
+        newPassword: "newPassword456",
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.message).toBe("Password successfully changed");
+  });
+
+  test("POST /auth/change-password - missing data returns 400", async () => {
+    const jwt = await import("jsonwebtoken");
+    const accessToken = jwt.sign(
+      { id: 1, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
+
+    const res = await request(app)
+      .post("/auth/change-password")
+      .set("Cookie", [`accessToken=${accessToken}`])
+      .send({ oldPassword: "" });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe("Missing data");
+  });
+
+  test("POST /auth/change-password - invalid user returns 401", async () => {
+    const jwt = await import("jsonwebtoken");
+    const accessToken = jwt.sign(
+      { id: 99, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
+
+    prisma.user.findUnique.mockResolvedValue(null);
+
+    const res = await request(app)
+      .post("/auth/change-password")
+      .set("Cookie", [`accessToken=${accessToken}`])
+      .send({
+        oldPassword: "oldPass",
+        newPassword: "newPass",
+      });
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe("Invalid user id");
+  });
+
+  test("POST /auth/change-password - invalid old password returns 401", async () => {
+    const jwt = await import("jsonwebtoken");
+    const argon2 = await import("argon2");
+    const accessToken = jwt.sign(
+      { id: 1, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
+
+    const hashed = await argon2.hash("correctOldPassword");
+    prisma.user.findUnique.mockResolvedValue({
+      id: 1,
+      email: "test@test.com",
+      password: hashed,
+    });
+
+    const res = await request(app)
+      .post("/auth/change-password")
+      .set("Cookie", [`accessToken=${accessToken}`])
+      .send({
+        oldPassword: "wrongOldPassword",
+        newPassword: "newPassword",
+      });
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe("Invalid password");
+  });
+
   // === LOGOUT ===
   test("POST /auth/logout - clears cookies", async () => {
     const jwt = await import("jsonwebtoken");
