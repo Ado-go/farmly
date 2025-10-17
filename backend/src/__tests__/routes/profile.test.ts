@@ -29,10 +29,9 @@ beforeAll(async () => {
 
 afterAll(async () => {
   try {
-    const user = await prisma.user.findUnique({ where: { id: testUserId } });
-    if (user) {
-      await prisma.user.delete({ where: { id: testUserId } });
-    }
+    await prisma.user.deleteMany({
+      where: { id: testUserId },
+    });
   } catch (err) {
     console.error("Cleanup failed:", err);
   } finally {
