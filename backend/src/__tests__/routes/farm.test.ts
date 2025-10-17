@@ -33,7 +33,6 @@ afterAll(async () => {
   await prisma.farm.deleteMany({});
   await prisma.user.deleteMany({});
   await prisma.$disconnect();
-  await new Promise((resolve) => setTimeout(resolve, 100));
 });
 
 describe("Farm routes", () => {

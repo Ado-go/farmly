@@ -3,6 +3,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth.ts";
 import profileRoutes from "./routes/profile.ts";
 import farmRoutes from "./routes/farm.ts";
+import productRoutes from "./routes/product.ts";
 import cookieParser from "cookie-parser";
 import prisma from "./prisma.ts";
 
@@ -21,6 +22,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 
 app.use("/api/farm", farmRoutes);
+
+app.use("/api/product", productRoutes);
 
 app.get("/api/hello", (req, res) => {
   res.json({ message: "Hello from backend!" });
