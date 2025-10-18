@@ -139,6 +139,42 @@
     "deleteSuccess": "Farm deleted successfully.",
     "deleteError": "Error deleting the farm.",
     "confirmDeleteTitle": "Are you sure you want to delete this farm?",
-    "confirmDeleteText": "This action cannot be undone. All farm data will be permanently removed."
+    "confirmDeleteText": "This action cannot be undone. All farm data will be permanently removed.",
+    "productAdded": "Product was successfully added.",
+    "productAddError": "Failed to add product.",
+    "addProductTitle": "Add new product",
+    "loadingProducts": "Loading products...",
+    "noProducts": "No products",
+    "products": "Products"
+  },
+  "productPage": {
+    "title": "Product Details",
+    "name": "Product Name",
+    "category": "Category",
+    "description": "Description",
+    "price": "Price",
+    "edit": "Edit",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "noImage": "No image",
+    "noDescription": "No description",
+    "loading": "Loading product...",
+    "errorLoading": "Failed to load product.",
+    "editSuccess": "Product was successfully updated.",
+    "editError": "Failed to update product.",
+    "deleteSuccess": "Product was deleted.",
+    "deleteError": "Failed to delete product."
+  },
+  "product": {
+    "name": "Product name",
+    "category": "Category",
+    "description": "Description",
+    "price": "Price",
+    "add": "Add product",
+    "saving": "Saving...",
+    "uploadImage": "Upload image"
   }
 }

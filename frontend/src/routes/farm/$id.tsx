@@ -22,6 +22,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
 const farmSchema = z.object({
   name: z.string().min(2, "Názov je povinný"),
   description: z.string().optional(),
@@ -32,6 +40,14 @@ const farmSchema = z.object({
   country: z.string().min(2, "Krajina je povinná"),
 });
 
+const productSchema = z.object({
+  name: z.string().min(2, "Názov je povinný"),
+  category: z.string().min(2, "Kategória je povinná"),
+  description: z.string().optional(),
+  price: z.number().min(0, "Cena musí byť väčšia alebo rovná 0"),
+});
+
+type ProductFormData = z.infer<typeof productSchema>;
 type FarmFormData = z.infer<typeof farmSchema>;
 
 export const Route = createFileRoute("/farm/$id")({
@@ -44,7 +60,9 @@ function FarmDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
+  const [showProductForm, setShowProductForm] = useState(false);
 
+  // FARM
   const {
     data: farm,
     isLoading,
@@ -81,6 +99,32 @@ function FarmDetailPage() {
     },
     onError: () => {
       toast.error(t("farmPage.deleteError"));
+    },
+  });
+
+  // PRODUCT
+  const { data: products = [], isLoading: loadingProducts } = useQuery({
+    queryKey: ["products", id],
+    queryFn: async () => await apiFetch(`/product/farm/${id}`),
+  });
+
+  const productForm = useForm<ProductFormData>({
+    resolver: zodResolver(productSchema),
+  });
+
+  const addProduct = useMutation({
+    mutationFn: async (data: ProductFormData) =>
+      apiFetch(`/product`, {
+        method: "POST",
+        body: JSON.stringify({ ...data, farmId: Number(id) }),
+      }),
+    onSuccess: () => {
+      toast.success(t("farmPage.productAdded"));
+      queryClient.invalidateQueries({ queryKey: ["products", id] });
+      setShowProductForm(false);
+    },
+    onError: () => {
+      toast.error(t("farmPage.productAddError"));
     },
   });
 
@@ -215,7 +259,102 @@ function FarmDetailPage() {
           </AlertDialogContent>
         </AlertDialog>
 
-        <Button>{t("farmPage.addProduct")}</Button>
+        <Dialog open={showProductForm} onOpenChange={setShowProductForm}>
+          <DialogTrigger asChild>
+            <Button>{t("farmPage.addProduct")}</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>{t("farmPage.addProductTitle")}</DialogTitle>
+            </DialogHeader>
+
+            <form
+              onSubmit={productForm.handleSubmit((data) =>
+                addProduct.mutate(data)
+              )}
+              className="space-y-3"
+            >
+              <Input
+                {...productForm.register("name")}
+                placeholder={t("product.name")}
+              />
+              <Input
+                {...productForm.register("category")}
+                placeholder={t("product.category")}
+              />
+              <Textarea
+                {...productForm.register("description")}
+                placeholder={t("product.description")}
+              />
+              <Input
+                type="number"
+                step="0.01"
+                {...productForm.register("price", { valueAsNumber: true })}
+                placeholder={t("product.price")}
+              />
+
+              <div className="mt-3">
+                <label className="flex flex-col items-center justify-center p-3 border border-emerald-700 rounded-md cursor-pointer hover:bg-emerald-50 focus-within:ring-2 focus-within:ring-emerald-400">
+                  <span className="font-medium text-emerald-700">
+                    {t("product.uploadImage")}
+                  </span>
+                  <input
+                    type="file"
+                    className="mt-2"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        console.log("todo: upload image", file);
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowProductForm(false)}
+                >
+                  {t("farmPage.cancel")}
+                </Button>
+                <Button type="submit" disabled={addProduct.isPending}>
+                  {addProduct.isPending
+                    ? t("product.saving")
+                    : t("product.add")}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="mt-10">
+        <h2 className="text-2xl font-semibold mb-4">
+          {t("farmPage.products")}
+        </h2>
+
+        {loadingProducts ? (
+          <p>{t("farmPage.loadingProducts")}</p>
+        ) : products.length === 0 ? (
+          <p>{t("farmPage.noProducts")}</p>
+        ) : (
+          <ul className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {products.map((product) => (
+              <li
+                key={product.id}
+                className="p-4 border rounded-md cursor-pointer hover:bg-emerald-50"
+                onClick={() => navigate({ to: `/product/${product.id}` })}
+              >
+                <h3 className="font-semibold">{product.name}</h3>
+                <p className="text-sm text-gray-600">{product.category}</p>
+                <p className="text-sm font-medium">{product.price} €</p>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

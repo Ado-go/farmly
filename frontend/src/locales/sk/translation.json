@@ -139,6 +139,42 @@
     "deleteSuccess": "Farma bola úspešne odstránená.",
     "deleteError": "Chyba pri odstraňovaní farmy.",
     "confirmDeleteTitle": "Naozaj chcete odstrániť túto farmu?",
-    "confirmDeleteText": "Túto akciu nie je možné vrátiť späť. Všetky údaje o farme budú odstránené."
+    "confirmDeleteText": "Túto akciu nie je možné vrátiť späť. Všetky údaje o farme budú odstránené.",
+    "productAdded": "Produkt bol úspešne pridaný.",
+    "productAddError": "Nepodarilo sa pridať produkt.",
+    "addProductTitle": "Pridať nový produkt",
+    "loadingProducts": "Načítavam produkty...",
+    "noProducts": "Žiadne produkty",
+    "products": "Produkty"
+  },
+  "productPage": {
+    "title": "Detail produktu",
+    "name": "Názov produktu",
+    "category": "Kategória",
+    "description": "Popis",
+    "price": "Cena",
+    "edit": "Upraviť",
+    "save": "Uložiť",
+    "saving": "Ukladám...",
+    "cancel": "Zrušiť",
+    "delete": "Zmazať",
+    "deleting": "Mažem...",
+    "noImage": "Bez obrázka",
+    "noDescription": "Bez popisu",
+    "loading": "Načítavam produkt...",
+    "errorLoading": "Nepodarilo sa načítať produkt.",
+    "editSuccess": "Produkt bol úspešne upravený.",
+    "editError": "Nepodarilo sa upraviť produkt.",
+    "deleteSuccess": "Produkt bol zmazaný.",
+    "deleteError": "Nepodarilo sa zmazať produkt."
+  },
+  "product": {
+    "name": "Názov produktu",
+    "category": "Kategória",
+    "description": "Popis",
+    "price": "Cena",
+    "uploadImage": "Nahrať obrázok",
+    "add": "Pridať produkt",
+    "saving": "Ukladám..."
   }
 }
