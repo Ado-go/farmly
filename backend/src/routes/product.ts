@@ -1,16 +1,18 @@
 import { Router } from "express";
-import prisma from "../prisma";
-import { productSchema } from "../schemas/productSchemas";
-import { validateRequest } from "../middleware/validateRequest";
-import {
-  authenticateToken,
-  authorizeRole,
-  AuthRequest,
-} from "../middleware/auth";
+import prisma from "../prisma.ts";
+import { productSchema } from "../schemas/productSchemas.ts";
+import { validateRequest } from "../middleware/validateRequest.ts";
+import { authenticateToken, authorizeRole } from "../middleware/auth.ts";
 
 const router = Router();
 
-const checkFarmOwnership = async (farmId: number, userId: number) => {
+const checkFarmOwnership = async (
+  farmId: number,
+  userId: number | undefined
+) => {
+  if (userId === undefined) {
+    return false;
+  }
   const farm = await prisma.farm.findUnique({ where: { id: farmId } });
   if (!farm) throw new Error("Farm not found");
   if (farm.farmerId !== userId) throw new Error("Not authorized for this farm");
@@ -23,11 +25,11 @@ router.post(
   authenticateToken,
   authorizeRole("FARMER"),
   validateRequest(productSchema),
-  async (req: AuthRequest, res) => {
+  async (req, res) => {
     try {
       const { images, farmId, ...productData } = req.body;
 
-      await checkFarmOwnership(farmId, req.user.id);
+      await checkFarmOwnership(farmId, req.user?.id);
 
       const product = await prisma.product.create({
         data: {
@@ -58,10 +60,10 @@ router.get(
   "/farm/:farmId",
   authenticateToken,
   authorizeRole("FARMER"),
-  async (req: AuthRequest, res) => {
+  async (req, res) => {
     try {
       const farmId = Number(req.params.farmId);
-      await checkFarmOwnership(farmId, req.user.id);
+      await checkFarmOwnership(farmId, req.user?.id);
 
       const products = await prisma.product.findMany({
         where: { farmId },
@@ -82,7 +84,7 @@ router.get(
   "/:id",
   authenticateToken,
   authorizeRole("FARMER"),
-  async (req: AuthRequest, res) => {
+  async (req, res) => {
     try {
       const product = await prisma.product.findUnique({
         where: { id: Number(req.params.id) },
@@ -94,7 +96,7 @@ router.get(
       const farm = await prisma.farm.findUnique({
         where: { id: product.farmId },
       });
-      if (farm?.farmerId !== req.user.id)
+      if (farm?.farmerId !== req.user?.id)
         return res.status(403).json({ error: "Access denied" });
 
       res.json(product);
@@ -110,7 +112,7 @@ router.put(
   authenticateToken,
   authorizeRole("FARMER"),
   validateRequest(productSchema.partial()),
-  async (req: AuthRequest, res) => {
+  async (req, res) => {
     try {
       const { images, farmId, ...updateData } = req.body;
       const productId = Number(req.params.id);
@@ -120,7 +122,7 @@ router.put(
       });
       if (!product) return res.status(404).json({ error: "Product not found" });
 
-      await checkFarmOwnership(product.farmId, req.user.id);
+      await checkFarmOwnership(product.farmId, req.user?.id);
 
       const updatedProduct = await prisma.product.update({
         where: { id: productId },
@@ -150,7 +152,7 @@ router.delete(
   "/:id",
   authenticateToken,
   authorizeRole("FARMER"),
-  async (req: AuthRequest, res) => {
+  async (req, res) => {
     try {
       const productId = Number(req.params.id);
       const product = await prisma.product.findUnique({
@@ -158,7 +160,7 @@ router.delete(
       });
       if (!product) return res.status(404).json({ error: "Product not found" });
 
-      await checkFarmOwnership(product.farmId, req.user.id);
+      await checkFarmOwnership(product.farmId, req.user?.id);
 
       await prisma.product.delete({ where: { id: productId } });
       res.json({ message: "Product deleted" });
@@ -175,10 +177,10 @@ router.delete(
   "/farm/:farmId",
   authenticateToken,
   authorizeRole("FARMER"),
-  async (req: AuthRequest, res) => {
+  async (req, res) => {
     try {
       const farmId = Number(req.params.farmId);
-      await checkFarmOwnership(farmId, req.user.id);
+      await checkFarmOwnership(farmId, req.user?.id);
 
       await prisma.product.deleteMany({ where: { farmId } });
       res.json({ message: "All products deleted for this farm" });
