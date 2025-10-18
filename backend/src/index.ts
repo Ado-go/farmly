@@ -1,11 +1,17 @@
 import express from "express";
 import cors from "cors";
-import authRoutes from "./routes/auth.ts";
-import profileRoutes from "./routes/profile.ts";
-import farmRoutes from "./routes/farm.ts";
-import productRoutes from "./routes/product.ts";
 import cookieParser from "cookie-parser";
 import prisma from "./prisma.ts";
+
+import authRoutes from "./routes/auth.ts";
+
+import profileRoutes from "./routes/profile.ts";
+
+import farmRoutes from "./routes/farm.ts";
+
+import productRoutes from "./routes/product.ts";
+
+import publicProductsRoutes from "./routes/publicProducts.ts";
 
 const app = express();
 app.use(cookieParser());
@@ -25,13 +31,10 @@ app.use("/api/farm", farmRoutes);
 
 app.use("/api/product", productRoutes);
 
+app.use("/api/products", publicProductsRoutes);
+
 app.get("/api/hello", (req, res) => {
   res.json({ message: "Hello from backend!" });
-});
-
-app.get("/api/products", async (req, res) => {
-  const products = await prisma.product.findMany();
-  res.json(products);
 });
 
 export default app;
