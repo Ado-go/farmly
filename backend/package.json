@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "cd src && node index.ts",
-    "test": "jest"
+    "test": "jest --runInBand"
   },
   "keywords": [],
   "author": "",
