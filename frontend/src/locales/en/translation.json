@@ -7,6 +7,7 @@
   "profile": "Profile",
   "farms": "Farms",
   "signedId": "Signed in as",
+  "products": "Products",
   "loginPage": {
     "title": "Login",
     "subtitle": "Enter your login credentials",
@@ -176,5 +177,16 @@
     "add": "Add product",
     "saving": "Saving...",
     "uploadImage": "Upload image"
+  },
+  "productsPage": {
+    "title": "All Products",
+    "loading": "Loading products...",
+    "error": "Failed to load products."
+  },
+  "productCard": {
+    "price": "Price",
+    "farmName": "Farm",
+    "addToCart": "Add to Cart",
+    "noRating": "No rating"
   }
 }

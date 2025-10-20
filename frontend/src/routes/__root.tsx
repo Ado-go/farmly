@@ -27,6 +27,9 @@ function RootLayout() {
           <Link to="/" className="font-semibold text-lg">
             {t("farmly")}
           </Link>
+          <Link to="/products" className="font-semibold text-lg">
+            {t("products")}
+          </Link>
         </div>
 
         <div className="flex items-center gap-2">

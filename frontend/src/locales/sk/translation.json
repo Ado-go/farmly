@@ -7,6 +7,7 @@
   "profile": "Profil",
   "farms": "Farmy",
   "signedIn": "Prihlásený ako:",
+  "products": "Produkty",
   "loginPage": {
     "title": "Prihlásenie",
     "subtitle": "Zadaj svoje prihlasovacie údaje",
@@ -176,5 +177,16 @@
     "uploadImage": "Nahrať obrázok",
     "add": "Pridať produkt",
     "saving": "Ukladám..."
+  },
+  "productsPage": {
+    "title": "Všetky produkty",
+    "loading": "Načítavam produkty...",
+    "error": "Nepodarilo sa načítať produkty."
+  },
+  "productCard": {
+    "price": "Cena",
+    "farmName": "Farma",
+    "addToCart": "Pridať do košíka",
+    "noRating": "Bez hodnotenia"
   }
 }
