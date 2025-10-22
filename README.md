@@ -44,7 +44,7 @@ DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/farmly_db
 PORT=5000
 
 # Client URL (frontend)
-CLIENT_URL=http://localhost:3000
+CLIENT_URL=http://localhost:5173
 
 # JWT secrets
 ACCESS_TOKEN_SECRET=your_access_token_secret
