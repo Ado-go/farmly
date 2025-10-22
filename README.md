@@ -1,10 +1,14 @@
-# Farmly – Eshop Project
+# 🌾 Farmly – Eshop Project
 
 Farmly is an e-commerce application for managing farms, products, and users. It is built with Node.js, React, Prisma, and PostgreSQL.
 
 ---
 
-## Requirements
+### 🚧 Work in Progress
+
+Farmly is still under active development.
+
+## ⚙️ Requirements
 
 Before running the project, make sure you have installed the following:
 
@@ -14,7 +18,7 @@ Before running the project, make sure you have installed the following:
 
 ---
 
-## Project Structure
+## 🧱 Project Structure
 farmly/\
 ├─ backend/ # Node.js + Express + Prisma API\
 ├─ frontend/ # React + TanStack Router + TailwindCSS\
@@ -22,7 +26,7 @@ farmly/\
 
 ---
 
-## Setup
+## 🚀 Setup
 
 ### 1. Clone the repository
 ```bash
@@ -86,7 +90,7 @@ From the main repo folder:
 npm start
 ```
 
-### Testing
+### 🧪 Testing
 in backend/ run
 ```bash
 npm run test
