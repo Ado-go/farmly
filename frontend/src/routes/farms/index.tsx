@@ -52,11 +52,10 @@ function FarmsPage() {
     );
   }
 
-  // vytvor mapu farmerov
   const farmersMap: Record<number, { farmer: Farm["farmer"]; farms: Farm[] }> =
     {};
   farms.forEach((farm) => {
-    if (!farm.farmer) return; // bezpečné preskočenie farm bez farmára
+    if (!farm.farmer) return;
 
     const farmerId = farm.farmer.id;
     if (!farmersMap[farmerId]) {
