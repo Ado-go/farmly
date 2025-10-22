@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "cd src && node index.ts",
-    "test": "jest --detectOpenHandles --runInBand"
+    "test": "jest --detectOpenHandles --runInBand",
+    "prisma:seed": "ts-node prisma/seed/seed.ts",
+    "prisma:clear": "ts-node prisma/seed/clear.ts"
   },
   "keywords": [],
   "author": "",
