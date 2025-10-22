@@ -188,5 +188,12 @@
     "farmName": "Farm",
     "addToCart": "Add to Cart",
     "noRating": "No rating"
+  },
+  "farmsPage": {
+    "title": "Farms",
+    "loading": "Loading farms...",
+    "error": "Failed to load farms.",
+    "products": "Products",
+    "farmer": "Farmer"
   }
 }

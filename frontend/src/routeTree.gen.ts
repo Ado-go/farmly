@@ -16,9 +16,11 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductsIndexRouteImport } from './routes/products/index'
+import { Route as FarmsIndexRouteImport } from './routes/farms/index'
 import { Route as FarmIndexRouteImport } from './routes/farm/index'
 import { Route as ProductsIdRouteImport } from './routes/products/$id'
 import { Route as ProductIdRouteImport } from './routes/product/$id'
+import { Route as FarmsIdRouteImport } from './routes/farms/$id'
 import { Route as FarmIdRouteImport } from './routes/farm/$id'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -56,6 +58,11 @@ const ProductsIndexRoute = ProductsIndexRouteImport.update({
   path: '/products/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FarmsIndexRoute = FarmsIndexRouteImport.update({
+  id: '/farms/',
+  path: '/farms/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FarmIndexRoute = FarmIndexRouteImport.update({
   id: '/farm/',
   path: '/farm/',
@@ -69,6 +76,11 @@ const ProductsIdRoute = ProductsIdRouteImport.update({
 const ProductIdRoute = ProductIdRouteImport.update({
   id: '/product/$id',
   path: '/product/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FarmsIdRoute = FarmsIdRouteImport.update({
+  id: '/farms/$id',
+  path: '/farms/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FarmIdRoute = FarmIdRouteImport.update({
@@ -85,9 +97,11 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/farm/$id': typeof FarmIdRoute
+  '/farms/$id': typeof FarmsIdRoute
   '/product/$id': typeof ProductIdRoute
   '/products/$id': typeof ProductsIdRoute
   '/farm': typeof FarmIndexRoute
+  '/farms': typeof FarmsIndexRoute
   '/products': typeof ProductsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -98,9 +112,11 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/farm/$id': typeof FarmIdRoute
+  '/farms/$id': typeof FarmsIdRoute
   '/product/$id': typeof ProductIdRoute
   '/products/$id': typeof ProductsIdRoute
   '/farm': typeof FarmIndexRoute
+  '/farms': typeof FarmsIndexRoute
   '/products': typeof ProductsIndexRoute
 }
 export interface FileRoutesById {
@@ -112,9 +128,11 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/farm/$id': typeof FarmIdRoute
+  '/farms/$id': typeof FarmsIdRoute
   '/product/$id': typeof ProductIdRoute
   '/products/$id': typeof ProductsIdRoute
   '/farm/': typeof FarmIndexRoute
+  '/farms/': typeof FarmsIndexRoute
   '/products/': typeof ProductsIndexRoute
 }
 export interface FileRouteTypes {
@@ -127,9 +145,11 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/farm/$id'
+    | '/farms/$id'
     | '/product/$id'
     | '/products/$id'
     | '/farm'
+    | '/farms'
     | '/products'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -140,9 +160,11 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/farm/$id'
+    | '/farms/$id'
     | '/product/$id'
     | '/products/$id'
     | '/farm'
+    | '/farms'
     | '/products'
   id:
     | '__root__'
@@ -153,9 +175,11 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/farm/$id'
+    | '/farms/$id'
     | '/product/$id'
     | '/products/$id'
     | '/farm/'
+    | '/farms/'
     | '/products/'
   fileRoutesById: FileRoutesById
 }
@@ -167,9 +191,11 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   FarmIdRoute: typeof FarmIdRoute
+  FarmsIdRoute: typeof FarmsIdRoute
   ProductIdRoute: typeof ProductIdRoute
   ProductsIdRoute: typeof ProductsIdRoute
   FarmIndexRoute: typeof FarmIndexRoute
+  FarmsIndexRoute: typeof FarmsIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
 }
 
@@ -224,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/farms/': {
+      id: '/farms/'
+      path: '/farms'
+      fullPath: '/farms'
+      preLoaderRoute: typeof FarmsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/farm/': {
       id: '/farm/'
       path: '/farm'
@@ -245,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/farms/$id': {
+      id: '/farms/$id'
+      path: '/farms/$id'
+      fullPath: '/farms/$id'
+      preLoaderRoute: typeof FarmsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/farm/$id': {
       id: '/farm/$id'
       path: '/farm/$id'
@@ -263,9 +303,11 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   FarmIdRoute: FarmIdRoute,
+  FarmsIdRoute: FarmsIdRoute,
   ProductIdRoute: ProductIdRoute,
   ProductsIdRoute: ProductsIdRoute,
   FarmIndexRoute: FarmIndexRoute,
+  FarmsIndexRoute: FarmsIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
 }
 export const routeTree = rootRouteImport

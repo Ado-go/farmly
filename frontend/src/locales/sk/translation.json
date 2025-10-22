@@ -188,5 +188,12 @@
     "farmName": "Farma",
     "addToCart": "Pridať do košíka",
     "noRating": "Bez hodnotenia"
+  },
+  "farmsPage": {
+    "title": "Farmy",
+    "loading": "Načítavam farmy...",
+    "error": "Nepodarilo sa načítať farmy.",
+    "products": "Produkty",
+    "farmer": "Farmár"
   }
 }
