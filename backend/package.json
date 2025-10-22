@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "cd src && node index.ts",
-    "test": "jest --runInBand"
+    "test": "jest --detectOpenHandles --runInBand"
   },
   "keywords": [],
   "author": "",
