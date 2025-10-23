@@ -10,6 +10,8 @@ import farmRoutes from "./routes/farm.ts";
 
 import productRoutes from "./routes/product.ts";
 
+import reviewRoutes from "./routes/review.ts";
+
 // public routes //
 import publicProductsRoutes from "./routes/publicProducts.ts";
 
@@ -32,6 +34,8 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/farm", farmRoutes);
 
 app.use("/api/product", productRoutes);
+
+app.use("/api/review", reviewRoutes);
 
 // Public //
 app.use("/api/products", publicProductsRoutes);
