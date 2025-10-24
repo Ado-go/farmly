@@ -47,12 +47,29 @@ const productNames = [
   { name: "Špenát", category: "Zelenina" },
 ];
 
+const reviewComments = [
+  "Výborná kvalita a rýchle doručenie!",
+  "Veľmi chutné produkty, určite objednám znova.",
+  "Trochu drahšie, ale oplatí sa.",
+  "Farmár bol veľmi ochotný.",
+  "Skvelá skúsenosť, odporúčam!",
+];
+
 async function main() {
+  console.log("🧹 Clearing old data...");
+  await prisma.review.deleteMany({});
+  await prisma.product.deleteMany({});
+  await prisma.farm.deleteMany({});
+  await prisma.user.deleteMany({});
+  console.log("✅ Old data cleared.");
+
+  console.log("🌱 Seeding new data...");
+
   const farmers = [];
   const customers = [];
 
   // ------------------- FARMERS -------------------
-  const numFarmers = 5 + randomInt(0, 5); // 5–10 farmers
+  const numFarmers = randomInt(5, 10);
   for (let i = 0; i < numFarmers; i++) {
     const name = farmerNames[i % farmerNames.length];
     const email = `farmer${i + 1}@example.com`;
@@ -67,7 +84,6 @@ async function main() {
         password,
       },
     });
-
     farmers.push(farmer);
   }
 
@@ -86,19 +102,20 @@ async function main() {
         password,
       },
     });
-
     customers.push(customer);
   }
 
   // ------------------- FARMS AND PRODUCTS -------------------
+  const allProducts: { id: number }[] = [];
+
   for (const farmer of farmers) {
-    const numFarms = randomInt(1, 3); // 1–3 farms for farmers
+    const numFarms = randomInt(1, 3); // 1–3 farms per farmer
 
     for (let j = 0; j < numFarms; j++) {
       const cityIndex = randomInt(0, cities.length - 1);
       const farmName = `${cities[cityIndex]} Farma ${j + 1}`;
 
-      const numProducts = randomInt(2, 5); // 2–5 products for farm
+      const numProducts = randomInt(2, 5); // 2–5 products per farm
       const products = [];
 
       for (let k = 0; k < numProducts; k++) {
@@ -107,15 +124,15 @@ async function main() {
         products.push({
           name: prod.name,
           category: prod.category,
-          description: `Čerstvé ${prod.name.toLowerCase()}`,
-          price: parseFloat((randomInt(100, 1000) / 100).toFixed(2)), // price 1.00–10.00
+          description: `Čerstvé ${prod.name.toLowerCase()} priamo z farmy.`,
+          price: parseFloat((randomInt(100, 1000) / 100).toFixed(2)),
         });
       }
 
-      await prisma.farm.create({
+      const farm = await prisma.farm.create({
         data: {
           name: farmName,
-          description: "Rodinná farma s rôznymi produktami",
+          description: "Rodinná farma s rôznymi produktami.",
           city: cities[cityIndex],
           street: streets[randomInt(0, streets.length - 1)],
           region: regions[randomInt(0, regions.length - 1)],
@@ -124,13 +141,36 @@ async function main() {
           farmerId: farmer.id,
           products: { create: products },
         },
+        include: { products: true },
+      });
+
+      allProducts.push(...farm.products);
+    }
+  }
+
+  // ------------------- REVIEWS -------------------
+  for (const product of allProducts) {
+    const numReviews = randomInt(1, 3);
+    for (let i = 0; i < numReviews; i++) {
+      const reviewer = customers[randomInt(0, customers.length - 1)];
+      await prisma.review.create({
+        data: {
+          comment: reviewComments[randomInt(0, reviewComments.length - 1)],
+          rating: randomInt(3, 5),
+          userId: reviewer.id,
+          productId: product.id,
+        },
       });
     }
   }
 
-  console.log("Seeding farmers, farms and products finished ✅");
+  console.log("🌾 Seeding complete!");
 }
 
 main()
-  .catch((e) => console.error(e))
-  .finally(async () => await prisma.$disconnect());
+  .catch((e) => {
+    console.error("❌ Seeding failed:", e);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
