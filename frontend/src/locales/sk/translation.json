@@ -8,6 +8,8 @@
   "farms": "Farmy",
   "signedIn": "Prihlásený ako:",
   "products": "Produkty",
+  "page_not_found": "Stránka, ktorú hľadáš, neexistuje.",
+  "go_home": "Späť na hlavnú stránku",
   "loginPage": {
     "title": "Prihlásenie",
     "subtitle": "Zadaj svoje prihlasovacie údaje",

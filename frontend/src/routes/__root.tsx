@@ -85,4 +85,21 @@ function RootLayout() {
   );
 }
 
-export const Route = createRootRoute({ component: RootLayout });
+function NotFound() {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex flex-col items-center justify-center h-screen text-center">
+      <h1 className="text-6xl font-bold">🌾404</h1>
+      <p className="mt-4 text-xl">{t("page_not_found")}</p>
+      <Link to="/" className="mt-6 text-blue-500 underline">
+        {t("go_home")}
+      </Link>
+    </div>
+  );
+}
+
+export const Route = createRootRoute({
+  component: RootLayout,
+  notFoundComponent: NotFound,
+});
