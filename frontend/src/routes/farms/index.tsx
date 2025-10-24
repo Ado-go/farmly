@@ -38,7 +38,7 @@ function FarmsPage() {
           <Card key={i} className="animate-pulse h-40" />
         ))}
         <p className="col-span-full text-center text-gray-500 mt-4">
-          {t("farmPage.loading")}
+          {t("farmsPage.loading")}
         </p>
       </div>
     );
@@ -47,7 +47,7 @@ function FarmsPage() {
   if (isError) {
     return (
       <p className="text-center text-red-500 p-6">
-        {t("farmPage.errorLoading")}
+        {t("farmsPage.errorLoading")}
       </p>
     );
   }
@@ -68,10 +68,10 @@ function FarmsPage() {
 
   return (
     <div className="p-6 space-y-10">
-      <h2 className="text-2xl font-bold mb-6">{t("farmPage.title")}</h2>
+      <h2 className="text-2xl font-bold mb-6">{t("farmsPage.title")}</h2>
 
       {farmers.length === 0 ? (
-        <p className="text-gray-500">{t("farmPage.noFarms")}</p>
+        <p className="text-gray-500">{t("farmsPage.noFarms")}</p>
       ) : (
         farmers.map(({ farmer, farms }) => (
           <div key={farmer.id}>
@@ -95,11 +95,11 @@ function FarmsPage() {
                       />
                     ) : (
                       <div className="w-full h-32 bg-gray-200 flex items-center justify-center text-gray-500 mt-2 rounded">
-                        {t("farmPage.noImage")}
+                        {t("farmsPage.noImage")}
                       </div>
                     )}
                     <p className="text-sm mt-2">
-                      {farm.products?.length || 0} {t("farmPage.products")}
+                      {farm.products?.length || 0} {t("farmsPage.products")}
                     </p>
                   </Card>
                 </Link>

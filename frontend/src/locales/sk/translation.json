@@ -194,7 +194,10 @@
     "loading": "Načítavam farmy...",
     "error": "Nepodarilo sa načítať farmy.",
     "products": "Produkty",
-    "farmer": "Farmár"
+    "farmer": "Farmár",
+    "errorLoading": "Chyba pri načítaní fárm.",
+    "noFarms": "Zatiaľ tu nie sú žiadne farmy.",
+    "noImage": "Bez obrázka"
   },
   "reviews": {
     "title": "Recenzie",

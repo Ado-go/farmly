@@ -194,7 +194,10 @@
     "loading": "Loading farms...",
     "error": "Failed to load farms.",
     "products": "Products",
-    "farmer": "Farmer"
+    "farmer": "Farmer",
+    "errorLoading": "Error loading farms.",
+    "noFarms": "We don't have any farms yet.",
+    "noImage": "No image"
   },
   "reviews": {
     "title": "Reviews",
