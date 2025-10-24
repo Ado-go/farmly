@@ -10,6 +10,8 @@ import { apiFetch } from "../../lib/api";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { Star } from "lucide-react";
 
 const productSchema = z.object({
   name: z.string().min(2),
@@ -87,7 +89,7 @@ function ProductDetailPage() {
     return <p className="text-red-500">{t("productPage.errorLoading")}</p>;
 
   return (
-    <div className="max-w-lg mx-auto p-6 space-y-6">
+    <div className="max-w-2xl mx-auto p-6 space-y-8">
       <h1 className="text-3xl font-bold">{product.name}</h1>
 
       <div className="w-full h-64 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
@@ -170,6 +172,30 @@ function ProductDetailPage() {
           </div>
         </form>
       )}
+
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4">{t("reviews.title")}</h2>
+
+        {product.reviews?.length === 0 ? (
+          <p className="text-gray-500">{t("reviews.none")}</p>
+        ) : (
+          <div className="space-y-4">
+            {product.reviews.map((r: any) => (
+              <div key={r.id} className="border-b pb-2">
+                <div className="flex items-center gap-2">
+                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
+                  <span className="font-medium">{r.rating}/5</span>
+                  <span className="text-sm text-gray-400">
+                    {new Date(r.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                {r.comment && <p className="text-sm mt-1">{r.comment}</p>}
+                <p className="text-xs text-gray-500">{r.user?.name}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

@@ -1,9 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
-import { Star } from "lucide-react";
+import { Star, Trash2 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "../../context/AuthContext";
 
 export const Route = createFileRoute("/products/$id")({
   component: ProductDetailPage,
@@ -12,6 +17,8 @@ export const Route = createFileRoute("/products/$id")({
 function ProductDetailPage() {
   const { id } = Route.useParams();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const {
     data: product,
@@ -20,6 +27,36 @@ function ProductDetailPage() {
   } = useQuery({
     queryKey: ["product", id],
     queryFn: async () => apiFetch(`/products/${id}`),
+  });
+
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+
+  const addReview = useMutation({
+    mutationFn: async () =>
+      apiFetch(`/review`, {
+        method: "POST",
+        body: JSON.stringify({
+          productId: Number(id),
+          rating,
+          comment,
+        }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["product", id] });
+      setRating(0);
+      setComment("");
+    },
+  });
+
+  const deleteReview = useMutation({
+    mutationFn: async (reviewId: number) =>
+      apiFetch(`/review/${reviewId}`, {
+        method: "DELETE",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["product", id] });
+    },
   });
 
   if (isLoading) {
@@ -39,10 +76,17 @@ function ProductDetailPage() {
   }
 
   const imageUrl = product.images?.[0]?.url || "/placeholder.jpg";
-  const rating = averageRating(product.reviews);
+  const avgRating = averageRating(product.reviews);
+
+  const userReview = user
+    ? product.reviews.find((r: any) => r.userId === user.id)
+    : null;
+  const otherReviews = product.reviews.filter(
+    (r: any) => r.userId !== user?.id
+  );
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto space-y-6">
       <Card className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <img
@@ -60,7 +104,7 @@ function ProductDetailPage() {
             <div className="flex items-center text-yellow-500 mb-3">
               <Star className="w-4 h-4 fill-yellow-400" />
               <span className="ml-1 text-sm text-gray-700">
-                {rating ?? t("productCard.noRating")}
+                {avgRating ?? t("productCard.noRating")}
               </span>
             </div>
 
@@ -71,6 +115,104 @@ function ProductDetailPage() {
             <p className="text-sm text-gray-600">{product.description}</p>
           </div>
         </div>
+      </Card>
+
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4">{t("reviews.title")}</h2>
+
+        {userReview && (
+          <div className="border-b pb-3 mb-4 bg-gray-50 p-3 rounded-md">
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
+                  <span className="font-medium">{userReview.rating}/5</span>
+                  <span className="text-sm text-gray-400">
+                    {new Date(userReview.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                {userReview.comment && (
+                  <p className="text-sm mt-1">{userReview.comment}</p>
+                )}
+                <p className="text-xs text-gray-500">{userReview.user?.name}</p>
+              </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => deleteReview.mutate(userReview.id)}
+                disabled={deleteReview.isPending}
+              >
+                <Trash2 className="w-4 h-4 mr-1" />
+                {t("reviews.delete")}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {otherReviews.length === 0 && !userReview ? (
+          <p className="text-gray-500 mb-4">{t("reviews.none")}</p>
+        ) : (
+          <div className="space-y-4 mb-6">
+            {otherReviews.map((r: any) => (
+              <div key={r.id} className="border-b pb-2">
+                <div className="flex items-center gap-2">
+                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
+                  <span className="font-medium">{r.rating}/5</span>
+                  <span className="text-sm text-gray-400">
+                    {new Date(r.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                {r.comment && <p className="text-sm mt-1">{r.comment}</p>}
+                <p className="text-xs text-gray-500">{r.user?.name}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {user && !userReview && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              addReview.mutate();
+            }}
+            className="space-y-3"
+          >
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {t("reviews.rating")}
+              </label>
+              <Input
+                type="number"
+                min={1}
+                max={5}
+                value={rating}
+                onChange={(e) => setRating(Number(e.target.value))}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {t("reviews.comment")}
+              </label>
+              <Textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder={t("reviews.placeholder")}
+              />
+            </div>
+
+            <Button type="submit" disabled={addReview.isPending}>
+              {addReview.isPending
+                ? t("reviews.submitting")
+                : t("reviews.submit")}
+            </Button>
+          </form>
+        )}
+
+        {!user && (
+          <p className="text-gray-500 italic">{t("reviews.loginToAdd")}</p>
+        )}
       </Card>
     </div>
   );

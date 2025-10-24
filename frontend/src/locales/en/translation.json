@@ -195,5 +195,16 @@
     "error": "Failed to load farms.",
     "products": "Products",
     "farmer": "Farmer"
+  },
+  "reviews": {
+    "title": "Reviews",
+    "none": "No reviews yet.",
+    "rating": "Rating (1-5)",
+    "comment": "Comment",
+    "placeholder": "Write your experience with the product...",
+    "submit": "Submit review",
+    "submitting": "Submitting...",
+    "delete": "Delete",
+    "loginToAdd": "Please log in to add a review."
   }
 }

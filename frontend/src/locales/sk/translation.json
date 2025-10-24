@@ -195,5 +195,16 @@
     "error": "Nepodarilo sa načítať farmy.",
     "products": "Produkty",
     "farmer": "Farmár"
+  },
+  "reviews": {
+    "title": "Recenzie",
+    "none": "Zatiaľ nie sú žiadne recenzie.",
+    "rating": "Hodnotenie (1–5)",
+    "comment": "Komentár",
+    "placeholder": "Napíš svoju skúsenosť s produktom...",
+    "submit": "Odoslať recenziu",
+    "submitting": "Odosielam...",
+    "delete": "Zmazať",
+    "loginToAdd": "Pre pridanie recenzie sa prosím prihlás."
   }
 }
