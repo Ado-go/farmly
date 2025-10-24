@@ -17,6 +17,7 @@ router.get("/", async (req, res) => {
             price: true,
             rating: true,
             images: true,
+            reviews: true,
           },
         },
         farmer: {
@@ -61,6 +62,7 @@ router.get("/:id", async (req, res) => {
             price: true,
             rating: true,
             images: true,
+            reviews: true,
           },
         },
         farmer: {
