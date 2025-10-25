@@ -13,11 +13,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ------------- ENUMS ---------------
+
 enum Role {
   CUSTOMER
   FARMER
   ADMIN
 }
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+}
+
 
 // ------------------- USER -------------------
 
@@ -28,7 +37,8 @@ model User {
   name          String
   phone         String
   role          Role      @default(CUSTOMER)
-  orders        Order[]
+  orders        Order[]   @relation("BuyerOrders")
+  soldOrders    Order[]   @relation("SellerOrders")
   refreshToken  String?
   resetToken    String?
 
@@ -75,10 +85,11 @@ model Product {
   rating       Float           @default(0)
   farm         Farm            @relation(fields: [farmId], references: [id])
   farmId       Int
-  orderItems   OrderItem[]
+  orderItems   OrderItem[]   
   reviews      Review[]
   eventLinks   EventProduct[]
   images       ProductImage[]
+  offers       Offer[]
 }
 
 model ProductImage {
@@ -101,16 +112,35 @@ model Offer {
 
   user        User        @relation(fields: [userId], references: [id])
   userId      Int
+  product     Product    @relation(fields: [productId], references: [id])
+  productId   Int
 }
+
 
 // ------------------- ORDER -------------------
 
 model Order {
-  id        Int         @id @default(autoincrement())
-  createdAt DateTime    @default(now())
-  user      User        @relation(fields: [userId], references: [id])
-  userId    Int
-  items     OrderItem[]
+  id             Int         @id @default(autoincrement())
+  createdAt      DateTime    @default(now())
+
+  buyer          User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  buyerId        Int
+
+  seller         User        @relation("SellerOrders", fields: [sellerId], references: [id])
+  sellerId       Int
+
+  deliveryCity       String
+  deliveryStreet     String
+  deliveryRegion     String
+  deliveryPostalCode String
+  deliveryCountry    String
+
+  isDelivered    Boolean     @default(false)
+  isPaid         Boolean     @default(false)
+
+  paymentMethod  PaymentMethod
+
+  items          OrderItem[]
 }
 
 model OrderItem {
