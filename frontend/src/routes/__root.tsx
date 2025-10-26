@@ -56,7 +56,12 @@ function RootLayout() {
                   </DropdownMenuItem>
                   {user.role === "FARMER" && (
                     <DropdownMenuItem asChild>
-                      <Link to="/farm">{t("farms")}</Link>
+                      <Link to="/farm">{t("my_farms")}</Link>
+                    </DropdownMenuItem>
+                  )}
+                  {user.role === "FARMER" && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/event">{t("my_events")}</Link>
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem asChild>
