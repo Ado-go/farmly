@@ -43,131 +43,141 @@ router.post(
 );
 
 // GET /event
-router.get("/", authenticateToken, async (req, res) => {
-  try {
-    const events = await prisma.event.findMany({
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        startDate: true,
-        endDate: true,
-        city: true,
-        street: true,
-        region: true,
-        postalCode: true,
-        country: true,
-        createdAt: true,
+router.get(
+  "/",
+  authenticateToken,
+  authorizeRole("FARMER"),
+  async (req, res) => {
+    try {
+      const events = await prisma.event.findMany({
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          startDate: true,
+          endDate: true,
+          city: true,
+          street: true,
+          region: true,
+          postalCode: true,
+          country: true,
+          createdAt: true,
 
-        organizer: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
+          organizer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            },
           },
-        },
 
-        participants: {
-          select: {
-            id: true,
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
+          participants: {
+            select: {
+              id: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  role: true,
+                },
               },
             },
           },
         },
-      },
-      orderBy: { startDate: "asc" },
-    });
+        orderBy: { startDate: "asc" },
+      });
 
-    const formatted = events.map((event) => ({
-      ...event,
-      participants: event.participants.map((p) => p.user),
-    }));
+      const formatted = events.map((event) => ({
+        ...event,
+        participants: event.participants.map((p) => p.user),
+      }));
 
-    res.json(formatted);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Unable to load events" });
+      res.json(formatted);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Unable to load events" });
+    }
   }
-});
+);
 
 // GET /event/:id
-router.get("/:id", authenticateToken, async (req, res) => {
-  try {
-    const eventId = parseInt(req.params.id, 10);
+router.get(
+  "/:id",
+  authenticateToken,
+  authorizeRole("FARMER"),
+  async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id, 10);
 
-    if (isNaN(eventId)) {
-      return res.status(400).json({ message: "Invalid event ID" });
-    }
+      if (isNaN(eventId)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
 
-    const event = await prisma.event.findUnique({
-      where: { id: eventId },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        startDate: true,
-        endDate: true,
-        city: true,
-        street: true,
-        region: true,
-        postalCode: true,
-        country: true,
-        createdAt: true,
+      const event = await prisma.event.findUnique({
+        where: { id: eventId },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          startDate: true,
+          endDate: true,
+          city: true,
+          street: true,
+          region: true,
+          postalCode: true,
+          country: true,
+          createdAt: true,
 
-        organizer: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
+          organizer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            },
           },
-        },
 
-        participants: {
-          select: {
-            id: true,
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
+          participants: {
+            select: {
+              id: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  role: true,
+                },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    if (!event) {
-      return res.status(404).json({ message: "Event not found" });
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+
+      const formattedEvent = {
+        ...event,
+        participants: event.participants.map((p) => p.user),
+      };
+
+      res.json(formattedEvent);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Error while loading event" });
     }
-
-    const formattedEvent = {
-      ...event,
-      participants: event.participants.map((p) => p.user),
-    };
-
-    res.json(formattedEvent);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error while loading event" });
   }
-});
+);
 
 // PUT /event/:id
 router.put(
   "/:id",
   authenticateToken,
   authorizeRole("FARMER"),
-  validateRequest(eventSchema.partial()),
+  validateRequest(eventSchema),
   async (req, res) => {
     try {
       const userId = req.user?.id;

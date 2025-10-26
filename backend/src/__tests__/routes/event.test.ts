@@ -127,23 +127,48 @@ describe("Event Routes", () => {
     expect(res.body).toHaveProperty("participants");
   });
 
-  it("PUT /event/:id - should update own event", async () => {
+  it("PUT /event/:id - should update own event (full data required)", async () => {
     const res = await request(app)
       .put(`/api/event/${eventId}`)
       .set("Cookie", [`accessToken=${accessToken}`])
-      .send({ title: "Updated Festival" });
+      .send({
+        title: "Updated Festival",
+        description: "Updated farm event",
+        startDate: "2025-12-05T09:00:00.000Z",
+        endDate: "2025-12-06T18:00:00.000Z",
+        city: "Trnava",
+        street: "Updated Street 10",
+        region: "Trnavský",
+        postalCode: "91701",
+        country: "Slovakia",
+      });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty("title", "Updated Festival");
+    expect(res.body).toHaveProperty("city", "Trnava");
   });
 
-  it("PUT /event/:id - should fail to update other farmer's event", async () => {
+  it("PUT /event/:id - should fail to update other farmer's event (full data required)", async () => {
     const res = await request(app)
       .put(`/api/event/${eventId}`)
       .set("Cookie", [`accessToken=${otherAccessToken}`])
-      .send({ title: "Invalid Update" });
+      .send({
+        title: "Invalid Update",
+        description: "Unauthorized farmer update attempt",
+        startDate: "2025-12-10T08:00:00.000Z",
+        endDate: "2025-12-11T18:00:00.000Z",
+        city: "Košice",
+        street: "Street 99",
+        region: "Košický",
+        postalCode: "04001",
+        country: "Slovakia",
+      });
 
     expect(res.statusCode).toBe(404);
+    expect(res.body).toHaveProperty(
+      "message",
+      "Event not found or unauthorized"
+    );
   });
 
   it("POST /event/:id/join - should allow farmer to join event", async () => {
@@ -185,6 +210,11 @@ describe("Event Routes", () => {
       "message",
       "You have successfully left the event"
     );
+
+    const participant = await prisma.eventParticipant.findFirst({
+      where: { eventId, userId: OTHER_FARMER_ID },
+    });
+    expect(participant).toBeNull();
   });
 
   it("DELETE /event/:id/leave - should fail if user not joined", async () => {
@@ -203,6 +233,7 @@ describe("Event Routes", () => {
     const newEvent = await prisma.event.create({
       data: {
         title: "Delete Event",
+        description: "Temporary event for delete test",
         startDate: new Date(),
         endDate: new Date(),
         city: "Nitra",
@@ -229,6 +260,7 @@ describe("Event Routes", () => {
     const otherEvent = await prisma.event.create({
       data: {
         title: "Other Event",
+        description: "Another test event",
         startDate: new Date(),
         endDate: new Date(),
         city: "Košice",
@@ -245,6 +277,10 @@ describe("Event Routes", () => {
       .set("Cookie", [`accessToken=${accessToken}`]);
 
     expect(res.statusCode).toBe(404);
+    expect(res.body).toHaveProperty(
+      "message",
+      "Event not found or unauthorized"
+    );
   });
 
   it("GET /event/:id - should return 401 without token", async () => {
