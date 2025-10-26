@@ -3,6 +3,9 @@ const prisma = new PrismaClient();
 
 async function main() {
   await prisma.review.deleteMany({});
+  await prisma.eventParticipant.deleteMany({});
+  await prisma.eventProduct.deleteMany({});
+  await prisma.event.deleteMany({});
   await prisma.product.deleteMany({});
   await prisma.farm.deleteMany({});
   await prisma.user.deleteMany({});

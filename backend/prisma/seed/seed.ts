@@ -58,6 +58,9 @@ const reviewComments = [
 async function main() {
   console.log("🧹 Clearing old data...");
   await prisma.review.deleteMany({});
+  await prisma.eventParticipant.deleteMany({});
+  await prisma.eventProduct.deleteMany({});
+  await prisma.event.deleteMany({});
   await prisma.product.deleteMany({});
   await prisma.farm.deleteMany({});
   await prisma.user.deleteMany({});
@@ -145,6 +148,59 @@ async function main() {
       });
 
       allProducts.push(...farm.products);
+    }
+  }
+
+  // ------------------- EVENTS -------------------
+  console.log("📅 Creating events...");
+  for (const farmer of farmers) {
+    const numEvents = randomInt(1, 3);
+
+    for (let i = 0; i < numEvents; i++) {
+      const cityIndex = randomInt(0, cities.length - 1);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() + randomInt(3, 20));
+      const endDate = new Date(startDate);
+      endDate.setHours(endDate.getHours() + randomInt(4, 24));
+
+      const event = await prisma.event.create({
+        data: {
+          title: `Farmársky deň ${i + 1} - ${farmer.name.split(" ")[0]}`,
+          description: "Udalosť pre zákazníkov a priateľov farmy.",
+          startDate,
+          endDate,
+          city: cities[cityIndex],
+          street: streets[randomInt(0, streets.length - 1)],
+          region: regions[randomInt(0, regions.length - 1)],
+          postalCode: `0${randomInt(1000, 9999)}`,
+          country: "Slovensko",
+          organizerId: farmer.id,
+        },
+      });
+
+      // pridaj náhodných účastníkov
+      const numParticipants = randomInt(2, 6);
+      const chosenCustomers = [...customers]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, numParticipants);
+
+      for (const cust of chosenCustomers) {
+        await prisma.eventParticipant.create({
+          data: { eventId: event.id, userId: cust.id },
+        });
+      }
+
+      // priraď náhodné produkty
+      const numLinkedProducts = randomInt(1, 3);
+      const chosenProducts = [...allProducts]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, numLinkedProducts);
+
+      for (const prod of chosenProducts) {
+        await prisma.eventProduct.create({
+          data: { eventId: event.id, productId: prod.id },
+        });
+      }
     }
   }
 
