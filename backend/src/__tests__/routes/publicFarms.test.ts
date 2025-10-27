@@ -114,9 +114,12 @@ describe("Public Farms Routes", () => {
     const firstFarm = res.body.find((f: any) => f.name === "Green Valley");
     expect(firstFarm.farmer).toHaveProperty("name", "Public Farmer");
     expect(firstFarm).toHaveProperty("images");
-    expect(firstFarm.products.length).toBeGreaterThanOrEqual(1);
+    expect(firstFarm.farmProducts.length).toBeGreaterThanOrEqual(1);
 
-    expect(firstFarm.products[0].product).toHaveProperty("name", "Fresh Milk");
+    expect(firstFarm.farmProducts[0].product).toHaveProperty(
+      "name",
+      "Fresh Milk"
+    );
   });
 
   it("GET /api/farms/:id - should return a specific farm", async () => {
@@ -127,7 +130,7 @@ describe("Public Farms Routes", () => {
     expect(res.body).toHaveProperty("name", "Sunny Hills");
     expect(res.body.farmer.name).toBe("Public Farmer");
 
-    const hasHoney = res.body.products.some(
+    const hasHoney = res.body.farmProducts.some(
       (p: any) => p.product.name === "Honey Jar"
     );
     expect(hasHoney).toBe(true);

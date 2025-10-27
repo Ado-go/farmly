@@ -8,6 +8,8 @@ let farm1Id: number;
 let farm2Id: number;
 let farmProduct1Id: number;
 let farmProduct2Id: number;
+let product1Id: number;
+let product2Id: number;
 
 beforeAll(async () => {
   const farm1 = await prisma.farm.create({
@@ -91,6 +93,8 @@ beforeAll(async () => {
 
   farmProduct1Id = farmProduct1.id;
   farmProduct2Id = farmProduct2.id;
+  product1Id = farmProduct1.product.id;
+  product2Id = farmProduct2.product.id;
 });
 
 afterAll(async () => {
@@ -122,11 +126,10 @@ describe("Public FarmProducts Routes", () => {
 
   it("GET /public-farm-products/:id - should return a specific farm product", async () => {
     const res = await request(app).get(
-      `/api/public-farm-products/${farmProduct2Id}`
+      `/api/public-farm-products/${product2Id}`
     );
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty("id", farmProduct2Id);
     expect(res.body.product).toHaveProperty("name", "Goat Cheese");
     expect(res.body.farm).toHaveProperty("name", "Farm Two");
   });

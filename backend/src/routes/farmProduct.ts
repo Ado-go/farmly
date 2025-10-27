@@ -147,12 +147,13 @@ router.put(
   async (req, res) => {
     try {
       const id = Number(req.params.id);
-      const { images, price, stock, ...updateData } = req.body;
+      const { images, price, stock, name, category, description } = req.body;
 
       const farmProduct = await prisma.farmProduct.findUnique({
         where: { id },
         include: { product: true },
       });
+
       if (!farmProduct)
         return res.status(404).json({ error: "Farm product not found" });
 
@@ -165,7 +166,9 @@ router.put(
           stock: stock ?? farmProduct.stock,
           product: {
             update: {
-              ...updateData,
+              ...(name && { name }),
+              ...(category && { category }),
+              ...(description && { description }),
               ...(images && {
                 images: {
                   deleteMany: {},
@@ -177,7 +180,10 @@ router.put(
             },
           },
         },
-        include: { product: { include: { images: true } } },
+        include: {
+          product: { include: { images: true } },
+          farm: { select: { id: true, name: true } },
+        },
       });
 
       res.json(updated);
@@ -185,7 +191,7 @@ router.put(
       const status = error.status || 400;
       res
         .status(status)
-        .json({ error: error.message || "Failed to process request" });
+        .json({ error: error.message || "Failed to update farm product" });
     }
   }
 );

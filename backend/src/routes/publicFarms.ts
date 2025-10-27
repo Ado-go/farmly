@@ -9,33 +9,16 @@ router.get("/", async (req, res) => {
     const farms = await prisma.farm.findMany({
       include: {
         images: true,
+        farmer: { select: { id: true, name: true } },
         farmProducts: {
           include: {
             product: {
               include: {
                 images: true,
-                reviews: {
-                  select: {
-                    id: true,
-                    rating: true,
-                    comment: true,
-                    user: { select: { id: true, name: true } },
-                  },
-                },
               },
             },
           },
         },
-        farmer: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
       },
     });
 
@@ -44,12 +27,13 @@ router.get("/", async (req, res) => {
       name: farm.name,
       description: farm.description,
       city: farm.city,
+      street: farm.street,
       region: farm.region,
+      postalCode: farm.postalCode,
       country: farm.country,
-      createdAt: farm.createdAt,
       farmer: farm.farmer,
       images: farm.images,
-      products: farm.farmProducts.map((fp) => ({
+      farmProducts: farm.farmProducts.map((fp) => ({
         id: fp.id,
         price: fp.price,
         stock: fp.stock,
@@ -58,16 +42,14 @@ router.get("/", async (req, res) => {
           name: fp.product.name,
           category: fp.product.category,
           description: fp.product.description,
-          rating: fp.product.rating,
           images: fp.product.images,
-          reviews: fp.product.reviews,
         },
       })),
     }));
 
     res.json(formatted);
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -86,26 +68,14 @@ router.get("/:id", async (req, res) => {
       where: { id: farmId },
       include: {
         images: true,
+        farmer: { select: { id: true, name: true } },
         farmProducts: {
           include: {
             product: {
               include: {
                 images: true,
-                reviews: {
-                  include: {
-                    user: { select: { id: true, name: true } },
-                  },
-                },
               },
             },
-          },
-        },
-        farmer: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
           },
         },
       },
@@ -120,12 +90,13 @@ router.get("/:id", async (req, res) => {
       name: farm.name,
       description: farm.description,
       city: farm.city,
+      street: farm.street,
       region: farm.region,
+      postalCode: farm.postalCode,
       country: farm.country,
-      createdAt: farm.createdAt,
       farmer: farm.farmer,
       images: farm.images,
-      products: farm.farmProducts.map((fp) => ({
+      farmProducts: farm.farmProducts.map((fp) => ({
         id: fp.id,
         price: fp.price,
         stock: fp.stock,
@@ -134,16 +105,14 @@ router.get("/:id", async (req, res) => {
           name: fp.product.name,
           category: fp.product.category,
           description: fp.product.description,
-          rating: fp.product.rating,
           images: fp.product.images,
-          reviews: fp.product.reviews,
         },
       })),
     };
 
     res.json(formatted);
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

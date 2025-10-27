@@ -51,16 +51,15 @@ router.get("/", async (req, res) => {
 
 // GET /public-farm-products/:id
 router.get("/:id", async (req, res) => {
-  const { id } = req.params;
-  const farmProductId = Number(id);
+  const productId = Number(req.params.id);
 
-  if (isNaN(farmProductId)) {
+  if (isNaN(productId)) {
     return res.status(400).json({ error: "Invalid product ID" });
   }
 
   try {
-    const farmProduct = await prisma.farmProduct.findUnique({
-      where: { id: farmProductId },
+    const farmProduct = await prisma.farmProduct.findFirst({
+      where: { productId },
       include: {
         farm: { select: { id: true, name: true, city: true, region: true } },
         product: {
@@ -99,7 +98,6 @@ router.get("/:id", async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
