@@ -7,7 +7,7 @@ let FARMER_ID: number;
 let OTHER_FARMER_ID: number;
 let farmId: number;
 let otherFarmId: number;
-let productId: number;
+let farmProductId: number;
 let accessToken: string;
 let otherAccessToken: string;
 
@@ -70,40 +70,43 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await prisma.farmProduct.deleteMany({});
   await prisma.product.deleteMany({});
   await prisma.farm.deleteMany({});
   await prisma.user.deleteMany({});
   await prisma.$disconnect();
 });
 
-describe("Product Routes", () => {
-  it("POST /product - should create product for own farm", async () => {
+describe("FarmProduct Routes", () => {
+  it("POST /farm-product - should create farm product for own farm", async () => {
     const res = await request(app)
-      .post("/api/product")
+      .post("/api/farm-product")
       .set("Cookie", [`accessToken=${accessToken}`])
       .send({
         name: "Test Product",
         category: "Fruits",
         description: "Test description",
         price: 10,
+        stock: 5,
         farmId,
       });
 
     expect(res.statusCode).toBe(201);
     expect(res.body).toHaveProperty("id");
-    expect(res.body.name).toBe("Test Product");
-    productId = res.body.id;
+    expect(res.body.product).toHaveProperty("name", "Test Product");
+    farmProductId = res.body.id;
   });
 
-  it("POST /product - should fail to create product for other farmer's farm", async () => {
+  it("POST /farm-product - should fail to create product for other farmer's farm", async () => {
     const res = await request(app)
-      .post("/api/product")
+      .post("/api/farm-product")
       .set("Cookie", [`accessToken=${accessToken}`])
       .send({
         name: "Invalid Product",
         category: "Fruits",
         description: "Invalid description",
         price: 5,
+        stock: 2,
         farmId: otherFarmId,
       });
 
@@ -111,38 +114,39 @@ describe("Product Routes", () => {
     expect(res.body).toHaveProperty("error");
   });
 
-  it("GET /product/farm/:id - should return products of own farm", async () => {
+  it("GET /farm-product/farm/:id - should return products of own farm", async () => {
     const res = await request(app)
-      .get(`/api/product/farm/${farmId}`)
+      .get(`/api/farm-product/farm/${farmId}`)
       .set("Cookie", [`accessToken=${accessToken}`]);
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body[0]).toHaveProperty("name", "Test Product");
+    expect(res.body[0].product).toHaveProperty("name", "Test Product");
   });
 
-  it("GET /product/farm/:id - should fail for other farm", async () => {
+  it("GET /farm-product/farm/:id - should fail for other farm", async () => {
     const res = await request(app)
-      .get(`/api/product/farm/${otherFarmId}`)
+      .get(`/api/farm-product/farm/${otherFarmId}`)
       .set("Cookie", [`accessToken=${accessToken}`]);
 
     expect(res.statusCode).toBe(403);
     expect(res.body).toHaveProperty("error");
   });
 
-  it("PUT /product/:id - should update own product", async () => {
+  it("PUT /farm-product/:id - should update own product", async () => {
     const res = await request(app)
-      .put(`/api/product/${productId}`)
+      .put(`/api/farm-product/${farmProductId}`)
       .set("Cookie", [`accessToken=${accessToken}`])
-      .send({ price: 15 });
+      .send({ price: 15, stock: 20 });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty("price", 15);
+    expect(res.body).toHaveProperty("stock", 20);
   });
 
-  it("PUT /product/:id - should fail to update other farmer's product", async () => {
+  it("PUT /farm-product/:id - should fail to update other farmer's product", async () => {
     const res = await request(app)
-      .put(`/api/product/${productId}`)
+      .put(`/api/farm-product/${farmProductId}`)
       .set("Cookie", [`accessToken=${otherAccessToken}`])
       .send({ price: 20 });
 
@@ -150,84 +154,92 @@ describe("Product Routes", () => {
     expect(res.body).toHaveProperty("error");
   });
 
-  it("DELETE /product/:id - should delete own product", async () => {
+  it("GET /farm-product/:id - should return own product by id", async () => {
     const res = await request(app)
-      .delete(`/api/product/${productId}`)
+      .get(`/api/farm-product/${farmProductId}`)
       .set("Cookie", [`accessToken=${accessToken}`]);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty("message", "Product deleted");
+    expect(res.body.product).toHaveProperty("name", "Test Product");
   });
 
-  it("DELETE /product/:id - should fail to delete other farmer's product", async () => {
-    const otherProduct = await prisma.product.create({
+  it("GET /farm-product/:id - should fail for other farmer's product", async () => {
+    const otherFarmProduct = await prisma.farmProduct.create({
       data: {
-        name: "Other Product",
-        category: "Veg",
-        description: "Other description",
-        price: 5,
-        farmId: otherFarmId,
+        farm: { connect: { id: otherFarmId } },
+        price: 8,
+        stock: 10,
+        product: {
+          create: {
+            name: "Other Fetch",
+            category: "Meat",
+            description: "Other fetch",
+            basePrice: 2.5,
+          },
+        },
       },
     });
 
     const res = await request(app)
-      .delete(`/api/product/${otherProduct.id}`)
+      .get(`/api/farm-product/${otherFarmProduct.id}`)
       .set("Cookie", [`accessToken=${accessToken}`]);
 
     expect(res.statusCode).toBe(403);
     expect(res.body).toHaveProperty("error");
   });
 
-  it("GET /product/:id - should return own product by id", async () => {
-    const product = await prisma.product.create({
-      data: {
-        name: "Fetch Product",
-        category: "Dairy",
-        description: "Fetch description",
-        price: 12,
-        farmId,
-      },
-    });
-
+  it("DELETE /farm-product/:id - should delete own product", async () => {
     const res = await request(app)
-      .get(`/api/product/${product.id}`)
+      .delete(`/api/farm-product/${farmProductId}`)
       .set("Cookie", [`accessToken=${accessToken}`]);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty("name", "Fetch Product");
+    expect(res.body).toHaveProperty("message", "Farm product deleted");
   });
 
-  it("GET /product/:id - should fail for other farmer's product", async () => {
-    const otherProduct = await prisma.product.create({
+  it("DELETE /farm-product/:id - should fail to delete other farmer's product", async () => {
+    const otherFarmProduct = await prisma.farmProduct.create({
       data: {
-        name: "Other Fetch",
-        category: "Meat",
-        description: "Other fetch",
-        price: 20,
-        farmId: otherFarmId,
+        farm: { connect: { id: otherFarmId } },
+        price: 5,
+        stock: 10,
+        product: {
+          create: {
+            name: "Other Product",
+            category: "Veg",
+            description: "Other description",
+            basePrice: 3,
+          },
+        },
       },
     });
 
     const res = await request(app)
-      .get(`/api/product/${otherProduct.id}`)
+      .delete(`/api/farm-product/${otherFarmProduct.id}`)
       .set("Cookie", [`accessToken=${accessToken}`]);
 
     expect(res.statusCode).toBe(403);
     expect(res.body).toHaveProperty("error");
   });
 
-  it("GET /product/:id - should return 401 without token", async () => {
-    const product = await prisma.product.create({
+  it("GET /farm-product/:id - should return 401 without token", async () => {
+    const fp = await prisma.farmProduct.create({
       data: {
-        name: "No Token Product",
-        category: "Fruits",
-        description: "No token",
-        price: 5,
-        farmId,
+        farm: { connect: { id: farmId } },
+        price: 10,
+        stock: 10,
+        product: {
+          create: {
+            name: "No Token Product",
+            category: "Fruits",
+            description: "No token",
+            basePrice: 2,
+          },
+        },
       },
     });
 
-    const res = await request(app).get(`/api/product/${product.id}`);
+    const res = await request(app).get(`/api/farm-product/${fp.id}`);
     expect(res.statusCode).toBe(401);
     expect(res.body).toHaveProperty("message", "Access token missing");
   });

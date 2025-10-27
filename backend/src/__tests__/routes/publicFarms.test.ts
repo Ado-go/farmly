@@ -9,6 +9,7 @@ let farm1Id: number;
 let farm2Id: number;
 
 beforeAll(async () => {
+  await prisma.farmProduct.deleteMany({});
   await prisma.product.deleteMany({});
   await prisma.farmImage.deleteMany({});
   await prisma.farm.deleteMany({});
@@ -56,28 +57,41 @@ beforeAll(async () => {
   farm1Id = farm1.id;
   farm2Id = farm2.id;
 
-  await prisma.product.create({
+  await prisma.farmProduct.create({
     data: {
-      name: "Fresh Milk",
-      category: "Dairy",
-      description: "Creamy milk from local cows",
+      farm: { connect: { id: farm1Id } },
       price: 1.99,
-      farmId: farm1Id,
+      stock: 30,
+      product: {
+        create: {
+          name: "Fresh Milk",
+          category: "Dairy",
+          description: "Creamy milk from local cows",
+          basePrice: 1.99,
+        },
+      },
     },
   });
 
-  await prisma.product.create({
+  await prisma.farmProduct.create({
     data: {
-      name: "Honey Jar",
-      category: "Sweets",
-      description: "Pure forest honey",
+      farm: { connect: { id: farm2Id } },
       price: 4.5,
-      farmId: farm2Id,
+      stock: 20,
+      product: {
+        create: {
+          name: "Honey Jar",
+          category: "Sweets",
+          description: "Pure forest honey",
+          basePrice: 4.5,
+        },
+      },
     },
   });
 });
 
 afterAll(async () => {
+  await prisma.farmProduct.deleteMany({});
   await prisma.product.deleteMany({});
   await prisma.farmImage.deleteMany({});
   await prisma.farm.deleteMany({});
@@ -101,6 +115,8 @@ describe("Public Farms Routes", () => {
     expect(firstFarm.farmer).toHaveProperty("name", "Public Farmer");
     expect(firstFarm).toHaveProperty("images");
     expect(firstFarm.products.length).toBeGreaterThanOrEqual(1);
+
+    expect(firstFarm.products[0].product).toHaveProperty("name", "Fresh Milk");
   });
 
   it("GET /api/farms/:id - should return a specific farm", async () => {
@@ -110,9 +126,11 @@ describe("Public Farms Routes", () => {
     expect(res.body).toHaveProperty("id", farm2Id);
     expect(res.body).toHaveProperty("name", "Sunny Hills");
     expect(res.body.farmer.name).toBe("Public Farmer");
-    expect(res.body.products.some((p: any) => p.name === "Honey Jar")).toBe(
-      true
+
+    const hasHoney = res.body.products.some(
+      (p: any) => p.product.name === "Honey Jar"
     );
+    expect(hasHoney).toBe(true);
   });
 
   it("GET /api/farms/:id - should return 400 for invalid ID", async () => {
@@ -121,9 +139,9 @@ describe("Public Farms Routes", () => {
     expect(res.body).toHaveProperty("error", "Invalid farm ID");
   });
 
-  it("GET /api/farms/:id - should return 400 for non-existing farm", async () => {
+  it("GET /api/farms/:id - should return 404 for non-existing farm", async () => {
     const res = await request(app).get("/api/farms/999999");
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(404);
     expect(res.body).toHaveProperty("error", "Farm was not found");
   });
 });

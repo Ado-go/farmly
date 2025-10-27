@@ -13,6 +13,12 @@ let accessToken: string;
 let otherAccessToken: string;
 
 beforeAll(async () => {
+  await prisma.review.deleteMany({});
+  await prisma.farmProduct.deleteMany({});
+  await prisma.product.deleteMany({});
+  await prisma.farm.deleteMany({});
+  await prisma.user.deleteMany({});
+
   const user = await prisma.user.create({
     data: {
       email: "user@test.com",
@@ -63,20 +69,29 @@ beforeAll(async () => {
     },
   });
 
-  const product = await prisma.product.create({
+  const farmProduct = await prisma.farmProduct.create({
     data: {
-      name: "Test Product",
-      category: "Fruits",
-      description: "Delicious test product",
+      farm: { connect: { id: farm.id } },
       price: 5.5,
-      farmId: farm.id,
+      stock: 10,
+      product: {
+        create: {
+          name: "Test Product",
+          category: "Fruits",
+          description: "Delicious test product",
+          basePrice: 5.5,
+        },
+      },
     },
+    include: { product: true },
   });
-  productId = product.id;
+
+  productId = farmProduct.product.id;
 });
 
 afterAll(async () => {
   await prisma.review.deleteMany({});
+  await prisma.farmProduct.deleteMany({});
   await prisma.product.deleteMany({});
   await prisma.farm.deleteMany({});
   await prisma.user.deleteMany({});

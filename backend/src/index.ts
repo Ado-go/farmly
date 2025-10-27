@@ -8,14 +8,14 @@ import profileRoutes from "./routes/profile.ts";
 
 import farmRoutes from "./routes/farm.ts";
 
-import productRoutes from "./routes/product.ts";
+import farmProductRoutes from "./routes/farmProduct.ts";
 
 import reviewRoutes from "./routes/review.ts";
 
 import eventRoutes from "./routes/event.ts";
 
 // public routes //
-import publicProductsRoutes from "./routes/publicProducts.ts";
+import publicFarmProductsRoutes from "./routes/publicFarmProducts.ts";
 
 import publicFarmsRoutes from "./routes/publicFarms.ts";
 
@@ -35,14 +35,14 @@ app.use("/api/profile", profileRoutes);
 
 app.use("/api/farm", farmRoutes);
 
-app.use("/api/product", productRoutes);
+app.use("/api/farm-product", farmProductRoutes);
 
 app.use("/api/review", reviewRoutes);
 
 app.use("/api/event", eventRoutes);
 
 // Public //
-app.use("/api/products", publicProductsRoutes);
+app.use("/api/public-farm-products", publicFarmProductsRoutes);
 
 app.use("/api/farms", publicFarmsRoutes);
 
