@@ -7,36 +7,45 @@ import { Link } from "@tanstack/react-router";
 type ProductCardProps = {
   product: {
     id: number;
-    name: string;
     price: number;
-    images?: { url: string }[];
-    farm?: { name: string };
-    reviews?: { rating: number }[];
+    stock?: number;
+    product: {
+      id: number;
+      name: string;
+      category?: string;
+      description?: string;
+      rating?: number;
+      images?: { url: string }[];
+      reviews?: { rating: number }[];
+    };
+    farm?: { id: number; name: string };
   };
   onAddToCart?: (id: number) => void;
 };
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const { t } = useTranslation();
-  const imageUrl = product.images?.[0]?.url || "/placeholder.jpg";
-  const rating = averageRating(product.reviews);
+
+  const { product: inner } = product;
+  const imageUrl = inner.images?.[0]?.url || "/placeholder.jpg";
+  const rating = inner.rating ?? averageRating(inner.reviews);
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <Link
-        to={`/products/${product.id}`}
+        to={`/products/${inner.id}`}
         className="block cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary"
       >
         <div className="relative h-48 w-full overflow-hidden">
           <img
             src={imageUrl}
-            alt={product.name}
+            alt={inner.name}
             className="object-cover w-full h-full"
           />
         </div>
 
         <CardHeader>
-          <CardTitle className="text-lg truncate">{product.name}</CardTitle>
+          <CardTitle className="text-lg truncate">{inner.name}</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-2">
@@ -51,9 +60,17 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             </span>
           </div>
 
-          <p className="text-xs text-gray-500">
-            {t("productCard.farmName")}: {product.farm?.name}
-          </p>
+          {product.farm?.name && (
+            <p className="text-xs text-gray-500">
+              {t("productCard.farmName")}: {product.farm.name}
+            </p>
+          )}
+
+          {product.stock !== undefined && (
+            <p className="text-xs text-gray-500">
+              {t("productCard.stock")}: {product.stock}
+            </p>
+          )}
         </CardContent>
       </Link>
 
@@ -61,7 +78,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         <Button
           variant="outline"
           className="w-full mt-2"
-          onClick={() => onAddToCart?.(product.id)}
+          onClick={() => onAddToCart?.(product.product.id)}
         >
           {t("productCard.addToCart")}
         </Button>

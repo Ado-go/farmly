@@ -9,16 +9,32 @@ export const Route = createFileRoute("/products/")({
   component: ProductsPage,
 });
 
+type FarmProduct = {
+  id: number;
+  price: number;
+  stock: number;
+  farm?: { id: number; name: string };
+  product: {
+    id: number;
+    name: string;
+    category: string;
+    description?: string;
+    rating?: number;
+    images?: { url: string }[];
+    reviews?: { rating: number }[];
+  };
+};
+
 function ProductsPage() {
   const { t } = useTranslation();
 
   const {
-    data: products,
+    data: farmProducts = [],
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["products"],
-    queryFn: async () => apiFetch("/products"),
+  } = useQuery<FarmProduct[]>({
+    queryKey: ["farmProducts"],
+    queryFn: async () => apiFetch("/public-farm-products"),
   });
 
   if (isLoading) {
@@ -47,17 +63,22 @@ function ProductsPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 max-w-7xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">{t("productsPage.title")}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {products?.map((product: any) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            onAddToCart={(id) => console.log("Add to cart:", id)}
-          />
-        ))}
-      </div>
+
+      {farmProducts.length === 0 ? (
+        <p className="text-gray-500">{t("productsPage.noProducts")}</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {farmProducts.map((fp) => (
+            <ProductCard
+              key={fp.id}
+              product={fp}
+              onAddToCart={() => console.log("Add to cart:", fp.product.id)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

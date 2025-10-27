@@ -40,15 +40,16 @@ const farmSchema = z.object({
   country: z.string().min(2, "Krajina je povinná"),
 });
 
-const productSchema = z.object({
+const farmProductSchema = z.object({
   name: z.string().min(2, "Názov je povinný"),
   category: z.string().min(2, "Kategória je povinná"),
   description: z.string().optional(),
   price: z.number().min(0, "Cena musí byť väčšia alebo rovná 0"),
+  stock: z.number().min(0, "Počet kusov musí byť 0 alebo viac"),
 });
 
-type ProductFormData = z.infer<typeof productSchema>;
 type FarmFormData = z.infer<typeof farmSchema>;
+type FarmProductFormData = z.infer<typeof farmProductSchema>;
 
 export const Route = createFileRoute("/farm/$id")({
   component: FarmDetailPage,
@@ -62,7 +63,6 @@ function FarmDetailPage() {
   const [editing, setEditing] = useState(false);
   const [showProductForm, setShowProductForm] = useState(false);
 
-  // FARM
   const {
     data: farm,
     isLoading,
@@ -72,9 +72,29 @@ function FarmDetailPage() {
     queryFn: async () => await apiFetch(`/farm/${id}`),
   });
 
+  const {
+    data: farmProducts = [],
+    isLoading: loadingProducts,
+    isError: productsError,
+  } = useQuery({
+    queryKey: ["farmProducts", id],
+    queryFn: async () => await apiFetch(`/farm-product/farm/${id}`),
+  });
+
   const farmForm = useForm<FarmFormData>({
     resolver: zodResolver(farmSchema),
     defaultValues: farm || {},
+  });
+
+  const productForm = useForm<FarmProductFormData>({
+    resolver: zodResolver(farmProductSchema),
+    defaultValues: {
+      name: "",
+      category: "",
+      description: "",
+      price: 0,
+      stock: 0,
+    },
   });
 
   const editFarm = useMutation({
@@ -102,28 +122,30 @@ function FarmDetailPage() {
     },
   });
 
-  // PRODUCT
-  const { data: products = [], isLoading: loadingProducts } = useQuery({
-    queryKey: ["products", id],
-    queryFn: async () => await apiFetch(`/product/farm/${id}`),
-  });
+  const addFarmProduct = useMutation({
+    mutationFn: async (data: FarmProductFormData) => {
+      const payload = {
+        name: data.name,
+        category: data.category,
+        description: data.description,
+        price: data.price,
+        stock: data.stock,
+        farmId: Number(id),
+      };
 
-  const productForm = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
-  });
-
-  const addProduct = useMutation({
-    mutationFn: async (data: ProductFormData) =>
-      apiFetch(`/product`, {
+      return apiFetch(`/farm-product`, {
         method: "POST",
-        body: JSON.stringify({ ...data, farmId: Number(id) }),
-      }),
+        body: JSON.stringify(payload),
+      });
+    },
     onSuccess: () => {
       toast.success(t("farmPage.productAdded"));
-      queryClient.invalidateQueries({ queryKey: ["products", id] });
+      queryClient.invalidateQueries({ queryKey: ["farmProducts", id] });
+      productForm.reset();
       setShowProductForm(false);
     },
-    onError: () => {
+    onError: (err: any) => {
+      console.error(err);
       toast.error(t("farmPage.productAddError"));
     },
   });
@@ -137,14 +159,16 @@ function FarmDetailPage() {
       </div>
     );
 
+  const imageUrl = farm.images?.[0]?.url;
+
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
       <h1 className="text-4xl font-bold">{farm.name}</h1>
 
       <div className="w-full h-64 bg-gray-200 rounded-md overflow-hidden flex items-center justify-center">
-        {farm.imageUrl ? (
+        {imageUrl ? (
           <img
-            src={farm.imageUrl}
+            src={imageUrl}
             alt={farm.name}
             className="w-full h-full object-cover"
           />
@@ -170,11 +194,6 @@ function FarmDetailPage() {
             {...farmForm.register("name")}
             placeholder={t("farmPage.name")}
           />
-          {farmForm.formState.errors.name && (
-            <p className="text-red-500 text-sm">
-              {farmForm.formState.errors.name.message}
-            </p>
-          )}
           <Textarea
             {...farmForm.register("description")}
             placeholder={t("farmPage.description")}
@@ -203,20 +222,6 @@ function FarmDetailPage() {
           <Button type="submit" disabled={editFarm.isPending}>
             {editFarm.isPending ? t("farmPage.saving") : t("farmPage.save")}
           </Button>
-
-          <div className="mt-4">
-            <label className="flex flex-col items-center justify-center p-3 border border-emerald-700 rounded-md cursor-pointer hover:bg-emerald-50 focus-within:ring-2 focus-within:ring-emerald-400">
-              <span className="font-medium text-emerald-700">
-                {t("farmPage.uploadImage")}
-              </span>
-              <input
-                type="file"
-                className="mt-2"
-                onChange={() => console.log("upload image todo")}
-                tabIndex={0}
-              />
-            </label>
-          </div>
         </form>
       )}
 
@@ -270,9 +275,8 @@ function FarmDetailPage() {
 
             <form
               onSubmit={productForm.handleSubmit((data) =>
-                addProduct.mutate(data)
+                addFarmProduct.mutate(data)
               )}
-              className="space-y-3"
             >
               <Input
                 {...productForm.register("name")}
@@ -292,25 +296,11 @@ function FarmDetailPage() {
                 {...productForm.register("price", { valueAsNumber: true })}
                 placeholder={t("product.price")}
               />
-
-              <div className="mt-3">
-                <label className="flex flex-col items-center justify-center p-3 border border-emerald-700 rounded-md cursor-pointer hover:bg-emerald-50 focus-within:ring-2 focus-within:ring-emerald-400">
-                  <span className="font-medium text-emerald-700">
-                    {t("product.uploadImage")}
-                  </span>
-                  <input
-                    type="file"
-                    className="mt-2"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        console.log("todo: upload image", file);
-                      }
-                    }}
-                  />
-                </label>
-              </div>
+              <Input
+                type="number"
+                {...productForm.register("stock", { valueAsNumber: true })}
+                placeholder={t("product.stock")}
+              />
 
               <div className="flex justify-end gap-2 pt-4">
                 <Button
@@ -320,8 +310,8 @@ function FarmDetailPage() {
                 >
                   {t("farmPage.cancel")}
                 </Button>
-                <Button type="submit" disabled={addProduct.isPending}>
-                  {addProduct.isPending
+                <Button type="submit" disabled={addFarmProduct.isPending}>
+                  {addFarmProduct.isPending
                     ? t("product.saving")
                     : t("product.add")}
                 </Button>
@@ -338,19 +328,21 @@ function FarmDetailPage() {
 
         {loadingProducts ? (
           <p>{t("farmPage.loadingProducts")}</p>
-        ) : products.length === 0 ? (
+        ) : productsError ? (
+          <p className="text-red-500">{t("farmPage.errorLoadingProducts")}</p>
+        ) : farmProducts.length === 0 ? (
           <p>{t("farmPage.noProducts")}</p>
         ) : (
           <ul className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {products.map((product) => (
+            {farmProducts.map((fp: any) => (
               <li
-                key={product.id}
+                key={fp.id}
                 className="p-4 border rounded-md cursor-pointer hover:bg-emerald-50"
-                onClick={() => navigate({ to: `/product/${product.id}` })}
+                onClick={() => navigate({ to: `/product/${fp.id}` })}
               >
-                <h3 className="font-semibold">{product.name}</h3>
-                <p className="text-sm text-gray-600">{product.category}</p>
-                <p className="text-sm font-medium">{product.price} €</p>
+                <h3 className="font-semibold">{fp.product.name}</h3>
+                <p className="text-sm text-gray-600">{fp.product.category}</p>
+                <p className="text-sm font-medium">{fp.price} €</p>
               </li>
             ))}
           </ul>

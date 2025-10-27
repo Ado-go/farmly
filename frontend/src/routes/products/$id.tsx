@@ -21,12 +21,12 @@ function ProductDetailPage() {
   const { user } = useAuth();
 
   const {
-    data: product,
+    data: farmProduct,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["product", id],
-    queryFn: async () => apiFetch(`/products/${id}`),
+    queryKey: ["farmProduct", id],
+    queryFn: async () => apiFetch(`/public-farm-products/${id}`),
   });
 
   const [rating, setRating] = useState(0);
@@ -37,13 +37,13 @@ function ProductDetailPage() {
       apiFetch(`/review`, {
         method: "POST",
         body: JSON.stringify({
-          productId: Number(id),
+          productId: farmProduct.product.id,
           rating,
           comment,
         }),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["product", id] });
+      queryClient.invalidateQueries({ queryKey: ["farmProduct", id] });
       setRating(0);
       setComment("");
     },
@@ -55,35 +55,32 @@ function ProductDetailPage() {
         method: "DELETE",
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["product", id] });
+      queryClient.invalidateQueries({ queryKey: ["farmProduct", id] });
     },
   });
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <p className="text-center text-gray-500 mt-10">
         {t("productsPage.loading")}
       </p>
     );
-  }
 
-  if (isError || !product) {
+  if (isError || !farmProduct)
     return (
       <p className="text-center text-red-500 mt-10">
         {t("productsPage.error")}
       </p>
     );
-  }
 
+  const product = farmProduct.product;
   const imageUrl = product.images?.[0]?.url || "/placeholder.jpg";
   const avgRating = averageRating(product.reviews);
-
   const userReview = user
-    ? product.reviews.find((r: any) => r.userId === user.id)
+    ? product.reviews?.find((r) => r.user?.id === user.id)
     : null;
-  const otherReviews = product.reviews.filter(
-    (r: any) => r.userId !== user?.id
-  );
+  const otherReviews =
+    product.reviews?.filter((r) => r.user?.id !== user?.id) || [];
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
@@ -98,7 +95,10 @@ function ProductDetailPage() {
           <div>
             <h1 className="text-2xl font-bold mb-3">{product.name}</h1>
             <p className="text-gray-700 mb-2">
-              {t("productCard.price")}: {product.price} €
+              {t("productCard.price")}: {farmProduct.price} €
+            </p>
+            <p className="text-gray-700 mb-2">
+              {t("productCard.stock")}: {farmProduct.stock}
             </p>
 
             <div className="flex items-center text-yellow-500 mb-3">
@@ -109,10 +109,12 @@ function ProductDetailPage() {
             </div>
 
             <p className="text-gray-500 mb-3">
-              {t("productCard.farmName")}: {product.farm?.name}
+              {t("productCard.farmName")}: {farmProduct.farm?.name}
             </p>
 
-            <p className="text-sm text-gray-600">{product.description}</p>
+            <p className="text-sm text-gray-600">
+              {product.description || t("productCard.noDescription")}
+            </p>
           </div>
         </div>
       </Card>
@@ -153,7 +155,7 @@ function ProductDetailPage() {
           <p className="text-gray-500 mb-4">{t("reviews.none")}</p>
         ) : (
           <div className="space-y-4 mb-6">
-            {otherReviews.map((r: any) => (
+            {otherReviews.map((r) => (
               <div key={r.id} className="border-b pb-2">
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />

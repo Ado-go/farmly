@@ -14,10 +14,11 @@ import { Card } from "@/components/ui/card";
 import { Star } from "lucide-react";
 
 const productSchema = z.object({
-  name: z.string().min(2),
-  category: z.string().min(2),
+  name: z.string().min(2, "Názov je povinný"),
+  category: z.string().min(2, "Kategória je povinná"),
   description: z.string().optional(),
-  price: z.number().min(0),
+  price: z.number().min(0, "Cena musí byť väčšia ako 0"),
+  stock: z.number().min(0, "Sklad musí byť nezáporný"),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -34,12 +35,12 @@ function ProductDetailPage() {
   const [editing, setEditing] = useState(false);
 
   const {
-    data: product,
+    data: farmProduct,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["product", id],
-    queryFn: async () => await apiFetch(`/product/${id}`),
+    queryKey: ["farmProduct", id],
+    queryFn: async () => await apiFetch(`/farm-product/${id}`),
   });
 
   const form = useForm<ProductFormData>({
@@ -47,25 +48,32 @@ function ProductDetailPage() {
   });
 
   useEffect(() => {
-    if (product) {
+    if (farmProduct) {
       form.reset({
-        name: product.name,
-        category: product.category,
-        description: product.description,
-        price: product.price,
+        name: farmProduct.product.name,
+        category: farmProduct.product.category,
+        description: farmProduct.product.description,
+        price: farmProduct.price,
+        stock: farmProduct.stock,
       });
     }
-  }, [product, form]);
+  }, [farmProduct, form]);
 
   const editProduct = useMutation({
     mutationFn: async (data: ProductFormData) =>
-      apiFetch(`/product/${id}`, {
+      apiFetch(`/farm-product/${id}`, {
         method: "PUT",
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          name: data.name,
+          category: data.category,
+          description: data.description,
+          price: data.price,
+          stock: data.stock,
+        }),
       }),
     onSuccess: () => {
       toast.success(t("productPage.editSuccess"));
-      queryClient.invalidateQueries({ queryKey: ["product", id] });
+      queryClient.invalidateQueries({ queryKey: ["farmProduct", id] });
       setEditing(false);
     },
     onError: () => {
@@ -74,10 +82,11 @@ function ProductDetailPage() {
   });
 
   const deleteProduct = useMutation({
-    mutationFn: async () => apiFetch(`/product/${id}`, { method: "DELETE" }),
+    mutationFn: async () =>
+      apiFetch(`/farm-product/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       toast.success(t("productPage.deleteSuccess"));
-      navigate({ to: `/farm/${product.farmId}` });
+      navigate({ to: `/farm/${farmProduct.farmId}` });
     },
     onError: () => {
       toast.error(t("productPage.deleteError"));
@@ -85,36 +94,38 @@ function ProductDetailPage() {
   });
 
   if (isLoading) return <p>{t("productPage.loading")}</p>;
-  if (isError)
+  if (isError || !farmProduct)
     return <p className="text-red-500">{t("productPage.errorLoading")}</p>;
+
+  const inner = farmProduct.product;
+  const imageUrl = inner.images?.[0]?.url || "/placeholder.jpg";
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-8">
-      <h1 className="text-3xl font-bold">{product.name}</h1>
+      <h1 className="text-3xl font-bold">{inner.name}</h1>
 
       <div className="w-full h-64 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
-        {product.imageUrl ? (
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <span className="text-gray-500">{t("productPage.noImage")}</span>
-        )}
+        <img
+          src={imageUrl}
+          alt={inner.name}
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {!editing ? (
         <div className="space-y-2">
           <p>
-            <strong>{t("productPage.category")}:</strong> {product.category}
+            <strong>{t("productPage.category")}:</strong> {inner.category}
           </p>
           <p>
-            <strong>{t("productPage.price")}:</strong> {product.price} €
+            <strong>{t("productPage.price")}:</strong> {farmProduct.price} €
+          </p>
+          <p>
+            <strong>{t("productPage.stock")}:</strong> {farmProduct.stock}
           </p>
           <p>
             <strong>{t("productPage.description")}:</strong>{" "}
-            {product.description || t("productPage.noDescription")}
+            {inner.description || t("productPage.noDescription")}
           </p>
 
           <div className="flex gap-3 pt-4">
@@ -155,6 +166,11 @@ function ProductDetailPage() {
             {...form.register("price", { valueAsNumber: true })}
             placeholder={t("productPage.price")}
           />
+          <Input
+            type="number"
+            {...form.register("stock", { valueAsNumber: true })}
+            placeholder={t("productPage.stock")}
+          />
 
           <div className="flex justify-end gap-2 pt-4">
             <Button
@@ -176,11 +192,11 @@ function ProductDetailPage() {
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">{t("reviews.title")}</h2>
 
-        {product.reviews?.length === 0 ? (
+        {inner.reviews?.length === 0 ? (
           <p className="text-gray-500">{t("reviews.none")}</p>
         ) : (
           <div className="space-y-4">
-            {product.reviews.map((r: any) => (
+            {inner.reviews.map((r: any) => (
               <div key={r.id} className="border-b pb-2">
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />

@@ -170,35 +170,39 @@ function FarmPage() {
         <p className="text-gray-500">{t("farmPage.noFarms")}</p>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {farms.map((farm) => (
-            <Card
-              key={farm.id}
-              className="shadow-md cursor-pointer hover:shadow-lg transition-all duration-200"
-              onClick={() => navigate({ to: `/farm/${farm.id}` })}
-            >
-              <CardHeader className="p-0">
-                {farm.imageUrl ? (
-                  <img
-                    src={farm.imageUrl}
-                    alt={farm.name}
-                    className="h-40 w-full object-cover rounded-t-md"
-                  />
-                ) : (
-                  <div className="h-40 bg-gray-200 flex items-center justify-center text-gray-500">
-                    {t("farmPage.noImage")}
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent className="p-4">
-                <CardTitle className="text-xl font-semibold mb-1">
-                  {farm.name}
-                </CardTitle>
-                <p className="text-gray-700 text-sm">
-                  {farm.description || t("farmPage.noDescription")}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+          {farms.map((farm: any) => {
+            const imageUrl = farm.images?.[0]?.url;
+
+            return (
+              <Card
+                key={farm.id}
+                className="shadow-md cursor-pointer hover:shadow-lg transition-all duration-200"
+                onClick={() => navigate({ to: `/farm/${farm.id}` })}
+              >
+                <CardHeader className="p-0">
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt={farm.name}
+                      className="h-40 w-full object-cover rounded-t-md"
+                    />
+                  ) : (
+                    <div className="h-40 bg-gray-200 flex items-center justify-center text-gray-500">
+                      {t("farmPage.noImage")}
+                    </div>
+                  )}
+                </CardHeader>
+                <CardContent className="p-4">
+                  <CardTitle className="text-xl font-semibold mb-1">
+                    {farm.name}
+                  </CardTitle>
+                  <p className="text-gray-700 text-sm">
+                    {farm.description || t("farmPage.noDescription")}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
