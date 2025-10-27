@@ -27,75 +27,77 @@ enum PaymentMethod {
 // ------------------- USER -------------------
 
 model User {
-  id            Int       @id @default(autoincrement())
-  email         String    @unique
-  password      String
-  name          String
-  phone         String
-  role          Role      @default(CUSTOMER)
-  orders        Order[]   @relation("BuyerOrders")
-  refreshToken  String?
-  resetToken    String?
+  id                  Int               @id @default(autoincrement())
+  email               String            @unique
+  password            String
+  name                String
+  phone               String
+  role                Role              @default(CUSTOMER)
+  orders              Order[]           @relation("BuyerOrders")
+  refreshToken        String?
+  resetToken          String?
 
-  farms         Farm[]
-  offers        Offer[]
-  reviews       Review[]
-  organizedEvents Event[] @relation("OrganizedEvents")
+  farms               Farm[]
+  offers              Offer[]
+  reviews             Review[]
+  organizedEvents     Event[]           @relation("OrganizedEvents")
   eventParticipations EventParticipant[]
 }
 
 // ------------------- FARM -------------------
 
 model Farm {
-  id          Int         @id @default(autoincrement())
-  name        String
-  description String?
-  city        String
-  street      String
-  region      String
-  postalCode  String
-  country     String
-  createdAt   DateTime    @default(now())
-  farmer      User        @relation(fields: [farmerId], references: [id])
-  farmerId    Int
-  images      FarmImage[]
-  farmProducts FarmProduct[]
+  id            Int           @id @default(autoincrement())
+  name          String
+  description   String?
+  city          String
+  street        String
+  region        String
+  postalCode    String
+  country       String
+  createdAt     DateTime      @default(now())
+
+  farmer        User          @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  farmerId      Int
+
+  images        FarmImage[]
+  farmProducts  FarmProduct[]
 }
 
 model FarmImage {
-  id      Int    @id @default(autoincrement())
-  url     String
-  farm    Farm   @relation(fields: [farmId], references: [id])
-  farmId  Int
+  id       Int    @id @default(autoincrement())
+  url      String
+  farm     Farm   @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  farmId   Int
 }
 
 // ------------------- PRODUCT -------------------
 
 model Product {
-  id           Int            @id @default(autoincrement())
-  name         String
-  category     String
-  description  String
-  basePrice    Float?
-  rating       Float           @default(0)
-  createdAt    DateTime        @default(now())
+  id            Int             @id @default(autoincrement())
+  name          String
+  category      String
+  description   String
+  basePrice     Float?
+  rating        Float           @default(0)
+  createdAt     DateTime        @default(now())
 
-  orderItems   OrderItem[]   
-  reviews      Review[]
-  eventLinks   EventProduct[]
-  images       ProductImage[]
-  offers       Offer[]
-  farmLinks    FarmProduct[]
+  orderItems    OrderItem[]   
+  reviews       Review[]
+  eventLinks    EventProduct[]
+  images        ProductImage[]
+  offers        Offer[]
+  farmLinks     FarmProduct[]
 }
 
 model ProductImage {
-  id         Int       @id @default(autoincrement())
-  url        String
-  product    Product   @relation(fields: [productId], references: [id])
-  productId  Int
+  id          Int       @id @default(autoincrement())
+  url         String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId   Int
 }
 
-// ------------------- FARM PRODUCT (NEW) -------------------
+// ------------------- FARM PRODUCT -------------------
 
 model FarmProduct {
   id         Int       @id @default(autoincrement())
@@ -104,10 +106,10 @@ model FarmProduct {
   createdAt  DateTime  @default(now())
 
   farmId     Int
-  farm       Farm      @relation(fields: [farmId], references: [id])
+  farm       Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
 
   productId  Int
-  product    Product   @relation(fields: [productId], references: [id])
+  product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([farmId, productId])
 }
@@ -122,22 +124,23 @@ model Offer {
   price       Float
   imageUrl    String?
   createdAt   DateTime    @default(now())
+  isActive    Boolean     @default(true)
 
-  user        User        @relation(fields: [userId], references: [id])
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      Int
 
-  product     Product     @relation(fields: [productId], references: [id])
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId   Int
 }
 
 // ------------------- ORDER -------------------
 
 model Order {
-  id             Int         @id @default(autoincrement())
-  createdAt      DateTime    @default(now())
+  id                 Int          @id @default(autoincrement())
+  createdAt          DateTime     @default(now())
 
-  buyer          User        @relation("BuyerOrders", fields: [buyerId], references: [id])
-  buyerId        Int
+  buyer              User         @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+  buyerId            Int
 
   deliveryCity       String
   deliveryStreet     String
@@ -145,19 +148,21 @@ model Order {
   deliveryPostalCode String
   deliveryCountry    String
 
-  isDelivered    Boolean     @default(false)
-  isPaid         Boolean     @default(false)
-  paymentMethod  PaymentMethod
+  isDelivered        Boolean      @default(false)
+  isPaid             Boolean      @default(false)
+  paymentMethod      PaymentMethod
+  totalPrice         Float?       
 
-  items          OrderItem[]
+  items              OrderItem[]
 }
 
 model OrderItem {
-  id           Int       @id @default(autoincrement())
-  order        Order     @relation(fields: [orderId], references: [id])
+  id           Int        @id @default(autoincrement())
+  order        Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId      Int
-  product      Product   @relation(fields: [productId], references: [id])
-  productId    Int
+
+  product      Product?   @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productId    Int?
   quantity     Int
 
   unitPrice    Float
@@ -168,37 +173,39 @@ model OrderItem {
 // ------------------- EVENT -------------------
 
 model Event {
-  id          Int         @id @default(autoincrement())
-  title       String
-  description String?
-  startDate   DateTime
-  endDate     DateTime
-  city        String
-  street      String
-  region      String
-  postalCode  String
-  country     String
-  createdAt   DateTime    @default(now())
-  organizer   User        @relation("OrganizedEvents", fields: [organizerId], references: [id])
-  organizerId Int
-  participants EventParticipant[]
-  eventProducts EventProduct[]
+  id              Int                 @id @default(autoincrement())
+  title           String
+  description     String?
+  startDate       DateTime
+  endDate         DateTime
+  city            String
+  street          String
+  region          String
+  postalCode      String
+  country         String
+  createdAt       DateTime            @default(now())
+
+  organizer       User                @relation("OrganizedEvents", fields: [organizerId], references: [id], onDelete: Cascade)
+  organizerId     Int
+
+  participants    EventParticipant[]
+  eventProducts   EventProduct[]
 }
 
 model EventParticipant {
-  id      Int    @id @default(autoincrement())
-  event   Event  @relation(fields: [eventId], references: [id])
-  eventId Int
-  user    User   @relation(fields: [userId], references: [id])
-  userId  Int
+  id        Int     @id @default(autoincrement())
+  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId   Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
 }
 
 model EventProduct {
-  id        Int      @id @default(autoincrement())
-  event     Event    @relation(fields: [eventId], references: [id])
-  eventId   Int
-  product   Product  @relation(fields: [productId], references: [id])
-  productId Int
+  id         Int      @id @default(autoincrement())
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId    Int
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  Int
 }
 
 // ------------------- REVIEW -------------------
@@ -209,9 +216,9 @@ model Review {
   comment     String?
   createdAt   DateTime  @default(now())
 
-  user        User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      Int
 
-  product     Product   @relation(fields: [productId], references: [id])
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId   Int
 }
