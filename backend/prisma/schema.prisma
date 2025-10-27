@@ -1,8 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -27,7 +24,6 @@ enum PaymentMethod {
   BANK_TRANSFER
 }
 
-
 // ------------------- USER -------------------
 
 model User {
@@ -38,7 +34,6 @@ model User {
   phone         String
   role          Role      @default(CUSTOMER)
   orders        Order[]   @relation("BuyerOrders")
-  soldOrders    Order[]   @relation("SellerOrders")
   refreshToken  String?
   resetToken    String?
 
@@ -63,8 +58,8 @@ model Farm {
   createdAt   DateTime    @default(now())
   farmer      User        @relation(fields: [farmerId], references: [id])
   farmerId    Int
-  products    Product[]
   images      FarmImage[]
+  farmProducts FarmProduct[]
 }
 
 model FarmImage {
@@ -81,15 +76,16 @@ model Product {
   name         String
   category     String
   description  String
-  price        Float
+  basePrice    Float?
   rating       Float           @default(0)
-  farm         Farm            @relation(fields: [farmId], references: [id])
-  farmId       Int
+  createdAt    DateTime        @default(now())
+
   orderItems   OrderItem[]   
   reviews      Review[]
   eventLinks   EventProduct[]
   images       ProductImage[]
   offers       Offer[]
+  farmLinks    FarmProduct[]
 }
 
 model ProductImage {
@@ -97,6 +93,23 @@ model ProductImage {
   url        String
   product    Product   @relation(fields: [productId], references: [id])
   productId  Int
+}
+
+// ------------------- FARM PRODUCT (NEW) -------------------
+
+model FarmProduct {
+  id         Int       @id @default(autoincrement())
+  price      Float
+  stock      Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  farmId     Int
+  farm       Farm      @relation(fields: [farmId], references: [id])
+
+  productId  Int
+  product    Product   @relation(fields: [productId], references: [id])
+
+  @@unique([farmId, productId])
 }
 
 // ------------------- OFFER -------------------
@@ -112,10 +125,10 @@ model Offer {
 
   user        User        @relation(fields: [userId], references: [id])
   userId      Int
-  product     Product    @relation(fields: [productId], references: [id])
+
+  product     Product     @relation(fields: [productId], references: [id])
   productId   Int
 }
-
 
 // ------------------- ORDER -------------------
 
@@ -126,9 +139,6 @@ model Order {
   buyer          User        @relation("BuyerOrders", fields: [buyerId], references: [id])
   buyerId        Int
 
-  seller         User        @relation("SellerOrders", fields: [sellerId], references: [id])
-  sellerId       Int
-
   deliveryCity       String
   deliveryStreet     String
   deliveryRegion     String
@@ -137,19 +147,22 @@ model Order {
 
   isDelivered    Boolean     @default(false)
   isPaid         Boolean     @default(false)
-
   paymentMethod  PaymentMethod
 
   items          OrderItem[]
 }
 
 model OrderItem {
-  id        Int         @id @default(autoincrement())
-  order     Order       @relation(fields: [orderId], references: [id])
-  orderId   Int
-  product   Product     @relation(fields: [productId], references: [id])
-  productId Int
-  quantity  Int
+  id           Int       @id @default(autoincrement())
+  order        Order     @relation(fields: [orderId], references: [id])
+  orderId      Int
+  product      Product   @relation(fields: [productId], references: [id])
+  productId    Int
+  quantity     Int
+
+  unitPrice    Float
+  sellerName   String
+  productName  String
 }
 
 // ------------------- EVENT -------------------
