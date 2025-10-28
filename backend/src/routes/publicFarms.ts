@@ -15,6 +15,9 @@ router.get("/", async (req, res) => {
             product: {
               include: {
                 images: true,
+                reviews: {
+                  include: { user: { select: { id: true, name: true } } },
+                },
               },
             },
           },
@@ -43,6 +46,7 @@ router.get("/", async (req, res) => {
           category: fp.product.category,
           description: fp.product.description,
           images: fp.product.images,
+          reviews: fp.product.reviews,
         },
       })),
     }));
@@ -74,6 +78,9 @@ router.get("/:id", async (req, res) => {
             product: {
               include: {
                 images: true,
+                reviews: {
+                  include: { user: { select: { id: true, name: true } } },
+                },
               },
             },
           },
@@ -106,6 +113,7 @@ router.get("/:id", async (req, res) => {
           category: fp.product.category,
           description: fp.product.description,
           images: fp.product.images,
+          reviews: fp.product.reviews,
         },
       })),
     };
