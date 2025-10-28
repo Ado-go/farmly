@@ -191,7 +191,8 @@
     "price": "Cena",
     "farmName": "Farma",
     "addToCart": "Pridať do košíka",
-    "noRating": "Bez hodnotenia"
+    "noRating": "Bez hodnotenia",
+    "stock": "Sklad"
   },
   "farmsPage": {
     "title": "Farmy",

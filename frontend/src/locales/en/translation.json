@@ -191,7 +191,8 @@
     "price": "Price",
     "farmName": "Farm",
     "addToCart": "Add to Cart",
-    "noRating": "No rating"
+    "noRating": "No rating",
+    "stock": "Stock"
   },
   "farmsPage": {
     "title": "Farms",
