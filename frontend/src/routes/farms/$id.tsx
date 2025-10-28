@@ -49,6 +49,8 @@ function FarmDetailPage() {
     queryFn: async () => apiFetch(`/farms/${id}`),
   });
 
+  console.log(farm);
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
@@ -94,19 +96,7 @@ function FarmDetailPage() {
           {farm.farmProducts.map((fp) => (
             <ProductCard
               key={fp.id}
-              product={{
-                id: fp.id,
-                price: fp.price,
-                stock: fp.stock,
-                product: {
-                  id: fp.product.id,
-                  name: fp.product.name,
-                  category: fp.product.category,
-                  description: fp.product.description,
-                  rating: fp.product.rating,
-                  images: fp.product.images,
-                },
-              }}
+              product={fp}
               onAddToCart={() => console.log("Add to cart:", fp.product.id)}
             />
           ))}
