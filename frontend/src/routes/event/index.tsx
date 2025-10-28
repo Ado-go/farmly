@@ -107,7 +107,6 @@ function EventPage() {
       </div>
     );
 
-  // 🧩 Rozdelenie podľa používateľa
   const myEvents = events.filter((e) => e.organizer.id === user?.id);
   const joinedEvents = events.filter(
     (e) =>
