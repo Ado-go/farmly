@@ -260,5 +260,26 @@
     "confirm": "Potvrdiť",
     "deleted": "Udalosť bola úspešne zmazaná.",
     "errorDeleting": "Nepodarilo sa zmazať udalosť."
+  },
+  "eventProducts": {
+    "loadingProducts": "Načítavam produkty...",
+    "title": "Moje produkty",
+    "add": "Pridať produkt",
+    "addDialogTitle": "Pridaj produkt",
+    "namePlaceholder": "Názov produktu",
+    "categoryPlaceholder": "Kategória",
+    "descriptionPlaceholder": "Popis produktu",
+    "pricePlaceholder": "Cena",
+    "save": "Uložiť",
+    "cancel": "Zrušiť",
+    "fromFarm": "Alebo pridaj z farmy:",
+    "noFarmProducts": "Žiadne produkty na farme",
+    "addSelected": "Pridať vybraný produkt",
+    "myProductsEmpty": "Nemáš žiadne produkty",
+    "added": "Produkt bol pridaný",
+    "deleted": "Produkt bol odstránený",
+    "addFailed": "Nepodarilo sa pridať produkt",
+    "deleteFailed": "Nepodarilo sa odstrániť produkt",
+    "delete": "Zmazať"
   }
 }

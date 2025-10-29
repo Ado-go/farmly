@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { format } from "date-fns";
 import DatePicker from "@/components/date-picker";
+import { EventProductsSection } from "@/components/EventProductsSection";
 import { useAuth } from "@/context/AuthContext";
 
 const eventSchema = z.object({
@@ -233,6 +234,9 @@ function EventDetailPage() {
           )}
         </CardContent>
       </Card>
+      {isParticipant && user?.role === "FARMER" && (
+        <EventProductsSection eventId={Number(id)} />
+      )}
     </div>
   );
 }

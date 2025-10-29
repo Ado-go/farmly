@@ -260,5 +260,26 @@
     "confirm": "Confirm",
     "deleted": "Event was successfully deleted.",
     "errorDeleting": "Failed to delete the event."
+  },
+  "eventProducts": {
+    "loadingProducts": "Loading products...",
+    "title": "My Products",
+    "add": "Add Product",
+    "addDialogTitle": "Add Product",
+    "namePlaceholder": "Product Name",
+    "categoryPlaceholder": "Category",
+    "descriptionPlaceholder": "Description",
+    "pricePlaceholder": "Price",
+    "save": "Save",
+    "cancel": "Cancel",
+    "fromFarm": "Or add from farm:",
+    "noFarmProducts": "No farm products available",
+    "addSelected": "Add selected product",
+    "myProductsEmpty": "You have no products",
+    "added": "Product added successfully",
+    "deleted": "Product deleted",
+    "addFailed": "Failed to add product",
+    "deleteFailed": "Failed to delete product",
+    "delete": "Delete"
   }
 }
