@@ -30,8 +30,6 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const imageUrl = inner.images?.[0]?.url || "/placeholder.jpg";
   const rating = averageRating(inner.reviews);
 
-  console.log(product);
-
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <Link
