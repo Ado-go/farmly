@@ -81,6 +81,43 @@ router.post(
   }
 );
 
+// GET /farm-product/all - All prod from all farms
+router.get(
+  "/all",
+  authenticateToken,
+  authorizeRole("FARMER"),
+  async (req, res) => {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const farms = await prisma.farm.findMany({
+        where: { farmerId: userId },
+        include: {
+          farmProducts: {
+            include: {
+              product: { include: { images: true } },
+              farm: { select: { id: true, name: true } },
+            },
+          },
+        },
+      });
+
+      const allFarmProducts = farms.flatMap((f) => f.farmProducts ?? []) ?? [];
+
+      return res.status(200).json(allFarmProducts);
+    } catch (error: any) {
+      console.error("🔥 ERROR /farm-product/all:", error);
+      return res.status(400).json({
+        error: error.message || "Failed to fetch farm products",
+      });
+    }
+  }
+);
+
 // GET /farm-product/farm/:farmId
 router.get(
   "/farm/:farmId",

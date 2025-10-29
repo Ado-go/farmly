@@ -243,4 +243,68 @@ describe("FarmProduct Routes", () => {
     expect(res.statusCode).toBe(401);
     expect(res.body).toHaveProperty("message", "Access token missing");
   });
+
+  it("GET /farm-product/all - should return all products from farmer's farms", async () => {
+    const p1 = await prisma.farmProduct.create({
+      data: {
+        farm: { connect: { id: farmId } },
+        price: 10,
+        stock: 5,
+        product: {
+          create: {
+            name: "Apple",
+            category: "Fruit",
+            description: "Fresh apple",
+            basePrice: 1.2,
+          },
+        },
+      },
+      include: { product: true },
+    });
+
+    const p2 = await prisma.farmProduct.create({
+      data: {
+        farm: { connect: { id: farmId } },
+        price: 20,
+        stock: 3,
+        product: {
+          create: {
+            name: "Pear",
+            category: "Fruit",
+            description: "Sweet pear",
+            basePrice: 2.1,
+          },
+        },
+      },
+      include: { product: true },
+    });
+
+    const res = await request(app)
+      .get("/api/farm-product/all")
+      .set("Cookie", [`accessToken=${accessToken}`]);
+
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThanOrEqual(2);
+
+    const names = res.body.map((p: any) => p.product.name);
+    expect(names).toContain("Apple");
+    expect(names).toContain("Pear");
+  });
+
+  it("GET /farm-product/all - should return empty array for farmer without farms", async () => {
+    const res = await request(app)
+      .get("/api/farm-product/all")
+      .set("Cookie", [`accessToken=${otherAccessToken}`]);
+
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThanOrEqual(0);
+  });
+
+  it("GET /farm-product/all - should fail without token", async () => {
+    const res = await request(app).get("/api/farm-product/all");
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty("message", "Access token missing");
+  });
 });

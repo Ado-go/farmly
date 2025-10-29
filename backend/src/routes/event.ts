@@ -34,6 +34,13 @@ router.post(
         },
       });
 
+      await prisma.eventParticipant.create({
+        data: {
+          eventId: event.id,
+          userId: userId!,
+        },
+      });
+
       res.status(201).json(event);
     } catch (err) {
       console.error(err);
