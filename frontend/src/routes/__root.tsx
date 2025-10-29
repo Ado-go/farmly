@@ -14,7 +14,6 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { User } from "lucide-react";
-import "../css/root.css";
 
 function RootLayout() {
   const { user } = useAuth();
@@ -22,7 +21,7 @@ function RootLayout() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <nav className="flex items-center justify-between p-4 border-b bg-background">
+      <nav className="flex items-center justify-between p-4 border-b bg-foreground">
         <div className="flex items-center gap-4">
           <Link to="/" className="font-semibold text-lg">
             {t("farmly")}

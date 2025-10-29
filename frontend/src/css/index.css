@@ -152,6 +152,10 @@ body {
   @apply bg-background text-foreground;
 }
 
+button {
+  cursor: pointer;
+}
+
 a {
   font-weight: 500;
   color: oklch(0.78 0.15 145);
