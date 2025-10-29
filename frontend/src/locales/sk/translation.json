@@ -1,6 +1,6 @@
 {
   "farmly": "Farmly",
-  "welcome": "Vitaj vo Farmly!",
+  "welcome": "Vitaj na Farmly",
   "login": "Prihlásiť sa",
   "register": "Registrovať sa",
   "logout": "Odhlásiť sa",
@@ -185,7 +185,8 @@
   "productsPage": {
     "title": "Všetky produkty",
     "loading": "Načítavam produkty...",
-    "error": "Nepodarilo sa načítať produkty."
+    "error": "Nepodarilo sa načítať produkty.",
+    "noProducts": "Aktuálne nemáme žiadne produkty."
   },
   "productCard": {
     "price": "Cena",

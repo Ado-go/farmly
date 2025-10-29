@@ -1,6 +1,6 @@
 {
   "farmly": "Farmly",
-  "welcome": "Welcome to Farmly!",
+  "welcome": "Welcome to Farmly",
   "login": "Login",
   "register": "Register",
   "logout": "Logout",
@@ -185,7 +185,8 @@
   "productsPage": {
     "title": "All Products",
     "loading": "Loading products...",
-    "error": "Failed to load products."
+    "error": "Failed to load products.",
+    "noProducts": "We don't have any products yet."
   },
   "productCard": {
     "price": "Price",
