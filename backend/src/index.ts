@@ -21,6 +21,8 @@ import publicFarmProductsRoutes from "./routes/publicFarmProducts.ts";
 
 import publicFarmsRoutes from "./routes/publicFarms.ts";
 
+import publicEventsRoutes from "./routes/publicEvents.ts";
+
 const app = express();
 app.use(cookieParser());
 app.use(
@@ -49,6 +51,8 @@ app.use("/api/event-product", eventProductRoutes);
 app.use("/api/public-farm-products", publicFarmProductsRoutes);
 
 app.use("/api/farms", publicFarmsRoutes);
+
+app.use("/api/public-events", publicEventsRoutes);
 
 // test routes //
 app.get("/api/hello", (req, res) => {
