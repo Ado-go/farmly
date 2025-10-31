@@ -12,6 +12,7 @@
   "go_home": "Back to Home",
   "my_farms": "My farms",
   "my_events": "My events",
+  "events": "Events",
   "loginPage": {
     "title": "Login",
     "subtitle": "Enter your login credentials",
@@ -281,5 +282,25 @@
     "addFailed": "Failed to add product",
     "deleteFailed": "Failed to delete product",
     "delete": "Delete"
+  },
+  "eventsPage": {
+    "title": "Events",
+    "loading": "Loading events...",
+    "errorLoading": "Failed to load events.",
+    "ongoing": "Ongoing Events",
+    "upcoming": "Upcoming Events",
+    "noOngoing": "There are no ongoing events at the moment.",
+    "noUpcoming": "No upcoming events.",
+    "organizedBy": "Organized by"
+  },
+  "eventsDetail": {
+    "loading": "Loading event details...",
+    "errorLoading": "Failed to load event details.",
+    "organizedBy": "Organized by",
+    "availableProducts": "Products available at this event",
+    "noProducts": "There are no products available for this event yet.",
+    "soldBy": "Sold by",
+    "noImage": "No image",
+    "preorder": "Preorder"
   }
 }

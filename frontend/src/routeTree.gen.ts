@@ -18,11 +18,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductsIndexRouteImport } from './routes/products/index'
 import { Route as FarmsIndexRouteImport } from './routes/farms/index'
 import { Route as FarmIndexRouteImport } from './routes/farm/index'
+import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as EventIndexRouteImport } from './routes/event/index'
 import { Route as ProductsIdRouteImport } from './routes/products/$id'
 import { Route as ProductIdRouteImport } from './routes/product/$id'
 import { Route as FarmsIdRouteImport } from './routes/farms/$id'
 import { Route as FarmIdRouteImport } from './routes/farm/$id'
+import { Route as EventsIdRouteImport } from './routes/events/$id'
 import { Route as EventIdRouteImport } from './routes/event/$id'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -70,6 +72,11 @@ const FarmIndexRoute = FarmIndexRouteImport.update({
   path: '/farm/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventIndexRoute = EventIndexRouteImport.update({
   id: '/event/',
   path: '/event/',
@@ -95,6 +102,11 @@ const FarmIdRoute = FarmIdRouteImport.update({
   path: '/farm/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsIdRoute = EventsIdRouteImport.update({
+  id: '/events/$id',
+  path: '/events/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventIdRoute = EventIdRouteImport.update({
   id: '/event/$id',
   path: '/event/$id',
@@ -109,11 +121,13 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/event/$id': typeof EventIdRoute
+  '/events/$id': typeof EventsIdRoute
   '/farm/$id': typeof FarmIdRoute
   '/farms/$id': typeof FarmsIdRoute
   '/product/$id': typeof ProductIdRoute
   '/products/$id': typeof ProductsIdRoute
   '/event': typeof EventIndexRoute
+  '/events': typeof EventsIndexRoute
   '/farm': typeof FarmIndexRoute
   '/farms': typeof FarmsIndexRoute
   '/products': typeof ProductsIndexRoute
@@ -126,11 +140,13 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/event/$id': typeof EventIdRoute
+  '/events/$id': typeof EventsIdRoute
   '/farm/$id': typeof FarmIdRoute
   '/farms/$id': typeof FarmsIdRoute
   '/product/$id': typeof ProductIdRoute
   '/products/$id': typeof ProductsIdRoute
   '/event': typeof EventIndexRoute
+  '/events': typeof EventsIndexRoute
   '/farm': typeof FarmIndexRoute
   '/farms': typeof FarmsIndexRoute
   '/products': typeof ProductsIndexRoute
@@ -144,11 +160,13 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/event/$id': typeof EventIdRoute
+  '/events/$id': typeof EventsIdRoute
   '/farm/$id': typeof FarmIdRoute
   '/farms/$id': typeof FarmsIdRoute
   '/product/$id': typeof ProductIdRoute
   '/products/$id': typeof ProductsIdRoute
   '/event/': typeof EventIndexRoute
+  '/events/': typeof EventsIndexRoute
   '/farm/': typeof FarmIndexRoute
   '/farms/': typeof FarmsIndexRoute
   '/products/': typeof ProductsIndexRoute
@@ -163,11 +181,13 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/event/$id'
+    | '/events/$id'
     | '/farm/$id'
     | '/farms/$id'
     | '/product/$id'
     | '/products/$id'
     | '/event'
+    | '/events'
     | '/farm'
     | '/farms'
     | '/products'
@@ -180,11 +200,13 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/event/$id'
+    | '/events/$id'
     | '/farm/$id'
     | '/farms/$id'
     | '/product/$id'
     | '/products/$id'
     | '/event'
+    | '/events'
     | '/farm'
     | '/farms'
     | '/products'
@@ -197,11 +219,13 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/event/$id'
+    | '/events/$id'
     | '/farm/$id'
     | '/farms/$id'
     | '/product/$id'
     | '/products/$id'
     | '/event/'
+    | '/events/'
     | '/farm/'
     | '/farms/'
     | '/products/'
@@ -215,11 +239,13 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   EventIdRoute: typeof EventIdRoute
+  EventsIdRoute: typeof EventsIdRoute
   FarmIdRoute: typeof FarmIdRoute
   FarmsIdRoute: typeof FarmsIdRoute
   ProductIdRoute: typeof ProductIdRoute
   ProductsIdRoute: typeof ProductsIdRoute
   EventIndexRoute: typeof EventIndexRoute
+  EventsIndexRoute: typeof EventsIndexRoute
   FarmIndexRoute: typeof FarmIndexRoute
   FarmsIndexRoute: typeof FarmsIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
@@ -290,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FarmIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/': {
+      id: '/events/'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/event/': {
       id: '/event/'
       path: '/event'
@@ -325,6 +358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FarmIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$id': {
+      id: '/events/$id'
+      path: '/events/$id'
+      fullPath: '/events/$id'
+      preLoaderRoute: typeof EventsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/event/$id': {
       id: '/event/$id'
       path: '/event/$id'
@@ -343,11 +383,13 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   EventIdRoute: EventIdRoute,
+  EventsIdRoute: EventsIdRoute,
   FarmIdRoute: FarmIdRoute,
   FarmsIdRoute: FarmsIdRoute,
   ProductIdRoute: ProductIdRoute,
   ProductsIdRoute: ProductsIdRoute,
   EventIndexRoute: EventIndexRoute,
+  EventsIndexRoute: EventsIndexRoute,
   FarmIndexRoute: FarmIndexRoute,
   FarmsIndexRoute: FarmsIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,

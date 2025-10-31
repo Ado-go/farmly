@@ -12,6 +12,7 @@
   "go_home": "Späť na hlavnú stránku",
   "my_farms": "Moje farmy",
   "my_events": "Moje udalosti",
+  "events": "Udalosti",
   "loginPage": {
     "title": "Prihlásenie",
     "subtitle": "Zadaj svoje prihlasovacie údaje",
@@ -281,5 +282,25 @@
     "addFailed": "Nepodarilo sa pridať produkt",
     "deleteFailed": "Nepodarilo sa odstrániť produkt",
     "delete": "Zmazať"
+  },
+  "eventsPage": {
+    "title": "Udalosti",
+    "loading": "Načítavam udalosti...",
+    "errorLoading": "Nepodarilo sa načítať udalosti.",
+    "ongoing": "Prebiehajúce udalosti",
+    "upcoming": "Nadchádzajúce udalosti",
+    "noOngoing": "Momentálne neprebiehajú žiadne udalosti.",
+    "noUpcoming": "Žiadne nadchádzajúce udalosti.",
+    "organizedBy": "Organizuje"
+  },
+  "eventsDetail": {
+    "loading": "Načítavam údaje o udalosti...",
+    "errorLoading": "Nepodarilo sa načítať údaje o udalosti.",
+    "organizedBy": "Organizuje",
+    "availableProducts": "Produkty dostupné na udalosti",
+    "noProducts": "Na tejto udalosti zatiaľ nie sú žiadne produkty.",
+    "soldBy": "Predáva",
+    "noImage": "Bez obrázka",
+    "preorder": "Predobjednať"
   }
 }

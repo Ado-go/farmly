@@ -29,6 +29,9 @@ function RootLayout() {
           <Link to="/products" className="font-semibold text-lg">
             {t("products")}
           </Link>
+          <Link to="/events" className="font-semibold text-lg">
+            {t("events")}
+          </Link>
           <Link to="/farms" className="font-semibold text-lg">
             {t("farms")}
           </Link>
