@@ -56,63 +56,67 @@ const reviewComments = [
   "Skvelá skúsenosť, odporúčam!",
 ];
 
-async function main() {
-  console.log("🧹 Clearing old data...");
+// ------------------ CLEAR DATABASE ------------------
+async function clearDatabase() {
+  console.log("🧹 Clearing database...");
+
   await prisma.review.deleteMany({});
   await prisma.eventParticipant.deleteMany({});
   await prisma.eventProduct.deleteMany({});
   await prisma.event.deleteMany({});
+  await prisma.orderItem.deleteMany({});
+  await prisma.order.deleteMany({});
   await prisma.farmProduct.deleteMany({});
-  await prisma.product.deleteMany({});
+  await prisma.farmImage.deleteMany({});
   await prisma.farm.deleteMany({});
+  await prisma.productImage.deleteMany({});
+  await prisma.product.deleteMany({});
   await prisma.user.deleteMany({});
-  console.log("✅ Old data cleared.");
+
+  console.log("✅ Database cleared successfully.");
+}
+
+async function main() {
+  await clearDatabase();
 
   console.log("🌱 Seeding new data...");
 
-  const farmers = [];
-  const customers = [];
+  const farmers: any[] = [];
+  const customers: any[] = [];
+  const allProducts: any[] = [];
 
-  // ------------------- FARMERS -------------------
+  // ------------------ USERS ------------------
   const numFarmers = randomInt(5, 8);
   for (let i = 0; i < numFarmers; i++) {
-    const name = farmerNames[i % farmerNames.length];
-    const email = `farmer${i + 1}@example.com`;
     const password = await argon2.hash("heslo123");
-
     const farmer = await prisma.user.create({
       data: {
-        name,
-        email,
+        email: `farmer${i + 1}@example.com`,
+        password,
+        name: farmerNames[i % farmerNames.length],
         phone: `+421900${100000 + i}`,
         role: "FARMER",
-        password,
       },
     });
     farmers.push(farmer);
   }
 
-  // ------------------- CUSTOMERS -------------------
   for (let i = 0; i < customerNames.length; i++) {
-    const name = customerNames[i];
-    const email = `customer${i + 1}@example.com`;
     const password = await argon2.hash("heslo123");
-
     const customer = await prisma.user.create({
       data: {
-        name,
-        email,
+        email: `customer${i + 1}@example.com`,
+        password,
+        name: customerNames[i],
         phone: `+421910${100000 + i}`,
         role: "CUSTOMER",
-        password,
       },
     });
     customers.push(customer);
   }
 
   // ------------------- FARMS + FARM PRODUCTS -------------------
-  const allProducts = [];
-
+  console.log("🌾 Creating farms and farm products...");
   for (const farmer of farmers) {
     const numFarms = randomInt(1, 3);
 
@@ -141,14 +145,14 @@ async function main() {
       for (const template of chosenTemplates) {
         const farmProduct = await prisma.farmProduct.create({
           data: {
-            farm: { connect: { id: farm.id } }, // 👈 toto je podstatná zmena
+            farm: { connect: { id: farm.id } },
             price: parseFloat((randomInt(150, 1200) / 100).toFixed(2)),
             stock: randomInt(5, 50),
             product: {
               create: {
-                name: template.name,
+                name: `${template.name} z farmy ${farm.name}`,
                 category: template.category,
-                description: `Čerstvé ${template.name.toLowerCase()} priamo z farmy ${
+                description: `Čerstvé ${template.name.toLowerCase()} z farmy ${
                   farm.name
                 }.`,
                 basePrice: parseFloat((randomInt(100, 800) / 100).toFixed(2)),
@@ -171,7 +175,7 @@ async function main() {
     for (let i = 0; i < numEvents; i++) {
       const cityIndex = randomInt(0, cities.length - 1);
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() + randomInt(3, 20));
+      startDate.setDate(startDate.getDate() + randomInt(-5, 20));
       const endDate = new Date(startDate);
       endDate.setHours(endDate.getHours() + randomInt(4, 24));
 
@@ -190,7 +194,6 @@ async function main() {
         },
       });
 
-      // ďalší farmári ako účastníci
       const otherFarmers = farmers.filter((f) => f.id !== farmer.id);
       const chosenFarmers = [...otherFarmers]
         .sort(() => Math.random() - 0.5)
@@ -202,7 +205,6 @@ async function main() {
         });
       }
 
-      // produkty patriace k eventu
       const numProducts = randomInt(1, 3);
       const chosenTemplates = [...productTemplates]
         .sort(() => Math.random() - 0.5)
@@ -211,12 +213,13 @@ async function main() {
       for (const template of chosenTemplates) {
         const eventProduct = await prisma.eventProduct.create({
           data: {
-            event: { connect: { id: event.id } }, // 👈 dôležitá zmena
+            event: { connect: { id: event.id } },
+            user: { connect: { id: farmer.id } },
             product: {
               create: {
-                name: template.name,
+                name: `${template.name} (${event.title})`,
                 category: template.category,
-                description: `Produkt prezentovaný na udalosti ${event.title}.`,
+                description: `Produkt predávaný počas ${event.title}.`,
                 basePrice: parseFloat((randomInt(100, 800) / 100).toFixed(2)),
               },
             },
@@ -229,11 +232,10 @@ async function main() {
     }
   }
 
-  // ------------------- REVIEWS -------------------
+  // ------------------ REVIEWS ------------------
   console.log("⭐ Creating reviews...");
   for (const prod of allProducts) {
-    const numReviews = randomInt(1, 3);
-    for (let i = 0; i < numReviews; i++) {
+    for (let i = 0; i < randomInt(1, 3); i++) {
       const reviewer = customers[randomInt(0, customers.length - 1)];
       await prisma.review.create({
         data: {

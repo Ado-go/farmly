@@ -5,7 +5,6 @@ async function main() {
   console.log("🧹 Clearing database...");
 
   await prisma.review.deleteMany({});
-
   await prisma.eventParticipant.deleteMany({});
   await prisma.eventProduct.deleteMany({});
   await prisma.event.deleteMany({});
@@ -18,7 +17,9 @@ async function main() {
   await prisma.farm.deleteMany({});
 
   await prisma.productImage.deleteMany({});
+  await prisma.offer.deleteMany({});
   await prisma.product.deleteMany({});
+
   await prisma.user.deleteMany({});
 
   console.log("✅ All data were successfully deleted.");
