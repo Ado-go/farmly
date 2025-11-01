@@ -16,6 +16,9 @@ import eventRoutes from "./routes/event.ts";
 
 import eventProductRoutes from "./routes/eventProduct.ts";
 
+// mix public private //
+import offerRoutes from "./routes/offer.ts";
+
 // public routes //
 import publicFarmProductsRoutes from "./routes/publicFarmProducts.ts";
 
@@ -46,6 +49,9 @@ app.use("/api/review", reviewRoutes);
 app.use("/api/event", eventRoutes);
 
 app.use("/api/event-product", eventProductRoutes);
+
+// MIX Public/private
+app.use("/api/offer", offerRoutes);
 
 // Public //
 app.use("/api/public-farm-products", publicFarmProductsRoutes);
