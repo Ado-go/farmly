@@ -32,6 +32,9 @@ function RootLayout() {
           <Link to="/events" className="font-semibold text-lg">
             {t("events")}
           </Link>
+          <Link to="/offers" className="font-semibold text-lg">
+            {t("offers")}
+          </Link>
           <Link to="/farms" className="font-semibold text-lg">
             {t("farms")}
           </Link>
@@ -55,6 +58,9 @@ function RootLayout() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link to="/profile">{t("profile")}</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/offers/my">{t("my_offers")}</Link>
                   </DropdownMenuItem>
                   {user.role === "FARMER" && (
                     <DropdownMenuItem asChild>

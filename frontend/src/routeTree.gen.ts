@@ -16,16 +16,19 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductsIndexRouteImport } from './routes/products/index'
+import { Route as OffersIndexRouteImport } from './routes/offers/index'
 import { Route as FarmsIndexRouteImport } from './routes/farms/index'
 import { Route as FarmIndexRouteImport } from './routes/farm/index'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as EventIndexRouteImport } from './routes/event/index'
 import { Route as ProductsIdRouteImport } from './routes/products/$id'
 import { Route as ProductIdRouteImport } from './routes/product/$id'
+import { Route as OffersIdRouteImport } from './routes/offers/$id'
 import { Route as FarmsIdRouteImport } from './routes/farms/$id'
 import { Route as FarmIdRouteImport } from './routes/farm/$id'
 import { Route as EventsIdRouteImport } from './routes/events/$id'
 import { Route as EventIdRouteImport } from './routes/event/$id'
+import { Route as OffersMyIndexRouteImport } from './routes/offers/my/index'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -62,6 +65,11 @@ const ProductsIndexRoute = ProductsIndexRouteImport.update({
   path: '/products/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OffersIndexRoute = OffersIndexRouteImport.update({
+  id: '/offers/',
+  path: '/offers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FarmsIndexRoute = FarmsIndexRouteImport.update({
   id: '/farms/',
   path: '/farms/',
@@ -92,6 +100,11 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OffersIdRoute = OffersIdRouteImport.update({
+  id: '/offers/$id',
+  path: '/offers/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FarmsIdRoute = FarmsIdRouteImport.update({
   id: '/farms/$id',
   path: '/farms/$id',
@@ -112,6 +125,11 @@ const EventIdRoute = EventIdRouteImport.update({
   path: '/event/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OffersMyIndexRoute = OffersMyIndexRouteImport.update({
+  id: '/offers/my/',
+  path: '/offers/my/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -124,13 +142,16 @@ export interface FileRoutesByFullPath {
   '/events/$id': typeof EventsIdRoute
   '/farm/$id': typeof FarmIdRoute
   '/farms/$id': typeof FarmsIdRoute
+  '/offers/$id': typeof OffersIdRoute
   '/product/$id': typeof ProductIdRoute
   '/products/$id': typeof ProductsIdRoute
   '/event': typeof EventIndexRoute
   '/events': typeof EventsIndexRoute
   '/farm': typeof FarmIndexRoute
   '/farms': typeof FarmsIndexRoute
+  '/offers': typeof OffersIndexRoute
   '/products': typeof ProductsIndexRoute
+  '/offers/my': typeof OffersMyIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -143,13 +164,16 @@ export interface FileRoutesByTo {
   '/events/$id': typeof EventsIdRoute
   '/farm/$id': typeof FarmIdRoute
   '/farms/$id': typeof FarmsIdRoute
+  '/offers/$id': typeof OffersIdRoute
   '/product/$id': typeof ProductIdRoute
   '/products/$id': typeof ProductsIdRoute
   '/event': typeof EventIndexRoute
   '/events': typeof EventsIndexRoute
   '/farm': typeof FarmIndexRoute
   '/farms': typeof FarmsIndexRoute
+  '/offers': typeof OffersIndexRoute
   '/products': typeof ProductsIndexRoute
+  '/offers/my': typeof OffersMyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -163,13 +187,16 @@ export interface FileRoutesById {
   '/events/$id': typeof EventsIdRoute
   '/farm/$id': typeof FarmIdRoute
   '/farms/$id': typeof FarmsIdRoute
+  '/offers/$id': typeof OffersIdRoute
   '/product/$id': typeof ProductIdRoute
   '/products/$id': typeof ProductsIdRoute
   '/event/': typeof EventIndexRoute
   '/events/': typeof EventsIndexRoute
   '/farm/': typeof FarmIndexRoute
   '/farms/': typeof FarmsIndexRoute
+  '/offers/': typeof OffersIndexRoute
   '/products/': typeof ProductsIndexRoute
+  '/offers/my/': typeof OffersMyIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -184,13 +211,16 @@ export interface FileRouteTypes {
     | '/events/$id'
     | '/farm/$id'
     | '/farms/$id'
+    | '/offers/$id'
     | '/product/$id'
     | '/products/$id'
     | '/event'
     | '/events'
     | '/farm'
     | '/farms'
+    | '/offers'
     | '/products'
+    | '/offers/my'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -203,13 +233,16 @@ export interface FileRouteTypes {
     | '/events/$id'
     | '/farm/$id'
     | '/farms/$id'
+    | '/offers/$id'
     | '/product/$id'
     | '/products/$id'
     | '/event'
     | '/events'
     | '/farm'
     | '/farms'
+    | '/offers'
     | '/products'
+    | '/offers/my'
   id:
     | '__root__'
     | '/'
@@ -222,13 +255,16 @@ export interface FileRouteTypes {
     | '/events/$id'
     | '/farm/$id'
     | '/farms/$id'
+    | '/offers/$id'
     | '/product/$id'
     | '/products/$id'
     | '/event/'
     | '/events/'
     | '/farm/'
     | '/farms/'
+    | '/offers/'
     | '/products/'
+    | '/offers/my/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -242,13 +278,16 @@ export interface RootRouteChildren {
   EventsIdRoute: typeof EventsIdRoute
   FarmIdRoute: typeof FarmIdRoute
   FarmsIdRoute: typeof FarmsIdRoute
+  OffersIdRoute: typeof OffersIdRoute
   ProductIdRoute: typeof ProductIdRoute
   ProductsIdRoute: typeof ProductsIdRoute
   EventIndexRoute: typeof EventIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
   FarmIndexRoute: typeof FarmIndexRoute
   FarmsIndexRoute: typeof FarmsIndexRoute
+  OffersIndexRoute: typeof OffersIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
+  OffersMyIndexRoute: typeof OffersMyIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -302,6 +341,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/offers/': {
+      id: '/offers/'
+      path: '/offers'
+      fullPath: '/offers'
+      preLoaderRoute: typeof OffersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/farms/': {
       id: '/farms/'
       path: '/farms'
@@ -344,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/offers/$id': {
+      id: '/offers/$id'
+      path: '/offers/$id'
+      fullPath: '/offers/$id'
+      preLoaderRoute: typeof OffersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/farms/$id': {
       id: '/farms/$id'
       path: '/farms/$id'
@@ -372,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/offers/my/': {
+      id: '/offers/my/'
+      path: '/offers/my'
+      fullPath: '/offers/my'
+      preLoaderRoute: typeof OffersMyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -386,13 +446,16 @@ const rootRouteChildren: RootRouteChildren = {
   EventsIdRoute: EventsIdRoute,
   FarmIdRoute: FarmIdRoute,
   FarmsIdRoute: FarmsIdRoute,
+  OffersIdRoute: OffersIdRoute,
   ProductIdRoute: ProductIdRoute,
   ProductsIdRoute: ProductsIdRoute,
   EventIndexRoute: EventIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
   FarmIndexRoute: FarmIndexRoute,
   FarmsIndexRoute: FarmsIndexRoute,
+  OffersIndexRoute: OffersIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
+  OffersMyIndexRoute: OffersMyIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
