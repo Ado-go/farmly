@@ -24,6 +24,11 @@ enum PaymentMethod {
   BANK_TRANSFER
 }
 
+enum OrderType {
+  STANDARD 
+  PREORDER
+}
+
 // ------------------- USER -------------------
 
 model User {
@@ -140,8 +145,11 @@ model Order {
   id                 Int          @id @default(autoincrement())
   createdAt          DateTime     @default(now())
 
-  buyer              User         @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
-  buyerId            Int
+  buyer              User?         @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+  buyerId            Int?
+  anonymousEmail     String?
+
+  orderType          OrderType    @default(STANDARD)
 
   deliveryCity       String
   deliveryStreet     String
@@ -152,7 +160,7 @@ model Order {
   isDelivered        Boolean      @default(false)
   isPaid             Boolean      @default(false)
   paymentMethod      PaymentMethod
-  totalPrice         Float?       
+  totalPrice         Float?      
 
   items              OrderItem[]
 }
