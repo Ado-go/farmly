@@ -26,6 +26,12 @@ import publicFarmsRoutes from "./routes/publicFarms.ts";
 
 import publicEventsRoutes from "./routes/publicEvents.ts";
 
+// checkouts
+
+import checkoutRoutes from "./routes/checkout.ts";
+
+import checkoutPreorderRoutes from "./routes/checkoutPreorder.ts";
+
 const app = express();
 app.use(cookieParser());
 app.use(
@@ -59,6 +65,12 @@ app.use("/api/public-farm-products", publicFarmProductsRoutes);
 app.use("/api/farms", publicFarmsRoutes);
 
 app.use("/api/public-events", publicEventsRoutes);
+
+// checkouts
+
+app.use("/api/checkout", checkoutRoutes);
+
+app.use("/api/checkout-preorder", checkoutPreorderRoutes);
 
 // test routes //
 app.get("/api/hello", (req, res) => {
