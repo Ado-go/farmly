@@ -189,7 +189,8 @@
     "title": "All Products",
     "loading": "Loading products...",
     "error": "Failed to load products.",
-    "noProducts": "We don't have any products yet."
+    "noProducts": "We don't have any products yet.",
+    "addedToCart": "Product {{name}} has been added to the cart."
   },
   "productCard": {
     "price": "Price",
@@ -344,5 +345,44 @@
     "confirmDeleteTitle": "Are you sure you want to delete this offer?",
     "confirmDeleteText": "This action cannot be undone and the offer will be permanently removed.",
     "cancel": "Cancel"
+  },
+  "cartPage": {
+    "emptyCart": "Cart is empty.",
+    "yourCart": "Your cart",
+    "remove": "Remove",
+    "total": "Total:",
+    "clear": "Clear cart",
+    "continueCheckout": "Continue to checkout"
+  },
+  "checkoutPage": {
+    "title": "Checkout",
+    "email": "Email",
+    "city": "City",
+    "street": "Street",
+    "region": "Region",
+    "postalCode": "Postal code",
+    "country": "Country",
+    "paymentMethod": "Payment method",
+    "selectPayment": "Select payment method",
+    "cash": "Cash",
+    "card": "Card",
+    "bankTransfer": "Bank transfer",
+    "total": "Total",
+    "submit": "Submit order",
+    "submitting": "Submitting...",
+    "success": "Your order has been placed successfully!",
+    "error": "Failed to submit the order.",
+    "emptyCart": "Your cart is empty.",
+    "invalidEmail": "Enter a valid email address",
+    "requiredCity": "City is required",
+    "requiredStreet": "Street is required",
+    "requiredRegion": "Region is required",
+    "requiredPostalCode": "Postal code is required",
+    "requiredCountry": "Country is required"
+  },
+  "cart": {
+    "empty": "Your cart is empty",
+    "total": "Total",
+    "open": "Open cart"
   }
 }

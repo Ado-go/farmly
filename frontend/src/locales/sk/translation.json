@@ -189,7 +189,8 @@
     "title": "Všetky produkty",
     "loading": "Načítavam produkty...",
     "error": "Nepodarilo sa načítať produkty.",
-    "noProducts": "Aktuálne nemáme žiadne produkty."
+    "noProducts": "Aktuálne nemáme žiadne produkty.",
+    "addedToCart": "Produkt {{name}} bol pridaný do košíka."
   },
   "productCard": {
     "price": "Cena",
@@ -344,5 +345,44 @@
     "confirmDeleteTitle": "Naozaj chcete zmazať túto ponuku?",
     "confirmDeleteText": "Táto akcia je nevratná a ponuka bude natrvalo odstránená.",
     "cancel": "Zrušiť"
+  },
+  "cartPage": {
+    "emptyCart": "Košík je prázdny.",
+    "yourCart": "Váš košík",
+    "remove": "Odstrániť",
+    "total": "Spolu:",
+    "clear": "Vyčistiť košík",
+    "continueCheckout": "Pokračovať k objednávke"
+  },
+  "checkoutPage": {
+    "title": "Objednávka",
+    "email": "Email",
+    "city": "Mesto",
+    "street": "Ulica",
+    "region": "Región",
+    "postalCode": "PSČ",
+    "country": "Krajina",
+    "paymentMethod": "Spôsob platby",
+    "selectPayment": "Vyber spôsob platby",
+    "cash": "Hotovosť",
+    "card": "Karta",
+    "bankTransfer": "Bankový prevod",
+    "total": "Spolu",
+    "submit": "Odoslať objednávku",
+    "submitting": "Odosielam...",
+    "success": "Objednávka bola úspešne odoslaná!",
+    "error": "Nepodarilo sa odoslať objednávku.",
+    "emptyCart": "Košík je prázdny.",
+    "invalidEmail": "Zadaj platný email",
+    "requiredCity": "Mesto je povinné",
+    "requiredStreet": "Ulica je povinná",
+    "requiredRegion": "Región je povinný",
+    "requiredPostalCode": "PSČ je povinné",
+    "requiredCountry": "Krajina je povinná"
+  },
+  "cart": {
+    "empty": "Košík je prázdny",
+    "total": "Spolu",
+    "open": "Otvoriť košík"
   }
 }

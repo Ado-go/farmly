@@ -1,4 +1,4 @@
-import { Outlet, Link } from "@tanstack/react-router";
+import { Outlet, Link, useNavigate } from "@tanstack/react-router";
 import { createRootRoute } from "@tanstack/react-router";
 import { useAuth } from "../context/AuthContext";
 import LogoutButton from "../components/LogoutButton";
@@ -13,15 +13,19 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { User } from "lucide-react";
+import { User, ShoppingCart } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 
 function RootLayout() {
   const { user } = useAuth();
   const { t } = useTranslation();
+  const { cart, totalPrice } = useCart();
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col min-h-screen">
       <nav className="flex items-center justify-between p-4 border-b bg-foreground">
+        {/* LEFT LINKS */}
         <div className="flex items-center gap-4">
           <Link to="/" className="font-semibold text-lg">
             {t("farmly")}
@@ -40,15 +44,62 @@ function RootLayout() {
           </Link>
         </div>
 
+        {/* RIGHT SIDE */}
         <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                {cart.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                    {cart.length}
+                  </span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end" className="w-64">
+              {cart.length === 0 ? (
+                <div className="p-3 text-sm text-gray-500 text-center">
+                  {t("cart.empty")}
+                </div>
+              ) : (
+                <>
+                  <div className="max-h-64 overflow-y-auto divide-y">
+                    {cart.map((item) => (
+                      <div key={item.productId} className="p-2 text-sm">
+                        <p className="font-medium truncate">
+                          {item.productName}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {item.quantity}× {item.unitPrice} €
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="p-3 border-t text-sm flex justify-between items-center">
+                    <span className="font-medium">
+                      {t("cart.total")}: {totalPrice.toFixed(2)} €
+                    </span>
+                    <Button size="sm" onClick={() => navigate({ to: "/cart" })}>
+                      {t("cart.open")}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <ModeToggle />
           <LanguageToggle />
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon" className="rounded-full">
                 <User className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
+
             <DropdownMenuContent align="end" className="w-48">
               {user ? (
                 <>
