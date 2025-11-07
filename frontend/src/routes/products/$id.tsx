@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "../../context/AuthContext";
+import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/products/$id")({
   component: ProductDetailPage,
@@ -19,6 +21,7 @@ function ProductDetailPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { addToCart } = useCart();
 
   const {
     data: farmProduct,
@@ -59,6 +62,18 @@ function ProductDetailPage() {
     },
   });
 
+  const handleAddToCart = (fp) => {
+    addToCart({
+      productId: fp.product.id,
+      productName: fp.product.name,
+      sellerName: fp.farm?.name || "unknown",
+      unitPrice: fp.price,
+      quantity: 1,
+    });
+
+    toast.success(t("productCard.addedToCart", { name: fp.product.name }));
+  };
+
   if (isLoading)
     return (
       <p className="text-center text-gray-500 mt-10">
@@ -74,7 +89,6 @@ function ProductDetailPage() {
     );
 
   const product = farmProduct.product;
-  const imageUrl = product.images?.[0]?.url || "/placeholder.jpg";
   const avgRating = averageRating(product.reviews);
   const userReview = user
     ? product.reviews?.find((r) => r.user?.id === user.id)
@@ -86,11 +100,17 @@ function ProductDetailPage() {
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <Card className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <img
-            src={imageUrl}
-            alt={product.name}
-            className="w-full h-64 object-cover rounded-lg"
-          />
+          {product.images?.[0]?.url ? (
+            <img
+              src={product.images[0].url}
+              alt={product.name}
+              className="w-full h-32 object-cover mt-2 rounded"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 rounded">
+              {t("productCard.noImage")}
+            </div>
+          )}
 
           <div>
             <h1 className="text-2xl font-bold mb-3">{product.name}</h1>
@@ -115,6 +135,11 @@ function ProductDetailPage() {
             <p className="text-sm text-gray-600">
               {product.description || t("productCard.noDescription")}
             </p>
+          </div>
+          <div>
+            <Button onClick={() => handleAddToCart(farmProduct)}>
+              {t("productCard.addToCart")}
+            </Button>
           </div>
         </div>
       </Card>

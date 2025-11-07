@@ -4,8 +4,6 @@ import { useTranslation } from "react-i18next";
 import { ProductCard } from "@/components/ProductCard";
 import { Card } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
-import { useCart } from "@/context/CartContext";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/products/")({
   component: ProductsPage,
@@ -29,7 +27,6 @@ type FarmProduct = {
 
 function ProductsPage() {
   const { t } = useTranslation();
-  const { addToCart } = useCart();
 
   const {
     data: farmProducts = [],
@@ -39,18 +36,6 @@ function ProductsPage() {
     queryKey: ["farmProducts"],
     queryFn: async () => apiFetch("/public-farm-products"),
   });
-
-  const handleAddToCart = (fp: FarmProduct) => {
-    addToCart({
-      productId: fp.product.id,
-      productName: fp.product.name,
-      sellerName: fp.farm?.name || "unknown",
-      unitPrice: fp.price,
-      quantity: 1,
-    });
-
-    toast.success(t("productsPage.addedToCart", { name: fp.product.name }));
-  };
 
   if (isLoading) {
     return (
@@ -86,11 +71,7 @@ function ProductsPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {farmProducts.map((fp) => (
-            <ProductCard
-              key={fp.id}
-              product={fp}
-              onAddToCart={() => handleAddToCart(fp)}
-            />
+            <ProductCard key={fp.id} product={fp} />
           ))}
         </div>
       )}

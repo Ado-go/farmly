@@ -189,15 +189,16 @@
     "title": "Všetky produkty",
     "loading": "Načítavam produkty...",
     "error": "Nepodarilo sa načítať produkty.",
-    "noProducts": "Aktuálne nemáme žiadne produkty.",
-    "addedToCart": "Produkt {{name}} bol pridaný do košíka."
+    "noProducts": "Aktuálne nemáme žiadne produkty."
   },
   "productCard": {
     "price": "Cena",
     "farmName": "Farma",
     "addToCart": "Pridať do košíka",
     "noRating": "Bez hodnotenia",
-    "stock": "Sklad"
+    "stock": "Sklad",
+    "addedToCart": "Produkt {{name}} bol pridaný do košíka.",
+    "noImage": "Bez obrázka"
   },
   "farmsPage": {
     "title": "Farmy",

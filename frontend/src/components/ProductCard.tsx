@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
+import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
 
 type ProductCardProps = {
   product: {
@@ -20,29 +22,44 @@ type ProductCardProps = {
     };
     farm?: { id: number; name: string };
   };
-  onAddToCart?: (id: number) => void;
 };
 
-export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+export function ProductCard({ product }: ProductCardProps) {
   const { t } = useTranslation();
+  const { addToCart } = useCart();
 
   const { product: inner } = product;
-  const imageUrl = inner.images?.[0]?.url || "/placeholder.jpg";
   const rating = averageRating(inner.reviews);
 
+  const handleAddToCart = (fp) => {
+    addToCart({
+      productId: fp.product.id,
+      productName: fp.product.name,
+      sellerName: fp.farm?.name || "unknown",
+      unitPrice: fp.price,
+      quantity: 1,
+    });
+
+    toast.success(t("productCard.addedToCart", { name: fp.product.name }));
+  };
+
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow p-2">
       <Link
         to={`/products/${inner.id}`}
         className="block cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary"
       >
-        <div className="relative h-48 w-full overflow-hidden">
+        {inner.images?.[0]?.url ? (
           <img
-            src={imageUrl}
+            src={inner.images[0].url}
             alt={inner.name}
-            className="object-cover w-full h-full"
+            className="w-full h-32 object-cover mt-2 rounded"
           />
-        </div>
+        ) : (
+          <div className="w-full h-32 bg-gray-200 flex items-center justify-center text-gray-500 rounded">
+            {t("productCard.noImage")}
+          </div>
+        )}
 
         <CardHeader>
           <CardTitle className="text-lg truncate">{inner.name}</CardTitle>
@@ -78,7 +95,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         <Button
           variant="outline"
           className="w-full mt-2"
-          onClick={() => onAddToCart?.(product.product.id)}
+          onClick={() => handleAddToCart(product)}
         >
           {t("productCard.addToCart")}
         </Button>

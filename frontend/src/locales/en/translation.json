@@ -189,15 +189,16 @@
     "title": "All Products",
     "loading": "Loading products...",
     "error": "Failed to load products.",
-    "noProducts": "We don't have any products yet.",
-    "addedToCart": "Product {{name}} has been added to the cart."
+    "noProducts": "We don't have any products yet."
   },
   "productCard": {
     "price": "Price",
     "farmName": "Farm",
     "addToCart": "Add to Cart",
     "noRating": "No rating",
-    "stock": "Stock"
+    "stock": "Stock",
+    "addedToCart": "Product {{name}} has been added to the cart.",
+    "noImage": "No image"
   },
   "farmsPage": {
     "title": "Farms",
