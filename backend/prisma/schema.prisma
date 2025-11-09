@@ -143,6 +143,7 @@ model Offer {
 
 model Order {
   id                 Int          @id @default(autoincrement())
+  orderNumber        String       @unique @default(uuid())
   createdAt          DateTime     @default(now())
 
   buyer              User?         @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
