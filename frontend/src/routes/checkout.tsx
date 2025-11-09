@@ -25,6 +25,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/context/AuthContext";
 
 export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
@@ -49,6 +50,7 @@ type PaymentData = z.infer<typeof paymentSchema>;
 
 function CheckoutPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { cart, totalPrice, clearCart } = useCart();
 
   const [step, setStep] = useState(1);
@@ -90,6 +92,7 @@ function CheckoutPage() {
       const payload = {
         cartItems: cart,
         userInfo: {
+          buyerId: user?.id,
           email: addressData.email,
           deliveryCity: addressData.deliveryCity,
           deliveryStreet: addressData.deliveryStreet || "-",

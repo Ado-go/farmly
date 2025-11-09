@@ -112,7 +112,9 @@
     "oldPasswordRequired": "Zadajte svoje aktuálne heslo",
     "newPasswordMin": "Nové heslo musí mať aspoň 6 znakov",
     "passwordChangeSuccess": "Heslo bolo úspešne zmenené",
-    "passwordChangeError": "Zmena hesla zlyhala"
+    "passwordChangeError": "Zmena hesla zlyhala",
+    "tabProfile": "Profil",
+    "tabOrders": "Objednávky"
   },
   "farmPage": {
     "title": "Moje farmy",
@@ -391,5 +393,15 @@
     "empty": "Košík je prázdny",
     "total": "Spolu",
     "open": "Otvoriť košík"
+  },
+  "ordersPage": {
+    "loading": "Načítavam objednávky...",
+    "empty": "Zatiaľ nemáš žiadne objednávky.",
+    "order": "Objednávka",
+    "status": "Stav",
+    "total": "Celková cena",
+    "cancel": "Zrušiť objednávku",
+    "canceled": "Objednávka bola zrušená.",
+    "cancelError": "Nepodarilo sa zrušiť objednávku."
   }
 }

@@ -112,7 +112,9 @@
     "oldPasswordRequired": "Please enter your current password",
     "newPasswordMin": "New password must be at least 6 characters",
     "passwordChangeSuccess": "Password changed successfully",
-    "passwordChangeError": "Failed to change password"
+    "passwordChangeError": "Failed to change password",
+    "tabProfile": "Profile",
+    "tabOrders": "Orders"
   },
   "farmPage": {
     "title": "My Farms",
@@ -391,5 +393,15 @@
     "empty": "Your cart is empty",
     "total": "Total",
     "open": "Open cart"
+  },
+  "ordersPage": {
+    "loading": "Loading orders...",
+    "empty": "You have no orders yet.",
+    "order": "Order",
+    "status": "Status",
+    "total": "Total",
+    "cancel": "Cancel order",
+    "canceled": "Order was canceled.",
+    "cancelError": "Failed to cancel the order."
   }
 }
