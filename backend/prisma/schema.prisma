@@ -29,6 +29,24 @@ enum OrderType {
   PREORDER
 }
 
+enum OrderStatus {
+  PENDING
+  CANCELED
+  COMPLETED
+}
+
+enum OrderItemStatus {
+  ACTIVE
+  CANCELED
+}
+
+enum HistoryAction {
+  ORDER_CREATED
+  ORDER_CANCELED
+  ITEM_CANCELED
+  ORDER_UPDATED
+}
+
 // ------------------- USER -------------------
 
 model User {
@@ -39,6 +57,7 @@ model User {
   phone               String
   role                Role              @default(CUSTOMER)
   orders              Order[]           @relation("BuyerOrders")
+  orderHistory        OrderHistory[]
   refreshToken        String?
   resetToken          String?
 
@@ -161,9 +180,12 @@ model Order {
   isDelivered        Boolean      @default(false)
   isPaid             Boolean      @default(false)
   paymentMethod      PaymentMethod
-  totalPrice         Float?      
+  totalPrice         Float?
+
+  status             OrderStatus  @default(PENDING)   
 
   items              OrderItem[]
+  history            OrderHistory[]
 }
 
 model OrderItem {
@@ -178,6 +200,19 @@ model OrderItem {
   unitPrice    Float
   sellerName   String
   productName  String
+
+  status       OrderItemStatus @default(ACTIVE)
+}
+
+model OrderHistory {
+  id          Int           @id @default(autoincrement())
+  action      HistoryAction
+  message     String
+  createdAt   DateTime       @default(now())
+  userId      Int?
+  user        User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  orderId     Int
+  order       Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 // ------------------- EVENT -------------------
