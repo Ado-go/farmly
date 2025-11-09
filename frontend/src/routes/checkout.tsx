@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCart } from "@/context/CartContext";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useTranslation } from "react-i18next";
+import { useCart } from "@/context/CartContext";
 import { apiFetch } from "@/lib/api";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -15,54 +17,129 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
 
 export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
 });
 
-const checkoutSchema = z.object({
-  email: z.string().email("checkoutPage.invalidEmail"),
-  deliveryCity: z.string().min(2, "checkoutPage.requiredCity"),
-  deliveryStreet: z.string().min(2, "checkoutPage.requiredStreet"),
-  deliveryRegion: z.string().min(2, "checkoutPage.requiredRegion"),
-  deliveryPostalCode: z.string().min(2, "checkoutPage.requiredPostalCode"),
-  deliveryCountry: z.string().min(2, "checkoutPage.requiredCountry"),
-  paymentMethod: z.enum(["CASH", "CARD", "BANK_TRANSFER"]),
+const addressSchema = z.object({
+  email: z.string().email(),
+  deliveryOption: z.enum(["ADDRESS", "PICKUP"]),
+  deliveryCity: z.string().min(2, "City required"),
+  deliveryStreet: z.string().optional(),
+  deliveryRegion: z.string().min(2, "Region required"),
+  deliveryPostalCode: z.string().min(2, "Postal code required"),
+  deliveryCountry: z.string().min(2, "Country required"),
 });
 
-type CheckoutFormData = z.infer<typeof checkoutSchema>;
+const paymentSchema = z.object({
+  paymentMethod: z.enum(["CASH", "CARD"]),
+});
+
+type AddressData = z.infer<typeof addressSchema>;
+type PaymentData = z.infer<typeof paymentSchema>;
 
 function CheckoutPage() {
   const { t } = useTranslation();
   const { cart, totalPrice, clearCart } = useCart();
 
-  const form = useForm<CheckoutFormData>({
-    resolver: zodResolver(checkoutSchema),
+  const [step, setStep] = useState(1);
+  const [addressData, setAddressData] = useState<AddressData | null>(null);
+  const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
+
+  const addressForm = useForm<AddressData>({
+    resolver: zodResolver(addressSchema),
     defaultValues: {
       email: "",
+      deliveryOption: "ADDRESS",
       deliveryCity: "",
       deliveryStreet: "",
       deliveryRegion: "",
       deliveryPostalCode: "",
       deliveryCountry: "",
-      paymentMethod: "CASH",
     },
   });
 
-  const onSubmit = async (data: CheckoutFormData) => {
+  const paymentForm = useForm<PaymentData>({
+    resolver: zodResolver(paymentSchema),
+    defaultValues: { paymentMethod: "CASH" },
+  });
+
+  const handleAddressSubmit = (data: AddressData) => {
+    setAddressData(data);
+    setStep(2);
+  };
+
+  const handlePaymentSubmit = (data: PaymentData) => {
+    setPaymentData(data);
+    setStep(3);
+  };
+
+  const handleConfirmOrder = async () => {
+    if (!addressData || !paymentData) return;
+
     try {
-      const payload = { cartItems: cart, userInfo: data };
-      const res = await apiFetch("/checkout", {
+      const payload = {
+        cartItems: cart,
+        userInfo: {
+          email: addressData.email,
+          deliveryCity: addressData.deliveryCity,
+          deliveryStreet: addressData.deliveryStreet || "-",
+          deliveryRegion: addressData.deliveryRegion,
+          deliveryPostalCode: addressData.deliveryPostalCode,
+          deliveryCountry: addressData.deliveryCountry,
+          paymentMethod: paymentData.paymentMethod,
+        },
+      };
+
+      if (paymentData.paymentMethod === "CARD") {
+        console.log("Redirect to payment gateway...");
+      }
+
+      await apiFetch("/checkout", {
         method: "POST",
         body: JSON.stringify(payload),
       });
 
       toast.success(t("checkoutPage.success"));
       clearCart();
-      form.reset();
-    } catch (err: any) {
+      setStep(1);
+      setAddressData(null);
+      setPaymentData(null);
+      addressForm.reset();
+      paymentForm.reset();
+    } catch (err) {
       console.error(err);
       toast.error(t("checkoutPage.error"));
+    }
+  };
+
+  const handleDeliveryOptionChange = (value: string) => {
+    addressForm.setValue("deliveryOption", value as "ADDRESS" | "PICKUP");
+
+    if (value === "PICKUP") {
+      addressForm.setValue("deliveryCity", "Banská Bystrica");
+      addressForm.setValue("deliveryStreet", "Horná 54");
+      addressForm.setValue("deliveryRegion", "Banskobystrický kraj");
+      addressForm.setValue("deliveryPostalCode", "97401");
+      addressForm.setValue("deliveryCountry", "Slovensko");
+    } else {
+      addressForm.reset({
+        ...addressForm.getValues(),
+        deliveryCity: "",
+        deliveryStreet: "",
+        deliveryRegion: "",
+        deliveryPostalCode: "",
+        deliveryCountry: "",
+      });
     }
   };
 
@@ -74,108 +151,222 @@ function CheckoutPage() {
     );
 
   return (
-    <div className="max-w-xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">{t("checkoutPage.title")}</h1>
+    <div className="max-w-2xl mx-auto p-6 space-y-8">
+      <CheckoutBreadcrumb step={step} setStep={setStep} />
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-        <Input
-          type="email"
-          placeholder={t("checkoutPage.email")}
-          {...form.register("email")}
-        />
-        {form.formState.errors.email && (
-          <p className="text-red-500 text-sm">
-            {t(form.formState.errors.email.message!)}
-          </p>
-        )}
+      {step === 1 && (
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <h2 className="text-xl font-semibold mb-2">
+              {t("checkoutPage.deliveryInfo")}
+            </h2>
 
-        <Input
-          placeholder={t("checkoutPage.city")}
-          {...form.register("deliveryCity")}
-        />
-        {form.formState.errors.deliveryCity && (
-          <p className="text-red-500 text-sm">
-            {t(form.formState.errors.deliveryCity.message!)}
-          </p>
-        )}
+            <form
+              onSubmit={addressForm.handleSubmit(handleAddressSubmit)}
+              className="space-y-3"
+            >
+              <Input
+                type="email"
+                placeholder={t("checkoutPage.email")}
+                {...addressForm.register("email")}
+              />
 
-        <Input
-          placeholder={t("checkoutPage.street")}
-          {...form.register("deliveryStreet")}
-        />
-        {form.formState.errors.deliveryStreet && (
-          <p className="text-red-500 text-sm">
-            {t(form.formState.errors.deliveryStreet.message!)}
-          </p>
-        )}
+              <div className="space-y-1">
+                <label className="text-sm font-medium">
+                  {t("checkoutPage.deliveryOption")}
+                </label>
+                <Select
+                  value={addressForm.watch("deliveryOption")}
+                  onValueChange={handleDeliveryOptionChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={t("checkoutPage.selectDelivery")}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ADDRESS">
+                      {t("checkoutPage.toAddress")}
+                    </SelectItem>
+                    <SelectItem value="PICKUP">
+                      {t("checkoutPage.pickupPoint")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-        <Input
-          placeholder={t("checkoutPage.region")}
-          {...form.register("deliveryRegion")}
-        />
-        {form.formState.errors.deliveryRegion && (
-          <p className="text-red-500 text-sm">
-            {t(form.formState.errors.deliveryRegion.message!)}
-          </p>
-        )}
+              {addressForm.watch("deliveryOption") === "ADDRESS" ? (
+                <>
+                  <Input
+                    placeholder={t("checkoutPage.street")}
+                    {...addressForm.register("deliveryStreet")}
+                  />
+                  <Input
+                    placeholder={t("checkoutPage.city")}
+                    {...addressForm.register("deliveryCity")}
+                  />
+                  <Input
+                    placeholder={t("checkoutPage.region")}
+                    {...addressForm.register("deliveryRegion")}
+                  />
+                  <Input
+                    placeholder={t("checkoutPage.postalCode")}
+                    {...addressForm.register("deliveryPostalCode")}
+                  />
+                  <Input
+                    placeholder={t("checkoutPage.country")}
+                    {...addressForm.register("deliveryCountry")}
+                  />
+                </>
+              ) : (
+                <div className="p-3 bg-gray-50 rounded-md text-sm text-gray-700">
+                  <p className="font-medium">{t("checkoutPage.pickupPoint")}</p>
+                  <p>Stará tržnica</p>
+                  <p>Horná 54, 97401 Banská Bystrica</p>
+                  <p>Slovensko</p>
+                </div>
+              )}
 
-        <Input
-          placeholder={t("checkoutPage.postalCode")}
-          {...form.register("deliveryPostalCode")}
-        />
-        {form.formState.errors.deliveryPostalCode && (
-          <p className="text-red-500 text-sm">
-            {t(form.formState.errors.deliveryPostalCode.message!)}
-          </p>
-        )}
+              <div className="flex justify-end pt-4">
+                <Button type="submit">{t("checkoutPage.next")}</Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
-        <Input
-          placeholder={t("checkoutPage.country")}
-          {...form.register("deliveryCountry")}
-        />
-        {form.formState.errors.deliveryCountry && (
-          <p className="text-red-500 text-sm">
-            {t(form.formState.errors.deliveryCountry.message!)}
-          </p>
-        )}
+      {step === 2 && (
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <h2 className="text-xl font-semibold mb-2">
+              {t("checkoutPage.paymentMethod")}
+            </h2>
 
-        <div className="space-y-1">
-          <label className="block text-sm font-medium text-gray-700">
-            {t("checkoutPage.paymentMethod")}
-          </label>
-          <Select
-            onValueChange={(value) =>
-              form.setValue(
-                "paymentMethod",
-                value as "CASH" | "CARD" | "BANK_TRANSFER"
-              )
-            }
-            value={form.watch("paymentMethod")}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t("checkoutPage.selectPayment")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="CASH">{t("checkoutPage.cash")}</SelectItem>
-              <SelectItem value="CARD">{t("checkoutPage.card")}</SelectItem>
-              <SelectItem value="BANK_TRANSFER">
-                {t("checkoutPage.bankTransfer")}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            <form
+              onSubmit={paymentForm.handleSubmit(handlePaymentSubmit)}
+              className="space-y-3"
+            >
+              <Select
+                value={paymentForm.watch("paymentMethod")}
+                onValueChange={(v) =>
+                  paymentForm.setValue("paymentMethod", v as any)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("checkoutPage.selectPayment")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CASH">{t("checkoutPage.cash")}</SelectItem>
+                  <SelectItem value="CARD">{t("checkoutPage.card")}</SelectItem>
+                </SelectContent>
+              </Select>
 
-        <div className="flex justify-between items-center mt-6">
-          <p className="text-lg font-semibold">
-            {t("checkoutPage.total")}: {totalPrice.toFixed(2)} €
-          </p>
-          <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting
-              ? t("checkoutPage.submitting")
-              : t("checkoutPage.submit")}
-          </Button>
-        </div>
-      </form>
+              <div className="flex justify-between pt-4">
+                <Button variant="outline" onClick={() => setStep(1)}>
+                  {t("checkoutPage.back")}
+                </Button>
+                <Button type="submit">{t("checkoutPage.next")}</Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === 3 && (
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <h2 className="text-xl font-semibold mb-4">
+              {t("checkoutPage.summary")}
+            </h2>
+
+            <div className="space-y-2 text-sm text-gray-700">
+              <p>
+                <strong>{t("checkoutPage.email")}:</strong> {addressData?.email}
+              </p>
+              <p>
+                <strong>{t("checkoutPage.deliveryType")}:</strong>{" "}
+                {addressData?.deliveryOption === "ADDRESS"
+                  ? t("checkoutPage.toAddress")
+                  : t("checkoutPage.pickupPoint")}
+              </p>
+              <p>
+                <strong>{t("checkoutPage.paymentMethod")}:</strong>{" "}
+                {paymentData?.paymentMethod === "CARD"
+                  ? t("checkoutPage.card")
+                  : t("checkoutPage.cash")}
+              </p>
+            </div>
+
+            <Separator className="my-4" />
+
+            <h3 className="font-semibold">{t("checkoutPage.products")}</h3>
+            <ul className="divide-y divide-gray-200">
+              {cart.map((item, index) => (
+                <li key={index} className="py-2 flex justify-between text-sm">
+                  <span>
+                    {item.productName} × {item.quantity}
+                  </span>
+                  <span>{(item.unitPrice * item.quantity).toFixed(2)} €</span>
+                </li>
+              ))}
+            </ul>
+
+            <Separator className="my-4" />
+            <p className="text-lg font-semibold text-right">
+              {t("checkoutPage.total")}: {totalPrice.toFixed(2)} €
+            </p>
+
+            <div className="flex justify-between pt-4">
+              <Button variant="outline" onClick={() => setStep(2)}>
+                {t("checkoutPage.back")}
+              </Button>
+              <Button onClick={handleConfirmOrder}>
+                {t("checkoutPage.confirm")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
+  );
+}
+
+function CheckoutBreadcrumb({
+  step,
+  setStep,
+}: {
+  step: number;
+  setStep: (s: number) => void;
+}) {
+  const { t } = useTranslation();
+
+  const steps = [
+    { label: t("checkoutPage.deliveryStep") },
+    { label: t("checkoutPage.paymentStep") },
+    { label: t("checkoutPage.summaryStep") },
+  ];
+
+  return (
+    <Breadcrumb>
+      <BreadcrumbList>
+        {steps.map((s, i) => (
+          <BreadcrumbItem key={i}>
+            <BreadcrumbLink
+              onClick={() => step > i + 1 && setStep(i + 1)}
+              className={`cursor-pointer ${
+                step === i + 1
+                  ? "text-[var(--primary)] font-semibold"
+                  : step > i + 1
+                    ? "text-foreground hover:text-[var(--primary)]"
+                    : "text-muted-foreground cursor-default"
+              }`}
+            >
+              {s.label}
+            </BreadcrumbLink>
+            {i < steps.length - 1 && <BreadcrumbSeparator />}
+          </BreadcrumbItem>
+        ))}
+      </BreadcrumbList>
+    </Breadcrumb>
   );
 }

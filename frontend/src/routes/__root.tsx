@@ -26,7 +26,7 @@ function RootLayout() {
     <div className="flex flex-col min-h-screen">
       <nav className="flex items-center justify-between p-4 border-b bg-foreground">
         {/* LEFT LINKS */}
-        <div className="flex items-center gap-4">
+        <div id="mainMenu" className="flex items-center gap-4">
           <Link to="/" className="font-semibold text-lg">
             {t("farmly")}
           </Link>

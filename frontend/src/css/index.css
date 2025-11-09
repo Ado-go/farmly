@@ -156,13 +156,13 @@ button {
   cursor: pointer;
 }
 
-a {
+#mainMenu a {
   font-weight: 500;
   color: oklch(0.78 0.15 145);
   text-decoration: none;
 }
 
-a:hover {
+#mainMenu a:hover {
   color: oklch(0.83 0.15 85);
 }
 
