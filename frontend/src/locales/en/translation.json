@@ -114,7 +114,8 @@
     "passwordChangeSuccess": "Password changed successfully",
     "passwordChangeError": "Failed to change password",
     "tabProfile": "Profile",
-    "tabOrders": "Orders"
+    "tabOrders": "Orders",
+    "tabSales": "Sales"
   },
   "farmPage": {
     "title": "My Farms",
@@ -402,6 +403,25 @@
     "total": "Total",
     "cancel": "Cancel order",
     "canceled": "Order was canceled.",
-    "cancelError": "Failed to cancel the order."
+    "cancelError": "Failed to cancel the order.",
+    "confirmCancelTitle": "Cancel order",
+    "confirmCancelText": "Are you sure you want to cancel this order? This action cannot be undone.",
+    "confirmDelete": "Confirm",
+    "cancelDelete": "Cancel"
+  },
+  "salesPage": {
+    "loading": "Loading farmer orders...",
+    "empty": "No orders yet.",
+    "order": "Order",
+    "status": "Status",
+    "buyer": "Buyer",
+    "cancelItem": "Cancel item",
+    "itemCanceled": "Item has been canceled.",
+    "itemCancelError": "Failed to cancel item.",
+    "confirmCancelTitle": "Cancel this product?",
+    "confirmCancelText": "After canceling, this product will be removed from the customer's order.",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "canceled": "Canceled"
   }
 }

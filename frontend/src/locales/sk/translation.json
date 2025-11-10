@@ -114,7 +114,8 @@
     "passwordChangeSuccess": "Heslo bolo úspešne zmenené",
     "passwordChangeError": "Zmena hesla zlyhala",
     "tabProfile": "Profil",
-    "tabOrders": "Objednávky"
+    "tabOrders": "Objednávky",
+    "tabSales": "Predaje"
   },
   "farmPage": {
     "title": "Moje farmy",
@@ -402,6 +403,25 @@
     "total": "Celková cena",
     "cancel": "Zrušiť objednávku",
     "canceled": "Objednávka bola zrušená.",
-    "cancelError": "Nepodarilo sa zrušiť objednávku."
+    "cancelError": "Nepodarilo sa zrušiť objednávku.",
+    "confirmCancelTitle": "Zrušiť objednávku",
+    "confirmCancelText": "Naozaj chcete zrušiť túto objednávku? Táto akcia je nezvratná.",
+    "confirmDelete": "Potvrdiť",
+    "cancelDelete": "Zrušiť"
+  },
+  "salesPage": {
+    "loading": "Načítavam objednávky farmára...",
+    "empty": "Zatiaľ nemáš žiadne objednávky.",
+    "order": "Objednávka",
+    "status": "Stav",
+    "buyer": "Zákazník",
+    "cancelItem": "Zrušiť produkt",
+    "itemCanceled": "Produkt bol zrušený.",
+    "itemCancelError": "Nepodarilo sa zrušiť produkt.",
+    "confirmCancelTitle": "Naozaj chceš zrušiť tento produkt?",
+    "confirmCancelText": "Po zrušení produkt zmizne z objednávky zákazníka.",
+    "cancel": "Zrušiť",
+    "confirm": "Potvrdiť",
+    "canceled": "Zrušené"
   }
 }

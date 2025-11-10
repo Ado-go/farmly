@@ -1,435 +1,50 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { apiFetch } from "../lib/api";
-import { useAuth } from "../context/AuthContext";
-import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { createFileRoute } from "@tanstack/react-router";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "@/context/AuthContext";
+
+import ProfileTab from "@/components/profileTabs/ProfileTab";
+import OrdersTab from "@/components/profileTabs/OrdersTab";
+import SalesTab from "@/components/profileTabs/SalesTab";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
 });
 
-const updateProfileSchema = z.object({
-  name: z.string().min(2, "registerPage.name_min"),
-  phone: z
-    .string()
-    .min(6, "registerPage.phone_min")
-    .regex(/^\+?\d{6,15}$/, "registerPage.phone_invalid"),
-  role: z.enum(["CUSTOMER", "FARMER"]),
-});
-
-const deleteProfileSchema = z.object({
-  password: z.string().min(1, "profilePage.deletePasswordLabel"),
-});
-
-const changePasswordSchema = z.object({
-  oldPassword: z.string().min(6, "profilePage.oldPasswordRequired"),
-  newPassword: z.string().min(6, "profilePage.newPasswordMin"),
-});
-
-type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
-type UpdateProfileForm = z.infer<typeof updateProfileSchema>;
-type DeleteProfileForm = z.infer<typeof deleteProfileSchema>;
-
 function ProfilePage() {
   const { t } = useTranslation();
-  const { setUser } = useAuth();
-  const queryClient = useQueryClient();
-  const [isEditing, setIsEditing] = useState(false);
-  const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
-
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["profile"],
-    queryFn: () => apiFetch("/profile"),
-    retry: false,
-  });
-
-  const { data: orders, isLoading: loadingOrders } = useQuery({
-    queryKey: ["myOrders"],
-    queryFn: () => apiFetch("/checkout/my-orders"),
-  });
-
-  const cancelOrderMutation = useMutation({
-    mutationFn: (orderId: number) =>
-      apiFetch(`/checkout/${orderId}/cancel`, { method: "PATCH" }),
-    onSuccess: () => {
-      toast.success(t("ordersPage.canceled"));
-      queryClient.invalidateQueries({ queryKey: ["myOrders"] });
-    },
-    onError: () => toast.error(t("ordersPage.cancelError")),
-  });
-
-  const {
-    register: changePasswordRegister,
-    handleSubmit: handleChangePasswordSubmit,
-    formState: { errors: changePasswordErrors },
-    reset: resetChangePassword,
-  } = useForm<ChangePasswordForm>({
-    resolver: zodResolver(changePasswordSchema),
-  });
-
-  const changePasswordMutation = useMutation({
-    mutationFn: (values: ChangePasswordForm) =>
-      apiFetch("/auth/change-password", {
-        method: "POST",
-        body: JSON.stringify(values),
-        headers: { "Content-Type": "application/json" },
-      }),
-    onSuccess: () => {
-      toast.success(t("profilePage.passwordChangeSuccess"));
-      resetChangePassword();
-      setOpen(false);
-    },
-    onError: () => toast.error(t("profilePage.passwordChangeError")),
-  });
-
-  useEffect(() => {
-    if (data?.user) setUser(data.user);
-  }, [data, setUser]);
-
-  const {
-    register: updateRegister,
-    handleSubmit: handleUpdateSubmit,
-    reset: resetUpdate,
-    formState: { errors: updateErrors },
-  } = useForm<UpdateProfileForm>({
-    resolver: zodResolver(updateProfileSchema),
-    values: {
-      name: data?.user?.name ?? "",
-      phone: data?.user?.phone ?? "",
-      role: data?.user?.role ?? "CUSTOMER",
-    },
-  });
-
-  const {
-    register: deleteRegister,
-    handleSubmit: handleDeleteSubmit,
-    reset: resetDelete,
-    formState: { errors: deleteErrors },
-  } = useForm<DeleteProfileForm>({
-    resolver: zodResolver(deleteProfileSchema),
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: (values: UpdateProfileForm) =>
-      apiFetch("/profile", {
-        method: "PUT",
-        body: JSON.stringify(values),
-        headers: { "Content-Type": "application/json" },
-      }),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-      setUser(data.user);
-      setIsEditing(false);
-      toast.success(t("profilePage.updateSuccess"));
-    },
-    onError: () => toast.error(t("profilePage.updateError")),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (values: DeleteProfileForm) =>
-      apiFetch("/profile", {
-        method: "DELETE",
-        body: JSON.stringify(values),
-        headers: { "Content-Type": "application/json" },
-      }),
-    onSuccess: () => {
-      setUser(null);
-      toast.success(t("profilePage.deleteSuccess"));
-      navigate({ to: "/" });
-    },
-    onError: () => toast.error(t("profilePage.deleteError")),
-  });
-
-  if (isLoading) return <p>{t("profilePage.loading")}</p>;
-  if (isError)
-    return <p className="text-red-500">{t("profilePage.loadError")}</p>;
-
-  const user = data.user;
-  const onUpdate = (values: UpdateProfileForm) => updateMutation.mutate(values);
-  const onDelete = (values: DeleteProfileForm) => {
-    deleteMutation.mutate(values);
-    resetDelete();
-  };
+  const { user } = useAuth();
 
   return (
-    <div className="max-w-3xl mx-auto p-4 space-y-6">
+    <div className="max-w-4xl mx-auto p-4 space-y-6">
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList
+          className={`grid ${
+            user?.role === "FARMER" ? "grid-cols-3" : "grid-cols-2"
+          } w-full`}
+        >
           <TabsTrigger value="profile">
             {t("profilePage.tabProfile")}
           </TabsTrigger>
           <TabsTrigger value="orders">{t("profilePage.tabOrders")}</TabsTrigger>
+          {user?.role === "FARMER" && (
+            <TabsTrigger value="sales">{t("profilePage.tabSales")}</TabsTrigger>
+          )}
         </TabsList>
 
-        {/* profile */}
         <TabsContent value="profile">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("profile")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <form
-                onSubmit={handleUpdateSubmit(onUpdate)}
-                className="space-y-4"
-              >
-                <div>
-                  <Label>{t("profilePage.name_label")}</Label>
-                  {isEditing ? (
-                    <>
-                      <Input {...updateRegister("name")} />
-                      {updateErrors.name && (
-                        <p className="text-red-500">
-                          {t(updateErrors.name.message!)}
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <p>{user.name}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label>{t("profilePage.email_label")}</Label>
-                  <p>{user.email}</p>
-                </div>
-
-                <div>
-                  <Label>{t("profilePage.role_label")}</Label>
-                  {isEditing ? (
-                    <select
-                      {...updateRegister("role")}
-                      className="border p-2 rounded w-full"
-                    >
-                      <option value="CUSTOMER">
-                        {t("registerPage.role_customer")}
-                      </option>
-                      <option value="FARMER">
-                        {t("registerPage.role_farmer")}
-                      </option>
-                    </select>
-                  ) : (
-                    <p>{user.role}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label>{t("profilePage.phone_label")}</Label>
-                  {isEditing ? (
-                    <>
-                      <Input {...updateRegister("phone")} />
-                      {updateErrors.phone && (
-                        <p className="text-red-500">
-                          {t(updateErrors.phone.message!)}
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <p>{user.phone}</p>
-                  )}
-                </div>
-
-                {isEditing ? (
-                  <div className="flex gap-2">
-                    <Button type="submit" className="flex-1">
-                      {t("profilePage.save")}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="flex-1"
-                      onClick={() => {
-                        setIsEditing(false);
-                        resetUpdate();
-                      }}
-                    >
-                      {t("profilePage.cancel")}
-                    </Button>
-                  </div>
-                ) : (
-                  <Button type="button" onClick={() => setIsEditing(true)}>
-                    {t("profilePage.edit")}
-                  </Button>
-                )}
-              </form>
-            </CardContent>
-          </Card>
-
-          <Separator className="my-6" />
-
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="destructive" className="w-full">
-                {t("profilePage.delete")}
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t("profilePage.deleteTitle")}</DialogTitle>
-              </DialogHeader>
-
-              <form
-                onSubmit={handleDeleteSubmit(onDelete)}
-                className="space-y-4"
-              >
-                <div>
-                  <Label>{t("profilePage.deletePasswordLabel")}</Label>
-                  <Input
-                    type="password"
-                    {...deleteRegister("password")}
-                    placeholder=""
-                  />
-                  {deleteErrors.password && (
-                    <p className="text-red-500">
-                      {t(deleteErrors.password.message!)}
-                    </p>
-                  )}
-                </div>
-
-                <Button
-                  type="submit"
-                  variant="destructive"
-                  className="w-full"
-                  disabled={deleteMutation.isPending}
-                >
-                  {t("profilePage.delete")}
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="w-full">
-                {t("profilePage.changePassword")}
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {t("profilePage.changePasswordTitle")}
-                </DialogTitle>
-              </DialogHeader>
-
-              <form
-                onSubmit={handleChangePasswordSubmit((values) =>
-                  changePasswordMutation.mutate(values)
-                )}
-                className="space-y-4"
-              >
-                <div>
-                  <Label>{t("profilePage.oldPasswordLabel")}</Label>
-                  <Input
-                    type="password"
-                    {...changePasswordRegister("oldPassword")}
-                    placeholder=""
-                  />
-                  {changePasswordErrors.oldPassword && (
-                    <p className="text-red-500">
-                      {t(changePasswordErrors.oldPassword.message!)}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label>{t("profilePage.newPasswordLabel")}</Label>
-                  <Input
-                    type="password"
-                    {...changePasswordRegister("newPassword")}
-                    placeholder=""
-                  />
-                  {changePasswordErrors.newPassword && (
-                    <p className="text-red-500">
-                      {t(changePasswordErrors.newPassword.message!)}
-                    </p>
-                  )}
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={changePasswordMutation.isPending}
-                >
-                  {t("profilePage.savePassword")}
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <ProfileTab />
         </TabsContent>
 
-        {/* Orders */}
         <TabsContent value="orders">
-          {loadingOrders ? (
-            <p>{t("ordersPage.loading")}</p>
-          ) : orders?.length === 0 ? (
-            <p className="text-gray-500">{t("ordersPage.empty")}</p>
-          ) : (
-            <div className="space-y-4">
-              {orders.map((order: any) => (
-                <Card key={order.id}>
-                  <CardHeader>
-                    <CardTitle>
-                      {t("ordersPage.order")} #{order.orderNumber.slice(0, 8)}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p>
-                      {t("ordersPage.status")}:{" "}
-                      <span className="font-medium">{order.status}</span>
-                    </p>
-                    <p>
-                      {t("ordersPage.total")}: {order.totalPrice} €
-                    </p>
-                    <div className="mt-2 space-y-1">
-                      {order.items.map((i: any) => (
-                        <div
-                          key={i.id}
-                          className="text-sm flex justify-between"
-                        >
-                          <span>{i.productName}</span>
-                          <span>
-                            {i.quantity}× {i.unitPrice} €
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {order.status === "PENDING" && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="mt-4"
-                        onClick={() => cancelOrderMutation.mutate(order.id)}
-                        disabled={cancelOrderMutation.isPending}
-                      >
-                        {t("ordersPage.cancel")}
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+          <OrdersTab />
         </TabsContent>
+
+        {user?.role === "FARMER" && (
+          <TabsContent value="sales">
+            <SalesTab />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
