@@ -186,7 +186,11 @@
     "price": "Price",
     "add": "Add product",
     "saving": "Saving...",
-    "uploadImage": "Upload image"
+    "uploadImage": "Upload image",
+    "editTitle": "Edit product",
+    "stock": "Stock",
+    "delete": "Delete product",
+    "save": "Save changes"
   },
   "productsPage": {
     "title": "All Products",
@@ -423,5 +427,13 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "canceled": "Canceled"
+  },
+  "upload": {
+    "button": "Upload images",
+    "uploading": "Uploading...",
+    "failed": "Upload failed",
+    "deleted": "Image deleted successfully",
+    "deleteFailed": "Failed to delete image",
+    "addMore": "Add more images"
   }
 }

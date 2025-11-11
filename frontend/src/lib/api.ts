@@ -11,14 +11,20 @@ async function safeJson(res: Response) {
 export async function apiFetch(path: string, options: RequestInit = {}) {
   const url = `${API_BASE}${path}`;
 
+  const isFormData = options.body instanceof FormData;
+
   const baseOptions: RequestInit = {
-    credentials: "include", // cookies (access/refresh) are sent automatically
+    credentials: "include", // cookies (access/refresh)
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...(options.headers || {}),
     },
     ...options,
   };
+
+  if (baseOptions.body && !isFormData && typeof baseOptions.body !== "string") {
+    baseOptions.body = JSON.stringify(baseOptions.body);
+  }
 
   let res = await fetch(url, baseOptions);
 
@@ -30,10 +36,8 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
     });
 
     if (refresh.ok) {
-      // refresh succeeded -> retry original request
       res = await fetch(url, baseOptions);
     } else {
-      // refresh failed -> session expired
       const err = await safeJson(refresh);
       throw new Error(err?.message || "Session expired");
     }

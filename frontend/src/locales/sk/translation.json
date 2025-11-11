@@ -186,7 +186,11 @@
     "price": "Cena",
     "uploadImage": "Nahrať obrázok",
     "add": "Pridať produkt",
-    "saving": "Ukladám..."
+    "saving": "Ukladám...",
+    "editTitle": "Upraviť produkt",
+    "stock": "Počet kusov",
+    "delete": "Zmazať produkt",
+    "save": "Uložiť zmeny"
   },
   "productsPage": {
     "title": "Všetky produkty",
@@ -423,5 +427,13 @@
     "cancel": "Zrušiť",
     "confirm": "Potvrdiť",
     "canceled": "Zrušené"
+  },
+  "upload": {
+    "button": "Nahrať obrázky",
+    "uploading": "Nahrávam...",
+    "failed": "Nahrávanie zlyhalo",
+    "deleted": "Obrázok bol odstránený",
+    "deleteFailed": "Nepodarilo sa odstrániť obrázok",
+    "addMore": "Pridať ďalšie obrázky"
   }
 }
