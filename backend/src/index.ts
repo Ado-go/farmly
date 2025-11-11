@@ -32,6 +32,9 @@ import checkoutRoutes from "./routes/checkout.ts";
 
 import checkoutPreorderRoutes from "./routes/checkoutPreorder.ts";
 
+// uploads images
+import uploadRouter from "./routes/upload.ts";
+
 const app = express();
 app.use(cookieParser());
 app.use(
@@ -71,6 +74,10 @@ app.use("/api/public-events", publicEventsRoutes);
 app.use("/api/checkout", checkoutRoutes);
 
 app.use("/api/checkout-preorder", checkoutPreorderRoutes);
+
+// upload images
+
+app.use("/api", uploadRouter);
 
 // test routes //
 app.get("/api/hello", (req, res) => {
