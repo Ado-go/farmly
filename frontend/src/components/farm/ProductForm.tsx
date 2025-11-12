@@ -9,13 +9,7 @@ import { apiFetch } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import { ImageCarousel } from "@/components/ImageCarousel";
 
 const productSchema = z.object({
   name: z.string().min(1),
@@ -24,7 +18,6 @@ const productSchema = z.object({
   price: z.number().positive(),
   stock: z.number().nonnegative().default(0),
 });
-
 type ProductFormData = z.infer<typeof productSchema>;
 
 export function ProductForm({
@@ -38,7 +31,8 @@ export function ProductForm({
 }) {
   const { t } = useTranslation();
   const [files, setFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
+  const [previews, setPreviews] = useState<{ url: string }[]>([]);
+
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -68,7 +62,7 @@ export function ProductForm({
         body: {
           ...data,
           farmId,
-          images: uploaded.map((u) => ({ url: u.url })),
+          images: uploaded.map((u) => ({ url: u.url, publicId: u.publicId })),
         },
       });
     },
@@ -87,7 +81,10 @@ export function ProductForm({
     if (!e.target.files) return;
     const f = Array.from(e.target.files);
     setFiles((p) => [...p, ...f]);
-    setPreviews((p) => [...p, ...f.map((file) => URL.createObjectURL(file))]);
+    setPreviews((p) => [
+      ...p,
+      ...f.map((file) => ({ url: URL.createObjectURL(file) })),
+    ]);
   };
 
   const removeFile = (idx: number) => {
@@ -101,30 +98,13 @@ export function ProductForm({
       className="space-y-3"
     >
       {previews.length > 0 && (
-        <Carousel>
-          <CarouselContent>
-            {previews.map((src, i) => (
-              <CarouselItem key={i}>
-                <div className="relative">
-                  <img
-                    src={src}
-                    alt="preview"
-                    className="h-48 w-full object-cover rounded"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeFile(i)}
-                    className="absolute top-1 right-1 bg-white/80 text-xs rounded px-1"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
+        <ImageCarousel
+          images={previews}
+          onDelete={removeFile}
+          editable
+          height="h-48"
+          emptyLabel={t("farmPage.noImage")}
+        />
       )}
 
       <Input {...form.register("name")} placeholder={t("product.name")} />
@@ -154,7 +134,7 @@ export function ProductForm({
           {t("farmPage.cancel")}
         </Button>
         <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? t("farmPage.saving") : t("farmPage.add")}
+          {mutation.isPending ? t("farmPage.saving") : t("product.add")}
         </Button>
       </div>
     </form>

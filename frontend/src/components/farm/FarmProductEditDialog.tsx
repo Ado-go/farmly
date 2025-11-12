@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ImageCarousel } from "../ImageCarousel";
+import { ImageCarousel } from "@/components/ImageCarousel";
 
 export function FarmProductEditDialog({
   product,
@@ -30,27 +30,19 @@ export function FarmProductEditDialog({
 
   const [images, setImages] = useState<any[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [removedIds, setRemovedIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (product?.product?.images) {
       setImages(product.product.images);
       setNewFiles([]);
-    } else {
-      setImages([]);
+      setRemovedIds([]);
     }
   }, [product]);
-
-  const deleteImageMutation = useMutation({
-    mutationFn: async (publicId: string) =>
-      apiFetch(`/images/${publicId}`, { method: "DELETE" }),
-    onSuccess: () => toast.success(t("upload.deleted")),
-    onError: () => toast.error(t("upload.deleteFailed")),
-  });
 
   const updateProduct = useMutation({
     mutationFn: async () => {
       const uploaded: any[] = [];
-
       for (const file of newFiles) {
         const formData = new FormData();
         formData.append("image", file);
@@ -58,12 +50,14 @@ export function FarmProductEditDialog({
           method: "POST",
           body: formData,
         });
-        uploaded.push(res);
+        uploaded.push({ url: res.url, publicId: res.publicId });
       }
 
-      const allImages = [...images, ...uploaded].map((img) => ({
-        url: img.url,
-      }));
+      const keptImages = images.filter(
+        (img) => !removedIds.includes(img.publicId)
+      );
+
+      const allImages = [...keptImages, ...uploaded];
 
       const body = {
         name: product.product.name,
@@ -85,14 +79,16 @@ export function FarmProductEditDialog({
     onError: () => toast.error(t("farmPage.editError")),
   });
 
-  const handleDeleteImage = (img: any, idx: number) => {
-    if (img.publicId) deleteImageMutation.mutate(img.publicId);
+  const handleDeleteAt = (idx: number) => {
+    const img = images[idx];
+    setRemovedIds((prev) => [...prev, img.publicId]);
     setImages((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleNewFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    setNewFiles((p) => [...p, ...Array.from(e.target.files)]);
+    const list = Array.from(e.target.files);
+    setNewFiles((prev) => [...prev, ...list]);
   };
 
   return (
@@ -104,17 +100,22 @@ export function FarmProductEditDialog({
 
         {product && (
           <div className="space-y-3">
-            {images.length > 0 || newFiles.length > 0 ? (
-              <ImageCarousel
-                images={images}
-                onDelete={(i) => handleDeleteImage(images[i], i)}
-                editable
-              />
-            ) : (
-              <div className="w-full h-56 bg-gray-200 rounded flex items-center justify-center text-gray-500">
-                {t("farmPage.noImage")}
-              </div>
-            )}
+            <ImageCarousel
+              images={[
+                ...images,
+                ...newFiles.map((f) => ({ url: URL.createObjectURL(f) })),
+              ]}
+              onDelete={(i) => {
+                if (i < images.length) handleDeleteAt(i);
+                else
+                  setNewFiles((prev) =>
+                    prev.filter((_, idx) => idx !== i - images.length)
+                  );
+              }}
+              editable
+              height="h-56"
+              emptyLabel={t("farmPage.noImage")}
+            />
 
             <input
               type="file"

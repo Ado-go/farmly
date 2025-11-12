@@ -12,11 +12,13 @@ export function ImageCarousel({
   onDelete,
   editable = false,
   height = "h-56",
+  emptyLabel = "Bez obrázka",
 }: {
   images: { url: string }[];
   onDelete?: (idx: number) => void;
   editable?: boolean;
   height?: string;
+  emptyLabel?: string;
 }) {
   if (!images?.length) {
     return (
@@ -26,7 +28,7 @@ export function ImageCarousel({
           height
         )}
       >
-        Bez obrázka
+        {emptyLabel}
       </div>
     );
   }
@@ -57,8 +59,8 @@ export function ImageCarousel({
           ))}
         </CarouselContent>
 
-        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-700 rounded-full" />
-        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-700 rounded-full" />
+        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-700 rounded-full shadow" />
+        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-700 rounded-full shadow" />
       </Carousel>
     </div>
   );
