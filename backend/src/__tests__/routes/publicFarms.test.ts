@@ -36,7 +36,14 @@ beforeAll(async () => {
       postalCode: "81101",
       country: "Slovakia",
       farmerId,
-      images: { create: [{ url: "https://example.com/farm1.jpg" }] },
+      images: {
+        create: [
+          {
+            url: "https://example.com/farm1.jpg",
+            publicId: "example_folder/exampleId",
+          },
+        ],
+      },
     },
   });
 
@@ -50,7 +57,14 @@ beforeAll(async () => {
       postalCode: "04001",
       country: "Slovakia",
       farmerId,
-      images: { create: [{ url: "https://example.com/farm2.jpg" }] },
+      images: {
+        create: [
+          {
+            url: "https://example.com/farm2.jpg",
+            publicId: "example_folder/anotherId",
+          },
+        ],
+      },
     },
   });
 

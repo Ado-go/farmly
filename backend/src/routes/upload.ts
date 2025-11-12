@@ -6,6 +6,15 @@ import { authenticateToken } from "../middleware/auth.ts";
 
 const router = Router();
 
+interface CloudinaryUploadedFile {
+  path: string;
+  filename: string;
+  width?: number;
+  height?: number;
+  bytes?: number;
+  format?: string;
+}
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
   api_key: process.env.CLOUDINARY_API_KEY!,
@@ -41,8 +50,7 @@ router.post(
   upload.single("image"),
   async (req, res) => {
     try {
-      // @ts-ignore - multer-storage-cloudinary
-      const file = req.file;
+      const file = req.file as CloudinaryUploadedFile;
       if (!file?.path || !file?.filename) {
         return res.status(400).json({ message: "Upload failed" });
       }

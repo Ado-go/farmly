@@ -92,6 +92,7 @@ model Farm {
 model FarmImage {
   id       Int    @id @default(autoincrement())
   url      String
+  publicId String
   farm     Farm   @relation(fields: [farmId], references: [id], onDelete: Cascade)
   farmId   Int
 }
@@ -118,6 +119,7 @@ model Product {
 model ProductImage {
   id          Int       @id @default(autoincrement())
   url         String
+  publicId    String
   product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId   Int
 }

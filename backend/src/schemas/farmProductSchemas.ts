@@ -12,10 +12,12 @@ export const productSchema = z.object({
     .nonnegative("Stock cannot be negative")
     .default(0),
   farmId: z.number("Farm ID is required"),
+
   images: z
     .array(
       z.object({
         url: z.string().url("Invalid image URL"),
+        publicId: z.string().min(1, "Missing publicId"),
       })
     )
     .optional(),

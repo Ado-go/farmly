@@ -3,6 +3,7 @@ import prisma from "../prisma.ts";
 import { productSchema } from "../schemas/farmProductSchemas.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
 import { authenticateToken, authorizeRole } from "../middleware/auth.ts";
+import { v2 as cloudinary } from "cloudinary";
 
 const router = Router();
 
@@ -49,9 +50,12 @@ router.post(
           ...productData,
           images: images
             ? {
-                create: images.map((img: { url: string }) => ({
-                  url: img.url,
-                })),
+                create: images.map(
+                  (img: { url: string; publicId: string }) => ({
+                    url: img.url,
+                    publicId: img.publicId,
+                  })
+                ),
               }
             : undefined,
         },
@@ -76,12 +80,12 @@ router.post(
       const status = error.status || 400;
       res
         .status(status)
-        .json({ error: error.message || "Failed to process request" });
+        .json({ error: error.message || "Failed to create farm product" });
     }
   }
 );
 
-// GET /farm-product/all - All prod from all farms
+// GET /farm-product/all
 router.get(
   "/all",
   authenticateToken,
@@ -89,10 +93,7 @@ router.get(
   async (req, res) => {
     try {
       const userId = req.user?.id;
-
-      if (!userId) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
       const farms = await prisma.farm.findMany({
         where: { farmerId: userId },
@@ -107,13 +108,12 @@ router.get(
       });
 
       const allFarmProducts = farms.flatMap((f) => f.farmProducts ?? []) ?? [];
-
-      return res.status(200).json(allFarmProducts);
+      res.status(200).json(allFarmProducts);
     } catch (error: any) {
-      console.error("🔥 ERROR /farm-product/all:", error);
-      return res.status(400).json({
-        error: error.message || "Failed to fetch farm products",
-      });
+      console.error("ERROR /farm-product/all:", error);
+      res
+        .status(400)
+        .json({ error: error.message || "Failed to fetch farm products" });
     }
   }
 );
@@ -140,7 +140,7 @@ router.get(
       const status = error.status || 400;
       res
         .status(status)
-        .json({ error: error.message || "Failed to process request" });
+        .json({ error: error.message || "Failed to fetch farm products" });
     }
   }
 );
@@ -163,14 +163,13 @@ router.get(
 
       if (!farmProduct)
         return res.status(404).json({ error: "Farm product not found" });
-
       await checkFarmOwnership(farmProduct.farmId, req.user?.id);
       res.json(farmProduct);
     } catch (error: any) {
       const status = error.status || 400;
       res
         .status(status)
-        .json({ error: error.message || "Failed to process request" });
+        .json({ error: error.message || "Failed to fetch farm product" });
     }
   }
 );
@@ -184,17 +183,40 @@ router.put(
   async (req, res) => {
     try {
       const id = Number(req.params.id);
-      const { images, price, stock, name, category, description } = req.body;
+      const {
+        images = [],
+        price,
+        stock,
+        name,
+        category,
+        description,
+      } = req.body;
 
       const farmProduct = await prisma.farmProduct.findUnique({
         where: { id },
-        include: { product: true },
+        include: { product: { include: { images: true } } },
       });
 
       if (!farmProduct)
         return res.status(404).json({ error: "Farm product not found" });
-
       await checkFarmOwnership(farmProduct.farmId, req.user?.id);
+
+      const oldImages = farmProduct.product.images;
+      const oldIds = oldImages.map((i) => i.publicId);
+      const newIds = images.map((i: any) => i.publicId);
+
+      const toDelete = oldIds.filter((pid) => !newIds.includes(pid));
+
+      for (const publicId of toDelete) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+          await prisma.productImage.deleteMany({ where: { publicId } });
+        } catch (e) {
+          console.warn(`Could not delete ${publicId}:`, e);
+        }
+      }
+
+      const toAdd = images.filter((img: any) => !oldIds.includes(img.publicId));
 
       const updated = await prisma.farmProduct.update({
         where: { id },
@@ -206,14 +228,12 @@ router.put(
               ...(name && { name }),
               ...(category && { category }),
               ...(description && { description }),
-              ...(images && {
-                images: {
-                  deleteMany: {},
-                  create: images.map((img: { url: string }) => ({
-                    url: img.url,
-                  })),
-                },
-              }),
+              images: {
+                create: toAdd.map((img: any) => ({
+                  url: img.url,
+                  publicId: img.publicId,
+                })),
+              },
             },
           },
         },
@@ -243,12 +263,20 @@ router.delete(
       const id = Number(req.params.id);
       const farmProduct = await prisma.farmProduct.findUnique({
         where: { id },
-        include: { farm: true, product: true },
+        include: { farm: true, product: { include: { images: true } } },
       });
       if (!farmProduct)
         return res.status(404).json({ error: "Farm product not found" });
 
       await checkFarmOwnership(farmProduct.farmId, req.user?.id);
+
+      for (const img of farmProduct.product.images) {
+        try {
+          await cloudinary.uploader.destroy(img.publicId);
+        } catch (e) {
+          console.warn(`Could not delete ${img.publicId}:`, e);
+        }
+      }
 
       await prisma.farmProduct.delete({ where: { id } });
       await prisma.product.delete({ where: { id: farmProduct.product.id } });
@@ -258,37 +286,7 @@ router.delete(
       const status = error.status || 400;
       res
         .status(status)
-        .json({ error: error.message || "Failed to process request" });
-    }
-  }
-);
-
-// DELETE ALL products
-router.delete(
-  "/farm/:farmId",
-  authenticateToken,
-  authorizeRole("FARMER"),
-  async (req, res) => {
-    try {
-      const farmId = Number(req.params.farmId);
-      await checkFarmOwnership(farmId, req.user?.id);
-
-      const farmProducts = await prisma.farmProduct.findMany({
-        where: { farmId },
-        include: { product: true },
-      });
-
-      for (const fp of farmProducts) {
-        await prisma.product.delete({ where: { id: fp.product.id } });
-      }
-
-      await prisma.farmProduct.deleteMany({ where: { farmId } });
-      res.json({ message: "All farm products deleted" });
-    } catch (error: any) {
-      const status = error.status || 400;
-      res
-        .status(status)
-        .json({ error: error.message || "Failed to process request" });
+        .json({ error: error.message || "Failed to delete farm product" });
     }
   }
 );
