@@ -3,6 +3,7 @@ import prisma from "../prisma.ts";
 import { farmSchema } from "../schemas/farmSchemas.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
 import { authenticateToken, authorizeRole } from "../middleware/auth.ts";
+import { v2 as cloudinary } from "cloudinary";
 
 const router = Router();
 
@@ -14,14 +15,23 @@ router.post(
   validateRequest(farmSchema),
   async (req, res) => {
     const userId = req.user?.id;
-
     try {
+      const { images = [], ...data } = req.body;
+
       const farm = await prisma.farm.create({
         data: {
-          ...req.body,
+          ...data,
           farmerId: userId,
+          images: {
+            create: images.map((img: { url: string; publicId: string }) => ({
+              url: img.url,
+              publicId: img.publicId,
+            })),
+          },
         },
+        include: { images: true },
       });
+
       res.status(201).json(farm);
     } catch (err) {
       console.error(err);
@@ -38,25 +48,10 @@ router.get(
   async (req, res) => {
     try {
       const userId = req.user?.id;
-
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized access" });
-      }
-
       const farms = await prisma.farm.findMany({
         where: { farmerId: userId },
-        select: {
-          id: true,
-          name: true,
-          city: true,
-          street: true,
-          region: true,
-          postalCode: true,
-          country: true,
-          description: true,
-        },
+        include: { images: true },
       });
-
       res.json(farms);
     } catch (err) {
       console.error(err);
@@ -71,41 +66,18 @@ router.get(
   authenticateToken,
   authorizeRole("FARMER"),
   async (req, res) => {
+    const userId = req.user?.id;
+    const farmId = parseInt(req.params.id, 10);
     try {
-      const userId = req.user?.id;
-      const farmId = parseInt(req.params.id, 10);
-
-      if (isNaN(farmId)) {
-        return res.status(400).json({ message: "Invalid farm ID" });
-      }
-
       const farm = await prisma.farm.findFirst({
-        where: {
-          id: farmId,
-          farmerId: userId,
-        },
-        select: {
-          id: true,
-          name: true,
-          city: true,
-          street: true,
-          region: true,
-          postalCode: true,
-          country: true,
-          description: true,
-        },
+        where: { id: farmId, farmerId: userId },
+        include: { images: true },
       });
-
-      if (!farm) {
-        return res
-          .status(404)
-          .json({ message: "Farm not found or unauthorized" });
-      }
-
+      if (!farm) return res.status(404).json({ message: "Farm not found" });
       res.json(farm);
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: "Error while loading farm" });
+      res.status(500).json({ message: "Error loading farm" });
     }
   }
 );
@@ -120,27 +92,72 @@ router.put(
     try {
       const userId = req.user?.id;
       const farmId = parseInt(req.params.id, 10);
+      const { images = [], ...data } = req.body as {
+        images?: { url: string; publicId: string }[];
+        [k: string]: any;
+      };
 
-      if (isNaN(farmId)) {
-        return res.status(400).json({ message: "Invalid farm ID" });
-      }
-
-      const existingFarm = await prisma.farm.findFirst({
-        where: {
-          id: farmId,
-          farmerId: userId,
-        },
+      const existing = await prisma.farm.findFirst({
+        where: { id: farmId, farmerId: userId },
+        include: { images: true },
       });
 
-      if (!existingFarm) {
+      if (!existing)
         return res
           .status(404)
           .json({ message: "Farm not found or unauthorized" });
-      }
 
-      const updatedFarm = await prisma.farm.update({
+      const existingPublicIds = existing.images.map((i) => i.publicId);
+      const newPublicIds = (images || [])
+        .map((i) => i.publicId)
+        .filter(Boolean);
+
+      const toDelete = existingPublicIds.filter(
+        (pid) => !newPublicIds.includes(pid)
+      );
+
+      await prisma.$transaction(async (tx) => {
+        if (toDelete.length > 0) {
+          await Promise.all(
+            toDelete.map(async (pid) => {
+              try {
+                await cloudinary.uploader.destroy(pid, {
+                  resource_type: "image",
+                });
+              } catch (e) {
+                console.error("Failed to delete Cloudinary image:", pid, e);
+              }
+            })
+          );
+
+          await tx.farmImage.deleteMany({
+            where: { farmId, publicId: { in: toDelete } },
+          });
+        }
+
+        const newImages = (images || []).filter(
+          (img) => !existingPublicIds.includes(img.publicId)
+        );
+
+        if (newImages.length > 0) {
+          await tx.farmImage.createMany({
+            data: newImages.map((img) => ({
+              url: img.url,
+              publicId: img.publicId,
+              farmId,
+            })),
+          });
+        }
+
+        await tx.farm.update({
+          where: { id: farmId },
+          data,
+        });
+      });
+
+      const updatedFarm = await prisma.farm.findUnique({
         where: { id: farmId },
-        data: req.body,
+        include: { images: true },
       });
 
       res.json(updatedFarm);
@@ -166,10 +183,8 @@ router.delete(
       }
 
       const existingFarm = await prisma.farm.findFirst({
-        where: {
-          id: farmId,
-          farmerId: userId,
-        },
+        where: { id: farmId, farmerId: userId },
+        include: { images: true },
       });
 
       if (!existingFarm) {
@@ -178,8 +193,27 @@ router.delete(
           .json({ message: "Farm not found or unauthorized" });
       }
 
-      await prisma.farm.delete({
-        where: { id: farmId },
+      const publicIds = (existingFarm.images || []).map((i) => i.publicId);
+
+      await prisma.$transaction(async (tx) => {
+        if (publicIds.length > 0) {
+          await Promise.all(
+            publicIds.map(async (pid) => {
+              try {
+                await cloudinary.uploader.destroy(pid, {
+                  resource_type: "image",
+                });
+              } catch (e) {
+                console.error("Failed to delete Cloudinary image:", pid, e);
+              }
+            })
+          );
+          await tx.farmImage.deleteMany({
+            where: { farmId, publicId: { in: publicIds } },
+          });
+        }
+
+        await tx.farm.delete({ where: { id: farmId } });
       });
 
       res.json({ message: "Farm was successfully deleted" });
