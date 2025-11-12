@@ -18,17 +18,17 @@ import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../lib/api";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
 
 const farmSchema = z.object({
-  name: z.string().min(2, "Názov je povinný"),
+  name: z.string().min(2),
   description: z.string().optional(),
-  city: z.string().min(2, "Mesto je povinné"),
-  street: z.string().min(2, "Ulica je povinná"),
-  region: z.string().min(2, "Región je povinný"),
-  postalCode: z.string().min(2, "PSČ je povinné"),
-  country: z.string().min(2, "Krajina je povinná"),
+  city: z.string().min(2),
+  street: z.string().min(2),
+  region: z.string().min(2),
+  postalCode: z.string().min(2),
+  country: z.string().min(2),
 });
-
 type FarmFormData = z.infer<typeof farmSchema>;
 
 export const Route = createFileRoute("/farm/")({
@@ -40,6 +40,7 @@ function FarmPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [images, setImages] = useState<UploadedImage[]>([]);
 
   const form = useForm<FarmFormData>({
     resolver: zodResolver(farmSchema),
@@ -65,14 +66,34 @@ function FarmPage() {
 
   const createFarm = useMutation({
     mutationFn: async (data: FarmFormData) => {
-      const res = await apiFetch("/farm", {
+      const uploaded: UploadedImage[] = [];
+      for (const img of images) {
+        if (img.file) {
+          const fd = new FormData();
+          fd.append("image", img.file);
+          const res = await apiFetch("/upload", { method: "POST", body: fd });
+          uploaded.push({
+            url: res.url,
+            publicId: res.publicId,
+            optimizedUrl: res.optimizedUrl,
+          });
+        } else {
+          uploaded.push({
+            url: img.url,
+            publicId: img.publicId,
+            optimizedUrl: img.optimizedUrl,
+          });
+        }
+      }
+
+      return apiFetch("/farm", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: { ...data, images: uploaded },
       });
-      return res;
     },
     onSuccess: () => {
       form.reset();
+      setImages([]);
       setOpen(false);
       toast.success(t("farmPage.farmCreated"));
       queryClient.invalidateQueries({ queryKey: ["farms"] });
@@ -116,6 +137,13 @@ function FarmPage() {
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-3 mt-2"
             >
+              <ImageUploader
+                value={images}
+                onChange={setImages}
+                editable
+                height="h-56"
+              />
+
               <Input
                 placeholder={t("farmPage.name")}
                 {...form.register("name")}
@@ -130,7 +158,6 @@ function FarmPage() {
                 placeholder={t("farmPage.description")}
                 {...form.register("description")}
               />
-
               <Input
                 placeholder={t("farmPage.city")}
                 {...form.register("city")}
@@ -171,8 +198,8 @@ function FarmPage() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {farms.map((farm: any) => {
-            const imageUrl = farm.images?.[0]?.url;
-
+            const imageUrl =
+              farm.images?.[0]?.optimizedUrl || farm.images?.[0]?.url;
             return (
               <Card
                 key={farm.id}

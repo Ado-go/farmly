@@ -45,11 +45,13 @@ export function ImageCarousel({
                   className={cn("w-full object-cover rounded", height)}
                   alt={`image-${i}`}
                 />
+
                 {editable && (
                   <button
                     type="button"
                     onClick={() => onDelete?.(i)}
-                    className="absolute top-2 right-2 bg-white/80 text-xs rounded px-1"
+                    className="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-700 text-sm rounded-full w-6 h-6 flex items-center justify-center shadow"
+                    title="Odstrániť obrázok"
                   >
                     ✕
                   </button>
@@ -59,8 +61,14 @@ export function ImageCarousel({
           ))}
         </CarouselContent>
 
-        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-700 rounded-full shadow" />
-        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-700 rounded-full shadow" />
+        <CarouselPrevious
+          type="button"
+          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-700 rounded-full shadow w-8 h-8 flex items-center justify-center"
+        />
+        <CarouselNext
+          type="button"
+          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-700 rounded-full shadow w-8 h-8 flex items-center justify-center"
+        />
       </Carousel>
     </div>
   );

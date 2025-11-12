@@ -16,17 +16,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useEffect, useState } from "react";
+import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
+import { ImageCarousel } from "@/components/ImageCarousel";
+import { apiFetch } from "@/lib/api";
 
 const farmSchema = z.object({
-  name: z.string().min(2, "Názov je povinný"),
+  name: z.string().min(2),
   description: z.string().optional(),
-  city: z.string().min(2, "Mesto je povinné"),
-  street: z.string().min(2, "Ulica je povinná"),
-  region: z.string().min(2, "Región je povinný"),
-  postalCode: z.string().min(2, "PSČ je povinné"),
-  country: z.string().min(2, "Krajina je povinná"),
+  city: z.string().min(2),
+  street: z.string().min(2),
+  region: z.string().min(2),
+  postalCode: z.string().min(2),
+  country: z.string().min(2),
 });
-
 export type FarmFormData = z.infer<typeof farmSchema>;
 
 export function FarmHeader({
@@ -41,7 +44,7 @@ export function FarmHeader({
   farm: any;
   editing: boolean;
   setEditing: (v: boolean) => void;
-  onEdit: (data: FarmFormData) => void;
+  onEdit: (data: any) => void;
   onDelete: () => void;
   isDeleting: boolean;
   isSaving: boolean;
@@ -52,23 +55,62 @@ export function FarmHeader({
     defaultValues: farm || {},
   });
 
-  const imageUrl = farm.images?.[0]?.url;
+  const [images, setImages] = useState<UploadedImage[]>([]);
+
+  useEffect(() => {
+    form.reset(farm || {});
+    const imgs = (farm?.images ?? []).map((i: any) => ({
+      url: i.optimizedUrl || i.url,
+      publicId: i.publicId,
+    }));
+    setImages(imgs);
+  }, [farm]);
+
+  const handleSave = async (data: FarmFormData) => {
+    const uploaded: UploadedImage[] = [];
+
+    for (const img of images) {
+      if (img.file) {
+        const fd = new FormData();
+        fd.append("image", img.file);
+        const res = await apiFetch("/upload", { method: "POST", body: fd });
+        uploaded.push({
+          url: res.url,
+          publicId: res.publicId,
+          optimizedUrl: res.optimizedUrl,
+        });
+      } else {
+        uploaded.push({
+          url: img.url,
+          publicId: img.publicId,
+          optimizedUrl: img.optimizedUrl,
+        });
+      }
+    }
+
+    onEdit({ ...data, images: uploaded });
+  };
 
   return (
     <div>
       <h1 className="text-4xl font-bold mb-4">{farm.name}</h1>
 
-      <div className="w-full h-64 bg-gray-200 rounded-md overflow-hidden flex items-center justify-center mb-4">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={farm.name}
-            className="w-full h-full object-cover"
-          />
+      {!editing ? (
+        images.length > 0 ? (
+          <div className="mb-4">
+            <ImageCarousel
+              images={images}
+              editable={false}
+              height="h-64"
+              emptyLabel={t("farmPage.noImage")}
+            />
+          </div>
         ) : (
-          <span className="text-gray-500">{t("farmPage.noImage")}</span>
-        )}
-      </div>
+          <div className="w-full h-64 bg-gray-200 flex items-center justify-center rounded mb-4">
+            <span className="text-gray-500">{t("farmPage.noImage")}</span>
+          </div>
+        )
+      ) : null}
 
       {!editing ? (
         <div className="space-y-2">
@@ -79,7 +121,17 @@ export function FarmHeader({
           </p>
         </div>
       ) : (
-        <form onSubmit={form.handleSubmit(onEdit)} className="space-y-3 mt-3">
+        <form
+          onSubmit={form.handleSubmit(handleSave)}
+          className="space-y-3 mt-3"
+        >
+          <ImageUploader
+            value={images}
+            onChange={setImages}
+            editable
+            height="h-64"
+          />
+
           <Input {...form.register("name")} placeholder={t("farmPage.name")} />
           <Textarea
             {...form.register("description")}
@@ -103,44 +155,55 @@ export function FarmHeader({
             placeholder={t("farmPage.country")}
           />
 
-          <Button type="submit" disabled={isSaving}>
-            {isSaving ? t("farmPage.saving") : t("farmPage.save")}
-          </Button>
+          <div className="flex items-center gap-2 pt-2">
+            <Button type="submit" disabled={isSaving}>
+              {isSaving ? t("farmPage.saving") : t("farmPage.save")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEditing(false)}
+            >
+              {t("farmPage.cancel")}
+            </Button>
+          </div>
         </form>
       )}
 
-      <div className="flex gap-2 mt-4">
-        <Button onClick={() => setEditing(!editing)}>
-          {editing ? t("farmPage.cancel") : t("farmPage.editFarm")}
-        </Button>
+      {!editing && (
+        <div className="flex items-center gap-2 mt-6">
+          <Button onClick={() => setEditing(true)} variant="default">
+            {t("farmPage.editFarm")}
+          </Button>
 
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" disabled={isDeleting}>
-              {isDeleting ? t("farmPage.deleting") : t("farmPage.delete")}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                {t("farmPage.confirmDeleteTitle")}
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                {t("farmPage.confirmDeleteText")}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t("farmPage.cancel")}</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={onDelete}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                {t("farmPage.delete")}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" disabled={isDeleting}>
+                {isDeleting ? t("farmPage.deleting") : t("farmPage.delete")}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {t("farmPage.confirmDeleteTitle")}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("farmPage.confirmDeleteText")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("farmPage.cancel")}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={onDelete}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {t("farmPage.delete")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
     </div>
   );
 }
