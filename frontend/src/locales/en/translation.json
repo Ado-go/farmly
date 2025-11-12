@@ -190,7 +190,8 @@
     "editTitle": "Edit product",
     "stock": "Stock",
     "delete": "Delete product",
-    "save": "Save changes"
+    "save": "Save changes",
+    "updated": "Product updated successfully"
   },
   "productsPage": {
     "title": "All Products",

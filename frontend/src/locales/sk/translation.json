@@ -190,7 +190,8 @@
     "editTitle": "Upraviť produkt",
     "stock": "Počet kusov",
     "delete": "Zmazať produkt",
-    "save": "Uložiť zmeny"
+    "save": "Uložiť zmeny",
+    "updated": "Produkt bol aktualizovaný"
   },
   "productsPage": {
     "title": "Všetky produkty",

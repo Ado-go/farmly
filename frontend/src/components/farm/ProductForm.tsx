@@ -9,7 +9,7 @@ import { apiFetch } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ImageCarousel } from "@/components/ImageCarousel";
+import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
 
 const productSchema = z.object({
   name: z.string().min(1),
@@ -30,8 +30,7 @@ export function ProductForm({
   onSuccess: () => void;
 }) {
   const { t } = useTranslation();
-  const [files, setFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<{ url: string }[]>([]);
+  const [images, setImages] = useState<UploadedImage[]>([]);
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -46,15 +45,19 @@ export function ProductForm({
 
   const mutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
-      const uploaded: any[] = [];
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append("image", file);
-        const res = await apiFetch("/upload", {
-          method: "POST",
-          body: formData,
-        });
-        uploaded.push(res);
+      const uploaded = [];
+      for (const img of images) {
+        if (img.file) {
+          const formData = new FormData();
+          formData.append("image", img.file);
+          const res = await apiFetch("/upload", {
+            method: "POST",
+            body: formData,
+          });
+          uploaded.push(res);
+        } else {
+          uploaded.push(img);
+        }
       }
 
       return apiFetch("/farm-product", {
@@ -69,43 +72,24 @@ export function ProductForm({
     onSuccess: () => {
       toast.success(t("farmPage.productAdded"));
       form.reset();
-      setFiles([]);
-      setPreviews([]);
+      setImages([]);
       onClose();
       onSuccess();
     },
     onError: () => toast.error(t("farmPage.productAddError")),
   });
 
-  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    const f = Array.from(e.target.files);
-    setFiles((p) => [...p, ...f]);
-    setPreviews((p) => [
-      ...p,
-      ...f.map((file) => ({ url: URL.createObjectURL(file) })),
-    ]);
-  };
-
-  const removeFile = (idx: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== idx));
-    setPreviews((prev) => prev.filter((_, i) => i !== idx));
-  };
-
   return (
     <form
       onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
       className="space-y-3"
     >
-      {previews.length > 0 && (
-        <ImageCarousel
-          images={previews}
-          onDelete={removeFile}
-          editable
-          height="h-48"
-          emptyLabel={t("farmPage.noImage")}
-        />
-      )}
+      <ImageUploader
+        value={images}
+        onChange={setImages}
+        editable
+        height="h-48"
+      />
 
       <Input {...form.register("name")} placeholder={t("product.name")} />
       <Input
@@ -126,8 +110,6 @@ export function ProductForm({
         {...form.register("stock", { valueAsNumber: true })}
         placeholder={t("product.stock")}
       />
-
-      <input type="file" multiple accept="image/*" onChange={handleFiles} />
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onClose}>

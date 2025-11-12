@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ImageCarousel } from "@/components/ImageCarousel";
+import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
 
 export function FarmProductEditDialog({
   product,
@@ -28,36 +28,32 @@ export function FarmProductEditDialog({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const [images, setImages] = useState<any[]>([]);
-  const [newFiles, setNewFiles] = useState<File[]>([]);
-  const [removedIds, setRemovedIds] = useState<string[]>([]);
+  const [images, setImages] = useState<UploadedImage[]>([]);
 
   useEffect(() => {
     if (product?.product?.images) {
       setImages(product.product.images);
-      setNewFiles([]);
-      setRemovedIds([]);
+    } else {
+      setImages([]);
     }
   }, [product]);
 
   const updateProduct = useMutation({
     mutationFn: async () => {
-      const uploaded: any[] = [];
-      for (const file of newFiles) {
-        const formData = new FormData();
-        formData.append("image", file);
-        const res = await apiFetch("/upload", {
-          method: "POST",
-          body: formData,
-        });
-        uploaded.push({ url: res.url, publicId: res.publicId });
+      const uploaded = [];
+      for (const img of images) {
+        if (img.file) {
+          const formData = new FormData();
+          formData.append("image", img.file);
+          const res = await apiFetch("/upload", {
+            method: "POST",
+            body: formData,
+          });
+          uploaded.push(res);
+        } else {
+          uploaded.push(img);
+        }
       }
-
-      const keptImages = images.filter(
-        (img) => !removedIds.includes(img.publicId)
-      );
-
-      const allImages = [...keptImages, ...uploaded];
 
       const body = {
         name: product.product.name,
@@ -65,7 +61,7 @@ export function FarmProductEditDialog({
         description: product.product.description,
         price: product.price,
         stock: product.stock,
-        images: allImages,
+        images: uploaded.map((i) => ({ url: i.url, publicId: i.publicId })),
       };
 
       return apiFetch(`/farm-product/${product.id}`, { method: "PUT", body });
@@ -79,16 +75,12 @@ export function FarmProductEditDialog({
     onError: () => toast.error(t("farmPage.editError")),
   });
 
-  const handleDeleteAt = (idx: number) => {
-    const img = images[idx];
-    setRemovedIds((prev) => [...prev, img.publicId]);
-    setImages((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleNewFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    const list = Array.from(e.target.files);
-    setNewFiles((prev) => [...prev, ...list]);
+  const handleDeleteProduct = async () => {
+    await apiFetch(`/farm-product/${product.id}`, { method: "DELETE" });
+    toast.success(t("product.deleted"));
+    queryClient.invalidateQueries();
+    onOpenChange(false);
+    onSave();
   };
 
   return (
@@ -100,28 +92,11 @@ export function FarmProductEditDialog({
 
         {product && (
           <div className="space-y-3">
-            <ImageCarousel
-              images={[
-                ...images,
-                ...newFiles.map((f) => ({ url: URL.createObjectURL(f) })),
-              ]}
-              onDelete={(i) => {
-                if (i < images.length) handleDeleteAt(i);
-                else
-                  setNewFiles((prev) =>
-                    prev.filter((_, idx) => idx !== i - images.length)
-                  );
-              }}
+            <ImageUploader
+              value={images}
+              onChange={setImages}
               editable
               height="h-56"
-              emptyLabel={t("farmPage.noImage")}
-            />
-
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleNewFiles}
             />
 
             <Input
@@ -153,18 +128,7 @@ export function FarmProductEditDialog({
             />
 
             <div className="flex justify-between pt-4">
-              <Button
-                variant="destructive"
-                onClick={async () => {
-                  await apiFetch(`/farm-product/${product.id}`, {
-                    method: "DELETE",
-                  });
-                  toast.success(t("product.deleted"));
-                  queryClient.invalidateQueries();
-                  onOpenChange(false);
-                  onSave();
-                }}
-              >
+              <Button variant="destructive" onClick={handleDeleteProduct}>
                 {t("product.delete")}
               </Button>
 
