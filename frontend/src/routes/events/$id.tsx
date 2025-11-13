@@ -5,6 +5,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
 
+import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
+
 export const Route = createFileRoute("/events/$id")({
   component: EventPageDetail,
 });
@@ -37,6 +40,8 @@ function EventPageDetail() {
   const { id } = Route.useParams();
   const { t } = useTranslation();
 
+  const { addToCart } = useCart();
+
   const {
     data: event,
     isLoading,
@@ -61,6 +66,22 @@ function EventPageDetail() {
   const products = event.eventProducts ?? [];
   const now = new Date();
   const eventHasNotStarted = new Date(event.startDate) > now;
+
+  const handleAddToPreorder = (ep: EventDetail["eventProducts"][0]) => {
+    addToCart(
+      {
+        productId: ep.product.id,
+        productName: ep.product.name,
+        sellerName: ep.user.name,
+        unitPrice: ep.product.basePrice,
+        quantity: 1,
+      },
+      "PREORDER",
+      event.id
+    );
+
+    toast.success(t("eventsDetail.addedToCart"));
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -119,15 +140,17 @@ function EventPageDetail() {
                   </p>
                 </div>
 
-                {eventHasNotStarted && (
+                {eventHasNotStarted ? (
                   <Button
                     className="mt-4 w-full"
-                    onClick={() =>
-                      console.log("preorder event product ID: " + ep.id)
-                    }
+                    onClick={() => handleAddToPreorder(ep)}
                   >
                     {t("eventsDetail.preorder")}
                   </Button>
+                ) : (
+                  <p className="mt-4 text-center text-red-500 text-xs">
+                    {t("eventsDetail.eventStarted")}
+                  </p>
                 )}
               </Card>
             ))}

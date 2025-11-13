@@ -115,7 +115,9 @@
     "passwordChangeError": "Zmena hesla zlyhala",
     "tabProfile": "Profil",
     "tabOrders": "Objednávky",
-    "tabSales": "Predaje"
+    "tabSales": "Predaje",
+    "tabPreorders": "Predobjednávky",
+    "tabEventSales": "Predobjednávky z eventov"
   },
   "farmPage": {
     "title": "Moje farmy",
@@ -313,7 +315,9 @@
     "noProducts": "Na tejto udalosti zatiaľ nie sú žiadne produkty.",
     "soldBy": "Predáva",
     "noImage": "Bez obrázka",
-    "preorder": "Predobjednať"
+    "preorder": "Predobjednať",
+    "addedToCart": "Pridané do košíka",
+    "eventStarted": "Udalosť už začala - predobjednávky sú uzavreté"
   },
   "offersPage": {
     "title": "Všetky ponuky",
@@ -436,5 +440,46 @@
     "deleted": "Obrázok bol odstránený",
     "deleteFailed": "Nepodarilo sa odstrániť obrázok",
     "addMore": "Pridať ďalšie obrázky"
+  },
+  "preordersPage": {
+    "loading": "Načítavam predobjednávky...",
+    "empty": "Nemáš žiadne predobjednávky.",
+    "order": "Predobjednávka",
+    "event": "Udalosť",
+    "pickup": "Miesto vyzdvihnutia",
+    "total": "Celkom",
+    "cancel": "Zrušiť predobjednávku",
+    "canceled": "Predobjednávka bola zrušená",
+    "cancelDelete": "Naspäť",
+    "confirmDelete": "Zrušiť",
+    "confirmCancelTitle": "Zrušiť predobjednávku?",
+    "confirmCancelText": "Rozhodneš sa zrušiť celú predobjednávku.",
+    "itemCanceled": "Položka bola zrušená",
+    "itemCancelError": "Položku sa nepodarilo zrušiť",
+    "orderCanceled": "Objednávka zrušená",
+    "cancelItem": "Zrušiť produkt"
+  },
+  "eventSalesPage": {
+    "loading": "Načítavam predaj eventov...",
+    "empty": "Žiadne predobjednávky.",
+    "order": "Objednávka",
+    "event": "Udalosť",
+    "buyer": "Kupujúci",
+    "itemCanceled": "Položka bola zrušená",
+    "cancelItem": "Zrušiť",
+    "cancelError": "Položku sa nepodarilo zrušiť",
+    "confirmCancelTitle": "Zrušiť položku?",
+    "confirmCancelText": "Naozaj chceš zrušiť túto položku?"
+  },
+  "checkoutPreoderPage": {
+    "emptyCart": "Váš košík je prázdny.",
+    "title": "Predobjednávka",
+    "pickupLocation": "Miesto prevzatia",
+    "products": "Produkty",
+    "total": "Celkom",
+    "confirm": "Potvrdiť predobjednávku",
+    "loading": "Načítavam...",
+    "success": "Predobjednávka bola vytvorená",
+    "error": "Nepodarilo sa vytvoriť predobjednávku"
   }
 }

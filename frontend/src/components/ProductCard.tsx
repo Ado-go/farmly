@@ -32,13 +32,16 @@ export function ProductCard({ product }: ProductCardProps) {
   const rating = averageRating(inner.reviews);
 
   const handleAddToCart = (fp) => {
-    addToCart({
-      productId: fp.product.id,
-      productName: fp.product.name,
-      sellerName: fp.farm?.name || "unknown",
-      unitPrice: fp.price,
-      quantity: 1,
-    });
+    addToCart(
+      {
+        productId: fp.product.id,
+        productName: fp.product.name,
+        sellerName: fp.farm?.name || "unknown",
+        unitPrice: fp.price,
+        quantity: 1,
+      },
+      "STANDARD"
+    );
 
     toast.success(t("productCard.addedToCart", { name: fp.product.name }));
   };

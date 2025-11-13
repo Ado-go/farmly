@@ -9,7 +9,7 @@ export const Route = createFileRoute("/cart")({
 });
 
 function CartPage() {
-  const { cart, removeFromCart, totalPrice, clearCart } = useCart();
+  const { cart, removeFromCart, totalPrice, clearCart, cartType } = useCart();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -18,6 +18,14 @@ function CartPage() {
       <p className="p-4 text-center text-gray-600">{t("cartPage.emptyCart")}</p>
     );
   }
+
+  const goToCheckout = () => {
+    if (cartType === "PREORDER") {
+      navigate({ to: "/checkout-preorder" });
+    } else {
+      navigate({ to: "/checkout" });
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto p-6">
@@ -55,7 +63,7 @@ function CartPage() {
           <Button variant="secondary" onClick={clearCart}>
             {t("cartPage.clear")}
           </Button>
-          <Button onClick={() => navigate({ to: "/checkout" })}>
+          <Button onClick={goToCheckout}>
             {t("cartPage.continueCheckout")}
           </Button>
         </div>

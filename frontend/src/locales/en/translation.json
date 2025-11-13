@@ -115,7 +115,9 @@
     "passwordChangeError": "Failed to change password",
     "tabProfile": "Profile",
     "tabOrders": "Orders",
-    "tabSales": "Sales"
+    "tabSales": "Sales",
+    "tabPreorders": "Preorders",
+    "tabEventSales": "Event Sales"
   },
   "farmPage": {
     "title": "My Farms",
@@ -313,7 +315,9 @@
     "noProducts": "There are no products available for this event yet.",
     "soldBy": "Sold by",
     "noImage": "No image",
-    "preorder": "Preorder"
+    "preorder": "Preorder",
+    "addedToCart": "Added to cart",
+    "eventStarted": "The event has already started – preorders are closed"
   },
   "offersPage": {
     "title": "All Offers",
@@ -436,5 +440,46 @@
     "deleted": "Image deleted successfully",
     "deleteFailed": "Failed to delete image",
     "addMore": "Add more images"
+  },
+  "preordersPage": {
+    "loading": "Loading preorders...",
+    "empty": "You have no preorders.",
+    "order": "Preorder",
+    "event": "Event",
+    "pickup": "Pickup location",
+    "total": "Total",
+    "cancel": "Cancel preorder",
+    "canceled": "Preorder was canceled",
+    "cancelDelete": "Back",
+    "confirmDelete": "Cancel",
+    "confirmCancelTitle": "Cancel preorder?",
+    "confirmCancelText": "Are you sure you want to cancel this entire preorder?",
+    "itemCanceled": "Item has been canceled",
+    "itemCancelError": "Failed to cancel item",
+    "orderCanceled": "Order canceled",
+    "cancelItem": "Cancel item"
+  },
+  "eventSalesPage": {
+    "loading": "Loading event sales...",
+    "empty": "No event preorders found.",
+    "order": "Order",
+    "event": "Event",
+    "buyer": "Buyer",
+    "itemCanceled": "Item was canceled",
+    "cancelItem": "Cancel",
+    "cancelError": "Failed to cancel item",
+    "confirmCancelTitle": "Cancel item?",
+    "confirmCancelText": "Are you sure you want to cancel this item?"
+  },
+  "checkoutPreoderPage": {
+    "emptyCart": "Your cart is empty.",
+    "title": "Preorder",
+    "pickupLocation": "Pickup location",
+    "products": "Products",
+    "total": "Total",
+    "confirm": "Confirm preorder",
+    "loading": "Loading...",
+    "success": "Preorder was successfully created",
+    "error": "Failed to create preorder"
   }
 }

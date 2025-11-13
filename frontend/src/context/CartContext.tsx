@@ -14,9 +14,19 @@ export interface CartItem {
   quantity: number;
 }
 
+type CartType = "STANDARD" | "PREORDER";
+
+interface CartState {
+  type: CartType | null;
+  eventId?: number | null;
+  items: CartItem[];
+}
+
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (item: CartItem) => void;
+  cartType: CartType | null;
+  eventId: number | null;
+  addToCart: (item: CartItem, type: CartType, eventId?: number) => void;
   removeFromCart: (productId: number) => void;
   clearCart: () => void;
   totalPrice: number;
@@ -25,44 +35,87 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    if (typeof window === "undefined") return [];
-    const stored = localStorage.getItem("cart");
-    return stored ? JSON.parse(stored) : [];
+  const [state, setState] = useState<CartState>(() => {
+    if (typeof window === "undefined")
+      return { type: null, items: [], eventId: null };
+
+    const stored = localStorage.getItem("cartState");
+    return stored
+      ? JSON.parse(stored)
+      : { type: null, items: [], eventId: null };
   });
 
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+    localStorage.setItem("cartState", JSON.stringify(state));
+  }, [state]);
 
-  const addToCart = (item: CartItem) => {
-    setCart((prev) => {
-      const existing = prev.find((i) => i.productId === item.productId);
-      if (existing) {
-        return prev.map((i) =>
-          i.productId === item.productId
-            ? { ...i, quantity: i.quantity + item.quantity }
-            : i
-        );
+  const addToCart = (item: CartItem, type: CartType, eventId?: number) => {
+    setState((prev) => {
+      if (prev.type && prev.type !== type) {
+        return {
+          type,
+          eventId: type === "PREORDER" ? (eventId ?? null) : null,
+          items: [item],
+        };
       }
-      return [...prev, item];
+
+      if (type === "PREORDER") {
+        if (prev.eventId && prev.eventId !== eventId) {
+          return {
+            type: "PREORDER",
+            eventId: eventId ?? null,
+            items: [item],
+          };
+        }
+      }
+
+      const existing = prev.items.find((i) => i.productId === item.productId);
+
+      if (existing) {
+        return {
+          ...prev,
+          items: prev.items.map((i) =>
+            i.productId === item.productId
+              ? { ...i, quantity: i.quantity + item.quantity }
+              : i
+          ),
+        };
+      }
+
+      return {
+        ...prev,
+        type,
+        eventId: type === "PREORDER" ? (eventId ?? null) : null,
+        items: [...prev.items, item],
+      };
     });
   };
 
   const removeFromCart = (productId: number) => {
-    setCart((prev) => prev.filter((i) => i.productId !== productId));
+    setState((prev) => ({
+      ...prev,
+      items: prev.items.filter((i) => i.productId !== productId),
+    }));
   };
 
-  const clearCart = () => setCart([]);
+  const clearCart = () => setState({ type: null, items: [], eventId: null });
 
-  const totalPrice = cart.reduce(
+  const totalPrice = state.items.reduce(
     (sum, item) => sum + item.unitPrice * item.quantity,
     0
   );
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, clearCart, totalPrice }}
+      value={{
+        cart: state.items,
+        cartType: state.type,
+        eventId: state.eventId ?? null,
+        addToCart,
+        removeFromCart,
+        clearCart,
+        totalPrice,
+      }}
     >
       {children}
     </CartContext.Provider>
