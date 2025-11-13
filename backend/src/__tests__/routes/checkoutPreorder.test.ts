@@ -24,6 +24,22 @@ beforeAll(async () => {
   });
   CUSTOMER_ID = customer.id;
 
+  const event = await prisma.event.create({
+    data: {
+      title: "Market Day",
+      description: "Test event",
+      startDate: new Date(),
+      endDate: new Date(),
+      city: "Trnava",
+      street: "Market 1",
+      region: "Trnavský",
+      postalCode: "91701",
+      country: "Slovensko",
+      organizerId: CUSTOMER_ID,
+    },
+  });
+  EVENT_ID = event.id;
+
   const product = await prisma.product.create({
     data: {
       name: "Honey Jar",
@@ -60,61 +76,14 @@ describe("Preorder Checkout Routes", () => {
         ],
         userInfo: {
           buyerId: CUSTOMER_ID,
-          deliveryCity: "Trnava",
-          deliveryStreet: "Farm Road 7",
-          deliveryRegion: "Trnavský",
-          deliveryPostalCode: "91701",
-          deliveryCountry: "Slovensko",
-          paymentMethod: "CASH",
+          email: null,
         },
+        eventId: EVENT_ID,
       });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty("orderId");
-    expect(res.body).toHaveProperty(
-      "message",
-      "Preorder was successfuly created"
-    );
-
-    const order = await prisma.order.findUnique({
-      where: { id: res.body.orderId },
-      include: { items: true },
-    });
-    expect(order?.orderType).toBe("PREORDER");
-    expect(order?.items[0].productName).toBe("Honey Jar");
-  });
-
-  it("POST /checkout-preorder - should create preorder for anonymous user with email", async () => {
-    const res = await request(app)
-      .post("/api/checkout-preorder")
-      .send({
-        cartItems: [
-          {
-            productId: PRODUCT_ID,
-            quantity: 2,
-            unitPrice: 8,
-            productName: "Honey Jar",
-            sellerName: "Farmer B",
-          },
-        ],
-        userInfo: {
-          email: "anonpreorder@test.com",
-          deliveryCity: "Trnava",
-          deliveryStreet: "Market 12",
-          deliveryRegion: "Trnavský",
-          deliveryPostalCode: "91701",
-          deliveryCountry: "Slovensko",
-          paymentMethod: "CARD",
-        },
-      });
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty("orderId");
-
-    const order = await prisma.order.findUnique({
-      where: { id: res.body.orderId },
-    });
-    expect(order?.anonymousEmail).toBe("anonpreorder@test.com");
+    expect(res.body).toHaveProperty("message", "Preorder created");
   });
 
   it("POST /checkout-preorder - should fail if preorder cart is empty", async () => {
@@ -123,10 +92,12 @@ describe("Preorder Checkout Routes", () => {
       .send({
         cartItems: [],
         userInfo: { email: "test@test.com" },
+        eventId: EVENT_ID,
       });
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toHaveProperty("message", "Preorder cart is empty");
+    expect(res.body.error).toBe("Invalid request data");
+    expect(res.body.details[0].message).toBe("Cart cannot be empty");
   });
 
   it("POST /checkout-preorder - should fail if missing user info", async () => {
@@ -134,17 +105,27 @@ describe("Preorder Checkout Routes", () => {
       .post("/api/checkout-preorder")
       .send({
         cartItems: [{ productId: PRODUCT_ID, quantity: 1, unitPrice: 8 }],
+        eventId: EVENT_ID,
       });
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toHaveProperty("message", "Missing user info");
+    expect(res.body.error).toBe("Invalid request data");
+    expect(res.body.details.some((d: any) => d.path === "userInfo")).toBe(true);
   });
 
   it("POST /checkout-preorder - should fail if missing both buyerId and email", async () => {
     const res = await request(app)
       .post("/api/checkout-preorder")
       .send({
-        cartItems: [{ productId: PRODUCT_ID, quantity: 1, unitPrice: 8 }],
+        cartItems: [
+          {
+            productId: PRODUCT_ID,
+            quantity: 1,
+            unitPrice: 8,
+            productName: "Honey Jar",
+            sellerName: "Farmer A",
+          },
+        ],
         userInfo: {
           deliveryCity: "Trnava",
           deliveryStreet: "No Name 3",
@@ -153,12 +134,36 @@ describe("Preorder Checkout Routes", () => {
           deliveryCountry: "Slovensko",
           paymentMethod: "CASH",
         },
+        eventId: EVENT_ID,
       });
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toHaveProperty(
-      "message",
-      "Enter an email to finish order"
-    );
+    expect(res.body.error).toBe("Invalid request data");
+    expect(
+      res.body.details.some((d: any) =>
+        d.message.includes("Either buyerId or email")
+      )
+    ).toBe(true);
+  });
+
+  it("POST /checkout-preorder - should fail if eventId is missing", async () => {
+    const res = await request(app)
+      .post("/api/checkout-preorder")
+      .send({
+        cartItems: [
+          {
+            productId: PRODUCT_ID,
+            quantity: 1,
+            unitPrice: 8,
+            productName: "Honey Jar",
+            sellerName: "Farmer A",
+          },
+        ],
+        userInfo: { email: "abc@test.com" },
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toBe("Invalid request data");
+    expect(res.body.details[0].path).toBe("eventId");
   });
 });

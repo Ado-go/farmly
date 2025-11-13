@@ -1,20 +1,16 @@
 import { Router } from "express";
 import prisma from "../prisma.ts";
 import { authenticateToken, authorizeRole } from "../middleware/auth.ts";
+import { checkoutSchema } from "../schemas/checkoutSchemas.ts";
+import { validateRequest } from "../middleware/validateRequest.ts";
 
 const router = Router();
 
 // POST /checkout
-router.post("/", async (req, res) => {
+router.post("/", validateRequest(checkoutSchema), async (req, res) => {
   const { cartItems, userInfo } = req.body;
 
   try {
-    if (!cartItems || cartItems.length === 0)
-      return res.status(400).json({ message: "Cart is empty" });
-
-    if (!userInfo)
-      return res.status(400).json({ message: "Missing user info" });
-
     const {
       buyerId,
       email,
@@ -26,11 +22,6 @@ router.post("/", async (req, res) => {
       paymentMethod,
     } = userInfo;
 
-    if (!buyerId && !email)
-      return res
-        .status(400)
-        .json({ message: "Enter an email to finish order" });
-
     const totalPrice = cartItems.reduce(
       (sum: number, item: any) => sum + item.unitPrice * item.quantity,
       0
@@ -41,14 +32,17 @@ router.post("/", async (req, res) => {
         buyerId: buyerId || null,
         anonymousEmail: buyerId ? null : email,
         orderType: "STANDARD",
+
         deliveryCity,
         deliveryStreet,
         deliveryRegion,
         deliveryPostalCode,
         deliveryCountry,
+
         paymentMethod,
         totalPrice,
         status: "PENDING",
+
         items: {
           create: cartItems.map((item: any) => ({
             productId: item.productId,
@@ -89,7 +83,10 @@ router.get("/my-orders", authenticateToken, async (req, res) => {
 
   try {
     const orders = await prisma.order.findMany({
-      where: { buyerId: userId },
+      where: {
+        buyerId: userId,
+        orderType: "STANDARD",
+      },
       include: { items: true },
       orderBy: { createdAt: "desc" },
     });

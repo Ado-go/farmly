@@ -179,6 +179,10 @@ model Order {
   deliveryPostalCode String
   deliveryCountry    String
 
+  event              Event?       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId            Int?         
+
+
   isDelivered        Boolean      @default(false)
   isPaid             Boolean      @default(false)
   paymentMethod      PaymentMethod
@@ -237,6 +241,7 @@ model Event {
 
   participants    EventParticipant[]
   eventProducts   EventProduct[]
+  eventOrders     Order[]
 }
 
 model EventParticipant {
