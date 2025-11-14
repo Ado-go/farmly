@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm-run-all --parallel start:frontend start:backend",
+    "start": "npm-run-all --parallel start:frontend start:backend start:stripe",
     "start:frontend": "cd frontend && npm run dev",
     "start:backend": "cd backend && npm start",
+    "start:stripe": "stripe listen --forward-to http://localhost:5000/api/checkout/stripe/webhook",
     "install:all": "npm run install:frontend && npm run install:backend",
     "install:frontend": "cd frontend && npm install",
     "install:backend": "cd backend && npm install"
