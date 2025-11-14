@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ProductCard } from "@/components/ProductCard";
 import { Card } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
+import { ImageCarousel } from "@/components/ImageCarousel";
 
 export const Route = createFileRoute("/farms/$id")({
   component: FarmDetailPage,
@@ -32,6 +33,7 @@ type FarmDetail = {
   region: string;
   postalCode: string;
   country: string;
+  images?: { url: string; optimizedUrl?: string }[];
   farmer?: { id: number; name: string };
   farmProducts: FarmProduct[];
 };
@@ -45,7 +47,7 @@ function FarmDetailPage() {
     isLoading,
     isError,
   } = useQuery<FarmDetail>({
-    queryKey: ["farm", id],
+    queryKey: ["farm-public", id],
     queryFn: async () => apiFetch(`/farms/${id}`),
   });
 
@@ -68,9 +70,30 @@ function FarmDetailPage() {
     );
   }
 
+  const carouselImages =
+    farm.images?.map((img) => ({
+      url: img.optimizedUrl || img.url,
+    })) ?? [];
+
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h2 className="text-3xl font-bold mb-2">{farm.name}</h2>
+      <h2 className="text-3xl font-bold mb-3">{farm.name}</h2>
+
+      {carouselImages.length > 0 ? (
+        <div className="mb-5">
+          <ImageCarousel
+            images={carouselImages}
+            editable={false}
+            height="h-64"
+            emptyLabel={t("farmsPage.noImage")}
+          />
+        </div>
+      ) : (
+        <div className="w-full h-64 bg-gray-200 flex items-center justify-center rounded mb-5">
+          <span className="text-gray-500">{t("farmsPage.noImage")}</span>
+        </div>
+      )}
+
       {farm.description && (
         <p className="mb-3 text-gray-700">{farm.description}</p>
       )}

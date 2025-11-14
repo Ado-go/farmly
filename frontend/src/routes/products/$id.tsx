@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
+import { ImageCarousel } from "@/components/ImageCarousel";
 
 export const Route = createFileRoute("/products/$id")({
   component: ProductDetailPage,
@@ -99,21 +100,29 @@ function ProductDetailPage() {
   const otherReviews =
     product.reviews?.filter((r) => r.user?.id !== user?.id) || [];
 
+  const productImages =
+    product.images?.map((img) => ({
+      url: img.optimizedUrl || img.url,
+    })) ?? [];
+
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <Card className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {product.images?.[0]?.url ? (
-            <img
-              src={product.images[0].url}
-              alt={product.name}
-              className="w-full h-32 object-cover mt-2 rounded"
-            />
-          ) : (
-            <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 rounded">
-              {t("productCard.noImage")}
-            </div>
-          )}
+          <div className="flex flex-col justify-center">
+            {productImages.length > 0 ? (
+              <ImageCarousel
+                images={productImages}
+                editable={false}
+                height="h-56"
+                emptyLabel={t("productCard.noImage")}
+              />
+            ) : (
+              <div className="w-full h-56 bg-gray-200 flex items-center justify-center text-gray-500 rounded">
+                {t("productCard.noImage")}
+              </div>
+            )}
+          </div>
 
           <div>
             <h1 className="text-2xl font-bold mb-3">{product.name}</h1>
@@ -135,11 +144,10 @@ function ProductDetailPage() {
               {t("productCard.farmName")}: {farmProduct.farm?.name}
             </p>
 
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 mb-4">
               {product.description || t("productCard.noDescription")}
             </p>
-          </div>
-          <div>
+
             <Button onClick={() => handleAddToCart(farmProduct)}>
               {t("productCard.addToCart")}
             </Button>
