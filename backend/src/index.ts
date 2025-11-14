@@ -43,6 +43,12 @@ app.use(
     credentials: true, // cookies
   })
 );
+
+app.post(
+  "/api/checkout/stripe/webhook",
+  express.raw({ type: "application/json" })
+);
+
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);

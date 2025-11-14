@@ -3,8 +3,13 @@ import prisma from "../prisma.ts";
 import { authenticateToken, authorizeRole } from "../middleware/auth.ts";
 import { checkoutSchema } from "../schemas/checkoutSchemas.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
+import { sendEmail } from "../utils/sendEmails.ts";
+import Stripe from "stripe";
+import express from "express";
 
 const router = Router();
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 // POST /checkout
 router.post("/", validateRequest(checkoutSchema), async (req, res) => {
@@ -65,6 +70,24 @@ router.post("/", validateRequest(checkoutSchema), async (req, res) => {
         message: `Order #${order.orderNumber.slice(0, 8)} was created`,
       },
     });
+
+    const paymentLink = `${process.env.FRONTEND_URL}/order/${order.id}/pay`;
+
+    await sendEmail(
+      email,
+      "Vaša objednávka bola vytvorená",
+      `
+        <h2>Ďakujeme za objednávku!</h2>
+        <p>Číslo objednávky: <strong>${order.orderNumber}</strong></p>
+        <p>Celková cena: <strong>${totalPrice} €</strong></p>
+        <p>Kliknite nižšie a zaplaťte objednávku:</p>
+        <a href="${paymentLink}" 
+          style="padding: 10px 18px; background: #34d399; color: #fff; 
+                text-decoration: none; border-radius: 6px;">
+          Zaplatiť objednávku
+        </a>
+      `
+    );
 
     res.json({
       message: "Order was successfully created",
@@ -290,5 +313,122 @@ router.patch(
     }
   }
 );
+
+// Paygate routes
+
+// POST /checkout/create-payment-session
+router.post("/create-payment-session", async (req, res) => {
+  try {
+    const { orderId } = req.body;
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    if (!order.totalPrice) {
+      return res.status(400).json({ error: "Order has no price" });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      client_reference_id: String(orderId),
+      payment_method_types: ["card"],
+      mode: "payment",
+
+      line_items: order.items.map((item) => ({
+        price_data: {
+          currency: "eur",
+          product_data: {
+            name: item.productName,
+          },
+          unit_amount: Math.round(item.unitPrice * 100),
+        },
+        quantity: item.quantity,
+      })),
+
+      success_url: `${process.env.FRONTEND_URL}/payment-success?orderId=${orderId}&orderNumber=${order.orderNumber}`,
+      cancel_url: `${process.env.FRONTEND_URL}/payment-cancelled?orderId=${orderId}&orderNumber=${order.orderNumber}`,
+    });
+
+    res.json({ url: session.url });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Failed to create payment session" });
+  }
+});
+
+// Stripe webhook
+router.post("/stripe/webhook", async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig!,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    );
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err);
+    return res.status(400).send(`Webhook Error: ${err}`);
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const orderId = session.client_reference_id
+      ? Number(session.client_reference_id)
+      : undefined;
+
+    if (!orderId) {
+      console.error(
+        "Missing client_reference_id on checkout.session.completed"
+      );
+    } else {
+      await prisma.order.update({
+        where: { id: orderId },
+        data: { isPaid: true, status: "COMPLETED" },
+      });
+    }
+  }
+
+  res.json({ received: true });
+});
+
+// POST /checkout/payment-link/:id
+router.post("/payment-link/:id", async (req, res) => {
+  const orderId = Number(req.params.id);
+
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { items: true },
+  });
+
+  if (!order) return res.status(404).json({ error: "Order not found" });
+  if (order.isPaid || order.status === "CANCELED")
+    return res.status(400).json({ error: "Order already closed" });
+
+  const session = await stripe.checkout.sessions.create({
+    client_reference_id: String(orderId),
+    payment_method_types: ["card"],
+    mode: "payment",
+    line_items: order.items.map((item) => ({
+      price_data: {
+        currency: "eur",
+        product_data: { name: item.productName },
+        unit_amount: Math.round(item.unitPrice * 100),
+      },
+      quantity: item.quantity,
+    })),
+
+    success_url: `${process.env.FRONTEND_URL}/payment-success?orderId=${orderId}&orderNumber=${order.orderNumber}`,
+    cancel_url: `${process.env.FRONTEND_URL}/payment-cancelled?orderId=${orderId}&orderNumber=${order.orderNumber}`,
+  });
+
+  res.json({ url: session.url });
+});
 
 export default router;
