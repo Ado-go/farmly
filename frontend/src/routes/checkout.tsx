@@ -56,6 +56,7 @@ function CheckoutPage() {
   const [step, setStep] = useState(1);
   const [addressData, setAddressData] = useState<AddressData | null>(null);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
+  const [loadingPayment, setLoadingPayment] = useState(false);
 
   const addressForm = useForm<AddressData>({
     resolver: zodResolver(addressSchema),
@@ -85,6 +86,15 @@ function CheckoutPage() {
     setStep(3);
   };
 
+  const cleanupCheckout = () => {
+    clearCart();
+    setStep(1);
+    setAddressData(null);
+    setPaymentData(null);
+    addressForm.reset();
+    paymentForm.reset();
+  };
+
   const handleConfirmOrder = async () => {
     if (!addressData || !paymentData) return;
 
@@ -104,7 +114,33 @@ function CheckoutPage() {
       };
 
       if (paymentData.paymentMethod === "CARD") {
-        console.log("Redirect to payment gateway...");
+        try {
+          setLoadingPayment(true);
+
+          const orderRes = await apiFetch("/checkout", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+
+          const { orderId } = orderRes;
+
+          setTimeout(() => {
+            cleanupCheckout();
+          }, 0);
+
+          const paymentRes = await apiFetch(
+            "/checkout/create-payment-session",
+            {
+              method: "POST",
+              body: JSON.stringify({ orderId }),
+            }
+          );
+
+          window.location.href = paymentRes.url;
+        } finally {
+          setLoadingPayment(false);
+        }
+        return;
       }
 
       await apiFetch("/checkout", {
@@ -113,12 +149,7 @@ function CheckoutPage() {
       });
 
       toast.success(t("checkoutPage.success"));
-      clearCart();
-      setStep(1);
-      setAddressData(null);
-      setPaymentData(null);
-      addressForm.reset();
-      paymentForm.reset();
+      cleanupCheckout();
     } catch (err) {
       console.error(err);
       toast.error(t("checkoutPage.error"));
@@ -323,8 +354,10 @@ function CheckoutPage() {
               <Button variant="outline" onClick={() => setStep(2)}>
                 {t("checkoutPage.back")}
               </Button>
-              <Button onClick={handleConfirmOrder}>
-                {t("checkoutPage.confirm")}
+              <Button disabled={loadingPayment} onClick={handleConfirmOrder}>
+                {loadingPayment
+                  ? "Presmerovávam..."
+                  : t("checkoutPage.confirm")}
               </Button>
             </div>
           </CardContent>

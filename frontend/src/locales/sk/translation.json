@@ -481,5 +481,16 @@
     "loading": "Načítavam...",
     "success": "Predobjednávka bola vytvorená",
     "error": "Nepodarilo sa vytvoriť predobjednávku"
+  },
+  "payment": {
+    "redirecting": "Presmerovávam na platbu...",
+    "cannotLoad": "Objednávku sa nepodarilo načítať.",
+    "cancelledTitle": "Platba bola zrušená ❌",
+    "cancelledDescription": "Platbu sa nepodarilo dokončiť. Objednávka stále čaká na úhradu.",
+    "retry": "Skúsiť znova zaplatiť",
+    "retryError": "Nepodarilo sa otvoriť platobnú bránu.",
+    "successTitle": "Platba prebehla úspešne 🎉",
+    "successDescription": "Tvoja objednávka je zaplatená.",
+    "goToOrders": "Prejsť na objednávky"
   }
 }

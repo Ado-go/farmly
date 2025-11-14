@@ -481,5 +481,16 @@
     "loading": "Loading...",
     "success": "Preorder was successfully created",
     "error": "Failed to create preorder"
+  },
+  "payment": {
+    "redirecting": "Redirecting to payment...",
+    "cannotLoad": "Failed to load the order.",
+    "cancelledTitle": "Payment was cancelled ❌",
+    "cancelledDescription": "The payment was not completed. Your order is still awaiting payment.",
+    "retry": "Try paying again",
+    "retryError": "Failed to open the payment gateway.",
+    "successTitle": "Payment successful 🎉",
+    "successDescription": "Your order has been paid.",
+    "goToOrders": "Go to orders"
   }
 }

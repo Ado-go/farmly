@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PaymentSuccessRouteImport } from './routes/payment-success'
+import { Route as PaymentCancelledRouteImport } from './routes/payment-cancelled'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CheckoutPreorderRouteImport } from './routes/checkout-preorder'
@@ -32,6 +34,7 @@ import { Route as FarmIdRouteImport } from './routes/farm/$id'
 import { Route as EventsIdRouteImport } from './routes/events/$id'
 import { Route as EventIdRouteImport } from './routes/event/$id'
 import { Route as OffersMyIndexRouteImport } from './routes/offers/my/index'
+import { Route as OrderIdPayRouteImport } from './routes/order/$id/pay'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -46,6 +49,16 @@ const RegisterRoute = RegisterRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentSuccessRoute = PaymentSuccessRouteImport.update({
+  id: '/payment-success',
+  path: '/payment-success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentCancelledRoute = PaymentCancelledRouteImport.update({
+  id: '/payment-cancelled',
+  path: '/payment-cancelled',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -148,6 +161,11 @@ const OffersMyIndexRoute = OffersMyIndexRouteImport.update({
   path: '/offers/my/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrderIdPayRoute = OrderIdPayRouteImport.update({
+  id: '/order/$id/pay',
+  path: '/order/$id/pay',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -156,6 +174,8 @@ export interface FileRoutesByFullPath {
   '/checkout-preorder': typeof CheckoutPreorderRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/payment-cancelled': typeof PaymentCancelledRoute
+  '/payment-success': typeof PaymentSuccessRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -172,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/farms': typeof FarmsIndexRoute
   '/offers': typeof OffersIndexRoute
   '/products': typeof ProductsIndexRoute
+  '/order/$id/pay': typeof OrderIdPayRoute
   '/offers/my': typeof OffersMyIndexRoute
 }
 export interface FileRoutesByTo {
@@ -181,6 +202,8 @@ export interface FileRoutesByTo {
   '/checkout-preorder': typeof CheckoutPreorderRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/payment-cancelled': typeof PaymentCancelledRoute
+  '/payment-success': typeof PaymentSuccessRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -197,6 +220,7 @@ export interface FileRoutesByTo {
   '/farms': typeof FarmsIndexRoute
   '/offers': typeof OffersIndexRoute
   '/products': typeof ProductsIndexRoute
+  '/order/$id/pay': typeof OrderIdPayRoute
   '/offers/my': typeof OffersMyIndexRoute
 }
 export interface FileRoutesById {
@@ -207,6 +231,8 @@ export interface FileRoutesById {
   '/checkout-preorder': typeof CheckoutPreorderRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/payment-cancelled': typeof PaymentCancelledRoute
+  '/payment-success': typeof PaymentSuccessRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -223,6 +249,7 @@ export interface FileRoutesById {
   '/farms/': typeof FarmsIndexRoute
   '/offers/': typeof OffersIndexRoute
   '/products/': typeof ProductsIndexRoute
+  '/order/$id/pay': typeof OrderIdPayRoute
   '/offers/my/': typeof OffersMyIndexRoute
 }
 export interface FileRouteTypes {
@@ -234,6 +261,8 @@ export interface FileRouteTypes {
     | '/checkout-preorder'
     | '/forgot-password'
     | '/login'
+    | '/payment-cancelled'
+    | '/payment-success'
     | '/profile'
     | '/register'
     | '/reset-password'
@@ -250,6 +279,7 @@ export interface FileRouteTypes {
     | '/farms'
     | '/offers'
     | '/products'
+    | '/order/$id/pay'
     | '/offers/my'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -259,6 +289,8 @@ export interface FileRouteTypes {
     | '/checkout-preorder'
     | '/forgot-password'
     | '/login'
+    | '/payment-cancelled'
+    | '/payment-success'
     | '/profile'
     | '/register'
     | '/reset-password'
@@ -275,6 +307,7 @@ export interface FileRouteTypes {
     | '/farms'
     | '/offers'
     | '/products'
+    | '/order/$id/pay'
     | '/offers/my'
   id:
     | '__root__'
@@ -284,6 +317,8 @@ export interface FileRouteTypes {
     | '/checkout-preorder'
     | '/forgot-password'
     | '/login'
+    | '/payment-cancelled'
+    | '/payment-success'
     | '/profile'
     | '/register'
     | '/reset-password'
@@ -300,6 +335,7 @@ export interface FileRouteTypes {
     | '/farms/'
     | '/offers/'
     | '/products/'
+    | '/order/$id/pay'
     | '/offers/my/'
   fileRoutesById: FileRoutesById
 }
@@ -310,6 +346,8 @@ export interface RootRouteChildren {
   CheckoutPreorderRoute: typeof CheckoutPreorderRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  PaymentCancelledRoute: typeof PaymentCancelledRoute
+  PaymentSuccessRoute: typeof PaymentSuccessRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -326,6 +364,7 @@ export interface RootRouteChildren {
   FarmsIndexRoute: typeof FarmsIndexRoute
   OffersIndexRoute: typeof OffersIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
+  OrderIdPayRoute: typeof OrderIdPayRoute
   OffersMyIndexRoute: typeof OffersMyIndexRoute
 }
 
@@ -350,6 +389,20 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment-success': {
+      id: '/payment-success'
+      path: '/payment-success'
+      fullPath: '/payment-success'
+      preLoaderRoute: typeof PaymentSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment-cancelled': {
+      id: '/payment-cancelled'
+      path: '/payment-cancelled'
+      fullPath: '/payment-cancelled'
+      preLoaderRoute: typeof PaymentCancelledRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -492,6 +545,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OffersMyIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/order/$id/pay': {
+      id: '/order/$id/pay'
+      path: '/order/$id/pay'
+      fullPath: '/order/$id/pay'
+      preLoaderRoute: typeof OrderIdPayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -502,6 +562,8 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutPreorderRoute: CheckoutPreorderRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  PaymentCancelledRoute: PaymentCancelledRoute,
+  PaymentSuccessRoute: PaymentSuccessRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
@@ -518,6 +580,7 @@ const rootRouteChildren: RootRouteChildren = {
   FarmsIndexRoute: FarmsIndexRoute,
   OffersIndexRoute: OffersIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
+  OrderIdPayRoute: OrderIdPayRoute,
   OffersMyIndexRoute: OffersMyIndexRoute,
 }
 export const routeTree = rootRouteImport
