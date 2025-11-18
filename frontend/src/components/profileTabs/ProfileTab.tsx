@@ -28,7 +28,10 @@ const updateProfileSchema = z.object({
     .string()
     .min(6, "registerPage.phone_min")
     .regex(/^\+?\d{6,15}$/, "registerPage.phone_invalid"),
-  role: z.enum(["CUSTOMER", "FARMER"]),
+  address: z.string().min(5, "registerPage.address_min"),
+  postalCode: z.string().min(3, "registerPage.postal_min"),
+  city: z.string().min(2, "registerPage.city_min"),
+  country: z.string().min(2, "registerPage.country_min"),
 });
 
 const deleteProfileSchema = z.object({
@@ -68,7 +71,10 @@ export default function ProfileTab() {
     values: {
       name: user?.name ?? "",
       phone: user?.phone ?? "",
-      role: user?.role ?? "CUSTOMER",
+      address: user?.address ?? "",
+      postalCode: user?.postalCode ?? "",
+      city: user?.city ?? "",
+      country: user?.country ?? "",
     },
   });
 
@@ -147,21 +153,7 @@ export default function ProfileTab() {
 
             <div>
               <Label>{t("profilePage.role_label")}</Label>
-              {isEditing ? (
-                <select
-                  {...updateForm.register("role")}
-                  className="border p-2 rounded w-full"
-                >
-                  <option value="CUSTOMER">
-                    {t("registerPage.role_customer")}
-                  </option>
-                  <option value="FARMER">
-                    {t("registerPage.role_farmer")}
-                  </option>
-                </select>
-              ) : (
-                <p>{user?.role}</p>
-              )}
+              <p>{user?.role}</p>
             </div>
 
             <div>
@@ -170,6 +162,42 @@ export default function ProfileTab() {
                 <Input {...updateForm.register("phone")} />
               ) : (
                 <p>{user?.phone}</p>
+              )}
+            </div>
+
+            <div>
+              <Label>{t("profilePage.address_label")}</Label>
+              {isEditing ? (
+                <Input {...updateForm.register("address")} />
+              ) : (
+                <p>{user?.address}</p>
+              )}
+            </div>
+
+            <div>
+              <Label>{t("profilePage.postal_label")}</Label>
+              {isEditing ? (
+                <Input {...updateForm.register("postalCode")} />
+              ) : (
+                <p>{user?.postalCode}</p>
+              )}
+            </div>
+
+            <div>
+              <Label>{t("profilePage.city_label")}</Label>
+              {isEditing ? (
+                <Input {...updateForm.register("city")} />
+              ) : (
+                <p>{user?.city}</p>
+              )}
+            </div>
+
+            <div>
+              <Label>{t("profilePage.country_label")}</Label>
+              {isEditing ? (
+                <Input {...updateForm.register("country")} />
+              ) : (
+                <p>{user?.country}</p>
               )}
             </div>
 

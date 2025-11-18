@@ -32,6 +32,10 @@ const registerSchema = z.object({
     .string()
     .min(6, "registerPage.phone_min")
     .regex(/^\+?\d{6,15}$/, "registerPage.phone_invalid"),
+  address: z.string().min(5, "registerPage.address_min"),
+  postalCode: z.string().min(3, "registerPage.postal_min"),
+  city: z.string().min(2, "registerPage.city_min"),
+  country: z.string().min(2, "registerPage.country_min"),
   email: z
     .string()
     .min(1, "registerPage.email_required")
@@ -121,6 +125,66 @@ function RegisterPage() {
               {errors.phone && (
                 <p className="text-sm text-red-500">
                   {t(errors.phone.message!)}
+                </p>
+              )}
+            </Field>
+
+            <Field>
+              <Label htmlFor="address">{t("registerPage.address_label")}</Label>
+              <Input
+                id="address"
+                placeholder={t("registerPage.address_placeholder")}
+                {...register("address")}
+              />
+              {errors.address && (
+                <p className="text-sm text-red-500">
+                  {t(errors.address.message!)}
+                </p>
+              )}
+            </Field>
+
+            <Field>
+              <Label htmlFor="postalCode">
+                {t("registerPage.postal_label")}
+              </Label>
+              <Input
+                id="postalCode"
+                placeholder={t("registerPage.postal_placeholder")}
+                {...register("postalCode")}
+              />
+              {errors.postalCode && (
+                <p className="text-sm text-red-500">
+                  {t(errors.postalCode.message!)}
+                </p>
+              )}
+            </Field>
+
+            <Field>
+              <Label htmlFor="city">{t("registerPage.city_label")}</Label>
+              <Input
+                id="city"
+                placeholder={t("registerPage.city_placeholder")}
+                {...register("city")}
+              />
+              {errors.city && (
+                <p className="text-sm text-red-500">
+                  {t(errors.city.message!)}
+                </p>
+              )}
+            </Field>
+
+            <Field>
+              <Label htmlFor="country">
+                {t("registerPage.country_label")}
+              </Label>
+              <Input
+                id="country"
+                placeholder={t("registerPage.country_placeholder")}
+                {...register("country")}
+              />
+              {errors.country && (
+                <p className="text-sm text-red-500">
+                  {t(errors.country.message!)}
                 </p>
               )}
             </Field>

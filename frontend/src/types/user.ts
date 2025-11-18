@@ -10,4 +10,8 @@ export type User = {
   phone: string;
   email: string;
   role: Role;
+  address: string;
+  postalCode: string;
+  city: string;
+  country: string;
 } | null;
