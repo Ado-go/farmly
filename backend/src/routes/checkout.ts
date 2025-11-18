@@ -5,7 +5,6 @@ import { checkoutSchema } from "../schemas/checkoutSchemas.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
 import { sendEmail } from "../utils/sendEmails.ts";
 import Stripe from "stripe";
-import express from "express";
 
 const router = Router();
 

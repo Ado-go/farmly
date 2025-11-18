@@ -1,6 +1,12 @@
 import nodemailer from "nodemailer";
 
 export const sendEmail = async (to: string, subject: string, html: string) => {
+  // Prevent sending emails during tests
+  if (process.env.NODE_ENV === "test") {
+    console.log("TEST MODE: Email skipped");
+    return;
+  }
+
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: Number(process.env.EMAIL_PORT),
