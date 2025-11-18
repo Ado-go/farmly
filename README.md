@@ -1,97 +1,126 @@
-# 🌾 Farmly – Eshop Project
+# 🌾 Farmly – Local Food Marketplace
 
-Farmly is an e-commerce application for managing farms, products, and users. It is built with Node.js, React, Prisma, and PostgreSQL.
-
----
-
-### 🚧 Work in Progress
-
-Farmly is still under active development.
-
-## ⚙️ Requirements
-
-Before running the project, make sure you have installed the following:
-
-- [Node.js](https://nodejs.org/) v20+  
-- [npm](https://www.npmjs.com/) or [pnpm](https://pnpm.io/)  
-- [PostgreSQL](https://www.postgresql.org/) v15+  
+Farmly is a full-stack e-commerce platform that connects farms with customers through product catalogs, farm events, offers, reviews, and Stripe-powered orders. The backend is built with Node.js, Express, Prisma, and PostgreSQL, while the frontend runs on React, TanStack Router, and TailwindCSS.
 
 ---
 
-## 🧱 Project Structure
-farmly/\
-├─ backend/ # Node.js + Express + Prisma API\
-├─ frontend/ # React + TanStack Router + TailwindCSS\
-├─ package.json # Main repo scripts for running backend + frontend
+## 🚧 Current Progress
+
+- Auth, profiles, farms, events, offers, and reviews endpoints are implemented in the API.
+- Stripe checkout (with webhooks) and Cloudinary uploads are wired up for the demo environment.
+- Frontend currently focuses on authenticated dashboards and farm management flows.
+- More public pages, moderation tooling, and production-ready content are still pending.
 
 ---
 
-## 🚀 Setup
+## 🛠️ Tech & Requirements
 
-### 1. Clone the repository
+- Node.js v20+ and npm (or pnpm) for running both apps.
+- PostgreSQL v15+ for the Prisma database.
+- Stripe CLI for forwarding webhooks locally (`npm start` spawns it automatically).
+- Optional integrations: SMTP account for transactional emails and a Cloudinary account for media uploads.
+
+---
+
+## ⚡ Quick Start (Localhost)
+
+### 1. Clone & install
+
 ```bash
 git clone https://github.com/Ado-go/farmly.git
 cd farmly
-```
-### 2. Install dependencies
-```bash
-npm run install:all
+npm run install:all          # installs frontend + backend dependencies
 ```
 
-### 3. Set up environment variables
-Create a .env file in the backend folder and add the following:
-```yaml
-# Database
-DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/farmly_db
+### 2. Configure environment files
 
-# Backend port
-PORT=5000
+- `backend/.env` (create if it does not exist):
 
-# Client URL (frontend)
-CLIENT_URL=http://localhost:5173
+  ```bash
+  DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/farmly"
+  PORT=5000
+  CLIENT_URL=http://localhost:5173
 
-# JWT secrets
-ACCESS_TOKEN_SECRET=your_access_token_secret
-REFRESH_TOKEN_SECRET=your_refresh_token_secret
-RESET_TOKEN_SECRET=your_reset_token_secret
+  ACCESS_TOKEN_SECRET=replace_me
+  REFRESH_TOKEN_SECRET=replace_me
+  RESET_TOKEN_SECRET=replace_me
 
-# Email configuration (for password reset and notifications)
-EMAIL_HOST=smtp.example.com
-EMAIL_PORT=587
-EMAIL_USER=your_email_user
-EMAIL_PASS="your_email_app_password"
-EMAIL_FROM="Farmly <noreply@example.com>"
-```
+  EMAIL_HOST=smtp.example.com
+  EMAIL_PORT=587
+  EMAIL_USER=your_inbox@example.com
+  EMAIL_PASS=app_password
+  EMAIL_FROM="Farmly Support <noreply@example.com>"
 
-### 4. Set up the database
+  CLOUDINARY_CLOUD_NAME=your_cloud
+  CLOUDINARY_API_KEY=your_key
+  CLOUDINARY_API_SECRET=your_secret
 
-1. Create a PostgreSQL database, e.g., farmly_db.
+  STRIPE_SECRET_KEY=sk_test_xxx
+  STRIPE_WEBHOOK_SECRET=whsec_xxx
+  FRONTEND_URL=http://localhost:5173
+  BACKEND_URL=http://localhost:5000
+  ```
 
-2. Run Prisma migrations to create the database schema:
+  The Stripe secrets come from the Stripe dashboard + `stripe listen`. Cloudinary and email credentials are optional but needed for the corresponding features.
+
+- `frontend/.env` (Vite-style variables):
+  ```bash
+  VITE_STRIPE_PUBLIC_KEY=pk_test_xxx
+  ```
+
+### 3. Prepare the database
+
 ```bash
 cd backend
-npx prisma migrate dev --name init
+npx prisma migrate dev
+npm run prisma:seed   # optional demo data (use npm run prisma:clear to reset)
+cd ..
 ```
 
-### 5. Seed the database (optional)
-in backend/ 
-```bash
-npm run prisma:seed
-```
-To clear the database before seeding, you can run:
-```bash
-npm run prisma:clear
-```
+### 4. Run the stack
 
-### 6. Start the application
-
-From the main repo folder:
 ```bash
 npm start
 ```
 
-### 🧪 Testing
-in backend/ run
+This script launches:
+
+- `start:frontend` → Vite dev server on `http://localhost:5173`
+- `start:backend` → Express API on `http://localhost:5000`
+- `start:stripe` → `stripe listen` forwarding to `/api/checkout/stripe/webhook`
+
+If you prefer to avoid Stripe while developing other parts, run `npm run start:frontend` and `npm run start:backend` manually in separate terminals instead.
+
+---
+
+## 🧪 Testing
+
 ```bash
+cd backend
 npm run test
+```
+
+---
+
+## 🔧 Useful scripts
+
+| Command                                        | Description                                                      |
+| ---------------------------------------------- | ---------------------------------------------------------------- |
+| `npm run install:all`                          | Install dependencies in both frontend and backend.               |
+| `npm start`                                    | Run frontend, backend, and Stripe webhook listener concurrently. |
+| `npm run start:frontend`                       | Launch only the Vite dev server.                                 |
+| `npm run start:backend`                        | Launch only the API (requires env + Postgres).                   |
+| `npm run install:frontend` / `install:backend` | Install dependencies per workspace.                              |
+| `cd backend && npm run prisma:seed`            | Seed demo data into the DB.                                      |
+| `cd backend && npm run prisma:clear`           | Remove seeded data.                                              |
+
+---
+
+## 🧱 Project Structure
+
+```
+farmly/
+├─ backend/   # Express + Prisma API
+├─ frontend/  # React + TanStack Router + Tailwind
+├─ package.json  # Root scripts for installing & running
 ```
