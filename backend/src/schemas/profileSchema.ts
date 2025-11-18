@@ -6,7 +6,10 @@ export const updateProfileSchema = z.object({
     .string()
     .min(6, "phone must be at least 6 char long")
     .regex(/^\+?\d{6,15}$/, "invalid phone number"),
-  role: z.enum(["CUSTOMER", "FARMER"]),
+  address: z.string().min(5, "address must be at least 5 char long"),
+  postalCode: z.string().min(3, "postal code must be at least 3 char long"),
+  city: z.string().min(2, "city must be at least 2 char long"),
+  country: z.string().min(2, "country must be at least 2 char long"),
 });
 
 export const deleteProfileSchema = z.object({

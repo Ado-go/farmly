@@ -8,6 +8,12 @@ let farmerId: number;
 let eventCurrentId: number;
 let eventFutureId: number;
 let eventPastId: number;
+const baseAddress = {
+  address: "Main Street 1",
+  postalCode: "01001",
+  city: "Bratislava",
+  country: "Slovakia",
+};
 
 beforeAll(async () => {
   await prisma.eventProduct.deleteMany({});
@@ -23,6 +29,7 @@ beforeAll(async () => {
       name: "Event Farmer",
       phone: "+421900555555",
       role: "FARMER",
+      ...baseAddress,
     },
   });
 

@@ -12,6 +12,12 @@ let PRODUCT_ID: number;
 let customerToken: string;
 let farmerToken: string;
 let otherFarmerToken: string;
+const baseAddress = {
+  address: "Main Street 1",
+  postalCode: "01001",
+  city: "Bratislava",
+  country: "Slovakia",
+};
 
 beforeAll(async () => {
   await prisma.orderHistory.deleteMany({});
@@ -29,6 +35,7 @@ beforeAll(async () => {
       name: "Farmer",
       phone: "+421900000001",
       role: "FARMER",
+      ...baseAddress,
     },
   });
   FARMER_ID = farmer.id;
@@ -44,6 +51,7 @@ beforeAll(async () => {
       name: "Other Farmer",
       phone: "+421900000002",
       role: "FARMER",
+      ...baseAddress,
     },
   });
   OTHER_FARMER_ID = otherFarmer.id;
@@ -59,6 +67,7 @@ beforeAll(async () => {
       name: "Customer",
       phone: "+421900000003",
       role: "CUSTOMER",
+      ...baseAddress,
     },
   });
   CUSTOMER_ID = customer.id;
@@ -222,6 +231,7 @@ describe("Checkout Routes", () => {
         name: "Other Customer",
         phone: "+421900000099",
         role: "CUSTOMER",
+        ...baseAddress,
       },
     });
     const otherCustomerToken = jwt.sign(

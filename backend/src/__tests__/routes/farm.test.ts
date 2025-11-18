@@ -8,6 +8,12 @@ import jwt from "jsonwebtoken";
 let token: string;
 let farmId: number;
 let farmerId: number;
+const baseAddress = {
+  address: "Main Street 1",
+  postalCode: "01001",
+  city: "Bratislava",
+  country: "Slovakia",
+};
 
 beforeAll(async () => {
   const user = await prisma.user.create({
@@ -17,6 +23,7 @@ beforeAll(async () => {
       name: "Test Farmer",
       phone: "123456789",
       role: "FARMER",
+      ...baseAddress,
     },
   });
 

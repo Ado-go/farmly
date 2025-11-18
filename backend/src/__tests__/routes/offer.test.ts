@@ -8,6 +8,12 @@ import jwt from "jsonwebtoken";
 let token: string;
 let offerId: number;
 let farmerId: number;
+const baseAddress = {
+  address: "Main Street 1",
+  postalCode: "01001",
+  city: "Bratislava",
+  country: "Slovakia",
+};
 
 beforeAll(async () => {
   await prisma.offer.deleteMany({});
@@ -21,6 +27,7 @@ beforeAll(async () => {
       name: "Offer Farmer",
       phone: "123456789",
       role: "FARMER",
+      ...baseAddress,
     },
   });
 

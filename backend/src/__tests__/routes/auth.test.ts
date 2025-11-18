@@ -27,6 +27,12 @@ describe("Auth routes", () => {
   let app: express.Express;
   let prisma: any;
   let sendEmail: any;
+  const baseAddress = {
+    address: "Main Street 1",
+    postalCode: "01001",
+    city: "Bratislava",
+    country: "Slovakia",
+  };
 
   beforeAll(async () => {
     const routerModule = await import("../../../src/routes/auth");
@@ -54,6 +60,7 @@ describe("Auth routes", () => {
       name: "John Johnson",
       phone: "+421940123456",
       role: "FARMER",
+      ...baseAddress,
     });
 
     const res = await request(app).post("/auth/register").send({
@@ -62,6 +69,7 @@ describe("Auth routes", () => {
       phone: "+421940123456",
       password: "123456",
       role: "FARMER",
+      ...baseAddress,
     });
 
     expect(res.status).toBe(200);
@@ -70,6 +78,7 @@ describe("Auth routes", () => {
       name: "John Johnson",
       phone: "+421940123456",
       role: "FARMER",
+      ...baseAddress,
     });
   });
 
@@ -92,6 +101,7 @@ describe("Auth routes", () => {
       role: "FARMER",
       name: "John",
       phone: "+421900000000",
+      ...baseAddress,
     });
 
     expect(res.status).toBe(400);
@@ -108,6 +118,7 @@ describe("Auth routes", () => {
       role: "FARMER",
       name: "John",
       phone: "+421900000000",
+      ...baseAddress,
     };
 
     prisma.user.findUnique.mockResolvedValue(mockUser);

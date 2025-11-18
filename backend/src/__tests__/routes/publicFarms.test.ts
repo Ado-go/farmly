@@ -7,6 +7,12 @@ import prisma from "../../prisma";
 let farmerId: number;
 let farm1Id: number;
 let farm2Id: number;
+const baseAddress = {
+  address: "Main Street 1",
+  postalCode: "01001",
+  city: "Bratislava",
+  country: "Slovakia",
+};
 
 beforeAll(async () => {
   await prisma.farmProduct.deleteMany({});
@@ -22,6 +28,7 @@ beforeAll(async () => {
       name: "Public Farmer",
       phone: "+421900123456",
       role: "FARMER",
+      ...baseAddress,
     },
   });
   farmerId = farmer.id;

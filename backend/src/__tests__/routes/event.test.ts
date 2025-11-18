@@ -8,6 +8,12 @@ let OTHER_FARMER_ID: number;
 let accessToken: string;
 let otherAccessToken: string;
 let eventId: number;
+const baseAddress = {
+  address: "Main Street 1",
+  postalCode: "01001",
+  city: "Bratislava",
+  country: "Slovakia",
+};
 
 beforeAll(async () => {
   const farmer = await prisma.user.create({
@@ -17,6 +23,7 @@ beforeAll(async () => {
       name: "Farmer",
       phone: "+421900000001",
       role: "FARMER",
+      ...baseAddress,
     },
   });
   FARMER_ID = farmer.id;
@@ -32,6 +39,7 @@ beforeAll(async () => {
       name: "Other Farmer",
       phone: "+421900000002",
       role: "FARMER",
+      ...baseAddress,
     },
   });
   OTHER_FARMER_ID = otherFarmer.id;

@@ -11,6 +11,12 @@ let productId: number;
 let reviewId: number;
 let accessToken: string;
 let otherAccessToken: string;
+const baseAddress = {
+  address: "Main Street 1",
+  postalCode: "01001",
+  city: "Bratislava",
+  country: "Slovakia",
+};
 
 beforeAll(async () => {
   await prisma.review.deleteMany({});
@@ -26,6 +32,7 @@ beforeAll(async () => {
       name: "User",
       phone: "+421900000001",
       role: "CUSTOMER",
+      ...baseAddress,
     },
   });
   USER_ID = user.id;
@@ -41,6 +48,7 @@ beforeAll(async () => {
       name: "Other User",
       phone: "+421900000002",
       role: "CUSTOMER",
+      ...baseAddress,
     },
   });
   OTHER_USER_ID = otherUser.id;
@@ -64,6 +72,7 @@ beforeAll(async () => {
           name: "Farmer",
           phone: "+421900000003",
           role: "FARMER",
+          ...baseAddress,
         },
       },
     },

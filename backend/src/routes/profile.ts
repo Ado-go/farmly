@@ -24,6 +24,10 @@ router.get("/", authenticateToken, async (req, res) => {
         name: true,
         phone: true,
         role: true,
+        address: true,
+        postalCode: true,
+        city: true,
+        country: true,
       },
     });
 
@@ -46,15 +50,21 @@ router.put(
       const userId = req.user?.id;
       if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
+      const { name, phone, address, postalCode, city, country } = req.body;
+
       const updatedUser = await prisma.user.update({
         where: { id: userId },
-        data: req.body,
+        data: { name, phone, address, postalCode, city, country },
         select: {
           id: true,
           email: true,
           name: true,
           role: true,
           phone: true,
+          address: true,
+          postalCode: true,
+          city: true,
+          country: true,
         },
       });
 
@@ -66,7 +76,6 @@ router.put(
   }
 );
 
-// TODO: Delete products and farms and offers and deal with everything that comes with it.
 // DELETE /profile
 router.delete(
   "/",

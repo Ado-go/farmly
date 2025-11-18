@@ -41,12 +41,32 @@ function generateTokens(user: User) {
 
 // Register
 router.post("/register", validateRequest(registerSchema), async (req, res) => {
-  const { email, password, role, name, phone } = req.body;
+  const {
+    email,
+    password,
+    role,
+    name,
+    phone,
+    address,
+    postalCode,
+    city,
+    country,
+  } = req.body;
 
-  if (!email || !password || !role || !name || !phone) {
+  if (
+    !email ||
+    !password ||
+    !role ||
+    !name ||
+    !phone ||
+    !address ||
+    !postalCode ||
+    !city ||
+    !country
+  ) {
     return res
       .status(400)
-      .json({ error: "Missing email, password, role, name or phone" });
+      .json({ error: "Missing required registration fields" });
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -58,7 +78,17 @@ router.post("/register", validateRequest(registerSchema), async (req, res) => {
     const hashed = await argon2.hash(password);
 
     const user = await prisma.user.create({
-      data: { email, password: hashed, role, name, phone },
+      data: {
+        email,
+        password: hashed,
+        role,
+        name,
+        phone,
+        address,
+        postalCode,
+        city,
+        country,
+      },
     });
 
     res.json({
@@ -68,6 +98,10 @@ router.post("/register", validateRequest(registerSchema), async (req, res) => {
         role: user.role,
         name: user.name,
         phone: user.phone,
+        address: user.address,
+        postalCode: user.postalCode,
+        city: user.city,
+        country: user.country,
       },
     });
   } catch (err: any) {
@@ -113,6 +147,10 @@ router.post("/login", validateRequest(loginSchema), async (req, res) => {
       role: user.role,
       name: user.name,
       phone: user.phone,
+      address: user.address,
+      postalCode: user.postalCode,
+      city: user.city,
+      country: user.country,
     },
   });
 });

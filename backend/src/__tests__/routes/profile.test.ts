@@ -6,6 +6,12 @@ import jwt from "jsonwebtoken";
 
 let accessToken: string;
 let testUserId: number;
+const baseAddress = {
+  address: "Main Street 1",
+  postalCode: "01001",
+  city: "Bratislava",
+  country: "Slovakia",
+};
 
 beforeAll(async () => {
   const hashedPassword = await argon2.hash("password123");
@@ -16,6 +22,7 @@ beforeAll(async () => {
       name: "Test User",
       phone: "+421940123456",
       role: "CUSTOMER",
+      ...baseAddress,
     },
   });
   testUserId = user.id;
@@ -49,21 +56,33 @@ describe("Profile Routes", () => {
     expect(res.body.user).toHaveProperty("id", testUserId);
     expect(res.body.user).toHaveProperty("email", "profile@test.com");
     expect(res.body.user).toHaveProperty("name", "Test User");
+    expect(res.body.user).toHaveProperty("address", baseAddress.address);
+    expect(res.body.user).toHaveProperty("postalCode", baseAddress.postalCode);
   });
 
   it("PUT /profile - should update user data", async () => {
+    const payload = {
+      name: "Updated User",
+      phone: "+421940456123",
+      address: "Updated Street 99",
+      postalCode: "04001",
+      city: "Kosice",
+      country: "Slovakia",
+      role: "ADMIN",
+    };
+
     const res = await request(app)
       .put("/api/profile")
       .set("Cookie", [`accessToken=${accessToken}`])
-      .send({
-        name: "Updated User",
-        phone: "+421940456123",
-        role: "CUSTOMER",
-      });
+      .send(payload);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.user).toHaveProperty("name", "Updated User");
     expect(res.body.user).toHaveProperty("phone", "+421940456123");
+    expect(res.body.user).toHaveProperty("address", "Updated Street 99");
+    expect(res.body.user).toHaveProperty("postalCode", "04001");
+    expect(res.body.user).toHaveProperty("city", "Kosice");
+    expect(res.body.user).toHaveProperty("country", "Slovakia");
     expect(res.body.user).toHaveProperty("role", "CUSTOMER");
   });
 
@@ -74,7 +93,10 @@ describe("Profile Routes", () => {
       .send({
         name: "A",
         phone: "123",
-        role: "INVALID_ROLE",
+        address: "12",
+        postalCode: "1",
+        city: "",
+        country: "",
       });
 
     expect(res.statusCode).toBe(400);
@@ -105,6 +127,7 @@ describe("Profile Routes", () => {
         name: "Test User 2",
         phone: "+421940123457",
         role: "CUSTOMER",
+        ...baseAddress,
       },
     });
     const token = jwt.sign(

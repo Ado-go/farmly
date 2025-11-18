@@ -5,6 +5,12 @@ import prisma from "../../prisma";
 let CUSTOMER_ID: number;
 let EVENT_ID: number;
 let PRODUCT_ID: number;
+const baseAddress = {
+  address: "Main Street 1",
+  postalCode: "01001",
+  city: "Bratislava",
+  country: "Slovakia",
+};
 
 beforeAll(async () => {
   await prisma.orderItem.deleteMany({});
@@ -20,6 +26,7 @@ beforeAll(async () => {
       name: "Customer 2",
       phone: "+421900000333",
       role: "CUSTOMER",
+      ...baseAddress,
     },
   });
   CUSTOMER_ID = customer.id;

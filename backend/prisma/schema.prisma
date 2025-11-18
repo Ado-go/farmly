@@ -55,6 +55,10 @@ model User {
   password            String
   name                String
   phone               String
+  address             String            @default("")
+  postalCode          String            @default("")
+  city                String            @default("")
+  country             String            @default("")
   role                Role              @default(CUSTOMER)
   orders              Order[]           @relation("BuyerOrders")
   orderHistory        OrderHistory[]

@@ -10,6 +10,12 @@ let OTHER_EVENT_ID: number;
 let eventProductId: number;
 let accessToken: string;
 let otherAccessToken: string;
+const baseAddress = {
+  address: "Main Street 1",
+  postalCode: "01001",
+  city: "Bratislava",
+  country: "Slovakia",
+};
 
 beforeAll(async () => {
   await prisma.eventProduct.deleteMany({});
@@ -25,6 +31,7 @@ beforeAll(async () => {
       name: "Farmer",
       phone: "+421900000001",
       role: "FARMER",
+      ...baseAddress,
     },
   });
   FARMER_ID = farmer.id;
@@ -40,6 +47,7 @@ beforeAll(async () => {
       name: "Other Farmer",
       phone: "+421900000002",
       role: "FARMER",
+      ...baseAddress,
     },
   });
   OTHER_FARMER_ID = otherFarmer.id;

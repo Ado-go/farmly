@@ -89,6 +89,10 @@ async function main() {
   const numFarmers = randomInt(5, 8);
   for (let i = 0; i < numFarmers; i++) {
     const password = await argon2.hash("heslo123");
+    const city = cities[randomInt(0, cities.length - 1)];
+    const street = `${streets[randomInt(0, streets.length - 1)]} ${
+      1 + i
+    }`;
     const farmer = await prisma.user.create({
       data: {
         email: `farmer${i + 1}@example.com`,
@@ -96,6 +100,10 @@ async function main() {
         name: farmerNames[i % farmerNames.length],
         phone: `+421900${100000 + i}`,
         role: "FARMER",
+        address: street,
+        postalCode: `0${randomInt(1000, 9999)}`,
+        city,
+        country: "Slovensko",
       },
     });
     farmers.push(farmer);
@@ -103,6 +111,10 @@ async function main() {
 
   for (let i = 0; i < customerNames.length; i++) {
     const password = await argon2.hash("heslo123");
+     const city = cities[randomInt(0, cities.length - 1)];
+     const street = `${streets[randomInt(0, streets.length - 1)]} ${
+       10 + i
+     }`;
     const customer = await prisma.user.create({
       data: {
         email: `customer${i + 1}@example.com`,
@@ -110,6 +122,10 @@ async function main() {
         name: customerNames[i],
         phone: `+421910${100000 + i}`,
         role: "CUSTOMER",
+        address: street,
+        postalCode: `0${randomInt(1000, 9999)}`,
+        city,
+        country: "Slovensko",
       },
     });
     customers.push(customer);
