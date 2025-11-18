@@ -9,6 +9,7 @@ async function main() {
   await prisma.eventProduct.deleteMany({});
   await prisma.event.deleteMany({});
 
+  await prisma.orderHistory.deleteMany({});
   await prisma.orderItem.deleteMany({});
   await prisma.order.deleteMany({});
 

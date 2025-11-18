@@ -1,10 +1,70 @@
-import { PrismaClient } from "@prisma/client";
+import {
+  HistoryAction,
+  OrderItemStatus,
+  OrderStatus,
+  OrderType,
+  PaymentMethod,
+  PrismaClient,
+} from "@prisma/client";
+import type { Event, Product, User } from "@prisma/client";
 import argon2 from "argon2";
 
 const prisma = new PrismaClient();
 
 const randomInt = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
+
+const shuffle = <T>(items: T[]) => [...items].sort(() => Math.random() - 0.5);
+
+const pickRandomSubset = <T>(collection: T[], min: number, max: number) => {
+  if (!collection.length || max <= 0) {
+    return [];
+  }
+
+  const actualMax = Math.min(collection.length, max);
+  const actualMin = Math.min(min, actualMax);
+  const takeCount = randomInt(actualMin, actualMax);
+
+  return shuffle(collection).slice(0, takeCount);
+};
+
+const randomAddress = () => ({
+  city: cities[randomInt(0, cities.length - 1)],
+  street: `${streets[randomInt(0, streets.length - 1)]} ${randomInt(1, 120)}`,
+  region: regions[randomInt(0, regions.length - 1)],
+  postalCode: `0${randomInt(1000, 9999)}`,
+});
+
+type FarmProductRecord = {
+  farmer: User;
+  product: Product;
+  price: number;
+};
+
+type EventProductRecord = {
+  event: Event;
+  seller: User;
+  product: Product;
+};
+
+type OrderItemSeed = {
+  product: Product;
+  sellerName: string;
+  price: number;
+  quantity: number;
+};
+
+const paymentOptions = [
+  PaymentMethod.CASH,
+  PaymentMethod.CARD,
+  PaymentMethod.BANK_TRANSFER,
+];
+
+const orderStatuses = [
+  OrderStatus.PENDING,
+  OrderStatus.COMPLETED,
+  OrderStatus.CANCELED,
+];
 
 const farmerNames = [
   "Ján Novák",
@@ -64,16 +124,110 @@ async function clearDatabase() {
   await prisma.eventParticipant.deleteMany({});
   await prisma.eventProduct.deleteMany({});
   await prisma.event.deleteMany({});
+  await prisma.orderHistory.deleteMany({});
   await prisma.orderItem.deleteMany({});
   await prisma.order.deleteMany({});
   await prisma.farmProduct.deleteMany({});
   await prisma.farmImage.deleteMany({});
   await prisma.farm.deleteMany({});
   await prisma.productImage.deleteMany({});
+  await prisma.offer.deleteMany({});
   await prisma.product.deleteMany({});
   await prisma.user.deleteMany({});
 
   console.log("✅ Database cleared successfully.");
+}
+
+async function createOrderWithItems({
+  buyer,
+  items,
+  orderType = OrderType.STANDARD,
+  event,
+}: {
+  buyer: User;
+  items: OrderItemSeed[];
+  orderType?: OrderType;
+  event?: Event;
+}) {
+  if (!items.length) return;
+
+  const address = randomAddress();
+  const status =
+    orderType === OrderType.PREORDER
+      ? OrderStatus.PENDING
+      : orderStatuses[randomInt(0, orderStatuses.length - 1)];
+  const totalPrice = parseFloat(
+    items
+      .reduce((sum, item) => sum + item.price * item.quantity, 0)
+      .toFixed(2)
+  );
+
+  const order = await prisma.order.create({
+    data: {
+      buyerId: buyer.id,
+      orderType,
+      deliveryCity: address.city,
+      deliveryStreet: address.street,
+      deliveryRegion: address.region,
+      deliveryPostalCode: address.postalCode,
+      deliveryCountry: "Slovensko",
+      eventId: event?.id ?? null,
+      isDelivered: status === OrderStatus.COMPLETED,
+      isPaid: status === OrderStatus.COMPLETED || Math.random() > 0.4,
+      paymentMethod: paymentOptions[randomInt(0, paymentOptions.length - 1)],
+      totalPrice,
+      status,
+    },
+  });
+
+  const itemStatus =
+    status === OrderStatus.CANCELED
+      ? OrderItemStatus.CANCELED
+      : OrderItemStatus.ACTIVE;
+
+  for (const item of items) {
+    await prisma.orderItem.create({
+      data: {
+        orderId: order.id,
+        productId: item.product.id,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        sellerName: item.sellerName,
+        productName: item.product.name,
+        status: itemStatus,
+      },
+    });
+  }
+
+  await prisma.orderHistory.create({
+    data: {
+      action: HistoryAction.ORDER_CREATED,
+      message:
+        orderType === OrderType.PREORDER
+          ? `Predobjednávka pre ${items.length} položky bola vytvorená.`
+          : `Objednávka so ${items.length} položkami bola vytvorená.`,
+      orderId: order.id,
+      userId: buyer.id,
+    },
+  });
+
+  if (status === OrderStatus.CANCELED) {
+    await prisma.orderHistory.create({
+      data: {
+        action: HistoryAction.ORDER_CANCELED,
+        message: "Objednávka bola zrušená systémom.",
+        orderId: order.id,
+      },
+    });
+  } else if (status === OrderStatus.COMPLETED) {
+    await prisma.orderHistory.create({
+      data: {
+        action: HistoryAction.ORDER_UPDATED,
+        message: "Objednávka bola úspešne doručená zákazníkovi.",
+        orderId: order.id,
+      },
+    });
+  }
 }
 
 async function main() {
@@ -81,18 +235,18 @@ async function main() {
 
   console.log("🌱 Seeding new data...");
 
-  const farmers: any[] = [];
-  const customers: any[] = [];
-  const allProducts: any[] = [];
+  const farmers: User[] = [];
+  const customers: User[] = [];
+  const allProducts: Product[] = [];
+  const farmProductRecords: FarmProductRecord[] = [];
+  const eventProductRecords: EventProductRecord[] = [];
+  const eventsData: { event: Event; participants: User[] }[] = [];
 
   // ------------------ USERS ------------------
   const numFarmers = randomInt(5, 8);
   for (let i = 0; i < numFarmers; i++) {
     const password = await argon2.hash("heslo123");
-    const city = cities[randomInt(0, cities.length - 1)];
-    const street = `${streets[randomInt(0, streets.length - 1)]} ${
-      1 + i
-    }`;
+    const address = randomAddress();
     const farmer = await prisma.user.create({
       data: {
         email: `farmer${i + 1}@example.com`,
@@ -100,9 +254,9 @@ async function main() {
         name: farmerNames[i % farmerNames.length],
         phone: `+421900${100000 + i}`,
         role: "FARMER",
-        address: street,
-        postalCode: `0${randomInt(1000, 9999)}`,
-        city,
+        address: address.street,
+        postalCode: address.postalCode,
+        city: address.city,
         country: "Slovensko",
       },
     });
@@ -111,10 +265,7 @@ async function main() {
 
   for (let i = 0; i < customerNames.length; i++) {
     const password = await argon2.hash("heslo123");
-     const city = cities[randomInt(0, cities.length - 1)];
-     const street = `${streets[randomInt(0, streets.length - 1)]} ${
-       10 + i
-     }`;
+    const address = randomAddress();
     const customer = await prisma.user.create({
       data: {
         email: `customer${i + 1}@example.com`,
@@ -122,9 +273,9 @@ async function main() {
         name: customerNames[i],
         phone: `+421910${100000 + i}`,
         role: "CUSTOMER",
-        address: street,
-        postalCode: `0${randomInt(1000, 9999)}`,
-        city,
+        address: address.street,
+        postalCode: address.postalCode,
+        city: address.city,
         country: "Slovensko",
       },
     });
@@ -154,9 +305,11 @@ async function main() {
       });
 
       const numProducts = randomInt(3, 6);
-      const chosenTemplates = [...productTemplates]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, numProducts);
+      const chosenTemplates = pickRandomSubset(
+        productTemplates,
+        numProducts,
+        numProducts
+      );
 
       for (const template of chosenTemplates) {
         const farmProduct = await prisma.farmProduct.create({
@@ -178,6 +331,11 @@ async function main() {
           include: { product: true },
         });
 
+        farmProductRecords.push({
+          farmer,
+          product: farmProduct.product,
+          price: farmProduct.price,
+        });
         allProducts.push(farmProduct.product);
       }
     }
@@ -211,26 +369,38 @@ async function main() {
       });
 
       const otherFarmers = farmers.filter((f) => f.id !== farmer.id);
-      const chosenFarmers = [...otherFarmers]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, randomInt(2, 5));
-
+      const chosenFarmers = pickRandomSubset(
+        otherFarmers,
+        1,
+        Math.min(4, otherFarmers.length || 1)
+      );
+      const participantMap = new Map<number, User>();
+      participantMap.set(farmer.id, farmer);
       for (const participant of chosenFarmers) {
+        participantMap.set(participant.id, participant);
+      }
+      const participants = Array.from(participantMap.values());
+
+      for (const participant of participants) {
         await prisma.eventParticipant.create({
           data: { eventId: event.id, userId: participant.id },
         });
       }
 
-      const numProducts = randomInt(1, 3);
-      const chosenTemplates = [...productTemplates]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, numProducts);
+      const numProducts = randomInt(2, 5);
+      const chosenTemplates = pickRandomSubset(
+        productTemplates,
+        numProducts,
+        numProducts
+      );
 
       for (const template of chosenTemplates) {
+        const seller =
+          participants[randomInt(0, participants.length - 1)] ?? farmer;
         const eventProduct = await prisma.eventProduct.create({
           data: {
             event: { connect: { id: event.id } },
-            user: { connect: { id: farmer.id } },
+            user: { connect: { id: seller.id } },
             product: {
               create: {
                 name: `${template.name} (${event.title})`,
@@ -243,8 +413,99 @@ async function main() {
           include: { product: true },
         });
 
+        eventProductRecords.push({
+          event,
+          seller,
+          product: eventProduct.product,
+        });
         allProducts.push(eventProduct.product);
       }
+
+      eventsData.push({ event, participants });
+    }
+  }
+
+  // ------------------- OFFERS -------------------
+  console.log("💼 Creating offers...");
+  for (const farmer of farmers) {
+    const ownedProducts = farmProductRecords.filter(
+      (record) => record.farmer.id === farmer.id
+    );
+    if (!ownedProducts.length) continue;
+
+    const numOffers = randomInt(1, Math.min(2, ownedProducts.length));
+    const offersSelection = shuffle(ownedProducts).slice(0, numOffers);
+
+    for (const record of offersSelection) {
+      await prisma.offer.create({
+        data: {
+          title: `${record.product.name} - akciová ponuka`,
+          description: "Limitovaná ponuka priamo od farmára.",
+          category: record.product.category,
+          price: parseFloat((record.price * 0.9).toFixed(2)),
+          imageUrl: null,
+          userId: farmer.id,
+          productId: record.product.id,
+        },
+      });
+    }
+  }
+
+  // ------------------- ORDERS -------------------
+  if (farmProductRecords.length && customers.length) {
+    console.log("🛒 Creating standard orders...");
+    for (const customer of customers) {
+      const maxItems = Math.min(3, farmProductRecords.length);
+      const selection = shuffle(farmProductRecords).slice(
+        0,
+        randomInt(1, maxItems)
+      );
+      const items: OrderItemSeed[] = selection.map((record) => ({
+        product: record.product,
+        sellerName: record.farmer.name,
+        price: parseFloat(
+          (record.price * (0.9 + Math.random() * 0.3)).toFixed(2)
+        ),
+        quantity: randomInt(1, 4),
+      }));
+
+      await createOrderWithItems({ buyer: customer, items });
+    }
+  }
+
+  // ------------------- PREORDERS FOR EVENTS -------------------
+  if (eventProductRecords.length && customers.length) {
+    console.log("📦 Creating preorders tied to events...");
+    for (const { event } of eventsData) {
+      const eventProducts = eventProductRecords.filter(
+        (record) => record.event.id === event.id
+      );
+      if (!eventProducts.length) continue;
+
+      const buyer = customers[randomInt(0, customers.length - 1)];
+      const maxItems = Math.min(2, eventProducts.length);
+      const chosenProducts = shuffle(eventProducts).slice(
+        0,
+        randomInt(1, maxItems)
+      );
+      const items: OrderItemSeed[] = chosenProducts.map((record) => ({
+        product: record.product,
+        sellerName: record.seller.name,
+        price: parseFloat(
+          (
+            (record.product.basePrice ?? 5) *
+            (1 + Math.random() * 0.2)
+          ).toFixed(2)
+        ),
+        quantity: randomInt(1, 2),
+      }));
+
+      await createOrderWithItems({
+        buyer,
+        items,
+        orderType: OrderType.PREORDER,
+        event,
+      });
     }
   }
 
