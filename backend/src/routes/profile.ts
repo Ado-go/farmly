@@ -1,6 +1,7 @@
 import { Router } from "express";
 import prisma from "../prisma.ts";
 import argon2 from "argon2";
+import { v2 as cloudinary } from "cloudinary";
 import { authenticateToken } from "../middleware/auth.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
 import {
@@ -28,6 +29,8 @@ router.get("/", authenticateToken, async (req, res) => {
         postalCode: true,
         city: true,
         country: true,
+        profileImageUrl: true,
+        profileImagePublicId: true,
       },
     });
 
@@ -50,11 +53,41 @@ router.put(
       const userId = req.user?.id;
       if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-      const { name, phone, address, postalCode, city, country } = req.body;
+      const {
+        name,
+        phone,
+        address,
+        postalCode,
+        city,
+        country,
+        profileImageUrl,
+        profileImagePublicId,
+      } = req.body;
+
+      const existingUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { profileImagePublicId: true },
+      });
+
+      const data: Record<string, any> = {
+        name,
+        phone,
+        address,
+        postalCode,
+        city,
+        country,
+      };
+
+      if (profileImageUrl !== undefined) {
+        data.profileImageUrl = profileImageUrl;
+      }
+      if (profileImagePublicId !== undefined) {
+        data.profileImagePublicId = profileImagePublicId;
+      }
 
       const updatedUser = await prisma.user.update({
         where: { id: userId },
-        data: { name, phone, address, postalCode, city, country },
+        data,
         select: {
           id: true,
           email: true,
@@ -65,8 +98,28 @@ router.put(
           postalCode: true,
           city: true,
           country: true,
+          profileImageUrl: true,
+          profileImagePublicId: true,
         },
       });
+
+      const oldPublicId = existingUser?.profileImagePublicId;
+      const isReplacingImage =
+        profileImagePublicId &&
+        profileImagePublicId !== oldPublicId &&
+        !!oldPublicId;
+      const isRemovingImage =
+        profileImagePublicId === null && !!oldPublicId;
+
+      if (oldPublicId && (isReplacingImage || isRemovingImage)) {
+        try {
+          await cloudinary.uploader.destroy(oldPublicId, {
+            resource_type: "image",
+          });
+        } catch (err) {
+          console.error("Failed to delete old profile image", err);
+        }
+      }
 
       res.json({ user: updatedUser });
     } catch (err: any) {
@@ -94,6 +147,16 @@ router.delete(
       const valid = await argon2.verify(user.password, password);
       if (!valid)
         return res.status(403).json({ message: "Incorrect password" });
+
+      if (user.profileImagePublicId) {
+        try {
+          await cloudinary.uploader.destroy(user.profileImagePublicId, {
+            resource_type: "image",
+          });
+        } catch (err) {
+          console.error("Failed to delete profile image", err);
+        }
+      }
 
       await prisma.user.delete({ where: { id: userId } });
       res.clearCookie("accessToken");

@@ -76,6 +76,7 @@ router.get(
               name: true,
               email: true,
               role: true,
+              profileImageUrl: true,
             },
           },
 
@@ -88,6 +89,7 @@ router.get(
                   name: true,
                   email: true,
                   role: true,
+                  profileImageUrl: true,
                 },
               },
             },
@@ -143,6 +145,7 @@ router.get(
               name: true,
               email: true,
               role: true,
+              profileImageUrl: true,
             },
           },
 
@@ -155,6 +158,7 @@ router.get(
                   name: true,
                   email: true,
                   role: true,
+                  profileImageUrl: true,
                 },
               },
             },

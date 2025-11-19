@@ -10,6 +10,8 @@ export const updateProfileSchema = z.object({
   postalCode: z.string().min(3, "postal code must be at least 3 char long"),
   city: z.string().min(2, "city must be at least 2 char long"),
   country: z.string().min(2, "country must be at least 2 char long"),
+  profileImageUrl: z.string().url().nullable().optional(),
+  profileImagePublicId: z.string().nullable().optional(),
 });
 
 export const deleteProfileSchema = z.object({

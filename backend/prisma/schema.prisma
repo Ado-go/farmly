@@ -59,6 +59,8 @@ model User {
   postalCode          String            @default("")
   city                String            @default("")
   country             String            @default("")
+  profileImageUrl     String?
+  profileImagePublicId String?
   role                Role              @default(CUSTOMER)
   orders              Order[]           @relation("BuyerOrders")
   orderHistory        OrderHistory[]

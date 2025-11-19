@@ -9,7 +9,9 @@ router.get("/", async (req, res) => {
     const farms = await prisma.farm.findMany({
       include: {
         images: true,
-        farmer: { select: { id: true, name: true } },
+        farmer: {
+          select: { id: true, name: true, profileImageUrl: true },
+        },
         farmProducts: {
           include: {
             product: {
@@ -72,7 +74,9 @@ router.get("/:id", async (req, res) => {
       where: { id: farmId },
       include: {
         images: true,
-        farmer: { select: { id: true, name: true } },
+        farmer: {
+          select: { id: true, name: true, profileImageUrl: true },
+        },
         farmProducts: {
           include: {
             product: {

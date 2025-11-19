@@ -102,6 +102,8 @@ router.post("/register", validateRequest(registerSchema), async (req, res) => {
         postalCode: user.postalCode,
         city: user.city,
         country: user.country,
+        profileImageUrl: user.profileImageUrl,
+        profileImagePublicId: user.profileImagePublicId,
       },
     });
   } catch (err: any) {
@@ -151,6 +153,8 @@ router.post("/login", validateRequest(loginSchema), async (req, res) => {
       postalCode: user.postalCode,
       city: user.city,
       country: user.country,
+      profileImageUrl: user.profileImageUrl,
+      profileImagePublicId: user.profileImagePublicId,
     },
   });
 });

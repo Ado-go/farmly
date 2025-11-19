@@ -20,12 +20,13 @@ router.get("/", async (req, res) => {
           select: {
             id: true,
             name: true,
+            profileImageUrl: true,
           },
         },
         participants: {
           select: {
             user: {
-              select: { id: true, name: true },
+              select: { id: true, name: true, profileImageUrl: true },
             },
           },
         },
@@ -45,6 +46,7 @@ router.get("/", async (req, res) => {
               select: {
                 id: true,
                 name: true,
+                profileImageUrl: true,
               },
             },
           },
@@ -75,12 +77,13 @@ router.get("/:id", async (req, res) => {
           select: {
             id: true,
             name: true,
+            profileImageUrl: true,
           },
         },
         participants: {
           select: {
             user: {
-              select: { id: true, name: true },
+              select: { id: true, name: true, profileImageUrl: true },
             },
           },
         },
@@ -100,6 +103,7 @@ router.get("/:id", async (req, res) => {
               select: {
                 id: true,
                 name: true,
+                profileImageUrl: true,
               },
             },
           },
