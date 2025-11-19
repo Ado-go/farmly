@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
+import { ImageCarousel } from "@/components/ImageCarousel";
 import {
   Dialog,
   DialogContent,
@@ -39,7 +41,10 @@ const offerSchema = z.object({
   description: z.string().optional(),
   category: z.string().min(2, "Category is required"),
   price: z.number().min(0, "Price must be 0 or more"),
-  imageUrl: z.string().optional(),
+  productName: z.string().min(2, "Product name is required"),
+  productDescription: z.string().optional(),
+  productCategory: z.string().min(2, "Product category is required"),
+  productPrice: z.number().min(0, "Product price must be 0 or more"),
 });
 
 type OfferFormData = z.infer<typeof offerSchema>;
@@ -50,8 +55,14 @@ type Offer = {
   description?: string;
   category: string;
   price: number;
-  imageUrl?: string;
-  product: { id: number; name: string };
+  product: {
+    id: number;
+    name: string;
+    description?: string;
+    category: string;
+    basePrice?: number;
+    images?: { url: string; publicId: string }[];
+  };
 };
 
 function OffersMyPage() {
@@ -60,7 +71,7 @@ function OffersMyPage() {
 
   const [open, setOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [images, setImages] = useState<UploadedImage[]>([]);
 
   const {
     data: offers = [],
@@ -78,7 +89,10 @@ function OffersMyPage() {
       description: "",
       category: "",
       price: 0,
-      imageUrl: "",
+      productName: "",
+      productDescription: "",
+      productCategory: "",
+      productPrice: 0,
     },
   });
 
@@ -89,41 +103,69 @@ function OffersMyPage() {
         description: editingOffer.description,
         category: editingOffer.category,
         price: editingOffer.price,
-        imageUrl: editingOffer.imageUrl || "",
+        productName: editingOffer.product?.name || "",
+        productDescription: editingOffer.product?.description || "",
+        productCategory: editingOffer.product?.category || "",
+        productPrice: editingOffer.product?.basePrice ?? editingOffer.price,
       });
-      setImagePreview(editingOffer.imageUrl || null);
+      setImages(
+        (editingOffer.product?.images ?? []).map((img) => ({
+          url: img.url,
+          publicId: img.publicId,
+        }))
+      );
     } else {
       form.reset({
         title: "",
         description: "",
         category: "",
         price: 0,
-        imageUrl: "",
+        productName: "",
+        productDescription: "",
+        productCategory: "",
+        productPrice: 0,
       });
-      setImagePreview(null);
+      setImages([]);
     }
   }, [editingOffer, form]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    setImagePreview(url);
+  const uploadImages = async (currentImages: UploadedImage[]) => {
+    const uploaded: UploadedImage[] = [];
+    for (const img of currentImages) {
+      if (img.file) {
+        const formData = new FormData();
+        formData.append("image", img.file);
+        const res = await apiFetch("/upload", {
+          method: "POST",
+          body: formData,
+        });
+        uploaded.push(res);
+      } else {
+        uploaded.push(img);
+      }
+    }
+    return uploaded;
   };
 
   const createOffer = useMutation({
     mutationFn: async (data: OfferFormData) => {
+      const uploaded = await uploadImages(images);
       const payload = {
         title: data.title,
         description: data.description,
         category: data.category,
         price: Number(data.price),
-        imageUrl: imagePreview || undefined,
         product: {
-          name: data.title,
-          category: data.category,
-          description: data.description,
-          basePrice: Number(data.price),
+          name: data.productName,
+          category: data.productCategory,
+          description: data.productDescription,
+          basePrice: Number(data.productPrice),
+          images: uploaded
+            .filter((img) => img.url && img.publicId)
+            .map((img) => ({
+              url: img.url,
+              publicId: img.publicId as string,
+            })),
         },
       };
       return apiFetch("/offer", {
@@ -137,7 +179,7 @@ function OffersMyPage() {
       setOpen(false);
       setEditingOffer(null);
       form.reset();
-      setImagePreview(null);
+      setImages([]);
     },
     onError: () => {
       toast.error(t("offersPage.createError"));
@@ -147,12 +189,24 @@ function OffersMyPage() {
   const updateOffer = useMutation({
     mutationFn: async (data: OfferFormData) => {
       if (!editingOffer) return;
+      const uploaded = await uploadImages(images);
       const payload = {
         title: data.title,
         description: data.description,
         category: data.category,
         price: Number(data.price),
-        imageUrl: imagePreview || editingOffer.imageUrl || undefined,
+        product: {
+          name: data.productName,
+          category: data.productCategory,
+          description: data.productDescription,
+          basePrice: Number(data.productPrice),
+          images: uploaded
+            .filter((img) => img.url && img.publicId)
+            .map((img) => ({
+              url: img.url,
+              publicId: img.publicId as string,
+            })),
+        },
       };
       return apiFetch(`/offer/${editingOffer.id}`, {
         method: "PUT",
@@ -165,7 +219,7 @@ function OffersMyPage() {
       setOpen(false);
       setEditingOffer(null);
       setTimeout(() => form.reset(), 150);
-      setImagePreview(null);
+      setImages([]);
     },
     onError: () => {
       toast.error(t("offersPage.updateError"));
@@ -186,7 +240,7 @@ function OffersMyPage() {
 
   const handleOpenCreate = () => {
     setEditingOffer(null);
-    setImagePreview(null);
+    setImages([]);
     form.reset();
     setOpen(true);
   };
@@ -226,43 +280,65 @@ function OffersMyPage() {
                   ? updateOffer.mutate(data)
                   : createOffer.mutate(data)
               )}
-              className="space-y-3"
+              className="space-y-4"
             >
-              <Input
-                {...form.register("title")}
-                placeholder={t("offersPage.titleLabel")}
-              />
-              <Textarea
-                {...form.register("description")}
-                placeholder={t("offersPage.descriptionLabel")}
-              />
-              <Input
-                {...form.register("category")}
-                placeholder={t("offersPage.categoryLabel")}
-              />
-              <Input
-                type="number"
-                step="0.01"
-                {...form.register("price", { valueAsNumber: true })}
-                placeholder={t("offersPage.priceLabel")}
-              />
-
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">
-                  {t("offersPage.imageLabel")}
-                </label>
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-gray-700">
+                  {t("offersPage.offerDetails")}
+                </h4>
                 <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
+                  {...form.register("title")}
+                  placeholder={t("offersPage.titleLabel")}
                 />
-                {imagePreview && (
-                  <img
-                    src={imagePreview}
-                    alt="preview"
-                    className="w-full h-40 object-cover mt-3 rounded"
+                <Textarea
+                  {...form.register("description")}
+                  placeholder={t("offersPage.descriptionLabel")}
+                />
+                <Input
+                  {...form.register("category")}
+                  placeholder={t("offersPage.categoryLabel")}
+                />
+                <Input
+                  type="number"
+                  step="0.01"
+                  {...form.register("price", { valueAsNumber: true })}
+                  placeholder={t("offersPage.priceLabel")}
+                />
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <h4 className="text-sm font-semibold text-gray-700">
+                  {t("offersPage.productDetails")}
+                </h4>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">
+                    {t("offersPage.productImagesLabel")}
+                  </label>
+                  <ImageUploader
+                    value={images}
+                    onChange={setImages}
+                    editable
+                    height="h-40"
                   />
-                )}
+                </div>
+                <Input
+                  {...form.register("productName")}
+                  placeholder={t("offersPage.productNameLabel")}
+                />
+                <Textarea
+                  {...form.register("productDescription")}
+                  placeholder={t("offersPage.productDescriptionLabel")}
+                />
+                <Input
+                  {...form.register("productCategory")}
+                  placeholder={t("offersPage.productCategoryLabel")}
+                />
+                <Input
+                  type="number"
+                  step="0.01"
+                  {...form.register("productPrice", { valueAsNumber: true })}
+                  placeholder={t("offersPage.productPriceLabel")}
+                />
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
@@ -296,13 +372,11 @@ function OffersMyPage() {
           {offers.map((offer) => (
             <Card key={offer.id} className="p-4 space-y-2">
               <h3 className="font-semibold">{offer.title}</h3>
-              {offer.imageUrl && (
-                <img
-                  src={offer.imageUrl}
-                  alt={offer.title}
-                  className="w-full h-32 object-cover rounded"
-                />
-              )}
+              <ImageCarousel
+                images={offer.product?.images ?? []}
+                height="h-32"
+                emptyLabel={t("offersPage.noImage")}
+              />
               <p className="text-sm text-gray-600">{offer.price} €</p>
               <p className="text-xs text-gray-500">{offer.category}</p>
 

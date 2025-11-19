@@ -14,7 +14,6 @@ type Offer = {
   description?: string;
   category: string;
   price: number;
-  imageUrl?: string;
   user: {
     id: number;
     name: string;
@@ -23,6 +22,9 @@ type Offer = {
     id: number;
     name: string;
     category: string;
+    basePrice?: number;
+    description?: string;
+    images?: { url: string; publicId: string }[];
   };
 };
 
@@ -76,9 +78,9 @@ function OffersAllPage() {
           <Link key={offer.id} to={`/offers/${offer.id}`}>
             <Card className="p-4 hover:shadow-lg transition">
               <h3 className="font-semibold">{offer.title}</h3>
-              {offer.imageUrl ? (
+              {offer.product?.images?.[0]?.url ? (
                 <img
-                  src={offer.imageUrl}
+                  src={offer.product.images[0].url}
                   alt={offer.title}
                   className="w-full h-32 object-cover mt-2 rounded"
                 />

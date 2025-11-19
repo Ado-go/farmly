@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
+import { ImageCarousel } from "@/components/ImageCarousel";
 
 export const Route = createFileRoute("/offers/$id")({
   component: OfferDetailPage,
@@ -14,9 +15,15 @@ type Offer = {
   description?: string;
   category: string;
   price: number;
-  imageUrl?: string;
   user: { id: number; name: string };
-  product: { id: number; name: string; category: string; description?: string };
+  product: {
+    id: number;
+    name: string;
+    category: string;
+    description?: string;
+    basePrice?: number;
+    images?: { url: string; publicId: string }[];
+  };
 };
 
 function OfferDetailPage() {
@@ -47,13 +54,19 @@ function OfferDetailPage() {
   return (
     <div className="p-6 flex justify-center">
       <Card className="p-6 max-w-2xl w-full">
-        {offer.imageUrl && (
-          <img
-            src={offer.imageUrl}
-            alt={offer.title}
-            className="w-full h-64 object-cover rounded mb-4"
-          />
-        )}
+        <div className="mb-4">
+          {offer.product?.images?.length ? (
+            <ImageCarousel
+              images={offer.product.images}
+              height="h-64"
+              emptyLabel={t("offersPage.noImage")}
+            />
+          ) : (
+            <div className="w-full h-64 bg-gray-100 text-gray-500 rounded flex items-center justify-center">
+              {t("offersPage.noImage")}
+            </div>
+          )}
+        </div>
         <h2 className="text-2xl font-bold mb-2">{offer.title}</h2>
         <p className="text-gray-600 mb-2">{offer.description}</p>
         <p className="text-sm text-gray-500">
@@ -69,6 +82,11 @@ function OfferDetailPage() {
             <p className="text-sm text-gray-500">
               {offer.product.category} — {offer.product.description}
             </p>
+            {offer.product.basePrice && (
+              <p className="text-sm text-gray-500">
+                {t("offersPage.productPriceLabel")}: {offer.product.basePrice} €
+              </p>
+            )}
           </div>
         )}
       </Card>
