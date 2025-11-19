@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
+import { getCategoryLabel } from "@/lib/productCategories";
 
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
@@ -134,7 +135,7 @@ function EventPageDetail() {
                   )}
 
                   <p className="text-sm mt-2 text-gray-600">
-                    {ep.product.category} – €
+                    {getCategoryLabel(ep.product.category, t)} – €
                     {ep.product.basePrice?.toFixed(2) ?? "N/A"}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">

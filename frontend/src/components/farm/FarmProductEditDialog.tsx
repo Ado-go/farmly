@@ -13,6 +13,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
+import {
+  PRODUCT_CATEGORIES,
+  productCategorySchema,
+} from "@/lib/productCategories";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function FarmProductEditDialog({
   product,
@@ -29,6 +40,9 @@ export function FarmProductEditDialog({
   const queryClient = useQueryClient();
 
   const [images, setImages] = useState<UploadedImage[]>([]);
+  const [category, setCategory] = useState<string>(
+    product?.product?.category ?? ""
+  );
 
   useEffect(() => {
     if (product?.product?.images) {
@@ -36,6 +50,7 @@ export function FarmProductEditDialog({
     } else {
       setImages([]);
     }
+    setCategory(product?.product?.category ?? "");
   }, [product]);
 
   const updateProduct = useMutation({
@@ -57,7 +72,10 @@ export function FarmProductEditDialog({
 
       const body = {
         name: product.product.name,
-        category: product.product.category,
+        category:
+          category && productCategorySchema.safeParse(category).success
+            ? category
+            : product.product.category,
         description: product.product.description,
         price: product.price,
         stock: product.stock,
@@ -104,11 +122,18 @@ export function FarmProductEditDialog({
               onChange={(e) => (product.product.name = e.target.value)}
               placeholder={t("product.name")}
             />
-            <Input
-              defaultValue={product.product.category}
-              onChange={(e) => (product.product.category = e.target.value)}
-              placeholder={t("product.category")}
-            />
+            <Select value={category || undefined} onValueChange={setCategory}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("product.category")} />
+              </SelectTrigger>
+              <SelectContent>
+                {PRODUCT_CATEGORIES.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {t(`productCategories.${value}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Textarea
               defaultValue={product.product.description}
               onChange={(e) => (product.product.description = e.target.value)}

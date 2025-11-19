@@ -214,6 +214,15 @@
     "save": "Uložiť zmeny",
     "updated": "Produkt bol aktualizovaný"
   },
+  "productCategories": {
+    "Fruits": "Ovocie",
+    "Vegetables": "Zelenina",
+    "Meat": "Mäso",
+    "Dairy": "Mliečne výrobky",
+    "Bakery": "Pečivo",
+    "Drinks": "Nápoje",
+    "Other": "Iné"
+  },
   "productsPage": {
     "title": "Všetky produkty",
     "loading": "Načítavam produkty...",

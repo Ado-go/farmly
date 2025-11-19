@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
+import { getCategoryLabel } from "@/lib/productCategories";
 
 export const Route = createFileRoute("/offers/")({
   component: OffersAllPage,
@@ -90,7 +91,7 @@ function OffersAllPage() {
                 </div>
               )}
               <p className="text-sm mt-2 text-gray-600">
-                {offer.category} • {offer.price} €
+                {getCategoryLabel(offer.category, t)} • {offer.price} €
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 {t("offersPage.by")} {offer.user.name}

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
+import { getCategoryLabel } from "@/lib/productCategories";
 import { ImageCarousel } from "@/components/ImageCarousel";
 
 export const Route = createFileRoute("/offers/$id")({
@@ -51,6 +52,9 @@ function OfferDetailPage() {
     );
   }
 
+  const offerCategoryLabel = getCategoryLabel(offer.category, t);
+  const productCategoryLabel = getCategoryLabel(offer.product.category, t);
+
   return (
     <div className="p-6 flex justify-center">
       <Card className="p-6 max-w-2xl w-full">
@@ -70,7 +74,7 @@ function OfferDetailPage() {
         <h2 className="text-2xl font-bold mb-2">{offer.title}</h2>
         <p className="text-gray-600 mb-2">{offer.description}</p>
         <p className="text-sm text-gray-500">
-          {offer.category} • {offer.price} €
+          {offerCategoryLabel} • {offer.price} €
         </p>
         <p className="text-sm text-gray-400 mt-2">
           {t("offersPage.seller")}: {offer.user?.name}
@@ -80,7 +84,7 @@ function OfferDetailPage() {
             <h3 className="font-semibold">{t("offersPage.productInfo")}</h3>
             <p>{offer.product.name}</p>
             <p className="text-sm text-gray-500">
-              {offer.product.category} — {offer.product.description}
+              {productCategoryLabel} — {offer.product.description}
             </p>
             {offer.product.basePrice && (
               <p className="text-sm text-gray-500">

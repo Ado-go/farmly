@@ -214,6 +214,15 @@
     "save": "Save changes",
     "updated": "Product updated successfully"
   },
+  "productCategories": {
+    "Fruits": "Fruits",
+    "Vegetables": "Vegetables",
+    "Meat": "Meat",
+    "Dairy": "Dairy",
+    "Bakery": "Bakery",
+    "Drinks": "Drinks",
+    "Other": "Other"
+  },
   "productsPage": {
     "title": "All Products",
     "loading": "Loading products...",

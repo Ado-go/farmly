@@ -15,13 +15,25 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { apiFetch } from "@/lib/api";
 import { useTranslation } from "react-i18next";
+import {
+  PRODUCT_CATEGORIES,
+  getCategoryLabel,
+  productCategorySchema,
+} from "@/lib/productCategories";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const eventProductSchema = z.object({
   name: z.string().min(2, "Názov je povinný"),
-  category: z.string().min(2, "Kategória je povinná"),
+  category: productCategorySchema,
   description: z.string().min(5, "Popis je povinný"),
   basePrice: z.number().min(0).optional(),
   eventId: z.number(),
@@ -129,9 +141,28 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
                 {...form.register("name")}
                 placeholder={t("eventProducts.namePlaceholder")}
               />
-              <Input
-                {...form.register("category")}
-                placeholder={t("eventProducts.categoryPlaceholder")}
+              <Controller
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <Select
+                    value={field.value ?? undefined}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue
+                        placeholder={t("eventProducts.categoryPlaceholder")}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PRODUCT_CATEGORIES.map((value) => (
+                        <SelectItem key={value} value={value}>
+                          {t(`productCategories.${value}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               />
               <Textarea
                 {...form.register("description")}
@@ -185,7 +216,7 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
                     >
                       <p className="font-medium">{fp.product.name}</p>
                       <p className="text-xs text-gray-500">
-                        {fp.product.category}
+                        {getCategoryLabel(fp.product.category, t)}
                       </p>
                     </div>
                   ))}

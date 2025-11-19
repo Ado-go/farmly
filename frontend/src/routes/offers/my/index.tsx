@@ -25,12 +25,24 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
+import {
+  PRODUCT_CATEGORIES,
+  getCategoryLabel,
+  productCategorySchema,
+} from "@/lib/productCategories";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/offers/my/")({
   component: OffersMyPage,
@@ -39,11 +51,11 @@ export const Route = createFileRoute("/offers/my/")({
 const offerSchema = z.object({
   title: z.string().min(3, "Title is required"),
   description: z.string().optional(),
-  category: z.string().min(2, "Category is required"),
+  category: productCategorySchema,
   price: z.number().min(0, "Price must be 0 or more"),
   productName: z.string().min(2, "Product name is required"),
   productDescription: z.string().optional(),
-  productCategory: z.string().min(2, "Product category is required"),
+  productCategory: productCategorySchema,
   productPrice: z.number().min(0, "Product price must be 0 or more"),
 });
 
@@ -87,11 +99,11 @@ function OffersMyPage() {
     defaultValues: {
       title: "",
       description: "",
-      category: "",
+      category: undefined,
       price: 0,
       productName: "",
       productDescription: "",
-      productCategory: "",
+      productCategory: undefined,
       productPrice: 0,
     },
   });
@@ -105,7 +117,7 @@ function OffersMyPage() {
         price: editingOffer.price,
         productName: editingOffer.product?.name || "",
         productDescription: editingOffer.product?.description || "",
-        productCategory: editingOffer.product?.category || "",
+        productCategory: editingOffer.product?.category || undefined,
         productPrice: editingOffer.product?.basePrice ?? editingOffer.price,
       });
       setImages(
@@ -118,11 +130,11 @@ function OffersMyPage() {
       form.reset({
         title: "",
         description: "",
-        category: "",
+        category: undefined,
         price: 0,
         productName: "",
         productDescription: "",
-        productCategory: "",
+        productCategory: undefined,
         productPrice: 0,
       });
       setImages([]);
@@ -294,9 +306,28 @@ function OffersMyPage() {
                   {...form.register("description")}
                   placeholder={t("offersPage.descriptionLabel")}
                 />
-                <Input
-                  {...form.register("category")}
-                  placeholder={t("offersPage.categoryLabel")}
+                <Controller
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value ?? undefined}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue
+                          placeholder={t("offersPage.categoryLabel")}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRODUCT_CATEGORIES.map((value) => (
+                          <SelectItem key={value} value={value}>
+                            {t(`productCategories.${value}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
                 <Input
                   type="number"
@@ -329,9 +360,28 @@ function OffersMyPage() {
                   {...form.register("productDescription")}
                   placeholder={t("offersPage.productDescriptionLabel")}
                 />
-                <Input
-                  {...form.register("productCategory")}
-                  placeholder={t("offersPage.productCategoryLabel")}
+                <Controller
+                  control={form.control}
+                  name="productCategory"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value ?? undefined}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue
+                          placeholder={t("offersPage.productCategoryLabel")}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRODUCT_CATEGORIES.map((value) => (
+                          <SelectItem key={value} value={value}>
+                            {t(`productCategories.${value}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
                 <Input
                   type="number"
@@ -378,7 +428,9 @@ function OffersMyPage() {
                 emptyLabel={t("offersPage.noImage")}
               />
               <p className="text-sm text-gray-600">{offer.price} €</p>
-              <p className="text-xs text-gray-500">{offer.category}</p>
+              <p className="text-xs text-gray-500">
+                {getCategoryLabel(offer.category, t)}
+              </p>
 
               <div className="flex gap-2 mt-3">
                 <Button

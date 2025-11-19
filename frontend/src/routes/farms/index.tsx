@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { getCategoryLabel } from "@/lib/productCategories";
 
 export const Route = createFileRoute("/farms/")({
   component: FarmsPage,
@@ -120,7 +121,8 @@ function FarmsPage() {
                       <ul className="text-xs text-gray-600 mt-1">
                         {farm.farmProducts.slice(0, 2).map((fp) => (
                           <li key={fp.id}>
-                            • {fp.product.name} ({fp.product.category})
+                            • {fp.product.name} (
+                            {getCategoryLabel(fp.product.category, t)})
                           </li>
                         ))}
                         {farm.farmProducts?.length > 2 && <li>…</li>}

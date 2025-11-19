@@ -5,17 +5,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { apiFetch } from "../../lib/api";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Star } from "lucide-react";
+import {
+  PRODUCT_CATEGORIES,
+  getCategoryLabel,
+  productCategorySchema,
+} from "@/lib/productCategories";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const productSchema = z.object({
   name: z.string().min(2, "Názov je povinný"),
-  category: z.string().min(2, "Kategória je povinná"),
+  category: productCategorySchema,
   description: z.string().optional(),
   price: z.number().min(0, "Cena musí byť väčšia ako 0"),
   stock: z.number().min(0, "Sklad musí byť nezáporný"),
@@ -100,6 +112,8 @@ function ProductDetailPage() {
   const inner = farmProduct.product;
   const imageUrl = inner.images?.[0]?.url || "/placeholder.jpg";
 
+  const categoryLabel = getCategoryLabel(inner.category, t);
+
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-8">
       <h1 className="text-3xl font-bold">{inner.name}</h1>
@@ -115,7 +129,7 @@ function ProductDetailPage() {
       {!editing ? (
         <div className="space-y-2">
           <p>
-            <strong>{t("productPage.category")}:</strong> {inner.category}
+            <strong>{t("productPage.category")}:</strong> {categoryLabel}
           </p>
           <p>
             <strong>{t("productPage.price")}:</strong> {farmProduct.price} €
@@ -152,9 +166,26 @@ function ProductDetailPage() {
             {...form.register("name")}
             placeholder={t("productPage.name")}
           />
-          <Input
-            {...form.register("category")}
-            placeholder={t("productPage.category")}
+          <Controller
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <Select
+                value={field.value ?? undefined}
+                onValueChange={field.onChange}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t("productPage.category")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRODUCT_CATEGORIES.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {t(`productCategories.${value}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           />
           <Textarea
             {...form.register("description")}

@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
@@ -10,10 +10,21 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
+import {
+  PRODUCT_CATEGORIES,
+  productCategorySchema,
+} from "@/lib/productCategories";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const productSchema = z.object({
   name: z.string().min(1),
-  category: z.string().min(1),
+  category: productCategorySchema,
   description: z.string().optional(),
   price: z.number().positive(),
   stock: z.number().nonnegative().default(0),
@@ -36,7 +47,7 @@ export function ProductForm({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
-      category: "",
+      category: undefined,
       description: "",
       price: 0,
       stock: 0,
@@ -92,9 +103,26 @@ export function ProductForm({
       />
 
       <Input {...form.register("name")} placeholder={t("product.name")} />
-      <Input
-        {...form.register("category")}
-        placeholder={t("product.category")}
+      <Controller
+        control={form.control}
+        name="category"
+        render={({ field }) => (
+          <Select
+            onValueChange={field.onChange}
+            value={field.value ?? undefined}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t("product.category")} />
+            </SelectTrigger>
+            <SelectContent>
+              {PRODUCT_CATEGORIES.map((value) => (
+                <SelectItem key={value} value={value}>
+                  {t(`productCategories.${value}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       />
       <Textarea
         {...form.register("description")}
