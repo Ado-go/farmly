@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User, ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 
 function RootLayout() {
   const { user } = useAuth();
@@ -95,8 +96,21 @@ function RootLayout() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-full">
-                <User className="h-5 w-5" />
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full p-0 h-10 w-10 overflow-hidden"
+              >
+                {user ? (
+                  <ProfileAvatar
+                    imageUrl={user.profileImageUrl}
+                    name={user.name}
+                    size={36}
+                    className="border-0 bg-transparent"
+                  />
+                ) : (
+                  <User className="h-5 w-5" />
+                )}
               </Button>
             </DropdownMenuTrigger>
 

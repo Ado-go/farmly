@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 
 export const Route = createFileRoute("/farms/")({
   component: FarmsPage,
@@ -24,6 +25,7 @@ type Farm = {
   farmer: {
     id: number;
     name: string;
+    profileImageUrl?: string | null;
   };
 };
 
@@ -83,10 +85,12 @@ function FarmsPage() {
       ) : (
         farmers.map(({ farmer, farms }) => (
           <div key={farmer.id}>
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
-                👩‍🌾
-              </div>
+            <div className="flex items-center space-x-3 mb-4">
+              <ProfileAvatar
+                imageUrl={farmer.profileImageUrl}
+                name={farmer.name}
+                size={40}
+              />
               <span className="font-semibold">{farmer.name}</span>
             </div>
 

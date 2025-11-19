@@ -14,4 +14,6 @@ export type User = {
   postalCode: string;
   city: string;
   country: string;
+  profileImageUrl: string | null;
+  profileImagePublicId: string | null;
 } | null;

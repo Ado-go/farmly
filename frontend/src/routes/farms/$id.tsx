@@ -5,6 +5,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { Card } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
 import { ImageCarousel } from "@/components/ImageCarousel";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 
 export const Route = createFileRoute("/farms/$id")({
   component: FarmDetailPage,
@@ -34,7 +35,7 @@ type FarmDetail = {
   postalCode: string;
   country: string;
   images?: { url: string; optimizedUrl?: string }[];
-  farmer?: { id: number; name: string };
+  farmer?: { id: number; name: string; profileImageUrl?: string | null };
   farmProducts: FarmProduct[];
 };
 
@@ -101,10 +102,21 @@ function FarmDetailPage() {
         {farm.street}, {farm.city}, {farm.region}, {farm.postalCode},{" "}
         {farm.country}
       </p>
-      <p className="mt-2 font-semibold text-emerald-700">
-        {t("farmsPage.farmer")}:{" "}
-        {farm.farmer?.name || t("farmsPage.unknownFarmer")}
-      </p>
+      <div className="mt-4 flex items-center gap-3">
+        <ProfileAvatar
+          imageUrl={farm.farmer?.profileImageUrl}
+          name={farm.farmer?.name}
+          size={48}
+        />
+        <div>
+          <p className="text-xs uppercase tracking-wide text-gray-500">
+            {t("farmsPage.farmer")}
+          </p>
+          <p className="font-semibold text-emerald-700">
+            {farm.farmer?.name || t("farmsPage.unknownFarmer")}
+          </p>
+        </div>
+      </div>
 
       <h3 className="text-2xl font-semibold mt-8 mb-4">
         {t("farmsPage.products")}

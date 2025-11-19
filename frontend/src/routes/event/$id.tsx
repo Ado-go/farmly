@@ -23,6 +23,7 @@ import { format } from "date-fns";
 import DatePicker from "@/components/date-picker";
 import { EventProductsSection } from "@/components/EventProductsSection";
 import { useAuth } from "@/context/AuthContext";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 
 const eventSchema = z.object({
   title: z.string().min(3, "Názov je povinný"),
@@ -222,14 +223,22 @@ function EventDetailPage() {
             {t("eventPage.participants")} ({event.participants.length})
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-1 text-sm">
+        <CardContent className="space-y-3 text-sm">
           {event.participants.length === 0 ? (
             <p>{t("eventPage.noParticipants")}</p>
           ) : (
             event.participants.map((p) => (
-              <p key={p.id}>
-                • {p.name} ({p.email})
-              </p>
+              <div key={p.id} className="flex items-center gap-3">
+                <ProfileAvatar
+                  imageUrl={p.profileImageUrl}
+                  name={p.name}
+                  size={36}
+                />
+                <div>
+                  <p className="font-medium">{p.name}</p>
+                  <p className="text-xs text-gray-500">{p.email}</p>
+                </div>
+              </div>
             ))
           )}
         </CardContent>
