@@ -3,6 +3,14 @@ import prisma from "../prisma.ts";
 
 const router = Router();
 
+const calculateAverageRating = (
+  reviews: { rating: number }[] = []
+): number | null => {
+  if (!reviews.length) return null;
+  const total = reviews.reduce((sum, review) => sum + (review.rating || 0), 0);
+  return Number((total / reviews.length).toFixed(2));
+};
+
 // GET /public-farm-products
 router.get("/", async (req, res) => {
   try {
@@ -36,7 +44,7 @@ router.get("/", async (req, res) => {
         name: fp.product.name,
         category: fp.product.category,
         description: fp.product.description,
-        rating: fp.product.rating,
+        rating: calculateAverageRating(fp.product.reviews),
         images: fp.product.images,
         reviews: fp.product.reviews,
       },
@@ -90,7 +98,7 @@ router.get("/:id", async (req, res) => {
         name: farmProduct.product.name,
         category: farmProduct.product.category,
         description: farmProduct.product.description,
-        rating: farmProduct.product.rating,
+        rating: calculateAverageRating(farmProduct.product.reviews),
         images: farmProduct.product.images,
         reviews: farmProduct.product.reviews,
       },

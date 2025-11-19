@@ -67,16 +67,6 @@ router.post(
         },
       });
 
-      const stats = await prisma.review.aggregate({
-        where: { productId: Number(productId) },
-        _avg: { rating: true },
-      });
-
-      await prisma.product.update({
-        where: { id: Number(productId) },
-        data: { rating: stats._avg.rating || 0 },
-      });
-
       res.status(201).json(review);
     } catch (error) {
       console.error(error);
@@ -107,16 +97,6 @@ router.put(
         data: { rating, comment },
       });
 
-      const stats = await prisma.review.aggregate({
-        where: { productId: existing.productId },
-        _avg: { rating: true },
-      });
-
-      await prisma.product.update({
-        where: { id: existing.productId },
-        data: { rating: stats._avg.rating || 0 },
-      });
-
       res.json(updated);
     } catch (error) {
       console.error(error);
@@ -137,16 +117,6 @@ router.delete("/:id", authenticateToken, async (req: any, res) => {
       return res.status(403).json({ error: "Not authorized" });
 
     await prisma.review.delete({ where: { id } });
-
-    const stats = await prisma.review.aggregate({
-      where: { productId: review.productId },
-      _avg: { rating: true },
-    });
-
-    await prisma.product.update({
-      where: { id: review.productId },
-      data: { rating: stats._avg.rating || 0 },
-    });
 
     res.json({ message: "Review deleted" });
   } catch (error) {

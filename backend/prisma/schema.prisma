@@ -121,7 +121,6 @@ model Product {
   category      ProductCategory
   description   String
   basePrice     Float?
-  rating        Float           @default(0)
   createdAt     DateTime        @default(now())
 
   orderItems    OrderItem[]   
