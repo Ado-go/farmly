@@ -22,28 +22,32 @@ type ProductCardProps = {
     };
     farm?: { id: number; name: string };
   };
+  sellerNameOverride?: string;
 };
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
   const { t } = useTranslation();
   const { addToCart } = useCart();
 
   const { product: inner } = product;
   const rating = averageRating(inner.reviews);
+  const displaySellerName = sellerNameOverride ?? product.farm?.name;
 
   const handleAddToCart = (fp) => {
-    addToCart(
+    const added = addToCart(
       {
         productId: fp.product.id,
         productName: fp.product.name,
-        sellerName: fp.farm?.name || "unknown",
+        sellerName: sellerNameOverride ?? fp.farm?.name ?? "unknown",
         unitPrice: fp.price,
         quantity: 1,
       },
       "STANDARD"
     );
 
-    toast.success(t("productCard.addedToCart", { name: fp.product.name }));
+    if (added) {
+      toast.success(t("productCard.addedToCart", { name: fp.product.name }));
+    }
   };
 
   return (
@@ -80,9 +84,9 @@ export function ProductCard({ product }: ProductCardProps) {
             </span>
           </div>
 
-          {product.farm?.name && (
+          {displaySellerName && (
             <p className="text-xs text-gray-500">
-              {t("productCard.farmName")}: {product.farm.name}
+              {t("productCard.farmName")}: {displaySellerName}
             </p>
           )}
 

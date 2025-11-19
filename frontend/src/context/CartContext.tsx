@@ -5,6 +5,16 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export interface CartItem {
   productId: number;
@@ -22,12 +32,19 @@ interface CartState {
   items: CartItem[];
 }
 
+interface PendingAddition {
+  item: CartItem;
+  type: CartType;
+  eventId: number | null;
+}
+
 interface CartContextType {
   cart: CartItem[];
   cartType: CartType | null;
   eventId: number | null;
-  addToCart: (item: CartItem, type: CartType, eventId?: number) => void;
+  addToCart: (item: CartItem, type: CartType, eventId?: number) => boolean;
   removeFromCart: (productId: number) => void;
+  updateQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
   totalPrice: number;
 }
@@ -35,6 +52,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
+  const { t } = useTranslation();
   const [state, setState] = useState<CartState>(() => {
     if (typeof window === "undefined")
       return { type: null, items: [], eventId: null };
@@ -44,34 +62,45 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       ? JSON.parse(stored)
       : { type: null, items: [], eventId: null };
   });
+  const [pendingAddition, setPendingAddition] = useState<PendingAddition | null>(
+    null
+  );
+  const [isConflictDialogOpen, setIsConflictDialogOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("cartState", JSON.stringify(state));
   }, [state]);
 
-  const addToCart = (item: CartItem, type: CartType, eventId?: number) => {
-    setState((prev) => {
-      if (prev.type && prev.type !== type) {
-        return {
-          type,
-          eventId: type === "PREORDER" ? (eventId ?? null) : null,
-          items: [item],
-        };
-      }
+  const requestCartReplacement = (
+    item: CartItem,
+    type: CartType,
+    eventId?: number
+  ) => {
+    setPendingAddition({
+      item,
+      type,
+      eventId: eventId ?? null,
+    });
+    setIsConflictDialogOpen(true);
+  };
 
-      if (type === "PREORDER") {
-        if (prev.eventId && prev.eventId !== eventId) {
-          return {
-            type: "PREORDER",
-            eventId: eventId ?? null,
-            items: [item],
-          };
-        }
+  const addToCart = (item: CartItem, type: CartType, eventId?: number) => {
+    let added = false;
+
+    setState((prev) => {
+      const isSwitchingType = prev.type && prev.type !== type;
+      const isSwitchingEvent =
+        type === "PREORDER" && prev.eventId && prev.eventId !== eventId;
+
+      if (isSwitchingType || isSwitchingEvent) {
+        requestCartReplacement(item, type, eventId);
+        return prev;
       }
 
       const existing = prev.items.find((i) => i.productId === item.productId);
 
       if (existing) {
+        added = true;
         return {
           ...prev,
           items: prev.items.map((i) =>
@@ -82,6 +111,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         };
       }
 
+      added = true;
       return {
         ...prev,
         type,
@@ -89,6 +119,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         items: [...prev.items, item],
       };
     });
+
+    return added;
   };
 
   const removeFromCart = (productId: number) => {
@@ -98,7 +130,39 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
+  const updateQuantity = (productId: number, quantity: number) => {
+    const sanitizedQuantity = Number.isFinite(quantity)
+      ? Math.floor(quantity)
+      : 1;
+    const normalizedQuantity = Math.max(1, sanitizedQuantity);
+    setState((prev) => ({
+      ...prev,
+      items: prev.items.map((i) =>
+        i.productId === productId ? { ...i, quantity: normalizedQuantity } : i
+      ),
+    }));
+  };
+
   const clearCart = () => setState({ type: null, items: [], eventId: null });
+
+  const handleCancelCartReplacement = () => {
+    setIsConflictDialogOpen(false);
+    setPendingAddition(null);
+  };
+
+  const handleConfirmCartReplacement = () => {
+    if (!pendingAddition) return;
+    setState({
+      type: pendingAddition.type,
+      eventId:
+        pendingAddition.type === "PREORDER"
+          ? pendingAddition.eventId ?? null
+          : null,
+      items: [pendingAddition.item],
+    });
+    setPendingAddition(null);
+    setIsConflictDialogOpen(false);
+  };
 
   const totalPrice = state.items.reduce(
     (sum, item) => sum + item.unitPrice * item.quantity,
@@ -113,11 +177,35 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         eventId: state.eventId ?? null,
         addToCart,
         removeFromCart,
+        updateQuantity,
         clearCart,
         totalPrice,
       }}
     >
       {children}
+      <Dialog
+        open={isConflictDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) handleCancelCartReplacement();
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("cart.conflictTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("cart.conflictDescription")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCancelCartReplacement}>
+              {t("cart.conflictCancel")}
+            </Button>
+            <Button onClick={handleConfirmCartReplacement}>
+              {t("cart.conflictConfirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </CartContext.Provider>
   );
 };

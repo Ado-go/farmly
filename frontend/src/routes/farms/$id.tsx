@@ -127,7 +127,11 @@ function FarmDetailPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {farm.farmProducts.map((fp) => (
-            <ProductCard key={fp.id} product={fp} />
+            <ProductCard
+              key={fp.id}
+              product={fp}
+              sellerNameOverride={farm.name}
+            />
           ))}
         </div>
       )}

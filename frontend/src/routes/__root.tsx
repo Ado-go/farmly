@@ -16,12 +16,19 @@ import {
 import { User, ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { useState } from "react";
 
 function RootLayout() {
   const { user } = useAuth();
   const { t } = useTranslation();
   const { cart, totalPrice } = useCart();
   const navigate = useNavigate();
+  const [isCartMenuOpen, setIsCartMenuOpen] = useState(false);
+
+  const handleGoToCart = () => {
+    setIsCartMenuOpen(false);
+    navigate({ to: "/cart" });
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -47,7 +54,7 @@ function RootLayout() {
 
         {/* RIGHT SIDE */}
         <div className="flex items-center gap-2">
-          <DropdownMenu>
+          <DropdownMenu open={isCartMenuOpen} onOpenChange={setIsCartMenuOpen}>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
@@ -82,7 +89,7 @@ function RootLayout() {
                     <span className="font-medium">
                       {t("cart.total")}: {totalPrice.toFixed(2)} €
                     </span>
-                    <Button size="sm" onClick={() => navigate({ to: "/cart" })}>
+                    <Button size="sm" onClick={handleGoToCart}>
                       {t("cart.open")}
                     </Button>
                   </div>

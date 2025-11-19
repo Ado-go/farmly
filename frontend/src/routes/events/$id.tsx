@@ -68,7 +68,7 @@ function EventPageDetail() {
   const eventHasNotStarted = new Date(event.startDate) > now;
 
   const handleAddToPreorder = (ep: EventDetail["eventProducts"][0]) => {
-    addToCart(
+    const added = addToCart(
       {
         productId: ep.product.id,
         productName: ep.product.name,
@@ -80,7 +80,9 @@ function EventPageDetail() {
       event.id
     );
 
-    toast.success(t("eventsDetail.addedToCart"));
+    if (added) {
+      toast.success(t("eventsDetail.addedToCart"));
+    }
   };
 
   return (

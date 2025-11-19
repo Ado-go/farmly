@@ -387,6 +387,7 @@
   "cartPage": {
     "emptyCart": "Cart is empty.",
     "yourCart": "Your cart",
+    "quantity": "Quantity",
     "remove": "Remove",
     "total": "Total:",
     "clear": "Clear cart",
@@ -427,7 +428,11 @@
   "cart": {
     "empty": "Your cart is empty",
     "total": "Total",
-    "open": "Open cart"
+    "open": "Open cart",
+    "conflictTitle": "Replace cart items?",
+    "conflictDescription": "The cart can only contain standard products or products from a single event.",
+    "conflictCancel": "Keep current items",
+    "conflictConfirm": "Clear cart and continue"
   },
   "ordersPage": {
     "loading": "Loading orders...",

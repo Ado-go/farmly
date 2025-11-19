@@ -35,6 +35,7 @@ function ProductDetailPage() {
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [quantity, setQuantity] = useState(1);
 
   const addReview = useMutation({
     mutationFn: async () =>
@@ -64,18 +65,26 @@ function ProductDetailPage() {
   });
 
   const handleAddToCart = (fp) => {
-    addToCart(
+    const normalizedQuantity = Math.max(1, Math.floor(quantity));
+    const finalQuantity =
+      fp.stock && fp.stock > 0
+        ? Math.min(normalizedQuantity, fp.stock)
+        : normalizedQuantity;
+
+    const added = addToCart(
       {
         productId: fp.product.id,
         productName: fp.product.name,
         sellerName: fp.farm?.name || "unknown",
         unitPrice: fp.price,
-        quantity: 1,
+        quantity: finalQuantity,
       },
       "STANDARD"
     );
 
-    toast.success(t("productCard.addedToCart", { name: fp.product.name }));
+    if (added) {
+      toast.success(t("productCard.addedToCart", { name: fp.product.name }));
+    }
   };
 
   if (isLoading)
@@ -147,6 +156,28 @@ function ProductDetailPage() {
             <p className="text-sm text-gray-600 mb-4">
               {product.description || t("productCard.noDescription")}
             </p>
+
+            <div className="flex items-center gap-3 mb-4">
+              <label className="text-sm font-medium text-gray-700">
+                {t("cartPage.quantity")}
+              </label>
+              <Input
+                type="number"
+                min={1}
+                max={farmProduct.stock ?? undefined}
+                value={quantity}
+                className="w-24"
+                onChange={(e) => {
+                  const value = e.target.valueAsNumber;
+                  if (Number.isNaN(value)) return;
+                  const maxQty =
+                    farmProduct.stock && farmProduct.stock > 0
+                      ? farmProduct.stock
+                      : Number.MAX_SAFE_INTEGER;
+                  setQuantity(Math.max(1, Math.min(Math.floor(value), maxQty)));
+                }}
+              />
+            </div>
 
             <Button onClick={() => handleAddToCart(farmProduct)}>
               {t("productCard.addToCart")}

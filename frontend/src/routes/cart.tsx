@@ -3,13 +3,21 @@ import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/cart")({
   component: CartPage,
 });
 
 function CartPage() {
-  const { cart, removeFromCart, totalPrice, clearCart, cartType } = useCart();
+  const {
+    cart,
+    removeFromCart,
+    totalPrice,
+    clearCart,
+    cartType,
+    updateQuantity,
+  } = useCart();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -43,6 +51,22 @@ function CartPage() {
               <p className="text-sm">
                 {item.unitPrice} € × {item.quantity}
               </p>
+              <div className="flex items-center gap-2 mt-2 text-sm">
+                <span className="text-xs uppercase tracking-wide text-gray-500">
+                  {t("cartPage.quantity")}
+                </span>
+                <Input
+                  type="number"
+                  min={1}
+                  value={item.quantity}
+                  className="w-20 h-8"
+                  onChange={(e) => {
+                    const value = e.target.valueAsNumber;
+                    if (Number.isNaN(value)) return;
+                    updateQuantity(item.productId, value);
+                  }}
+                />
+              </div>
             </div>
             <Button
               variant="destructive"

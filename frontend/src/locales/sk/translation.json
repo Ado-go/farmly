@@ -387,6 +387,7 @@
   "cartPage": {
     "emptyCart": "Košík je prázdny.",
     "yourCart": "Váš košík",
+    "quantity": "Počet kusov",
     "remove": "Odstrániť",
     "total": "Spolu:",
     "clear": "Vyčistiť košík",
@@ -427,7 +428,11 @@
   "cart": {
     "empty": "Košík je prázdny",
     "total": "Spolu",
-    "open": "Otvoriť košík"
+    "open": "Otvoriť košík",
+    "conflictTitle": "Vymazať položky z košíka?",
+    "conflictDescription": "V košíku je možné mať len produkty z ponuky alebo jednej udalosti.",
+    "conflictCancel": "Ponechať aktuálne položky",
+    "conflictConfirm": "Vyčistiť košík a pokračovať"
   },
   "ordersPage": {
     "loading": "Načítavam objednávky...",
