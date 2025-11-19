@@ -57,7 +57,6 @@ describe("Offer routes", () => {
         description: "Sladké jablká z domácej farmy",
         category: "Ovocie",
         price: 3.5,
-        imageUrl: "https://example.com/jablka.jpg",
         product: {
           name: "Jablká",
           category: "Ovocie",

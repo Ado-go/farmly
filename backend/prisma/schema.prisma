@@ -153,7 +153,6 @@ model Offer {
   description String?
   category    String
   price       Float
-  imageUrl    String?
   createdAt   DateTime    @default(now())
   isActive    Boolean     @default(true)
 

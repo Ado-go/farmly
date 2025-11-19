@@ -443,7 +443,6 @@ async function main() {
           description: "Limitovaná ponuka priamo od farmára.",
           category: record.product.category,
           price: parseFloat((record.price * 0.9).toFixed(2)),
-          imageUrl: null,
           userId: farmer.id,
           productId: record.product.id,
         },
