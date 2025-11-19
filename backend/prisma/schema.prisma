@@ -47,6 +47,16 @@ enum HistoryAction {
   ORDER_UPDATED
 }
 
+enum ProductCategory {
+  Fruits
+  Vegetables
+  Meat
+  Dairy
+  Bakery
+  Drinks
+  Other
+}
+
 // ------------------- USER -------------------
 
 model User {
@@ -108,7 +118,7 @@ model FarmImage {
 model Product {
   id            Int             @id @default(autoincrement())
   name          String
-  category      String
+  category      ProductCategory
   description   String
   basePrice     Float?
   rating        Float           @default(0)
@@ -153,7 +163,7 @@ model Offer {
   id          Int         @id @default(autoincrement())
   title       String
   description String?
-  category    String
+  category    ProductCategory
   price       Float
   createdAt   DateTime    @default(now())
   isActive    Boolean     @default(true)

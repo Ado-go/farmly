@@ -50,7 +50,7 @@ beforeAll(async () => {
   const product = await prisma.product.create({
     data: {
       name: "Honey Jar",
-      category: "Sweets",
+      category: "Other",
       description: "Natural honey",
       basePrice: 8,
     },

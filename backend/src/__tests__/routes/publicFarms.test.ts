@@ -102,7 +102,7 @@ beforeAll(async () => {
       product: {
         create: {
           name: "Honey Jar",
-          category: "Sweets",
+          category: "Other",
           description: "Pure forest honey",
           basePrice: 4.5,
         },

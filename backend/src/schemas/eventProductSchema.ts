@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { productCategorySchema } from "../constants/productCategories.ts";
 
 const imageSchema = z.object({
   url: z.string("Image URL is required").url("Invalid image URL"),
@@ -11,9 +12,7 @@ export const eventProductSchema = z.object({
     .string("Product name is required")
     .min(2, "Product name must be at least 2 characters long"),
 
-  category: z
-    .string("Category is required")
-    .min(2, "Category must be at least 2 characters long"),
+  category: productCategorySchema,
 
   description: z
     .string("Description is required")

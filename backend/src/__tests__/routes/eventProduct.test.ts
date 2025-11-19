@@ -134,7 +134,7 @@ describe("EventProduct Routes", () => {
       .set("Cookie", [`accessToken=${accessToken}`])
       .send({
         name: "Invalid Event Product",
-        category: "Veg",
+        category: "Vegetables",
         description: "Should not work",
         basePrice: 3,
         eventId: OTHER_EVENT_ID,
@@ -217,7 +217,7 @@ describe("EventProduct Routes", () => {
         product: {
           create: {
             name: "Other Farmer Product",
-            category: "Veg",
+            category: "Vegetables",
             description: "Owned by other farmer",
           },
         },
@@ -254,7 +254,7 @@ describe("EventProduct Routes", () => {
         product: {
           create: {
             name: "Bulk Product 2",
-            category: "Veg",
+            category: "Vegetables",
             description: "Batch test 2",
           },
         },

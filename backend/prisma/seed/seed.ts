@@ -95,17 +95,17 @@ const regions = [
 ];
 
 const productTemplates = [
-  { name: "Jahody", category: "Ovocie" },
-  { name: "Mrkva", category: "Zelenina" },
-  { name: "Cibuľa", category: "Zelenina" },
-  { name: "Jablká", category: "Ovocie" },
-  { name: "Hrášok", category: "Zelenina" },
-  { name: "Bazalka", category: "Bylinky" },
-  { name: "Rozmarín", category: "Bylinky" },
-  { name: "Hrušky", category: "Ovocie" },
-  { name: "Paradajky", category: "Zelenina" },
-  { name: "Paprika", category: "Zelenina" },
-  { name: "Špenát", category: "Zelenina" },
+  { name: "Jahody", category: "Fruits" },
+  { name: "Mrkva", category: "Vegetables" },
+  { name: "Cibuľa", category: "Vegetables" },
+  { name: "Jablká", category: "Fruits" },
+  { name: "Hrášok", category: "Vegetables" },
+  { name: "Bazalka", category: "Other" },
+  { name: "Rozmarín", category: "Other" },
+  { name: "Hrušky", category: "Fruits" },
+  { name: "Paradajky", category: "Vegetables" },
+  { name: "Paprika", category: "Vegetables" },
+  { name: "Špenát", category: "Vegetables" },
 ];
 
 const reviewComments = [

@@ -214,7 +214,7 @@ describe("FarmProduct Routes", () => {
         product: {
           create: {
             name: "Other Product",
-            category: "Veg",
+            category: "Vegetables",
             description: "Other description",
             basePrice: 3,
           },
@@ -261,7 +261,7 @@ describe("FarmProduct Routes", () => {
         product: {
           create: {
             name: "Apple",
-            category: "Fruit",
+            category: "Fruits",
             description: "Fresh apple",
             basePrice: 1.2,
           },
@@ -278,7 +278,7 @@ describe("FarmProduct Routes", () => {
         product: {
           create: {
             name: "Pear",
-            category: "Fruit",
+            category: "Fruits",
             description: "Sweet pear",
             basePrice: 2.1,
           },

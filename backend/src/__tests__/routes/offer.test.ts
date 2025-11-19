@@ -55,11 +55,11 @@ describe("Offer routes", () => {
       .send({
         title: "Čerstvé jablká",
         description: "Sladké jablká z domácej farmy",
-        category: "Ovocie",
+        category: "Fruits",
         price: 3.5,
         product: {
           name: "Jablká",
-          category: "Ovocie",
+          category: "Fruits",
           description: "Zdravé, čerstvo zozbierané jablká",
           basePrice: 2.5,
         },
