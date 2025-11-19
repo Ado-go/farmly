@@ -47,6 +47,8 @@ const paymentSchema = z.object({
 
 type AddressData = z.infer<typeof addressSchema>;
 type PaymentData = z.infer<typeof paymentSchema>;
+type DeliveryOption = AddressData["deliveryOption"];
+type PaymentMethod = PaymentData["paymentMethod"];
 
 function CheckoutPage() {
   const { t } = useTranslation();
@@ -156,8 +158,8 @@ function CheckoutPage() {
     }
   };
 
-  const handleDeliveryOptionChange = (value: string) => {
-    addressForm.setValue("deliveryOption", value as "ADDRESS" | "PICKUP");
+  const handleDeliveryOptionChange = (value: DeliveryOption) => {
+    addressForm.setValue("deliveryOption", value);
 
     if (value === "PICKUP") {
       addressForm.setValue("deliveryCity", "Banská Bystrica");
@@ -283,7 +285,7 @@ function CheckoutPage() {
               <Select
                 value={paymentForm.watch("paymentMethod")}
                 onValueChange={(v) =>
-                  paymentForm.setValue("paymentMethod", v as any)
+                  paymentForm.setValue("paymentMethod", v as PaymentMethod)
                 }
               >
                 <SelectTrigger>

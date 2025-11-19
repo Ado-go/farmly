@@ -40,7 +40,7 @@ function CheckoutPreorderPage() {
 
       toast.success(t("checkoutPreoderPage.success"));
       clearCart();
-    } catch (err) {
+    } catch {
       toast.error(t("checkoutPreoderPage.error"));
     }
   };

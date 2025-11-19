@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import type { Order } from "@/types/orders";
 
 export default function OrdersTab() {
   const { t } = useTranslation();
@@ -22,7 +23,7 @@ export default function OrdersTab() {
   const [open, setOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<number | null>(null);
 
-  const { data: orders, isLoading } = useQuery({
+  const { data: orders, isLoading } = useQuery<Order[]>({
     queryKey: ["myOrders"],
     queryFn: () => apiFetch("/checkout/my-orders"),
   });
@@ -46,7 +47,7 @@ export default function OrdersTab() {
   return (
     <>
       <div className="space-y-4">
-        {orders.map((order: any) => (
+        {orders.map((order) => (
           <Card key={order.id}>
             <CardHeader>
               <CardTitle>
@@ -64,7 +65,7 @@ export default function OrdersTab() {
               </p>
 
               <div className="mt-3 space-y-2">
-                {order.items.map((i: any) => {
+                {order.items.map((i) => {
                   const isCanceled = i.status === "CANCELED";
                   return (
                     <div

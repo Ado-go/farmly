@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useState } from "react";
 import { apiFetch } from "@/lib/api";
-import { FarmHeader } from "@/components/farm/FarmHeader";
+import { FarmHeader, type FarmFormData } from "@/components/farm/FarmHeader";
 import { FarmProductEditDialog } from "@/components/farm/FarmProductEditDialog";
 import { ProductForm } from "@/components/farm/ProductForm";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import type { Farm, FarmProduct } from "@/types/farm";
+import type { UploadedImage } from "@/components/ImageUploader";
 
 export const Route = createFileRoute("/farm/$id")({
   component: FarmDetailPage,
@@ -27,7 +29,9 @@ function FarmDetailPage() {
   const navigate = useNavigate();
 
   const [editing, setEditing] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<FarmProduct | null>(
+    null
+  );
   const [showEdit, setShowEdit] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
 
@@ -36,7 +40,7 @@ function FarmDetailPage() {
     data: farm,
     isLoading: farmLoading,
     isError: farmError,
-  } = useQuery({
+  } = useQuery<Farm>({
     queryKey: ["farm", id],
     queryFn: async () => await apiFetch(`/farm/${id}`),
   });
@@ -45,14 +49,14 @@ function FarmDetailPage() {
     data: farmProducts = [],
     isLoading: productsLoading,
     isError: productsError,
-  } = useQuery({
+  } = useQuery<FarmProduct[]>({
     queryKey: ["farmProducts", id],
     queryFn: async () => await apiFetch(`/farm-product/farm/${id}`),
   });
 
   // Mutations
   const editFarm = useMutation({
-    mutationFn: (data: any) =>
+    mutationFn: (data: FarmFormData & { images: UploadedImage[] }) =>
       apiFetch(`/farm/${id}`, { method: "PUT", body: data }),
     onSuccess: () => {
       toast.success(t("farmPage.editSuccess"));
@@ -125,7 +129,7 @@ function FarmDetailPage() {
         <p className="text-gray-500">{t("farmPage.noProducts")}</p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {farmProducts.map((fp: any) => (
+          {farmProducts.map((fp) => (
             <div
               key={fp.id}
               className="p-3 border rounded cursor-pointer hover:bg-emerald-50"

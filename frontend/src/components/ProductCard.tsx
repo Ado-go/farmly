@@ -5,23 +5,10 @@ import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
+import type { FarmProduct } from "@/types/farm";
 
 type ProductCardProps = {
-  product: {
-    id: number;
-    price: number;
-    stock?: number;
-    product: {
-      id: number;
-      name: string;
-      category?: string;
-      description?: string;
-      rating?: number;
-      images?: { url: string }[];
-      reviews?: { rating: number }[];
-    };
-    farm?: { id: number; name: string };
-  };
+  product: FarmProduct;
   sellerNameOverride?: string;
 };
 
@@ -33,7 +20,7 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
   const rating = averageRating(inner.reviews);
   const displaySellerName = sellerNameOverride ?? product.farm?.name;
 
-  const handleAddToCart = (fp) => {
+  const handleAddToCart = (fp: FarmProduct) => {
     const added = addToCart(
       {
         productId: fp.product.id,

@@ -12,6 +12,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { ImageCarousel } from "@/components/ImageCarousel";
+import type { FarmProduct } from "@/types/farm";
 
 export const Route = createFileRoute("/products/$id")({
   component: ProductDetailPage,
@@ -28,7 +29,7 @@ function ProductDetailPage() {
     data: farmProduct,
     isLoading,
     isError,
-  } = useQuery({
+  } = useQuery<FarmProduct>({
     queryKey: ["farmProduct", id],
     queryFn: async () => apiFetch(`/public-farm-products/${id}`),
   });
@@ -64,7 +65,7 @@ function ProductDetailPage() {
     },
   });
 
-  const handleAddToCart = (fp) => {
+  const handleAddToCart = (fp: FarmProduct) => {
     const normalizedQuantity = Math.max(1, Math.floor(quantity));
     const finalQuantity =
       fp.stock && fp.stock > 0

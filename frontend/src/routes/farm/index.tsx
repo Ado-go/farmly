@@ -19,6 +19,7 @@ import { apiFetch } from "../../lib/api";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
+import type { Farm } from "@/types/farm";
 
 const farmSchema = z.object({
   name: z.string().min(2),
@@ -59,7 +60,7 @@ function FarmPage() {
     data: farms = [],
     isLoading,
     isError,
-  } = useQuery({
+  } = useQuery<Farm[]>({
     queryKey: ["farms"],
     queryFn: async () => apiFetch("/farm"),
   });
@@ -197,7 +198,7 @@ function FarmPage() {
         <p className="text-gray-500">{t("farmPage.noFarms")}</p>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {farms.map((farm: any) => {
+          {farms.map((farm) => {
             const imageUrl =
               farm.images?.[0]?.optimizedUrl || farm.images?.[0]?.url;
             return (

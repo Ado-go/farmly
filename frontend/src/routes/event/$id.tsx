@@ -24,6 +24,8 @@ import DatePicker from "@/components/date-picker";
 import { EventProductsSection } from "@/components/EventProductsSection";
 import { useAuth } from "@/context/AuthContext";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
+import type { TFunction } from "i18next";
+import type { Event, EventParticipant } from "@/types/event";
 
 const eventSchema = z.object({
   title: z.string().min(3, "Názov je povinný"),
@@ -52,7 +54,7 @@ function EventDetailPage() {
   const [editMode, setEditMode] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
 
-  const { data: event, isLoading } = useQuery({
+  const { data: event, isLoading } = useQuery<Event>({
     queryKey: ["event", id],
     queryFn: async () => apiFetch(`/event/${id}`),
   });
@@ -250,7 +252,14 @@ function EventDetailPage() {
   );
 }
 
-function EditForm({ event, onSave, onCancel, t }) {
+type EditFormProps = {
+  event: Event;
+  onSave: (data: EventFormData) => void;
+  onCancel: () => void;
+  t: TFunction;
+};
+
+function EditForm({ event, onSave, onCancel, t }: EditFormProps) {
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {

@@ -24,6 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { FarmProduct } from "@/types/farm";
+import type { ProductCategory } from "@/lib/productCategories";
 
 export function FarmProductEditDialog({
   product,
@@ -31,7 +33,7 @@ export function FarmProductEditDialog({
   onOpenChange,
   onSave,
 }: {
-  product: any;
+  product: FarmProduct | null;
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onSave: () => void;
@@ -40,8 +42,8 @@ export function FarmProductEditDialog({
   const queryClient = useQueryClient();
 
   const [images, setImages] = useState<UploadedImage[]>([]);
-  const [category, setCategory] = useState<string>(
-    product?.product?.category ?? ""
+  const [category, setCategory] = useState<ProductCategory | "">(
+    (product?.product?.category as ProductCategory | undefined) ?? ""
   );
 
   useEffect(() => {
@@ -50,12 +52,16 @@ export function FarmProductEditDialog({
     } else {
       setImages([]);
     }
-    setCategory(product?.product?.category ?? "");
+    setCategory(
+      ((product?.product?.category as ProductCategory | undefined) ?? "") || ""
+    );
   }, [product]);
 
   const updateProduct = useMutation({
     mutationFn: async () => {
-      const uploaded = [];
+      if (!product) throw new Error("No product selected");
+
+      const uploaded: UploadedImage[] = [];
       for (const img of images) {
         if (img.file) {
           const formData = new FormData();
@@ -94,6 +100,7 @@ export function FarmProductEditDialog({
   });
 
   const handleDeleteProduct = async () => {
+    if (!product) return;
     await apiFetch(`/farm-product/${product.id}`, { method: "DELETE" });
     toast.success(t("product.deleted"));
     queryClient.invalidateQueries();
@@ -122,7 +129,10 @@ export function FarmProductEditDialog({
               onChange={(e) => (product.product.name = e.target.value)}
               placeholder={t("product.name")}
             />
-            <Select value={category || undefined} onValueChange={setCategory}>
+            <Select
+              value={category || undefined}
+              onValueChange={(value) => setCategory(value as ProductCategory)}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={t("product.category")} />
               </SelectTrigger>

@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import { apiFetch } from "@/lib/api";
+import type { Farm, MediaImage } from "@/types/farm";
 
 const farmSchema = z.object({
   name: z.string().min(2),
@@ -41,10 +42,10 @@ export function FarmHeader({
   isDeleting,
   isSaving,
 }: {
-  farm: any;
+  farm: Farm;
   editing: boolean;
   setEditing: (v: boolean) => void;
-  onEdit: (data: any) => void;
+  onEdit: (data: FarmFormData & { images: UploadedImage[] }) => void;
   onDelete: () => void;
   isDeleting: boolean;
   isSaving: boolean;
@@ -59,7 +60,7 @@ export function FarmHeader({
 
   useEffect(() => {
     form.reset(farm || {});
-    const imgs = (farm?.images ?? []).map((i: any) => ({
+    const imgs = (farm?.images ?? []).map((i: MediaImage) => ({
       url: i.optimizedUrl || i.url,
       publicId: i.publicId,
     }));

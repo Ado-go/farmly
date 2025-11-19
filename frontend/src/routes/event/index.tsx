@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import DatePicker from "@/components/date-picker";
 import { useAuth } from "@/context/AuthContext";
+import type { Event } from "@/types/event";
 
 const eventSchema = z.object({
   title: z.string().min(3, "Názov je povinný"),
@@ -66,7 +67,7 @@ function EventPage() {
     data: events = [],
     isLoading,
     isError,
-  } = useQuery({
+  } = useQuery<Event[]>({
     queryKey: ["events"],
     queryFn: async () => apiFetch("/event"),
   });
@@ -121,7 +122,7 @@ function EventPage() {
 
   const onSubmit = (data: EventFormData) => createEvent.mutate(data);
 
-  const Section = ({ title, items }) => (
+  const Section = ({ title, items }: { title: string; items: Event[] }) => (
     <div className="mb-10">
       <h2 className="text-xl font-semibold mb-3">{title}</h2>
       {items.length === 0 ? (

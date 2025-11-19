@@ -17,6 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import type { EventOrder, OrderItem } from "@/types/orders";
 
 export default function EventSalesTab() {
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ export default function EventSalesTab() {
   const [open, setOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<number | null>(null);
 
-  const { data: orders, isLoading } = useQuery({
+  const { data: orders, isLoading } = useQuery<EventOrder[]>({
     queryKey: ["myPreorders"],
     queryFn: () => apiFetch("/checkout-preorder/farmer-orders"),
   });
@@ -49,7 +50,7 @@ export default function EventSalesTab() {
   return (
     <>
       <div className="space-y-4">
-        {orders.map((order: any) => (
+        {orders.map((order) => (
           <Card key={order.id}>
             <CardHeader>
               <CardTitle>
@@ -74,7 +75,7 @@ export default function EventSalesTab() {
 
               {/* ITEMS */}
               <div className="mt-3 border-t pt-2 space-y-2">
-                {order.items.map((i: any) => {
+                {order.items.map((i: OrderItem) => {
                   const isCanceled = i.status === "CANCELED";
 
                   return (

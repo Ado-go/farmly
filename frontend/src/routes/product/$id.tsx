@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { FarmProduct, ProductReview } from "@/types/farm";
 
 const productSchema = z.object({
   name: z.string().min(2, "Názov je povinný"),
@@ -50,7 +51,7 @@ function ProductDetailPage() {
     data: farmProduct,
     isLoading,
     isError,
-  } = useQuery({
+  } = useQuery<FarmProduct>({
     queryKey: ["farmProduct", id],
     queryFn: async () => await apiFetch(`/farm-product/${id}`),
   });
@@ -227,19 +228,24 @@ function ProductDetailPage() {
           <p className="text-gray-500">{t("reviews.none")}</p>
         ) : (
           <div className="space-y-4">
-            {inner.reviews.map((r: any) => (
-              <div key={r.id} className="border-b pb-2">
+            {inner.reviews.map((r: ProductReview, idx: number) => {
+              const reviewDate = r.createdAt
+                ? new Date(r.createdAt).toLocaleDateString()
+                : "";
+              return (
+                <div key={r.id ?? idx} className="border-b pb-2">
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
                   <span className="font-medium">{r.rating}/5</span>
                   <span className="text-sm text-gray-400">
-                    {new Date(r.createdAt).toLocaleDateString()}
+                    {reviewDate}
                   </span>
                 </div>
                 {r.comment && <p className="text-sm mt-1">{r.comment}</p>}
                 <p className="text-xs text-gray-500">{r.user?.name}</p>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Card>

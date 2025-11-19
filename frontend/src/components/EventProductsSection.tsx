@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { EventProduct, FarmProduct } from "@/types/farm";
 
 const eventProductSchema = z.object({
   name: z.string().min(2, "Názov je povinný"),
@@ -48,15 +49,14 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
     null
   );
 
-  const { data: products, isLoading } = useQuery({
+  const { data: products, isLoading } = useQuery<EventProduct[]>({
     queryKey: ["event-products", eventId],
-    queryFn: async () =>
-      apiFetch(`/event-product/event/${eventId}`) as Promise<any[]>,
+    queryFn: async () => apiFetch(`/event-product/event/${eventId}`),
   });
 
-  const { data: farmProducts } = useQuery({
+  const { data: farmProducts } = useQuery<FarmProduct[]>({
     queryKey: ["farm-products"],
-    queryFn: async () => apiFetch("/farm-product/all") as Promise<any[]>,
+    queryFn: async () => apiFetch("/farm-product/all"),
   });
 
   const form = useForm<EventProductForm>({

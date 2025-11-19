@@ -15,14 +15,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import type { OrderItem, Order } from "@/types/orders";
 
 export default function SalesTab() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
 
-  const { data: sales, isLoading } = useQuery({
+  const { data: sales, isLoading } = useQuery<Order[]>({
     queryKey: ["farmerOrders"],
     queryFn: () => apiFetch("/checkout/farmer-orders"),
   });
@@ -46,7 +47,7 @@ export default function SalesTab() {
   return (
     <>
       <div className="space-y-4">
-        {sales.map((order: any) => (
+        {sales.map((order) => (
           <Card key={order.id}>
             <CardHeader>
               <CardTitle>
@@ -67,7 +68,7 @@ export default function SalesTab() {
               </p>
 
               <div className="mt-4 space-y-2">
-                {order.items.map((i: any) => {
+                {order.items.map((i) => {
                   const isCanceled = i.status === "CANCELED";
                   return (
                     <div

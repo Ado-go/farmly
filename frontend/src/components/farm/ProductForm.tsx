@@ -56,7 +56,7 @@ export function ProductForm({
 
   const mutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
-      const uploaded = [];
+      const uploaded: UploadedImage[] = [];
       for (const img of images) {
         if (img.file) {
           const formData = new FormData();
