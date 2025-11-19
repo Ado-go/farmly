@@ -250,14 +250,28 @@ function ProductDetailPage() {
               <label className="block text-sm font-medium mb-1">
                 {t("reviews.rating")}
               </label>
-              <Input
-                type="number"
-                min={1}
-                max={5}
-                value={rating}
-                onChange={(e) => setRating(Number(e.target.value))}
-                required
-              />
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setRating(value)}
+                    className="p-1"
+                    aria-label={t("reviews.starValue", { value })}
+                  >
+                    <Star
+                      className={`w-6 h-6 ${
+                        value <= rating
+                          ? "fill-yellow-400 text-yellow-500"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  </button>
+                ))}
+                <span className="text-sm text-gray-500">
+                  {rating ? `${rating}/5` : t("reviews.selectRating")}
+                </span>
+              </div>
             </div>
 
             <div>
@@ -271,7 +285,10 @@ function ProductDetailPage() {
               />
             </div>
 
-            <Button type="submit" disabled={addReview.isPending}>
+            <Button
+              type="submit"
+              disabled={addReview.isPending || rating === 0}
+            >
               {addReview.isPending
                 ? t("reviews.submitting")
                 : t("reviews.submit")}

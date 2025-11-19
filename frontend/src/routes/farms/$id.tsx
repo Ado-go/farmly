@@ -20,8 +20,8 @@ type FarmProduct = {
     name: string;
     category: string;
     description?: string;
-    rating: number;
     images: { url: string }[];
+    reviews?: { rating: number }[];
   };
 };
 

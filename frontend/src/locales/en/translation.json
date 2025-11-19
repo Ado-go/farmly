@@ -251,7 +251,9 @@
   "reviews": {
     "title": "Reviews",
     "none": "No reviews yet.",
-    "rating": "Rating (1-5)",
+    "rating": "Rating",
+    "selectRating": "Select rating",
+    "starValue": "Rate {{value}} out of 5",
     "comment": "Comment",
     "placeholder": "Write your experience with the product...",
     "submit": "Submit review",

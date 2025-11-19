@@ -251,7 +251,9 @@
   "reviews": {
     "title": "Recenzie",
     "none": "Zatiaľ nie sú žiadne recenzie.",
-    "rating": "Hodnotenie (1-5)",
+    "rating": "Hodnotenie",
+    "selectRating": "Vyberte hodnotenie",
+    "starValue": "Ohodnoťte {{value}} z 5",
     "comment": "Komentár",
     "placeholder": "Napíš svoju skúsenosť s produktom...",
     "submit": "Odoslať recenziu",
