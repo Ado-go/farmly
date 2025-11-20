@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "cd src && node index.ts",
+    "start": "ts-node --esm src/index.ts",
     "test": "jest --detectOpenHandles --runInBand",
     "prisma:seed": "ts-node prisma/seed/seed.ts",
     "prisma:clear": "ts-node prisma/seed/clear.ts"
@@ -13,6 +13,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "@prisma/client": "^6.16.3",
     "argon2": "^0.44.0",
