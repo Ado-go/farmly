@@ -14,7 +14,9 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
   const from = process.env.EMAIL_FROM || user;
 
   if (!host || !port || !user || !pass || !from) {
-    console.error("Missing email env vars. Check EMAIL_HOST/PORT/USER/PASS/FROM");
+    console.error(
+      "Missing email env vars. Check EMAIL_HOST/PORT/USER/PASS/FROM"
+    );
     throw new Error("Email service not configured");
   }
 
@@ -27,6 +29,8 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
       pass,
     },
     tls: { rejectUnauthorized: false },
+    logger: true,
+    debug: true,
   });
 
   const mailOptions = {
