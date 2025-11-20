@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "start": "npm-run-all --parallel start:frontend start:backend start:stripe",
     "start:frontend": "cd frontend && npm run dev",
