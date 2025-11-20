@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+const RESEND_API_URL = "https://api.resend.com/emails";
 
 export const sendEmail = async (to: string, subject: string, html: string) => {
   // Prevent sending emails during tests
@@ -7,38 +7,33 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
     return;
   }
 
-  const host = process.env.EMAIL_HOST;
-  const port = Number(process.env.EMAIL_PORT);
-  const user = process.env.EMAIL_USER;
-  const pass = process.env.EMAIL_PASS;
-  const from = process.env.EMAIL_FROM || user;
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM || process.env.EMAIL_USER;
 
-  if (!host || !port || !user || !pass || !from) {
-    console.error(
-      "Missing email env vars. Check EMAIL_HOST/PORT/USER/PASS/FROM"
-    );
+  if (!apiKey || !from) {
+    console.error("Missing email env vars. Need RESEND_API_KEY and EMAIL_FROM/EMAIL_USER");
     throw new Error("Email service not configured");
   }
 
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465, // 465: SSL, 587: STARTTLS
-    auth: {
-      user,
-      pass,
-    },
-    tls: { rejectUnauthorized: false },
-    logger: true,
-    debug: true,
-  });
-
-  const mailOptions = {
+  const payload = {
     from,
-    to,
+    to: Array.isArray(to) ? to : [to],
     subject,
     html,
   };
 
-  await transporter.sendMail(mailOptions);
+  const resp = await fetch(RESEND_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!resp.ok) {
+    const text = await resp.text();
+    console.error("Resend error:", resp.status, text);
+    throw new Error("Failed to send email");
+  }
 };
