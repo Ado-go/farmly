@@ -336,7 +336,7 @@ router.post("/logout", async (req, res) => {
     } catch {}
   }
 
-  res.clearCookie("refreshToken");
-  res.clearCookie("accessToken").json({ message: "Logged out" });
+  res.clearCookie("refreshToken", refreshCookieOptions);
+  res.clearCookie("accessToken", accessCookieOptions).json({ message: "Logged out" });
 });
 export default router;
