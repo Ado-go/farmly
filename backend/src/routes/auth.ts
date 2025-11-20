@@ -12,6 +12,19 @@ const router = Router();
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 const RESET_TOKEN_SECRET = process.env.RESET_TOKEN_SECRET;
+const isProduction = process.env.NODE_ENV === "production";
+const accessCookieOptions = {
+  httpOnly: true as const,
+  secure: isProduction,
+  sameSite: isProduction ? ("none" as const) : ("lax" as const),
+  maxAge: 15 * 60 * 1000, // 15 min
+};
+const refreshCookieOptions = {
+  httpOnly: true as const,
+  secure: isProduction,
+  sameSite: isProduction ? ("none" as const) : ("lax" as const),
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+};
 
 if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET || !RESET_TOKEN_SECRET) {
   throw new Error("Missing JWT secrets in environment variables");
@@ -128,19 +141,8 @@ router.post("/login", validateRequest(loginSchema), async (req, res) => {
     data: { refreshToken },
   });
 
-  res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 15 * 60 * 1000, // 15 min
-  });
-
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  });
+  res.cookie("accessToken", accessToken, accessCookieOptions);
+  res.cookie("refreshToken", refreshToken, refreshCookieOptions);
 
   res.json({
     user: {
@@ -298,18 +300,16 @@ router.post("/refresh", async (req, res) => {
         .json({ message: "Invalid or revoked refresh token" });
     }
 
-    const newAccessToken = jwt.sign(
-      { id: decoded.id, role: decoded.role },
-      ACCESS_TOKEN_SECRET!,
-      { expiresIn: "15m" }
-    );
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+      generateTokens(user);
 
-    res.cookie("accessToken", newAccessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 15 * 60 * 1000, // 15 min
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken: newRefreshToken },
     });
+
+    res.cookie("accessToken", newAccessToken, accessCookieOptions);
+    res.cookie("refreshToken", newRefreshToken, refreshCookieOptions);
 
     res.json({ message: "Access token refreshed" });
   } catch (err) {
