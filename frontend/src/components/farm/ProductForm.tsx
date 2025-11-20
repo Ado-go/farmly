@@ -27,7 +27,7 @@ const productSchema = z.object({
   category: productCategorySchema,
   description: z.string().optional(),
   price: z.number().positive(),
-  stock: z.number().nonnegative().default(0),
+  stock: z.number().nonnegative(),
 });
 type ProductFormData = z.infer<typeof productSchema>;
 

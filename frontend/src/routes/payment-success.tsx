@@ -10,7 +10,7 @@ export const Route = createFileRoute("/payment-success")({
 
 function PaymentSuccessPage() {
   const search = Route.useSearch();
-  const orderNumber = search.orderNumber as string | undefined;
+  const orderNumber = (search as { orderNumber?: string }).orderNumber;
   const { t } = useTranslation();
 
   return (
@@ -33,7 +33,7 @@ function PaymentSuccessPage() {
           </p>
 
           <Button asChild className="mt-4">
-            <Link to="/profile/orders">{t("payment.goToOrders")}</Link>
+            <Link to="/profile">{t("payment.goToOrders")}</Link>
           </Button>
         </CardContent>
       </Card>

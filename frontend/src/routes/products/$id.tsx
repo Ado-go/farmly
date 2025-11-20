@@ -39,15 +39,17 @@ function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
 
   const addReview = useMutation({
-    mutationFn: async () =>
-      apiFetch(`/review`, {
+    mutationFn: async () => {
+      if (!farmProduct) throw new Error("Product not loaded");
+      return apiFetch(`/review`, {
         method: "POST",
         body: JSON.stringify({
           productId: farmProduct.product.id,
           rating,
           comment,
         }),
-      }),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["farmProduct", id] });
       setRating(0);
@@ -198,7 +200,9 @@ function ProductDetailPage() {
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
                   <span className="font-medium">{userReview.rating}/5</span>
                   <span className="text-sm text-gray-400">
-                    {new Date(userReview.createdAt).toLocaleDateString()}
+                    {userReview.createdAt
+                      ? new Date(userReview.createdAt).toLocaleDateString()
+                      : ""}
                   </span>
                 </div>
                 {userReview.comment && (
@@ -209,8 +213,11 @@ function ProductDetailPage() {
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => deleteReview.mutate(userReview.id)}
-                disabled={deleteReview.isPending}
+                onClick={() => {
+                  if (!userReview.id) return;
+                  deleteReview.mutate(userReview.id);
+                }}
+                disabled={deleteReview.isPending || !userReview.id}
               >
                 <Trash2 className="w-4 h-4 mr-1" />
                 {t("reviews.delete")}
@@ -223,19 +230,22 @@ function ProductDetailPage() {
           <p className="text-gray-500 mb-4">{t("reviews.none")}</p>
         ) : (
           <div className="space-y-4 mb-6">
-            {otherReviews.map((r) => (
-              <div key={r.id} className="border-b pb-2">
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
-                  <span className="font-medium">{r.rating}/5</span>
-                  <span className="text-sm text-gray-400">
-                    {new Date(r.createdAt).toLocaleDateString()}
-                  </span>
+            {otherReviews.map((r) => {
+              const reviewDate = r.createdAt
+                ? new Date(r.createdAt).toLocaleDateString()
+                : "";
+              return (
+                <div key={r.id} className="border-b pb-2">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
+                    <span className="font-medium">{r.rating}/5</span>
+                    <span className="text-sm text-gray-400">{reviewDate}</span>
+                  </div>
+                  {r.comment && <p className="text-sm mt-1">{r.comment}</p>}
+                  <p className="text-xs text-gray-500">{r.user?.name}</p>
                 </div>
-                {r.comment && <p className="text-sm mt-1">{r.comment}</p>}
-                <p className="text-xs text-gray-500">{r.user?.name}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

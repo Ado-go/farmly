@@ -97,7 +97,11 @@ function FarmsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {farms.map((farm) => (
-                <Link key={farm.id} to={`/farms/${farm.id}`}>
+                <Link
+                  key={farm.id}
+                  to="/farms/$id"
+                  params={{ id: String(farm.id) }}
+                >
                   <Card className="p-4 hover:shadow-lg transition">
                     <h3 className="font-bold">{farm.name}</h3>
 

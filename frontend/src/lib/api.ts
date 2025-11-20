@@ -1,5 +1,7 @@
 export const API_BASE = import.meta.env.VITE_API_BASE;
 
+type ApiRequestInit = Omit<RequestInit, "body"> & { body?: any };
+
 async function safeJson(res: Response) {
   try {
     return await res.json();
@@ -8,7 +10,7 @@ async function safeJson(res: Response) {
   }
 }
 
-export async function apiFetch(path: string, options: RequestInit = {}) {
+export async function apiFetch(path: string, options: ApiRequestInit = {}) {
   const url = `${API_BASE}${path}`;
 
   const isFormData = options.body instanceof FormData;
@@ -20,6 +22,7 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
       ...(options.headers || {}),
     },
     ...options,
+    body: options.body,
   };
 
   if (baseOptions.body && !isFormData && typeof baseOptions.body !== "string") {

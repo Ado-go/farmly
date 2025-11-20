@@ -132,7 +132,9 @@ function EventPage() {
           {items.map((event) => (
             <Card
               key={event.id}
-              onClick={() => navigate({ to: `/event/${event.id}` })}
+              onClick={() =>
+                navigate({ to: "/event/$id", params: { id: String(event.id) } })
+              }
               className="cursor-pointer hover:shadow-md transition"
             >
               <CardHeader>

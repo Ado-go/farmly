@@ -25,7 +25,7 @@ import { EventProductsSection } from "@/components/EventProductsSection";
 import { useAuth } from "@/context/AuthContext";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import type { TFunction } from "i18next";
-import type { Event, EventParticipant } from "@/types/event";
+import type { Event } from "@/types/event";
 
 const eventSchema = z.object({
   title: z.string().min(3, "Názov je povinný"),
@@ -66,7 +66,7 @@ function EventDetailPage() {
     mutationFn: () => apiFetch(`/event/${id}/join`, { method: "POST" }),
     onSuccess: () => {
       toast.success(t("eventPage.joined"));
-      queryClient.invalidateQueries(["event", id]);
+      queryClient.invalidateQueries({ queryKey: ["event", id] });
     },
   });
 
@@ -74,7 +74,7 @@ function EventDetailPage() {
     mutationFn: () => apiFetch(`/event/${id}/leave`, { method: "DELETE" }),
     onSuccess: () => {
       toast.success(t("eventPage.left"));
-      queryClient.invalidateQueries(["event", id]);
+      queryClient.invalidateQueries({ queryKey: ["event", id] });
     },
   });
 
@@ -91,7 +91,7 @@ function EventDetailPage() {
     onSuccess: () => {
       toast.success(t("eventPage.updated"));
       setEditMode(false);
-      queryClient.invalidateQueries(["event", id]);
+      queryClient.invalidateQueries({ queryKey: ["event", id] });
     },
     onError: () => toast.error(t("eventPage.errorUpdating")),
   });
@@ -100,7 +100,7 @@ function EventDetailPage() {
     mutationFn: () => apiFetch(`/event/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       toast.success(t("eventPage.deleted"));
-      queryClient.invalidateQueries(["events"]);
+      queryClient.invalidateQueries({ queryKey: ["events"] });
       navigate({ to: "/event" });
     },
     onError: () => toast.error(t("eventPage.errorDeleting")),
@@ -263,9 +263,15 @@ function EditForm({ event, onSave, onCancel, t }: EditFormProps) {
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
-      ...event,
+      title: event.title,
+      description: event.description ?? undefined,
       startDate: new Date(event.startDate),
       endDate: new Date(event.endDate),
+      city: event.city,
+      street: event.street,
+      region: event.region,
+      postalCode: event.postalCode,
+      country: event.country,
     },
   });
 

@@ -73,7 +73,7 @@ function EventsPage() {
   const upcoming = events.filter((e) => new Date(e.startDate) > now);
 
   const renderEventCard = (event: Event) => (
-    <Link key={event.id} to={`/events/${event.id}`}>
+    <Link key={event.id} to="/events/$id" params={{ id: String(event.id) }}>
       <Card className="p-4 hover:shadow-lg transition">
         <h3 className="font-bold">{event.title}</h3>
         <p className="text-sm text-gray-600">{event.city}</p>

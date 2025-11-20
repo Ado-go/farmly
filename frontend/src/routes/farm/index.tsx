@@ -205,7 +205,9 @@ function FarmPage() {
               <Card
                 key={farm.id}
                 className="shadow-md cursor-pointer hover:shadow-lg transition-all duration-200"
-                onClick={() => navigate({ to: `/farm/${farm.id}` })}
+                onClick={() =>
+                  navigate({ to: "/farm/$id", params: { id: String(farm.id) } })
+                }
               >
                 <CardHeader className="p-0">
                   {imageUrl ? (

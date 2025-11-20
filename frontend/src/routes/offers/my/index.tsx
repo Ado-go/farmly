@@ -110,14 +110,23 @@ function OffersMyPage() {
 
   useEffect(() => {
     if (editingOffer) {
+      const parsedCategory = productCategorySchema.safeParse(
+        editingOffer.category
+      );
+      const parsedProductCategory = productCategorySchema.safeParse(
+        editingOffer.product?.category
+      );
+
       form.reset({
         title: editingOffer.title,
         description: editingOffer.description,
-        category: editingOffer.category,
+        category: parsedCategory.success ? parsedCategory.data : undefined,
         price: editingOffer.price,
         productName: editingOffer.product?.name || "",
         productDescription: editingOffer.product?.description || "",
-        productCategory: editingOffer.product?.category || undefined,
+        productCategory: parsedProductCategory.success
+          ? parsedProductCategory.data
+          : undefined,
         productPrice: editingOffer.product?.basePrice ?? editingOffer.price,
       });
       setImages(

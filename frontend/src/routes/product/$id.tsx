@@ -28,7 +28,7 @@ import type { FarmProduct, ProductReview } from "@/types/farm";
 
 const productSchema = z.object({
   name: z.string().min(2, "Názov je povinný"),
-  category: productCategorySchema,
+  category: productCategorySchema.optional(),
   description: z.string().optional(),
   price: z.number().min(0, "Cena musí byť väčšia ako 0"),
   stock: z.number().min(0, "Sklad musí byť nezáporný"),
@@ -62,9 +62,12 @@ function ProductDetailPage() {
 
   useEffect(() => {
     if (farmProduct) {
+      const parsedCategory = productCategorySchema.safeParse(
+        farmProduct.product.category
+      );
       form.reset({
         name: farmProduct.product.name,
-        category: farmProduct.product.category,
+        category: parsedCategory.success ? parsedCategory.data : undefined,
         description: farmProduct.product.description,
         price: farmProduct.price,
         stock: farmProduct.stock,
@@ -99,7 +102,12 @@ function ProductDetailPage() {
       apiFetch(`/farm-product/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       toast.success(t("productPage.deleteSuccess"));
-      navigate({ to: `/farm/${farmProduct.farmId}` });
+      if (farmProduct?.farmId) {
+        navigate({
+          to: "/farm/$id",
+          params: { id: String(farmProduct.farmId) },
+        });
+      }
     },
     onError: () => {
       toast.error(t("productPage.deleteError"));
@@ -224,26 +232,24 @@ function ProductDetailPage() {
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">{t("reviews.title")}</h2>
 
-        {inner.reviews?.length === 0 ? (
+        {(inner.reviews?.length ?? 0) === 0 ? (
           <p className="text-gray-500">{t("reviews.none")}</p>
         ) : (
           <div className="space-y-4">
-            {inner.reviews.map((r: ProductReview, idx: number) => {
+            {(inner.reviews ?? []).map((r: ProductReview, idx: number) => {
               const reviewDate = r.createdAt
                 ? new Date(r.createdAt).toLocaleDateString()
                 : "";
               return (
                 <div key={r.id ?? idx} className="border-b pb-2">
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
-                  <span className="font-medium">{r.rating}/5</span>
-                  <span className="text-sm text-gray-400">
-                    {reviewDate}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
+                    <span className="font-medium">{r.rating}/5</span>
+                    <span className="text-sm text-gray-400">{reviewDate}</span>
+                  </div>
+                  {r.comment && <p className="text-sm mt-1">{r.comment}</p>}
+                  <p className="text-xs text-gray-500">{r.user?.name}</p>
                 </div>
-                {r.comment && <p className="text-sm mt-1">{r.comment}</p>}
-                <p className="text-xs text-gray-500">{r.user?.name}</p>
-              </div>
               );
             })}
           </div>

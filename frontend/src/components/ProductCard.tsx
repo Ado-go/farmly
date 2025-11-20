@@ -40,7 +40,8 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow p-2">
       <Link
-        to={`/products/${inner.id}`}
+        to="/products/$id"
+        params={{ id: String(inner.id) }}
         className="block cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary"
       >
         {inner.images?.[0]?.url ? (

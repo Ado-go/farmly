@@ -76,7 +76,7 @@ function OffersAllPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {offers.map((offer) => (
-          <Link key={offer.id} to={`/offers/${offer.id}`}>
+          <Link key={offer.id} to="/offers/$id" params={{ id: String(offer.id) }}>
             <Card className="p-4 hover:shadow-lg transition">
               <h3 className="font-semibold">{offer.title}</h3>
               {offer.product?.images?.[0]?.url ? (

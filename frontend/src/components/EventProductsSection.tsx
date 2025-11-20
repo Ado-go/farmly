@@ -75,7 +75,7 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
       form.reset();
       setSelectedFarmProduct(null);
       setDialogOpen(false);
-      queryClient.invalidateQueries(["event-products", eventId]);
+      queryClient.invalidateQueries({ queryKey: ["event-products", eventId] });
     },
     onError: () => toast.error(t("eventProducts.addFailed")),
   });
@@ -85,7 +85,7 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
       apiFetch(`/event-product/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       toast.success(t("eventProducts.deleted"));
-      queryClient.invalidateQueries(["event-products", eventId]);
+      queryClient.invalidateQueries({ queryKey: ["event-products", eventId] });
     },
     onError: () => toast.error(t("eventProducts.deleteFailed")),
   });
@@ -102,9 +102,12 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
 
     const selected = farmProducts?.find((f) => f.id === selectedFarmProduct);
     if (selected) {
+      const parsedCategory = productCategorySchema.safeParse(
+        selected.product.category
+      );
       form.reset({
         name: selected.product.name,
-        category: selected.product.category,
+        category: parsedCategory.success ? parsedCategory.data : undefined,
         description: selected.product.description,
         basePrice: selected.product.basePrice ?? 0,
         eventId,

@@ -68,7 +68,8 @@ function EventPageDetail() {
   const now = new Date();
   const eventHasNotStarted = new Date(event.startDate) > now;
 
-  const handleAddToPreorder = (ep: EventDetail["eventProducts"][0]) => {
+  type EventProductDetail = NonNullable<EventDetail["eventProducts"]>[number];
+  const handleAddToPreorder = (ep: EventProductDetail) => {
     const added = addToCart(
       {
         productId: ep.product.id,

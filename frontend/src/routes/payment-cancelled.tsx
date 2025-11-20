@@ -11,7 +11,7 @@ export const Route = createFileRoute("/payment-cancelled")({
 function PaymentCancelledPage() {
   const { t } = useTranslation();
   const search = Route.useSearch();
-  const orderId = search.orderId;
+  const orderId = (search as { orderId?: string }).orderId;
 
   const handleRetry = async () => {
     if (!orderId) return;

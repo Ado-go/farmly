@@ -17,13 +17,13 @@ export type ProductReview = {
   rating: number;
   comment?: string | null;
   createdAt?: string;
-  user?: { name?: string | null };
+  user?: { id?: number; name?: string | null };
 };
 
 export type Product = {
   id: number;
   name: string;
-  category?: ProductCategory;
+  category?: ProductCategory | string;
   description?: string;
   rating?: number;
   basePrice?: number;
