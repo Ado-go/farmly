@@ -49,7 +49,13 @@ app.post(
   express.raw({ type: "application/json" })
 );
 
-app.use(express.json());
+// Skip JSON parsing for Stripe webhook so signature verification uses raw body
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/checkout/stripe/webhook") {
+    return next();
+  }
+  return express.json()(req, res, next);
+});
 
 app.use("/api/auth", authRoutes);
 

@@ -33,7 +33,7 @@ function PaymentSuccessPage() {
           </p>
 
           <Button asChild className="mt-4">
-            <Link to="/profile">{t("payment.goToOrders")}</Link>
+            <Link to="/">{t("go_home")}</Link>
           </Button>
         </CardContent>
       </Card>

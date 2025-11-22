@@ -5,6 +5,10 @@ import { checkoutSchema } from "../schemas/checkoutSchemas.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
 import { sendEmail } from "../utils/sendEmails.ts";
 import Stripe from "stripe";
+import {
+  buildOrderConfirmationEmail,
+  buildPaymentSuccessEmail,
+} from "../emailTemplates/orderTemplates.ts";
 
 const router = Router();
 
@@ -71,22 +75,35 @@ router.post("/", validateRequest(checkoutSchema), async (req, res) => {
     });
 
     const paymentLink = `${process.env.FRONTEND_URL}/order/${order.id}/pay`;
+    const recipientEmail =
+      email ??
+      (buyerId
+        ? (
+            await prisma.user.findUnique({
+              where: { id: buyerId },
+              select: { email: true },
+            })
+          )?.email
+        : null);
 
-    await sendEmail(
-      email,
-      "Vaša objednávka bola vytvorená",
-      `
-        <h2>Ďakujeme za objednávku!</h2>
-        <p>Číslo objednávky: <strong>${order.orderNumber}</strong></p>
-        <p>Celková cena: <strong>${totalPrice} €</strong></p>
-        <p>Kliknite nižšie a zaplaťte objednávku:</p>
-        <a href="${paymentLink}" 
-          style="padding: 10px 18px; background: #34d399; color: #fff; 
-                text-decoration: none; border-radius: 6px;">
-          Zaplatiť objednávku
-        </a>
-      `
-    );
+    if (recipientEmail) {
+      const { subject, html } = buildOrderConfirmationEmail({
+        orderNumber: order.orderNumber,
+        totalPrice,
+        delivery: {
+          deliveryStreet,
+          deliveryCity,
+          deliveryRegion,
+          deliveryPostalCode,
+          deliveryCountry,
+        },
+        items: order.items,
+        paymentMethod,
+        paymentLink,
+      });
+
+      await sendEmail(recipientEmail, subject, html);
+    }
 
     res.json({
       message: "Order was successfully created",
@@ -387,10 +404,64 @@ router.post("/stripe/webhook", async (req, res) => {
         "Missing client_reference_id on checkout.session.completed"
       );
     } else {
-      await prisma.order.update({
+      const order = await prisma.order.findUnique({
         where: { id: orderId },
-        data: { isPaid: true, status: "COMPLETED" },
+        include: {
+          items: true,
+          buyer: { select: { email: true } },
+        },
       });
+
+      if (!order) {
+        console.error(`Order ${orderId} not found in webhook`);
+      } else {
+        await prisma.$transaction([
+          prisma.order.update({
+            where: { id: orderId },
+            data: { isPaid: true, status: "COMPLETED" },
+          }),
+          prisma.orderHistory.create({
+            data: {
+              orderId,
+              action: "ORDER_UPDATED",
+              message: "Payment confirmed via Stripe",
+            },
+          }),
+        ]);
+
+        const recipient =
+          order.anonymousEmail ?? order.buyer?.email ?? null;
+
+        if (recipient) {
+          const { subject, html } = buildPaymentSuccessEmail({
+            orderNumber: order.orderNumber,
+            totalPrice:
+              order.totalPrice ??
+              order.items.reduce(
+                (sum, item) => sum + item.unitPrice * item.quantity,
+                0
+              ),
+            delivery: {
+              deliveryStreet: order.deliveryStreet,
+              deliveryCity: order.deliveryCity,
+              deliveryRegion: order.deliveryRegion,
+              deliveryPostalCode: order.deliveryPostalCode,
+              deliveryCountry: order.deliveryCountry,
+            },
+            items: order.items,
+            paymentMethod: order.paymentMethod as
+              | "CARD"
+              | "CASH"
+              | "BANK_TRANSFER",
+          });
+
+          try {
+            await sendEmail(recipient, subject, html);
+          } catch (emailErr) {
+            console.error("Failed to send payment success email:", emailErr);
+          }
+        }
+      }
     }
   }
 
