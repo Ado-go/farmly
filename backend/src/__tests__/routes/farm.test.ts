@@ -1,48 +1,50 @@
 process.env.NODE_ENV = "test";
+process.env.ACCESS_TOKEN_SECRET =
+  process.env.ACCESS_TOKEN_SECRET ?? "access-secret";
 
 import request from "supertest";
 import prisma from "../../prisma.ts";
 import app from "../../index.ts";
 import jwt from "jsonwebtoken";
 
-let token: string;
-let farmId: number;
-let farmerId: number;
-const baseAddress = {
-  address: "Main Street 1",
-  postalCode: "01001",
-  city: "Bratislava",
-  country: "Slovakia",
-};
+describe("Farm routes", () => {
+  let token: string;
+  let farmId: number;
+  let farmerId: number;
+  const baseAddress = {
+    address: "Main Street 1",
+    postalCode: "01001",
+    city: "Bratislava",
+    country: "Slovakia",
+  };
 
-beforeAll(async () => {
-  const user = await prisma.user.create({
-    data: {
-      email: "farmer@test.com",
-      password: "hashedpassword",
-      name: "Test Farmer",
-      phone: "123456789",
-      role: "FARMER",
-      ...baseAddress,
-    },
+  beforeAll(async () => {
+    const user = await prisma.user.create({
+      data: {
+        email: "farmer@test.com",
+        password: "hashedpassword",
+        name: "Test Farmer",
+        phone: "123456789",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+
+    farmerId = user.id;
+
+    token = jwt.sign(
+      { id: user.id, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!,
+      { expiresIn: "1h" }
+    );
   });
 
-  farmerId = user.id;
+  afterAll(async () => {
+    await prisma.farm.deleteMany({});
+    await prisma.user.deleteMany({});
+    await prisma.$disconnect();
+  });
 
-  token = jwt.sign(
-    { id: user.id, role: "FARMER" },
-    process.env.ACCESS_TOKEN_SECRET!,
-    { expiresIn: "1h" }
-  );
-});
-
-afterAll(async () => {
-  await prisma.farm.deleteMany({});
-  await prisma.user.deleteMany({});
-  await prisma.$disconnect();
-});
-
-describe("Farm routes", () => {
   // CREATE
   it("should create a farm", async () => {
     const res = await request(app)

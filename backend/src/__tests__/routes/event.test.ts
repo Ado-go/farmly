@@ -1,62 +1,66 @@
+process.env.NODE_ENV = "test";
+process.env.ACCESS_TOKEN_SECRET =
+  process.env.ACCESS_TOKEN_SECRET ?? "access-secret";
+
 import request from "supertest";
 import app from "../../index.ts";
 import prisma from "../../prisma.ts";
 import jwt from "jsonwebtoken";
 
-let FARMER_ID: number;
-let OTHER_FARMER_ID: number;
-let accessToken: string;
-let otherAccessToken: string;
-let eventId: number;
-const baseAddress = {
-  address: "Main Street 1",
-  postalCode: "01001",
-  city: "Bratislava",
-  country: "Slovakia",
-};
-
-beforeAll(async () => {
-  const farmer = await prisma.user.create({
-    data: {
-      email: "farmer@test.com",
-      password: "hashedpassword",
-      name: "Farmer",
-      phone: "+421900000001",
-      role: "FARMER",
-      ...baseAddress,
-    },
-  });
-  FARMER_ID = farmer.id;
-  accessToken = jwt.sign(
-    { id: FARMER_ID, role: "FARMER" },
-    process.env.ACCESS_TOKEN_SECRET!
-  );
-
-  const otherFarmer = await prisma.user.create({
-    data: {
-      email: "otherfarmer@test.com",
-      password: "hashedpassword",
-      name: "Other Farmer",
-      phone: "+421900000002",
-      role: "FARMER",
-      ...baseAddress,
-    },
-  });
-  OTHER_FARMER_ID = otherFarmer.id;
-  otherAccessToken = jwt.sign(
-    { id: OTHER_FARMER_ID, role: "FARMER" },
-    process.env.ACCESS_TOKEN_SECRET!
-  );
-});
-
-afterAll(async () => {
-  await prisma.eventParticipant.deleteMany({});
-  await prisma.event.deleteMany({});
-  await prisma.user.deleteMany({});
-  await prisma.$disconnect();
-});
-
 describe("Event Routes", () => {
+  let FARMER_ID: number;
+  let OTHER_FARMER_ID: number;
+  let accessToken: string;
+  let otherAccessToken: string;
+  let eventId: number;
+  const baseAddress = {
+    address: "Main Street 1",
+    postalCode: "01001",
+    city: "Bratislava",
+    country: "Slovakia",
+  };
+
+  beforeAll(async () => {
+    const farmer = await prisma.user.create({
+      data: {
+        email: "farmer@test.com",
+        password: "hashedpassword",
+        name: "Farmer",
+        phone: "+421900000001",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+    FARMER_ID = farmer.id;
+    accessToken = jwt.sign(
+      { id: FARMER_ID, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
+
+    const otherFarmer = await prisma.user.create({
+      data: {
+        email: "otherfarmer@test.com",
+        password: "hashedpassword",
+        name: "Other Farmer",
+        phone: "+421900000002",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+    OTHER_FARMER_ID = otherFarmer.id;
+    otherAccessToken = jwt.sign(
+      { id: OTHER_FARMER_ID, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
+  });
+
+  afterAll(async () => {
+    await prisma.eventParticipant.deleteMany({});
+    await prisma.event.deleteMany({});
+    await prisma.user.deleteMany({});
+    await prisma.$disconnect();
+  });
+
   it("POST /event - should create a new event", async () => {
     const res = await request(app)
       .post("/api/event")

@@ -1,115 +1,119 @@
+process.env.NODE_ENV = "test";
+process.env.ACCESS_TOKEN_SECRET =
+  process.env.ACCESS_TOKEN_SECRET ?? "access-secret";
+
 import request from "supertest";
 import app from "../../index.ts";
 import prisma from "../../prisma.ts";
 import jwt from "jsonwebtoken";
 
-let FARMER_ID: number;
-let OTHER_FARMER_ID: number;
-let EVENT_ID: number;
-let OTHER_EVENT_ID: number;
-let eventProductId: number;
-let accessToken: string;
-let otherAccessToken: string;
-const baseAddress = {
-  address: "Main Street 1",
-  postalCode: "01001",
-  city: "Bratislava",
-  country: "Slovakia",
-};
-
-beforeAll(async () => {
-  await prisma.eventProduct.deleteMany({});
-  await prisma.eventParticipant.deleteMany({});
-  await prisma.event.deleteMany({});
-  await prisma.product.deleteMany({});
-  await prisma.user.deleteMany({});
-
-  const farmer = await prisma.user.create({
-    data: {
-      email: "farmer@test.com",
-      password: "hashedpassword",
-      name: "Farmer",
-      phone: "+421900000001",
-      role: "FARMER",
-      ...baseAddress,
-    },
-  });
-  FARMER_ID = farmer.id;
-  accessToken = jwt.sign(
-    { id: FARMER_ID, role: "FARMER" },
-    process.env.ACCESS_TOKEN_SECRET!
-  );
-
-  const otherFarmer = await prisma.user.create({
-    data: {
-      email: "otherfarmer@test.com",
-      password: "hashedpassword",
-      name: "Other Farmer",
-      phone: "+421900000002",
-      role: "FARMER",
-      ...baseAddress,
-    },
-  });
-  OTHER_FARMER_ID = otherFarmer.id;
-  otherAccessToken = jwt.sign(
-    { id: OTHER_FARMER_ID, role: "FARMER" },
-    process.env.ACCESS_TOKEN_SECRET!
-  );
-
-  const event = await prisma.event.create({
-    data: {
-      title: "Green Market",
-      description: "Eco-friendly event",
-      startDate: new Date(),
-      endDate: new Date(),
-      city: "Bratislava",
-      street: "Market Street 5",
-      region: "Bratislavský",
-      postalCode: "81101",
-      country: "Slovakia",
-      organizerId: FARMER_ID,
-    },
-  });
-  EVENT_ID = event.id;
-
-  const otherEvent = await prisma.event.create({
-    data: {
-      title: "Autumn Harvest",
-      description: "Organic harvest fair",
-      startDate: new Date(),
-      endDate: new Date(),
-      city: "Košice",
-      street: "Harvest Road 10",
-      region: "Košický",
-      postalCode: "04001",
-      country: "Slovakia",
-      organizerId: OTHER_FARMER_ID,
-    },
-  });
-  OTHER_EVENT_ID = otherEvent.id;
-
-  await prisma.eventParticipant.create({
-    data: { eventId: EVENT_ID, userId: FARMER_ID },
-  });
-  await prisma.eventParticipant.create({
-    data: { eventId: EVENT_ID, userId: OTHER_FARMER_ID },
-  });
-
-  await prisma.eventParticipant.create({
-    data: { eventId: OTHER_EVENT_ID, userId: OTHER_FARMER_ID },
-  });
-});
-
-afterAll(async () => {
-  await prisma.eventProduct.deleteMany({});
-  await prisma.product.deleteMany({});
-  await prisma.eventParticipant.deleteMany({});
-  await prisma.event.deleteMany({});
-  await prisma.user.deleteMany({});
-  await prisma.$disconnect();
-});
-
 describe("EventProduct Routes", () => {
+  let FARMER_ID: number;
+  let OTHER_FARMER_ID: number;
+  let EVENT_ID: number;
+  let OTHER_EVENT_ID: number;
+  let eventProductId: number;
+  let accessToken: string;
+  let otherAccessToken: string;
+  const baseAddress = {
+    address: "Main Street 1",
+    postalCode: "01001",
+    city: "Bratislava",
+    country: "Slovakia",
+  };
+
+  beforeAll(async () => {
+    await prisma.eventProduct.deleteMany({});
+    await prisma.eventParticipant.deleteMany({});
+    await prisma.event.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.user.deleteMany({});
+
+    const farmer = await prisma.user.create({
+      data: {
+        email: "farmer@test.com",
+        password: "hashedpassword",
+        name: "Farmer",
+        phone: "+421900000001",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+    FARMER_ID = farmer.id;
+    accessToken = jwt.sign(
+      { id: FARMER_ID, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
+
+    const otherFarmer = await prisma.user.create({
+      data: {
+        email: "otherfarmer@test.com",
+        password: "hashedpassword",
+        name: "Other Farmer",
+        phone: "+421900000002",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+    OTHER_FARMER_ID = otherFarmer.id;
+    otherAccessToken = jwt.sign(
+      { id: OTHER_FARMER_ID, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
+
+    const event = await prisma.event.create({
+      data: {
+        title: "Green Market",
+        description: "Eco-friendly event",
+        startDate: new Date(),
+        endDate: new Date(),
+        city: "Bratislava",
+        street: "Market Street 5",
+        region: "Bratislavský",
+        postalCode: "81101",
+        country: "Slovakia",
+        organizerId: FARMER_ID,
+      },
+    });
+    EVENT_ID = event.id;
+
+    const otherEvent = await prisma.event.create({
+      data: {
+        title: "Autumn Harvest",
+        description: "Organic harvest fair",
+        startDate: new Date(),
+        endDate: new Date(),
+        city: "Košice",
+        street: "Harvest Road 10",
+        region: "Košický",
+        postalCode: "04001",
+        country: "Slovakia",
+        organizerId: OTHER_FARMER_ID,
+      },
+    });
+    OTHER_EVENT_ID = otherEvent.id;
+
+    await prisma.eventParticipant.create({
+      data: { eventId: EVENT_ID, userId: FARMER_ID },
+    });
+    await prisma.eventParticipant.create({
+      data: { eventId: EVENT_ID, userId: OTHER_FARMER_ID },
+    });
+
+    await prisma.eventParticipant.create({
+      data: { eventId: OTHER_EVENT_ID, userId: OTHER_FARMER_ID },
+    });
+  });
+
+  afterAll(async () => {
+    await prisma.eventProduct.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.eventParticipant.deleteMany({});
+    await prisma.event.deleteMany({});
+    await prisma.user.deleteMany({});
+    await prisma.$disconnect();
+  });
+
   it("POST /event-product - should create event product for own participation", async () => {
     const res = await request(app)
       .post("/api/event-product")

@@ -1,32 +1,19 @@
-process.env.ACCESS_TOKEN_SECRET = "access-secret";
-process.env.REFRESH_TOKEN_SECRET = "refresh-secret";
-process.env.RESET_TOKEN_SECRET = "reset-secret";
-process.env.CLIENT_URL = "https://client.com";
 process.env.NODE_ENV = "test";
+process.env.ACCESS_TOKEN_SECRET =
+  process.env.ACCESS_TOKEN_SECRET ?? "access-secret";
+process.env.REFRESH_TOKEN_SECRET =
+  process.env.REFRESH_TOKEN_SECRET ?? "refresh-secret";
+process.env.RESET_TOKEN_SECRET =
+  process.env.RESET_TOKEN_SECRET ?? "reset-secret";
+process.env.CLIENT_URL = process.env.CLIENT_URL ?? "https://client.com";
 
 import request from "supertest";
-import express from "express";
-import cookieParser from "cookie-parser";
-
-jest.mock("../../prisma", () => ({
-  __esModule: true,
-  default: {
-    user: {
-      findUnique: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-    },
-  },
-}));
-
-jest.mock("../../../src/utils/sendEmails", () => ({
-  sendEmail: jest.fn(),
-}));
+import argon2 from "argon2";
+import jwt from "jsonwebtoken";
+import app from "../../index.ts";
+import prisma from "../../prisma.ts";
 
 describe("Auth routes", () => {
-  let app: express.Express;
-  let prisma: any;
-  let sendEmail: any;
   const baseAddress = {
     address: "Main Street 1",
     postalCode: "01001",
@@ -34,37 +21,19 @@ describe("Auth routes", () => {
     country: "Slovakia",
   };
 
-  beforeAll(async () => {
-    const routerModule = await import("../../../src/routes/auth.ts");
-    const router = routerModule.default;
-
-    prisma = (await import("../../prisma.ts")).default;
-    sendEmail = (await import("../../../src/utils/sendEmails.ts")).sendEmail;
-
-    app = express();
-    app.use(express.json());
-    app.use(cookieParser());
-    app.use("/auth", router);
+  beforeEach(async () => {
+    await prisma.user.deleteMany({});
   });
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  afterAll(async () => {
+    await prisma.user.deleteMany({});
+    await prisma.$disconnect();
   });
 
   // === REGISTER TESTS ===
-  test("POST /auth/register - creates user successfully", async () => {
-    prisma.user.findUnique.mockResolvedValue(null);
-    prisma.user.create.mockResolvedValue({
-      id: 1,
-      email: "test@test.com",
-      name: "John Johnson",
-      phone: "+421940123456",
-      role: "FARMER",
-      ...baseAddress,
-    });
-
+  test("POST /api/auth/register - creates user successfully", async () => {
     const res = await request(app)
-      .post("/auth/register")
+      .post("/api/auth/register")
       .send({
         email: "test@test.com",
         name: "John Johnson",
@@ -84,8 +53,8 @@ describe("Auth routes", () => {
     });
   });
 
-  test("POST /auth/register - missing fields returns 400", async () => {
-    const res = await request(app).post("/auth/register").send({
+  test("POST /api/auth/register - missing fields returns 400", async () => {
+    const res = await request(app).post("/api/auth/register").send({
       email: "missing@test.com",
       password: "123456",
       role: "FARMER",
@@ -94,11 +63,20 @@ describe("Auth routes", () => {
     expect(res.body.error).toBe("Invalid request data");
   });
 
-  test("POST /auth/register - user already exists returns 400", async () => {
-    prisma.user.findUnique.mockResolvedValue({ id: 1, email: "test@test.com" });
+  test("POST /api/auth/register - user already exists returns 400", async () => {
+    await prisma.user.create({
+      data: {
+        email: "test@test.com",
+        password: "hashedpassword",
+        name: "John",
+        phone: "+421900000000",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
 
     const res = await request(app)
-      .post("/auth/register")
+      .post("/api/auth/register")
       .send({
         email: "test@test.com",
         password: "123456",
@@ -113,23 +91,21 @@ describe("Auth routes", () => {
   });
 
   // === LOGIN TESTS ===
-  test("POST /auth/login - valid credentials", async () => {
-    const argon2 = await import("argon2");
-    const mockUser = {
-      id: 1,
-      email: "test@test.com",
-      password: await argon2.hash("123456"),
-      role: "FARMER",
-      name: "John",
-      phone: "+421900000000",
-      ...baseAddress,
-    };
-
-    prisma.user.findUnique.mockResolvedValue(mockUser);
-    prisma.user.update.mockResolvedValue(mockUser);
+  test("POST /api/auth/login - valid credentials", async () => {
+    const hashed = await argon2.hash("123456");
+    await prisma.user.create({
+      data: {
+        email: "test@test.com",
+        password: hashed,
+        role: "FARMER",
+        name: "John",
+        phone: "+421900000000",
+        ...baseAddress,
+      },
+    });
 
     const res = await request(app)
-      .post("/auth/login")
+      .post("/api/auth/login")
       .send({ email: "test@test.com", password: "123456" });
 
     expect(res.status).toBe(200);
@@ -137,30 +113,30 @@ describe("Auth routes", () => {
     expect(res.headers["set-cookie"]).toBeDefined();
   });
 
-  test("POST /auth/login - invalid email returns 401", async () => {
-    prisma.user.findUnique.mockResolvedValue(null);
-
+  test("POST /api/auth/login - invalid email returns 401", async () => {
     const res = await request(app)
-      .post("/auth/login")
+      .post("/api/auth/login")
       .send({ email: "notfound@test.com", password: "123456" });
 
     expect(res.status).toBe(401);
     expect(res.body.error).toBe("Invalid credentials");
   });
 
-  test("POST /auth/login - invalid password returns 401", async () => {
-    const argon2 = await import("argon2");
-    const mockUser = {
-      id: 1,
-      email: "test@test.com",
-      password: await argon2.hash("correctpass"),
-      role: "FARMER",
-    };
-
-    prisma.user.findUnique.mockResolvedValue(mockUser);
+  test("POST /api/auth/login - invalid password returns 401", async () => {
+    const hashed = await argon2.hash("correctpass");
+    await prisma.user.create({
+      data: {
+        email: "test@test.com",
+        password: hashed,
+        role: "FARMER",
+        name: "John",
+        phone: "+421900000000",
+        ...baseAddress,
+      },
+    });
 
     const res = await request(app)
-      .post("/auth/login")
+      .post("/api/auth/login")
       .send({ email: "test@test.com", password: "wrongpass" });
 
     expect(res.status).toBe(401);
@@ -168,133 +144,167 @@ describe("Auth routes", () => {
   });
 
   // === FORGOT PASSWORD ===
-  test("POST /auth/forgot-password - sends reset email", async () => {
-    prisma.user.findUnique.mockResolvedValue({
-      id: 1,
-      email: "test@test.com",
-      resetToken: null,
+  test("POST /api/auth/forgot-password - sends reset email", async () => {
+    await prisma.user.create({
+      data: {
+        email: "test@test.com",
+        password: "hashedpassword",
+        name: "User",
+        phone: "+421900000001",
+        role: "CUSTOMER",
+        resetToken: null,
+        ...baseAddress,
+      },
     });
-    prisma.user.update.mockResolvedValue({});
-    sendEmail.mockResolvedValue(true);
 
     const res = await request(app)
-      .post("/auth/forgot-password")
+      .post("/api/auth/forgot-password")
       .send({ email: "test@test.com" });
 
     expect(res.status).toBe(200);
-    expect(sendEmail).toHaveBeenCalledTimes(1);
+    expect(res.body.message).toBe("Password reset email sent");
   });
 
-  test("POST /auth/forgot-password - user not found", async () => {
-    prisma.user.findUnique.mockResolvedValue(null);
+  test("POST /api/auth/forgot-password - user not found", async () => {
     const res = await request(app)
-      .post("/auth/forgot-password")
+      .post("/api/auth/forgot-password")
       .send({ email: "missing@test.com" });
     expect(res.status).toBe(404);
   });
 
   // === RESET PASSWORD ===
-  test("POST /auth/reset-password - valid token resets password", async () => {
-    const jwt = await import("jsonwebtoken");
-    const token = jwt.sign({ id: 1, email: "test@test.com" }, "reset-secret");
-
-    prisma.user.findUnique.mockResolvedValue({
-      id: 1,
-      email: "test@test.com",
-      resetToken: token,
+  test("POST /api/auth/reset-password - valid token resets password", async () => {
+    const user = await prisma.user.create({
+      data: {
+        email: "test@test.com",
+        password: "hashedpassword",
+        name: "User",
+        phone: "+421900000001",
+        role: "CUSTOMER",
+        ...baseAddress,
+      },
     });
-    prisma.user.update.mockResolvedValue({});
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.RESET_TOKEN_SECRET!
+    );
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { resetToken: token },
+    });
 
     const res = await request(app)
-      .post("/auth/reset-password")
+      .post("/api/auth/reset-password")
       .send({ token, newPassword: "newpass123" });
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe("Password successfully reset");
   });
 
-  test("POST /auth/reset-password - invalid token", async () => {
-    prisma.user.findUnique.mockResolvedValue({
-      id: 1,
-      email: "test@test.com",
-      resetToken: "different-token",
+  test("POST /api/auth/reset-password - invalid token", async () => {
+    await prisma.user.create({
+      data: {
+        email: "test@test.com",
+        password: "hashedpassword",
+        name: "User",
+        phone: "+421900000001",
+        role: "CUSTOMER",
+        resetToken: "different-token",
+        ...baseAddress,
+      },
     });
 
     const res = await request(app)
-      .post("/auth/reset-password")
+      .post("/api/auth/reset-password")
       .send({ token: "invalid-token", newPassword: "pass123" });
 
     expect(res.status).toBe(403);
   });
 
   // === REFRESH TOKEN ===
-  test("POST /auth/refresh - returns new access token when token matches DB", async () => {
-    const jwt = await import("jsonwebtoken");
+  test("POST /api/auth/refresh - returns new access token when token matches DB", async () => {
+    const user = await prisma.user.create({
+      data: {
+        email: "test@test.com",
+        password: "hashed",
+        name: "John",
+        phone: "+421900000000",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+
     const refreshToken = jwt.sign(
-      { id: 1, role: "FARMER" },
+      { id: user.id, role: "FARMER" },
       process.env.REFRESH_TOKEN_SECRET!
     );
 
-    prisma.user.findUnique.mockResolvedValue({
-      id: 1,
-      email: "test@test.com",
-      refreshToken,
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken },
     });
 
     const res = await request(app)
-      .post("/auth/refresh")
+      .post("/api/auth/refresh")
       .set("Cookie", [`refreshToken=${refreshToken}`]);
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe("Access token refreshed");
   });
 
-  test("POST /auth/refresh - invalid or missing token returns 401", async () => {
-    const res = await request(app).post("/auth/refresh");
+  test("POST /api/auth/refresh - invalid or missing token returns 401", async () => {
+    const res = await request(app).post("/api/auth/refresh");
     expect(res.status).toBe(401);
   });
 
-  test("POST /auth/refresh - token not in DB returns 403", async () => {
-    const jwt = await import("jsonwebtoken");
+  test("POST /api/auth/refresh - token not in DB returns 403", async () => {
     const refreshToken = jwt.sign(
       { id: 2, role: "FARMER" },
       process.env.REFRESH_TOKEN_SECRET!
     );
 
-    prisma.user.findUnique.mockResolvedValue({
-      id: 2,
-      email: "no@db.com",
-      refreshToken: "different-token",
+    await prisma.user.create({
+      data: {
+        email: "no@db.com",
+        password: "hashed",
+        name: "No DB",
+        phone: "+421900000999",
+        role: "FARMER",
+        refreshToken: "different-token",
+        ...baseAddress,
+      },
     });
 
     const res = await request(app)
-      .post("/auth/refresh")
+      .post("/api/auth/refresh")
       .set("Cookie", [`refreshToken=${refreshToken}`]);
 
     expect(res.status).toBe(403);
   });
 
   // === CHANGE PASSWORD ===
-  test("POST /auth/change-password - successfully changes password", async () => {
-    const jwt = await import("jsonwebtoken");
-    const argon2 = await import("argon2");
+  test("POST /api/auth/change-password - successfully changes password", async () => {
+    const oldHashed = await argon2.hash("oldPassword123");
+    const user = await prisma.user.create({
+      data: {
+        email: "test@test.com",
+        password: oldHashed,
+        name: "User",
+        phone: "+421900000001",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
 
     const accessToken = jwt.sign(
-      { id: 1, role: "FARMER" },
+      { id: user.id, role: user.role },
       process.env.ACCESS_TOKEN_SECRET!
     );
 
-    const oldHashed = await argon2.hash("oldPassword123");
-
-    prisma.user.findUnique.mockResolvedValue({
-      id: 1,
-      email: "test@test.com",
-      password: oldHashed,
-    });
-    prisma.user.update.mockResolvedValue({});
-
     const res = await request(app)
-      .post("/auth/change-password")
+      .post("/api/auth/change-password")
       .set("Cookie", [`accessToken=${accessToken}`])
       .send({
         oldPassword: "oldPassword123",
@@ -305,15 +315,25 @@ describe("Auth routes", () => {
     expect(res.body.message).toBe("Password successfully changed");
   });
 
-  test("POST /auth/change-password - missing data returns 400", async () => {
-    const jwt = await import("jsonwebtoken");
+  test("POST /api/auth/change-password - missing data returns 400", async () => {
+    const user = await prisma.user.create({
+      data: {
+        email: "test@test.com",
+        password: await argon2.hash("oldPassword123"),
+        name: "User",
+        phone: "+421900000001",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+
     const accessToken = jwt.sign(
-      { id: 1, role: "FARMER" },
+      { id: user.id, role: user.role },
       process.env.ACCESS_TOKEN_SECRET!
     );
 
     const res = await request(app)
-      .post("/auth/change-password")
+      .post("/api/auth/change-password")
       .set("Cookie", [`accessToken=${accessToken}`])
       .send({ oldPassword: "" });
 
@@ -321,17 +341,14 @@ describe("Auth routes", () => {
     expect(res.body.message).toBe("Missing data");
   });
 
-  test("POST /auth/change-password - invalid user returns 401", async () => {
-    const jwt = await import("jsonwebtoken");
+  test("POST /api/auth/change-password - invalid user returns 401", async () => {
     const accessToken = jwt.sign(
       { id: 99, role: "FARMER" },
       process.env.ACCESS_TOKEN_SECRET!
     );
 
-    prisma.user.findUnique.mockResolvedValue(null);
-
     const res = await request(app)
-      .post("/auth/change-password")
+      .post("/api/auth/change-password")
       .set("Cookie", [`accessToken=${accessToken}`])
       .send({
         oldPassword: "oldPass",
@@ -342,23 +359,26 @@ describe("Auth routes", () => {
     expect(res.body.message).toBe("Invalid user id");
   });
 
-  test("POST /auth/change-password - invalid old password returns 401", async () => {
-    const jwt = await import("jsonwebtoken");
-    const argon2 = await import("argon2");
+  test("POST /api/auth/change-password - invalid old password returns 401", async () => {
+    const hashed = await argon2.hash("correctOldPassword");
+    const user = await prisma.user.create({
+      data: {
+        email: "test@test.com",
+        password: hashed,
+        name: "User",
+        phone: "+421900000001",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+
     const accessToken = jwt.sign(
-      { id: 1, role: "FARMER" },
+      { id: user.id, role: user.role },
       process.env.ACCESS_TOKEN_SECRET!
     );
 
-    const hashed = await argon2.hash("correctOldPassword");
-    prisma.user.findUnique.mockResolvedValue({
-      id: 1,
-      email: "test@test.com",
-      password: hashed,
-    });
-
     const res = await request(app)
-      .post("/auth/change-password")
+      .post("/api/auth/change-password")
       .set("Cookie", [`accessToken=${accessToken}`])
       .send({
         oldPassword: "wrongOldPassword",
@@ -370,17 +390,26 @@ describe("Auth routes", () => {
   });
 
   // === LOGOUT ===
-  test("POST /auth/logout - clears cookies", async () => {
-    const jwt = await import("jsonwebtoken");
+  test("POST /api/auth/logout - clears cookies", async () => {
     const refreshToken = jwt.sign(
       { id: 1, role: "FARMER" },
       process.env.REFRESH_TOKEN_SECRET!
     );
 
-    prisma.user.update.mockResolvedValue({});
+    await prisma.user.create({
+      data: {
+        email: "test@test.com",
+        password: "hashed",
+        name: "User",
+        phone: "+421900000001",
+        role: "FARMER",
+        refreshToken,
+        ...baseAddress,
+      },
+    });
 
     const res = await request(app)
-      .post("/auth/logout")
+      .post("/api/auth/logout")
       .set("Cookie", [`refreshToken=${refreshToken}`]);
 
     expect(res.status).toBe(200);

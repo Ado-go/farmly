@@ -1,52 +1,56 @@
+process.env.NODE_ENV = "test";
+process.env.ACCESS_TOKEN_SECRET =
+  process.env.ACCESS_TOKEN_SECRET ?? "access-secret";
+
 import request from "supertest";
 import app from "../../index.ts";
 import prisma from "../../prisma.ts";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 
-let accessToken: string;
-let testUserId: number;
-const baseAddress = {
-  address: "Main Street 1",
-  postalCode: "01001",
-  city: "Bratislava",
-  country: "Slovakia",
-};
-
-beforeAll(async () => {
-  const hashedPassword = await argon2.hash("password123");
-  const user = await prisma.user.create({
-    data: {
-      email: "profile@test.com",
-      password: hashedPassword,
-      name: "Test User",
-      phone: "+421940123456",
-      role: "CUSTOMER",
-      ...baseAddress,
-    },
-  });
-  testUserId = user.id;
-
-  accessToken = jwt.sign(
-    { id: user.id, role: user.role },
-    process.env.ACCESS_TOKEN_SECRET!,
-    { expiresIn: "15m" }
-  );
-});
-
-afterAll(async () => {
-  try {
-    await prisma.user.deleteMany({
-      where: { id: testUserId },
-    });
-  } catch (err) {
-    console.error("Cleanup failed:", err);
-  } finally {
-    await prisma.$disconnect();
-  }
-});
-
 describe("Profile Routes", () => {
+  let accessToken: string;
+  let testUserId: number;
+  const baseAddress = {
+    address: "Main Street 1",
+    postalCode: "01001",
+    city: "Bratislava",
+    country: "Slovakia",
+  };
+
+  beforeAll(async () => {
+    const hashedPassword = await argon2.hash("password123");
+    const user = await prisma.user.create({
+      data: {
+        email: "profile@test.com",
+        password: hashedPassword,
+        name: "Test User",
+        phone: "+421940123456",
+        role: "CUSTOMER",
+        ...baseAddress,
+      },
+    });
+    testUserId = user.id;
+
+    accessToken = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.ACCESS_TOKEN_SECRET!,
+      { expiresIn: "15m" }
+    );
+  });
+
+  afterAll(async () => {
+    try {
+      await prisma.user.deleteMany({
+        where: { id: testUserId },
+      });
+    } catch (err) {
+      console.error("Cleanup failed:", err);
+    } finally {
+      await prisma.$disconnect();
+    }
+  });
+
   it("GET /profile - should return user data", async () => {
     const res = await request(app)
       .get("/api/profile")

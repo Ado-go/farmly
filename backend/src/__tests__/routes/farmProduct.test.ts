@@ -1,91 +1,100 @@
+process.env.NODE_ENV = "test";
+process.env.ACCESS_TOKEN_SECRET =
+  process.env.ACCESS_TOKEN_SECRET ?? "access-secret";
+
 import request from "supertest";
 import app from "../../index.ts";
 import prisma from "../../prisma.ts";
 import jwt from "jsonwebtoken";
 
-let FARMER_ID: number;
-let OTHER_FARMER_ID: number;
-let farmId: number;
-let otherFarmId: number;
-let farmProductId: number;
-let accessToken: string;
-let otherAccessToken: string;
-const baseAddress = {
-  address: "Main Street 1",
-  postalCode: "01001",
-  city: "Bratislava",
-  country: "Slovakia",
-};
-
-beforeAll(async () => {
-  const farmer = await prisma.user.create({
-    data: {
-      email: "farmer@test.com",
-      password: "hashedpassword",
-      name: "Farmer",
-      phone: "+421900000001",
-      role: "FARMER",
-      ...baseAddress,
-    },
-  });
-  FARMER_ID = farmer.id;
-  accessToken = jwt.sign(
-    { id: FARMER_ID, role: "FARMER" },
-    process.env.ACCESS_TOKEN_SECRET!
-  );
-
-  const otherFarmer = await prisma.user.create({
-    data: {
-      email: "otherfarmer@test.com",
-      password: "hashedpassword",
-      name: "Other Farmer",
-      phone: "+421900000002",
-      role: "FARMER",
-      ...baseAddress,
-    },
-  });
-  OTHER_FARMER_ID = otherFarmer.id;
-  otherAccessToken = jwt.sign(
-    { id: OTHER_FARMER_ID, role: "FARMER" },
-    process.env.ACCESS_TOKEN_SECRET!
-  );
-
-  const farm = await prisma.farm.create({
-    data: {
-      name: "My Farm",
-      farmerId: FARMER_ID,
-      city: "Bratislava",
-      street: "Main Street 1",
-      region: "Bratislavský",
-      postalCode: "81101",
-      country: "Slovakia",
-    },
-  });
-  farmId = farm.id;
-
-  const otherFarm = await prisma.farm.create({
-    data: {
-      name: "Other Farm",
-      farmerId: OTHER_FARMER_ID,
-      city: "Košice",
-      street: "Second Street 2",
-      region: "Košický",
-      postalCode: "04001",
-      country: "Slovakia",
-    },
-  });
-  otherFarmId = otherFarm.id;
-});
-
-afterAll(async () => {
-  await prisma.farmProduct.deleteMany({});
-  await prisma.product.deleteMany({});
-  await prisma.farm.deleteMany({});
-  await prisma.user.deleteMany({});
-  await prisma.$disconnect();
-});
-
 describe("FarmProduct Routes", () => {
+  let FARMER_ID: number;
+  let OTHER_FARMER_ID: number;
+  let farmId: number;
+  let otherFarmId: number;
+  let farmProductId: number;
+  let accessToken: string;
+  let otherAccessToken: string;
+  const baseAddress = {
+    address: "Main Street 1",
+    postalCode: "01001",
+    city: "Bratislava",
+    country: "Slovakia",
+  };
+
+  beforeAll(async () => {
+    await prisma.farmProduct.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.farm.deleteMany({});
+    await prisma.user.deleteMany({});
+
+    const farmer = await prisma.user.create({
+      data: {
+        email: "farmer@test.com",
+        password: "hashedpassword",
+        name: "Farmer",
+        phone: "+421900000001",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+    FARMER_ID = farmer.id;
+    accessToken = jwt.sign(
+      { id: FARMER_ID, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
+
+    const otherFarmer = await prisma.user.create({
+      data: {
+        email: "otherfarmer@test.com",
+        password: "hashedpassword",
+        name: "Other Farmer",
+        phone: "+421900000002",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+    OTHER_FARMER_ID = otherFarmer.id;
+    otherAccessToken = jwt.sign(
+      { id: OTHER_FARMER_ID, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
+
+    const farm = await prisma.farm.create({
+      data: {
+        name: "My Farm",
+        farmerId: FARMER_ID,
+        city: "Bratislava",
+        street: "Main Street 1",
+        region: "Bratislavský",
+        postalCode: "81101",
+        country: "Slovakia",
+      },
+    });
+    farmId = farm.id;
+
+    const otherFarm = await prisma.farm.create({
+      data: {
+        name: "Other Farm",
+        farmerId: OTHER_FARMER_ID,
+        city: "Košice",
+        street: "Second Street 2",
+        region: "Košický",
+        postalCode: "04001",
+        country: "Slovakia",
+      },
+    });
+    otherFarmId = otherFarm.id;
+  });
+
+  afterAll(async () => {
+    await prisma.farmProduct.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.farm.deleteMany({});
+    await prisma.user.deleteMany({});
+    await prisma.$disconnect();
+  });
+
   it("POST /farm-product - should create farm product for own farm", async () => {
     const res = await request(app)
       .post("/api/farm-product")

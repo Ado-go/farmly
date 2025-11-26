@@ -1,73 +1,77 @@
+process.env.NODE_ENV = "test";
+process.env.ACCESS_TOKEN_SECRET =
+  process.env.ACCESS_TOKEN_SECRET ?? "access-secret";
+
 import request from "supertest";
 import app from "../../index.ts";
 import prisma from "../../prisma.ts";
 
-let CUSTOMER_ID: number;
-let EVENT_ID: number;
-let PRODUCT_ID: number;
-const baseAddress = {
-  address: "Main Street 1",
-  postalCode: "01001",
-  city: "Bratislava",
-  country: "Slovakia",
-};
-
-beforeAll(async () => {
-  await prisma.orderItem.deleteMany({});
-  await prisma.order.deleteMany({});
-  await prisma.event.deleteMany({});
-  await prisma.product.deleteMany({});
-  await prisma.user.deleteMany({});
-
-  const customer = await prisma.user.create({
-    data: {
-      email: "customer2@test.com",
-      password: "hashedpassword",
-      name: "Customer 2",
-      phone: "+421900000333",
-      role: "CUSTOMER",
-      ...baseAddress,
-    },
-  });
-  CUSTOMER_ID = customer.id;
-
-  const event = await prisma.event.create({
-    data: {
-      title: "Market Day",
-      description: "Test event",
-      startDate: new Date(),
-      endDate: new Date(),
-      city: "Trnava",
-      street: "Market 1",
-      region: "Trnavský",
-      postalCode: "91701",
-      country: "Slovensko",
-      organizerId: CUSTOMER_ID,
-    },
-  });
-  EVENT_ID = event.id;
-
-  const product = await prisma.product.create({
-    data: {
-      name: "Honey Jar",
-      category: "Other",
-      description: "Natural honey",
-      basePrice: 8,
-    },
-  });
-  PRODUCT_ID = product.id;
-});
-
-afterAll(async () => {
-  await prisma.orderItem.deleteMany({});
-  await prisma.order.deleteMany({});
-  await prisma.event.deleteMany({});
-  await prisma.product.deleteMany({});
-  await prisma.user.deleteMany({});
-  await prisma.$disconnect();
-});
-
 describe("Preorder Checkout Routes", () => {
+  let CUSTOMER_ID: number;
+  let EVENT_ID: number;
+  let PRODUCT_ID: number;
+  const baseAddress = {
+    address: "Main Street 1",
+    postalCode: "01001",
+    city: "Bratislava",
+    country: "Slovakia",
+  };
+
+  beforeAll(async () => {
+    await prisma.orderItem.deleteMany({});
+    await prisma.order.deleteMany({});
+    await prisma.event.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.user.deleteMany({});
+
+    const customer = await prisma.user.create({
+      data: {
+        email: "customer2@test.com",
+        password: "hashedpassword",
+        name: "Customer 2",
+        phone: "+421900000333",
+        role: "CUSTOMER",
+        ...baseAddress,
+      },
+    });
+    CUSTOMER_ID = customer.id;
+
+    const event = await prisma.event.create({
+      data: {
+        title: "Market Day",
+        description: "Test event",
+        startDate: new Date(),
+        endDate: new Date(),
+        city: "Trnava",
+        street: "Market 1",
+        region: "Trnavský",
+        postalCode: "91701",
+        country: "Slovensko",
+        organizerId: CUSTOMER_ID,
+      },
+    });
+    EVENT_ID = event.id;
+
+    const product = await prisma.product.create({
+      data: {
+        name: "Honey Jar",
+        category: "Other",
+        description: "Natural honey",
+        basePrice: 8,
+      },
+    });
+    PRODUCT_ID = product.id;
+  });
+
+  afterAll(async () => {
+    await prisma.orderItem.deleteMany({});
+    await prisma.order.deleteMany({});
+    await prisma.event.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.user.deleteMany({});
+    await prisma.$disconnect();
+  });
+
   it("POST /checkout-preorder - should create preorder for logged-in user", async () => {
     const res = await request(app)
       .post("/api/checkout-preorder")

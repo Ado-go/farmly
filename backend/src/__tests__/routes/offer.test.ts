@@ -1,53 +1,55 @@
 process.env.NODE_ENV = "test";
+process.env.ACCESS_TOKEN_SECRET =
+  process.env.ACCESS_TOKEN_SECRET ?? "access-secret";
 
 import request from "supertest";
 import prisma from "../../prisma.ts";
 import app from "../../index.ts";
 import jwt from "jsonwebtoken";
 
-let token: string;
-let offerId: number;
-let farmerId: number;
-const baseAddress = {
-  address: "Main Street 1",
-  postalCode: "01001",
-  city: "Bratislava",
-  country: "Slovakia",
-};
+describe("Offer routes", () => {
+  let token: string;
+  let offerId: number;
+  let farmerId: number;
+  const baseAddress = {
+    address: "Main Street 1",
+    postalCode: "01001",
+    city: "Bratislava",
+    country: "Slovakia",
+  };
 
-beforeAll(async () => {
-  await prisma.offer.deleteMany({});
-  await prisma.product.deleteMany({});
-  await prisma.user.deleteMany({});
+  beforeAll(async () => {
+    await prisma.offer.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.user.deleteMany({});
 
-  const user = await prisma.user.create({
-    data: {
-      email: "offerfarmer@test.com",
-      password: "hashedpassword",
-      name: "Offer Farmer",
-      phone: "123456789",
-      role: "FARMER",
-      ...baseAddress,
-    },
+    const user = await prisma.user.create({
+      data: {
+        email: "offerfarmer@test.com",
+        password: "hashedpassword",
+        name: "Offer Farmer",
+        phone: "123456789",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+
+    farmerId = user.id;
+
+    token = jwt.sign(
+      { id: user.id, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!,
+      { expiresIn: "1h" }
+    );
   });
 
-  farmerId = user.id;
+  afterAll(async () => {
+    await prisma.offer.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.user.deleteMany({});
+    await prisma.$disconnect();
+  });
 
-  token = jwt.sign(
-    { id: user.id, role: "FARMER" },
-    process.env.ACCESS_TOKEN_SECRET!,
-    { expiresIn: "1h" }
-  );
-});
-
-afterAll(async () => {
-  await prisma.offer.deleteMany({});
-  await prisma.product.deleteMany({});
-  await prisma.user.deleteMany({});
-  await prisma.$disconnect();
-});
-
-describe("Offer routes", () => {
   it("should create an offer and product", async () => {
     const res = await request(app)
       .post("/api/offer")

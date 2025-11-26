@@ -1,125 +1,129 @@
+process.env.NODE_ENV = "test";
+process.env.ACCESS_TOKEN_SECRET =
+  process.env.ACCESS_TOKEN_SECRET ?? "access-secret";
+
 import request from "supertest";
 import app from "../../index.ts";
 import prisma from "../../prisma.ts";
 import jwt from "jsonwebtoken";
 
-let CUSTOMER_ID: number;
-let FARMER_ID: number;
-let OTHER_FARMER_ID: number;
-let FARM_ID: number;
-let PRODUCT_ID: number;
+describe("Checkout Routes", () => {
+  let CUSTOMER_ID: number;
+  let FARMER_ID: number;
+  let OTHER_FARMER_ID: number;
+  let FARM_ID: number;
+  let PRODUCT_ID: number;
 
-let customerToken: string;
-let farmerToken: string;
-let otherFarmerToken: string;
-const baseAddress = {
-  address: "Main Street 1",
-  postalCode: "01001",
-  city: "Bratislava",
-  country: "Slovakia",
-};
+  let customerToken: string;
+  let farmerToken: string;
+  let otherFarmerToken: string;
+  const baseAddress = {
+    address: "Main Street 1",
+    postalCode: "01001",
+    city: "Bratislava",
+    country: "Slovakia",
+  };
 
-beforeAll(async () => {
-  await prisma.orderHistory.deleteMany({});
-  await prisma.orderItem.deleteMany({});
-  await prisma.order.deleteMany({});
-  await prisma.farmProduct.deleteMany({});
-  await prisma.farm.deleteMany({});
-  await prisma.product.deleteMany({});
-  await prisma.user.deleteMany({});
+  beforeAll(async () => {
+    await prisma.orderHistory.deleteMany({});
+    await prisma.orderItem.deleteMany({});
+    await prisma.order.deleteMany({});
+    await prisma.farmProduct.deleteMany({});
+    await prisma.farm.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.user.deleteMany({});
 
-  const farmer = await prisma.user.create({
-    data: {
-      email: "farmer@test.com",
-      password: "hashedpassword",
-      name: "Farmer",
-      phone: "+421900000001",
-      role: "FARMER",
-      ...baseAddress,
-    },
-  });
-  FARMER_ID = farmer.id;
-  farmerToken = jwt.sign(
-    { id: FARMER_ID, role: "FARMER" },
-    process.env.ACCESS_TOKEN_SECRET!
-  );
+    const farmer = await prisma.user.create({
+      data: {
+        email: "farmer@test.com",
+        password: "hashedpassword",
+        name: "Farmer",
+        phone: "+421900000001",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+    FARMER_ID = farmer.id;
+    farmerToken = jwt.sign(
+      { id: FARMER_ID, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
 
-  const otherFarmer = await prisma.user.create({
-    data: {
-      email: "otherfarmer@test.com",
-      password: "hashedpassword",
-      name: "Other Farmer",
-      phone: "+421900000002",
-      role: "FARMER",
-      ...baseAddress,
-    },
-  });
-  OTHER_FARMER_ID = otherFarmer.id;
-  otherFarmerToken = jwt.sign(
-    { id: OTHER_FARMER_ID, role: "FARMER" },
-    process.env.ACCESS_TOKEN_SECRET!
-  );
+    const otherFarmer = await prisma.user.create({
+      data: {
+        email: "otherfarmer@test.com",
+        password: "hashedpassword",
+        name: "Other Farmer",
+        phone: "+421900000002",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+    OTHER_FARMER_ID = otherFarmer.id;
+    otherFarmerToken = jwt.sign(
+      { id: OTHER_FARMER_ID, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
 
-  const customer = await prisma.user.create({
-    data: {
-      email: "customer@test.com",
-      password: "hashedpassword",
-      name: "Customer",
-      phone: "+421900000003",
-      role: "CUSTOMER",
-      ...baseAddress,
-    },
-  });
-  CUSTOMER_ID = customer.id;
-  customerToken = jwt.sign(
-    { id: CUSTOMER_ID, role: "CUSTOMER" },
-    process.env.ACCESS_TOKEN_SECRET!
-  );
+    const customer = await prisma.user.create({
+      data: {
+        email: "customer@test.com",
+        password: "hashedpassword",
+        name: "Customer",
+        phone: "+421900000003",
+        role: "CUSTOMER",
+        ...baseAddress,
+      },
+    });
+    CUSTOMER_ID = customer.id;
+    customerToken = jwt.sign(
+      { id: CUSTOMER_ID, role: "CUSTOMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
 
-  const farm = await prisma.farm.create({
-    data: {
-      name: "Sunny Farm",
-      description: "Organic vegetables",
-      city: "Trnava",
-      street: "Farm Street 5",
-      region: "Trnavský",
-      postalCode: "91701",
-      country: "Slovensko",
-      farmerId: FARMER_ID,
-    },
-  });
-  FARM_ID = farm.id;
+    const farm = await prisma.farm.create({
+      data: {
+        name: "Sunny Farm",
+        description: "Organic vegetables",
+        city: "Trnava",
+        street: "Farm Street 5",
+        region: "Trnavský",
+        postalCode: "91701",
+        country: "Slovensko",
+        farmerId: FARMER_ID,
+      },
+    });
+    FARM_ID = farm.id;
 
-  const product = await prisma.product.create({
-    data: {
-      name: "Test Product",
-      category: "Vegetables",
-      description: "Fresh carrots",
-      basePrice: 3.5,
-      farmLinks: {
-        create: {
-          farmId: FARM_ID,
-          price: 3.5,
-          stock: 50,
+    const product = await prisma.product.create({
+      data: {
+        name: "Test Product",
+        category: "Vegetables",
+        description: "Fresh carrots",
+        basePrice: 3.5,
+        farmLinks: {
+          create: {
+            farmId: FARM_ID,
+            price: 3.5,
+            stock: 50,
+          },
         },
       },
-    },
+    });
+    PRODUCT_ID = product.id;
   });
-  PRODUCT_ID = product.id;
-});
 
-afterAll(async () => {
-  await prisma.orderHistory.deleteMany({});
-  await prisma.orderItem.deleteMany({});
-  await prisma.order.deleteMany({});
-  await prisma.farmProduct.deleteMany({});
-  await prisma.farm.deleteMany({});
-  await prisma.product.deleteMany({});
-  await prisma.user.deleteMany({});
-  await prisma.$disconnect();
-});
+  afterAll(async () => {
+    await prisma.orderHistory.deleteMany({});
+    await prisma.orderItem.deleteMany({});
+    await prisma.order.deleteMany({});
+    await prisma.farmProduct.deleteMany({});
+    await prisma.farm.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.user.deleteMany({});
+    await prisma.$disconnect();
+  });
 
-describe("Checkout Routes", () => {
   it("POST /checkout - creates order and adds ORDER_CREATED log", async () => {
     const res = await request(app)
       .post("/api/checkout")
