@@ -4,6 +4,7 @@ import {
   OrderStatus,
   OrderType,
   PaymentMethod,
+  ProductCategory,
   PrismaClient,
 } from "@prisma/client";
 import type { Event, Product, User } from "@prisma/client";
@@ -94,19 +95,51 @@ const regions = [
   "Žilinský",
 ];
 
-const productTemplates = [
-  { name: "Jahody", category: "Fruits" },
-  { name: "Mrkva", category: "Vegetables" },
-  { name: "Cibuľa", category: "Vegetables" },
-  { name: "Jablká", category: "Fruits" },
-  { name: "Hrášok", category: "Vegetables" },
-  { name: "Bazalka", category: "Other" },
-  { name: "Rozmarín", category: "Other" },
-  { name: "Hrušky", category: "Fruits" },
-  { name: "Paradajky", category: "Vegetables" },
-  { name: "Paprika", category: "Vegetables" },
-  { name: "Špenát", category: "Vegetables" },
+const farmNamePool = [
+  "Levanduľový dvor",
+  "Slnečný háj",
+  "Dubový statok",
+  "Bylinkový grúň",
+  "Potočný dvor",
+  "Horský sad",
+  "Dolina chutí",
+  "Modrý potok",
 ];
+
+const eventTitleTemplates = [
+  (city: string) => "Banskobystrický jarmok",
+  (city: string) => `Farmársky deň v ${city}`,
+  (city: string) => `Gurmánsky trh ${city}`,
+  (city: string) => `Festival úrody ${city}`,
+  (city: string) => `Remeselná sobota ${city}`,
+  (city: string) => `${city} trh regionálnych chutí`,
+  (city: string) => `Sezónny farmfest ${city}`,
+];
+
+type ProductTemplate = { name: string; category: ProductCategory };
+
+const productTemplates: ProductTemplate[] = [
+  { name: "Jahody", category: ProductCategory.Fruits },
+  { name: "Maliny", category: ProductCategory.Fruits },
+  { name: "Mrkva", category: ProductCategory.Vegetables },
+  { name: "Cibuľa", category: ProductCategory.Vegetables },
+  { name: "Jablká", category: ProductCategory.Fruits },
+  { name: "Hrášok", category: ProductCategory.Vegetables },
+  { name: "Bazalka", category: ProductCategory.Other },
+  { name: "Rozmarín", category: ProductCategory.Other },
+  { name: "Hrušky", category: ProductCategory.Fruits },
+  { name: "Paradajky", category: ProductCategory.Vegetables },
+  { name: "Paprika", category: ProductCategory.Vegetables },
+  { name: "Špenát", category: ProductCategory.Vegetables },
+  { name: "Kozí syr", category: ProductCategory.Dairy },
+  { name: "Med", category: ProductCategory.Other },
+];
+
+const pickFarmName = (city: string) =>
+  `${farmNamePool[randomInt(0, farmNamePool.length - 1)]} (${city})`;
+
+const pickEventTitle = (city: string) =>
+  eventTitleTemplates[randomInt(0, eventTitleTemplates.length - 1)](city);
 
 const reviewComments = [
   "Výborná kvalita a rýchle doručenie!",
@@ -289,7 +322,7 @@ async function main() {
 
     for (let j = 0; j < numFarms; j++) {
       const cityIndex = randomInt(0, cities.length - 1);
-      const farmName = `${cities[cityIndex]} Farma ${j + 1}`;
+      const farmName = pickFarmName(cities[cityIndex]);
 
       const farm = await prisma.farm.create({
         data: {
@@ -312,31 +345,30 @@ async function main() {
       );
 
       for (const template of chosenTemplates) {
+        const product = await prisma.product.create({
+          data: {
+            name: template.name,
+            category: template.category,
+            description: `Čerstvé ${template.name.toLowerCase()} z ${farm.name}.`,
+            basePrice: parseFloat((randomInt(100, 800) / 100).toFixed(2)),
+          },
+        });
+
         const farmProduct = await prisma.farmProduct.create({
           data: {
-            farm: { connect: { id: farm.id } },
+            farmId: farm.id,
             price: parseFloat((randomInt(150, 1200) / 100).toFixed(2)),
             stock: randomInt(5, 50),
-            product: {
-              create: {
-                name: `${template.name} z farmy ${farm.name}`,
-                category: template.category,
-                description: `Čerstvé ${template.name.toLowerCase()} z farmy ${
-                  farm.name
-                }.`,
-                basePrice: parseFloat((randomInt(100, 800) / 100).toFixed(2)),
-              },
-            },
+            productId: product.id,
           },
-          include: { product: true },
         });
 
         farmProductRecords.push({
           farmer,
-          product: farmProduct.product,
+          product,
           price: farmProduct.price,
         });
-        allProducts.push(farmProduct.product);
+        allProducts.push(product);
       }
     }
   }
@@ -353,9 +385,10 @@ async function main() {
       const endDate = new Date(startDate);
       endDate.setHours(endDate.getHours() + randomInt(4, 24));
 
+      const eventTitle = pickEventTitle(cities[cityIndex]);
       const event = await prisma.event.create({
         data: {
-          title: `Farmársky deň ${i + 1} - ${farmer.name.split(" ")[0]}`,
+          title: eventTitle,
           description: "Udalosť pre farmárov a priateľov farmy.",
           startDate,
           endDate,
@@ -397,28 +430,29 @@ async function main() {
       for (const template of chosenTemplates) {
         const seller =
           participants[randomInt(0, participants.length - 1)] ?? farmer;
+        const product = await prisma.product.create({
+          data: {
+            name: template.name,
+            category: template.category,
+            description: `Produkt predávaný počas ${event.title}.`,
+            basePrice: parseFloat((randomInt(100, 800) / 100).toFixed(2)),
+          },
+        });
+
         const eventProduct = await prisma.eventProduct.create({
           data: {
-            event: { connect: { id: event.id } },
-            user: { connect: { id: seller.id } },
-            product: {
-              create: {
-                name: `${template.name} (${event.title})`,
-                category: template.category,
-                description: `Produkt predávaný počas ${event.title}.`,
-                basePrice: parseFloat((randomInt(100, 800) / 100).toFixed(2)),
-              },
-            },
+            eventId: event.id,
+            userId: seller.id,
+            productId: product.id,
           },
-          include: { product: true },
         });
 
         eventProductRecords.push({
           event,
           seller,
-          product: eventProduct.product,
+          product,
         });
-        allProducts.push(eventProduct.product);
+        allProducts.push(product);
       }
 
       eventsData.push({ event, participants });
