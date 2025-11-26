@@ -3,6 +3,7 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma.ts";
 import { sendEmail } from "../utils/sendEmails.ts";
+import { buildResetPasswordEmail } from "../emailTemplates/resetPasswordTemplate.ts";
 import type { User } from "@prisma/client";
 import { validateRequest } from "../middleware/validateRequest.ts";
 import { loginSchema, registerSchema } from "../schemas/authSchemas.ts";
@@ -183,25 +184,10 @@ router.post("/forgot-password", async (req, res) => {
   });
 
   const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
-
-  const html = `
-    <h2>Resetovanie hesla</h2>
-    <p>Klikni na tento odkaz pre obnovenie hesla (platný 15 minút):</p>
-    <a href="${resetLink}" target="_blank">${resetLink}</a>
-    <p>Ak si o reset nežiadal, ignoruj tento email.</p>
-    <br>
-    <h2>Password reset</h2>
-    <p>Click this link to reset your password (valid for 15 minutes):</p>
-    <a href="${resetLink}" target="_blank">${resetLink}</a>
-    <p>If you did not request a reset, please ignore this email.</p>
-  `;
+  const { subject, html } = buildResetPasswordEmail(resetLink);
 
   try {
-    await sendEmail(
-      user.email,
-      "Resetovanie hesla(Password reset) - Farmly",
-      html
-    );
+    await sendEmail(user.email, subject, html);
     res.json({ message: "Password reset email sent" });
   } catch (error) {
     console.error(error);
