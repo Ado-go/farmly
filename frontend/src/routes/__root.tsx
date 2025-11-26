@@ -1,4 +1,9 @@
-import { Outlet, Link, useNavigate } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { createRootRoute } from "@tanstack/react-router";
 import { useAuth } from "../context/AuthContext";
 import LogoutButton from "../components/LogoutButton";
@@ -24,14 +29,25 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function RootLayout() {
   const { user } = useAuth();
   const { t } = useTranslation();
   const { cart, totalPrice } = useCart();
   const navigate = useNavigate();
+  const { location } = useRouterState();
   const [isCartMenuOpen, setIsCartMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const hasCustomTitle = ["/products", "/events", "/offers", "/farms"].some(
+      (path) => location.pathname.startsWith(path)
+    );
+
+    if (!hasCustomTitle) {
+      document.title = t("farmly");
+    }
+  }, [location.pathname, t]);
 
   const handleGoToCart = () => {
     setIsCartMenuOpen(false);
