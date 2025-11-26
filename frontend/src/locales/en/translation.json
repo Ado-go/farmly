@@ -15,6 +15,18 @@
   "events": "Events",
   "offers": "Offers",
   "my_offers": "My offers",
+  "footer": {
+    "tagline": "Fresh food directly from farmers to your city.",
+    "contact": "Contact",
+    "address": "Bratislava, Slovakia",
+    "phone": "+421 123 456 789",
+    "email": "support@example.sk",
+    "links": "Browse",
+    "supportTitle": "Support",
+    "hours": "Mon–Fri 8:00–18:00",
+    "responseTime": "We reply within one business day.",
+    "copyright": "© {{year}} Farmly. All rights reserved."
+  },
   "loginPage": {
     "title": "Login",
     "subtitle": "Enter your login credentials",

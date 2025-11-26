@@ -15,6 +15,18 @@
   "events": "Udalosti",
   "offers": "Ponuky",
   "my_offers": "Moje ponuky",
+  "footer": {
+    "tagline": "Čerstvé potraviny priamo od farmárov do tvojho mesta.",
+    "contact": "Kontakt",
+    "address": "Bratislava, Slovensko",
+    "phone": "+421 123 456 789",
+    "email": "support@example.sk",
+    "links": "Prehľadávaj",
+    "supportTitle": "Podpora",
+    "hours": "Po–Pi 8:00–18:00",
+    "responseTime": "Odpovieme do jedného pracovného dňa.",
+    "copyright": "© {{year}} Farmly. Všetky práva vyhradené."
+  },
   "loginPage": {
     "title": "Prihlásenie",
     "subtitle": "Zadaj svoje prihlasovacie údaje",

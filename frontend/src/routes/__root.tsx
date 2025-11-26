@@ -13,7 +13,15 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { User, ShoppingCart } from "lucide-react";
+import {
+  User,
+  ShoppingCart,
+  Leaf,
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+} from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useState } from "react";
@@ -166,7 +174,86 @@ function RootLayout() {
       <main className="flex-1">
         <Outlet />
       </main>
+
+      <Footer />
     </div>
+  );
+}
+
+function Footer() {
+  const { t } = useTranslation();
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <footer className="border-t bg-muted/30 text-sm">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-lg font-semibold">
+            <Leaf className="h-5 w-5 text-primary" />
+            <span>{t("farmly")}</span>
+          </div>
+          <p className="text-muted-foreground">{t("footer.tagline")}</p>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="flex items-center gap-2 text-base font-semibold">
+            <MapPin className="h-4 w-4" />
+            {t("footer.contact")}
+          </h3>
+          <div className="space-y-2 text-muted-foreground">
+            <p>{t("footer.address")}</p>
+            <a
+              href="tel:+421800123456"
+              className="flex items-center gap-2 hover:text-foreground"
+            >
+              <Phone className="h-4 w-4" />
+              <span>{t("footer.phone")}</span>
+            </a>
+            <a
+              href="mailto:podpora@farmly.sk"
+              className="flex items-center gap-2 hover:text-foreground"
+            >
+              <Mail className="h-4 w-4" />
+              <span>{t("footer.email")}</span>
+            </a>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="text-base font-semibold">{t("footer.links")}</h3>
+          <div className="flex flex-col gap-2 text-muted-foreground">
+            <Link to="/products" className="hover:text-foreground">
+              {t("products")}
+            </Link>
+            <Link to="/events" className="hover:text-foreground">
+              {t("events")}
+            </Link>
+            <Link to="/offers" className="hover:text-foreground">
+              {t("offers")}
+            </Link>
+            <Link to="/farms" className="hover:text-foreground">
+              {t("farms")}
+            </Link>
+            <Link to="/cart" className="hover:text-foreground">
+              {t("cart.open")}
+            </Link>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="flex items-center gap-2 text-base font-semibold">
+            <Clock className="h-4 w-4" />
+            {t("footer.supportTitle")}
+          </h3>
+          <p className="text-muted-foreground">{t("footer.hours")}</p>
+          <p className="text-muted-foreground">{t("footer.responseTime")}</p>
+        </div>
+      </div>
+
+      <div className="border-t px-4 py-4 text-center text-xs text-muted-foreground">
+        {t("footer.copyright", { year: currentYear })}
+      </div>
+    </footer>
   );
 }
 
