@@ -48,6 +48,7 @@ router.post(
       const product = await prisma.product.create({
         data: {
           ...productData,
+          basePrice: price,
           images: images
             ? {
                 create: images.map(
