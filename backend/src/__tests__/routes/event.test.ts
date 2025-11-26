@@ -1,6 +1,6 @@
 import request from "supertest";
-import app from "../../index";
-import prisma from "../../prisma";
+import app from "../../index.ts";
+import prisma from "../../prisma.ts";
 import jwt from "jsonwebtoken";
 
 let FARMER_ID: number;

@@ -1,8 +1,8 @@
 process.env.NODE_ENV = "test";
 
 import request from "supertest";
-import app from "../../index";
-import prisma from "../../prisma";
+import app from "../../index.ts";
+import prisma from "../../prisma.ts";
 
 let farmerId: number;
 let farm1Id: number;

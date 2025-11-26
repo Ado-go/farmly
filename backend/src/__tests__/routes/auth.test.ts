@@ -35,11 +35,11 @@ describe("Auth routes", () => {
   };
 
   beforeAll(async () => {
-    const routerModule = await import("../../../src/routes/auth");
+    const routerModule = await import("../../../src/routes/auth.ts");
     const router = routerModule.default;
 
-    prisma = (await import("../../prisma")).default;
-    sendEmail = (await import("../../../src/utils/sendEmails")).sendEmail;
+    prisma = (await import("../../prisma.ts")).default;
+    sendEmail = (await import("../../../src/utils/sendEmails.ts")).sendEmail;
 
     app = express();
     app.use(express.json());
@@ -63,14 +63,16 @@ describe("Auth routes", () => {
       ...baseAddress,
     });
 
-    const res = await request(app).post("/auth/register").send({
-      email: "test@test.com",
-      name: "John Johnson",
-      phone: "+421940123456",
-      password: "123456",
-      role: "FARMER",
-      ...baseAddress,
-    });
+    const res = await request(app)
+      .post("/auth/register")
+      .send({
+        email: "test@test.com",
+        name: "John Johnson",
+        phone: "+421940123456",
+        password: "123456",
+        role: "FARMER",
+        ...baseAddress,
+      });
 
     expect(res.status).toBe(200);
     expect(res.body.user).toMatchObject({
@@ -95,14 +97,16 @@ describe("Auth routes", () => {
   test("POST /auth/register - user already exists returns 400", async () => {
     prisma.user.findUnique.mockResolvedValue({ id: 1, email: "test@test.com" });
 
-    const res = await request(app).post("/auth/register").send({
-      email: "test@test.com",
-      password: "123456",
-      role: "FARMER",
-      name: "John",
-      phone: "+421900000000",
-      ...baseAddress,
-    });
+    const res = await request(app)
+      .post("/auth/register")
+      .send({
+        email: "test@test.com",
+        password: "123456",
+        role: "FARMER",
+        name: "John",
+        phone: "+421900000000",
+        ...baseAddress,
+      });
 
     expect(res.status).toBe(400);
     expect(res.body.message).toBe("User already exists");

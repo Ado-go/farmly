@@ -1,6 +1,6 @@
 import request from "supertest";
-import app from "../../index";
-import prisma from "../../prisma";
+import app from "../../index.ts";
+import prisma from "../../prisma.ts";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 

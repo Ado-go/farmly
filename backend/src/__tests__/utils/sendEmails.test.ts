@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { sendEmail } from "../../utils/sendEmails";
+import { sendEmail } from "../../utils/sendEmails.ts";
 
 jest.mock("nodemailer");
 

@@ -1,4 +1,4 @@
-import { validateRequest } from "../../middleware/validateRequest";
+import { validateRequest } from "../../middleware/validateRequest.ts";
 import { z } from "zod";
 
 describe("validateRequest middleware", () => {

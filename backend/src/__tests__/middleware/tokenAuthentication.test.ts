@@ -2,7 +2,7 @@ import {
   authenticateToken,
   authorizeRole,
   AuthRequest,
-} from "../../middleware/auth";
+} from "../../middleware/auth.ts";
 import jwt from "jsonwebtoken";
 
 jest.mock("jsonwebtoken");
