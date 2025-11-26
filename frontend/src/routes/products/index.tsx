@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { ProductCard } from "@/components/ProductCard";
@@ -27,6 +28,9 @@ type FarmProduct = {
 
 function ProductsPage() {
   const { t } = useTranslation();
+  useEffect(() => {
+    document.title = `${t("products")} | ${t("farmly")}`;
+  }, [t]);
 
   const {
     data: farmProducts = [],

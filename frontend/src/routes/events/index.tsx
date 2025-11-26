@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
@@ -35,6 +36,9 @@ type Event = {
 
 function EventsPage() {
   const { t } = useTranslation();
+  useEffect(() => {
+    document.title = `${t("events")} | ${t("farmly")}`;
+  }, [t]);
 
   const {
     data: events = [],

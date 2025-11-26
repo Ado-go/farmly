@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
@@ -31,6 +32,9 @@ type Offer = {
 
 function OffersAllPage() {
   const { t } = useTranslation();
+  useEffect(() => {
+    document.title = `${t("offers")} | ${t("farmly")}`;
+  }, [t]);
 
   const {
     data: offers = [],
