@@ -156,16 +156,6 @@ button {
   cursor: pointer;
 }
 
-#mainMenu a {
-  font-weight: 500;
-  color: oklch(0.78 0.15 145);
-  text-decoration: none;
-}
-
-#mainMenu a:hover {
-  color: oklch(0.83 0.15 85);
-}
-
 h1 {
   font-size: 3.2em;
   line-height: 1.1;

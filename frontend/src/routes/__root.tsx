@@ -21,6 +21,7 @@ import {
 import {
   User,
   ShoppingCart,
+  Menu,
   Leaf,
   MapPin,
   Phone,
@@ -53,27 +54,57 @@ function RootLayout() {
     setIsCartMenuOpen(false);
     navigate({ to: "/cart" });
   };
+  const homeLink = { to: "/", label: t("farmly") };
+  const navLinks = [
+    { to: "/products", label: t("products") },
+    { to: "/events", label: t("events") },
+    { to: "/offers", label: t("offers") },
+    { to: "/farms", label: t("farms") },
+  ];
 
   return (
     <div className="flex flex-col min-h-screen">
-      <nav className="flex items-center justify-between p-4 border-b bg-foreground">
-        {/* LEFT LINKS */}
-        <div id="mainMenu" className="flex items-center gap-4">
-          <Link to="/" className="font-semibold text-lg">
-            {t("farmly")}
-          </Link>
-          <Link to="/products" className="font-semibold text-lg">
-            {t("products")}
-          </Link>
-          <Link to="/events" className="font-semibold text-lg">
-            {t("events")}
-          </Link>
-          <Link to="/offers" className="font-semibold text-lg">
-            {t("offers")}
-          </Link>
-          <Link to="/farms" className="font-semibold text-lg">
-            {t("farms")}
-          </Link>
+      <nav className="flex items-center justify-between px-4 py-3 border-b bg-foreground">
+        {/* LEFT SIDE */}
+        <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-4">
+            <Link
+              to={homeLink.to}
+              className="font-semibold text-lg text-primary hover:text-secondary"
+            >
+              {homeLink.label}
+            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="font-semibold text-lg text-primary hover:text-secondary"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="start" className="w-56">
+              {[homeLink, ...navLinks].map((link) => (
+                <DropdownMenuItem key={link.to} asChild>
+                  <Link to={link.to}>{link.label}</Link>
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <div className="flex items-center justify-between gap-2 px-2 py-1">
+                <ModeToggle />
+                <LanguageToggle />
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* RIGHT SIDE */}
@@ -122,8 +153,10 @@ function RootLayout() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <ModeToggle />
-          <LanguageToggle />
+          <div className="hidden md:flex items-center gap-2">
+            <ModeToggle />
+            <LanguageToggle />
+          </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
