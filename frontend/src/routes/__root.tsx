@@ -50,6 +50,10 @@ function RootLayout() {
     }
   }, [location.pathname, t]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [location.pathname]);
+
   const handleGoToCart = () => {
     setIsCartMenuOpen(false);
     navigate({ to: "/cart" });
@@ -64,7 +68,7 @@ function RootLayout() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <nav className="flex items-center justify-between px-4 py-3 border-b bg-foreground">
+      <nav className="sticky top-0 z-40 flex items-center justify-between px-4 py-3 border-b bg-foreground shadow-sm">
         {/* LEFT SIDE */}
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-4">
@@ -282,9 +286,6 @@ function Footer() {
             </Link>
             <Link to="/farms" className="hover:text-foreground">
               {t("farms")}
-            </Link>
-            <Link to="/cart" className="hover:text-foreground">
-              {t("cart.open")}
             </Link>
           </div>
         </div>
