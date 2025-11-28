@@ -21,6 +21,7 @@ function CheckoutPreorderPage() {
   const { cart, totalPrice, eventId, clearCart } = useCart();
   const [contactName, setContactName] = useState(user?.name ?? "");
   const [contactPhone, setContactPhone] = useState(user?.phone ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
   const [submitting, setSubmitting] = useState(false);
 
   const { data: event } = useQuery({
@@ -33,6 +34,7 @@ function CheckoutPreorderPage() {
     if (user) {
       setContactName((prev) => (prev ? prev : user.name ?? ""));
       setContactPhone((prev) => (prev ? prev : user.phone ?? ""));
+      setEmail((prev) => (prev ? prev : user.email ?? ""));
     }
   }, [user]);
 
@@ -49,6 +51,14 @@ function CheckoutPreorderPage() {
       toast.error(t("checkoutPreoderPage.contactPhoneInvalid"));
       return;
     }
+    if (!email.trim()) {
+      toast.error(t("checkoutPreoderPage.contactEmailRequired"));
+      return;
+    }
+    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email.trim())) {
+      toast.error(t("checkoutPreoderPage.contactEmailInvalid"));
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -59,7 +69,7 @@ function CheckoutPreorderPage() {
           cartItems: cart,
           userInfo: {
             buyerId: user?.id,
-            email: user?.email,
+            email: email.trim(),
             contactName,
             contactPhone: contactPhone.trim(),
           },
@@ -102,6 +112,12 @@ function CheckoutPreorderPage() {
               placeholder={t("checkoutPreoderPage.phone")}
               value={contactPhone}
               onChange={(e) => setContactPhone(e.target.value)}
+            />
+            <Input
+              type="email"
+              placeholder={t("checkoutPreoderPage.email")}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 

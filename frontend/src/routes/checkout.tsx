@@ -70,13 +70,13 @@ function CheckoutPage() {
     defaultValues: {
       contactName: user?.name ?? "",
       contactPhone: user?.phone ?? "",
-      email: "",
+      email: user?.email ?? "",
       deliveryOption: "ADDRESS",
-      deliveryCity: "",
-      deliveryStreet: "",
+      deliveryCity: user?.city ?? "",
+      deliveryStreet: user?.address ?? "",
       deliveryRegion: "",
-      deliveryPostalCode: "",
-      deliveryCountry: "",
+      deliveryPostalCode: user?.postalCode ?? "",
+      deliveryCountry: user?.country ?? "",
     },
   });
 
@@ -114,6 +114,18 @@ function CheckoutPage() {
       }
       if (!addressForm.getValues("email")) {
         addressForm.setValue("email", user.email ?? "");
+      }
+      if (!addressForm.getValues("deliveryStreet")) {
+        addressForm.setValue("deliveryStreet", user.address ?? "");
+      }
+      if (!addressForm.getValues("deliveryCity")) {
+        addressForm.setValue("deliveryCity", user.city ?? "");
+      }
+      if (!addressForm.getValues("deliveryPostalCode")) {
+        addressForm.setValue("deliveryPostalCode", user.postalCode ?? "");
+      }
+      if (!addressForm.getValues("deliveryCountry")) {
+        addressForm.setValue("deliveryCountry", user.country ?? "");
       }
     }
   }, [user, addressForm]);
@@ -193,11 +205,11 @@ function CheckoutPage() {
     } else {
       addressForm.reset({
         ...addressForm.getValues(),
-        deliveryCity: "",
-        deliveryStreet: "",
+        deliveryCity: user?.city ?? "",
+        deliveryStreet: user?.address ?? "",
         deliveryRegion: "",
-        deliveryPostalCode: "",
-        deliveryCountry: "",
+        deliveryPostalCode: user?.postalCode ?? "",
+        deliveryCountry: user?.country ?? "",
       });
     }
   };

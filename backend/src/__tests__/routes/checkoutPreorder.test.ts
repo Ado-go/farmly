@@ -89,7 +89,7 @@ describe("Preorder Checkout Routes", () => {
           buyerId: CUSTOMER_ID,
           contactName: "Customer 2",
           contactPhone: "+421900000333",
-          email: null,
+          email: "customer2@test.com",
         },
         eventId: EVENT_ID,
       });
@@ -158,11 +158,7 @@ describe("Preorder Checkout Routes", () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body.error).toBe("Invalid request data");
-    expect(
-      res.body.details.some((d: any) =>
-        d.message.includes("Either buyerId or email")
-      )
-    ).toBe(true);
+    expect(res.body.details.some((d: any) => String(d.path).includes("email"))).toBe(true);
   });
 
   it("POST /checkout-preorder - should fail if eventId is missing", async () => {

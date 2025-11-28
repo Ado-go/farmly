@@ -27,7 +27,7 @@ router.post("/", validateRequest(preorderSchema), async (req, res) => {
         eventId,
         orderType: "PREORDER",
         buyerId: userInfo.buyerId || null,
-        anonymousEmail: userInfo.buyerId ? null : userInfo.email,
+        anonymousEmail: userInfo.email,
         contactName: userInfo.contactName,
         contactPhone: userInfo.contactPhone,
         paymentMethod: "CASH",
