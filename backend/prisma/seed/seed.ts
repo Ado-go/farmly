@@ -199,6 +199,8 @@ async function createOrderWithItems({
     data: {
       buyerId: buyer.id,
       orderType,
+      contactName: buyer.name,
+      contactPhone: buyer.phone ?? "+421900000000",
       deliveryCity: address.city,
       deliveryStreet: address.street,
       deliveryRegion: address.region,

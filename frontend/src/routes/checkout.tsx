@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -32,6 +32,11 @@ export const Route = createFileRoute("/checkout")({
 });
 
 const addressSchema = z.object({
+  contactName: z.string().min(2, "Name is required"),
+  contactPhone: z
+    .string()
+    .min(6, "Phone number must have at least 6 digits")
+    .regex(/^\+?\d{6,15}$/, "Enter a valid phone number"),
   email: z.string().email(),
   deliveryOption: z.enum(["ADDRESS", "PICKUP"]),
   deliveryCity: z.string().min(2, "City required"),
@@ -63,6 +68,8 @@ function CheckoutPage() {
   const addressForm = useForm<AddressData>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
+      contactName: user?.name ?? "",
+      contactPhone: user?.phone ?? "",
       email: "",
       deliveryOption: "ADDRESS",
       deliveryCity: "",
@@ -97,6 +104,20 @@ function CheckoutPage() {
     paymentForm.reset();
   };
 
+  useEffect(() => {
+    if (user) {
+      if (!addressForm.getValues("contactName")) {
+        addressForm.setValue("contactName", user.name ?? "");
+      }
+      if (!addressForm.getValues("contactPhone")) {
+        addressForm.setValue("contactPhone", user.phone ?? "");
+      }
+      if (!addressForm.getValues("email")) {
+        addressForm.setValue("email", user.email ?? "");
+      }
+    }
+  }, [user, addressForm]);
+
   const handleConfirmOrder = async () => {
     if (!addressData || !paymentData) return;
 
@@ -105,6 +126,8 @@ function CheckoutPage() {
         cartItems: cart,
         userInfo: {
           buyerId: user?.id,
+          contactName: addressData.contactName,
+          contactPhone: addressData.contactPhone,
           email: addressData.email,
           deliveryCity: addressData.deliveryCity,
           deliveryStreet: addressData.deliveryStreet || "-",
@@ -201,6 +224,14 @@ function CheckoutPage() {
               onSubmit={addressForm.handleSubmit(handleAddressSubmit)}
               className="space-y-3"
             >
+              <Input
+                placeholder={t("checkoutPage.name")}
+                {...addressForm.register("contactName")}
+              />
+              <Input
+                placeholder={t("checkoutPage.phone")}
+                {...addressForm.register("contactPhone")}
+              />
               <Input
                 type="email"
                 placeholder={t("checkoutPage.email")}
@@ -316,6 +347,14 @@ function CheckoutPage() {
             </h2>
 
             <div className="space-y-2 text-sm text-gray-700">
+              <p>
+                <strong>{t("checkoutPage.name")}:</strong>{" "}
+                {addressData?.contactName}
+              </p>
+              <p>
+                <strong>{t("checkoutPage.phone")}:</strong>{" "}
+                {addressData?.contactPhone}
+              </p>
               <p>
                 <strong>{t("checkoutPage.email")}:</strong> {addressData?.email}
               </p>

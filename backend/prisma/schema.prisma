@@ -184,6 +184,8 @@ model Order {
   buyer              User?         @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
   buyerId            Int?
   anonymousEmail     String?
+  contactName        String
+  contactPhone       String
 
   orderType          OrderType    @default(STANDARD)
 

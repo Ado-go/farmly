@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { apiFetch } from "@/lib/api";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "react-i18next";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/checkout-preorder")({
   component: CheckoutPreorderPage,
@@ -17,6 +19,9 @@ function CheckoutPreorderPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { cart, totalPrice, eventId, clearCart } = useCart();
+  const [contactName, setContactName] = useState(user?.name ?? "");
+  const [contactPhone, setContactPhone] = useState(user?.phone ?? "");
+  const [submitting, setSubmitting] = useState(false);
 
   const { data: event } = useQuery({
     queryKey: ["event", eventId],
@@ -24,8 +29,29 @@ function CheckoutPreorderPage() {
     enabled: !!eventId,
   });
 
+  useEffect(() => {
+    if (user) {
+      setContactName((prev) => (prev ? prev : user.name ?? ""));
+      setContactPhone((prev) => (prev ? prev : user.phone ?? ""));
+    }
+  }, [user]);
+
   const handleConfirm = async () => {
+    if (!contactName.trim()) {
+      toast.error(t("checkoutPreoderPage.contactNameRequired"));
+      return;
+    }
+    if (!contactPhone.trim()) {
+      toast.error(t("checkoutPreoderPage.contactPhoneRequired"));
+      return;
+    }
+    if (!/^\+?\d{6,15}$/.test(contactPhone.trim())) {
+      toast.error(t("checkoutPreoderPage.contactPhoneInvalid"));
+      return;
+    }
+
     try {
+      setSubmitting(true);
       await apiFetch("/checkout-preorder", {
         method: "POST",
         body: JSON.stringify({
@@ -34,6 +60,8 @@ function CheckoutPreorderPage() {
           userInfo: {
             buyerId: user?.id,
             email: user?.email,
+            contactName,
+            contactPhone: contactPhone.trim(),
           },
         }),
       });
@@ -42,6 +70,8 @@ function CheckoutPreorderPage() {
       clearCart();
     } catch {
       toast.error(t("checkoutPreoderPage.error"));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -61,6 +91,19 @@ function CheckoutPreorderPage() {
           <h2 className="text-xl font-semibold mb-4">
             {t("checkoutPreoderPage.title")}
           </h2>
+
+          <div className="space-y-3">
+            <Input
+              placeholder={t("checkoutPreoderPage.name")}
+              value={contactName}
+              onChange={(e) => setContactName(e.target.value)}
+            />
+            <Input
+              placeholder={t("checkoutPreoderPage.phone")}
+              value={contactPhone}
+              onChange={(e) => setContactPhone(e.target.value)}
+            />
+          </div>
 
           <p>
             <strong>{t("checkoutPreoderPage.pickupLocation")}:</strong>
@@ -92,7 +135,7 @@ function CheckoutPreorderPage() {
           </p>
 
           <div className="flex justify-end pt-4">
-            <Button onClick={handleConfirm}>
+            <Button onClick={handleConfirm} disabled={submitting}>
               {t("checkoutPreoderPage.confirm")}
             </Button>
           </div>

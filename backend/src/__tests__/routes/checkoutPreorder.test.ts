@@ -87,6 +87,8 @@ describe("Preorder Checkout Routes", () => {
         ],
         userInfo: {
           buyerId: CUSTOMER_ID,
+          contactName: "Customer 2",
+          contactPhone: "+421900000333",
           email: null,
         },
         eventId: EVENT_ID,
@@ -102,7 +104,11 @@ describe("Preorder Checkout Routes", () => {
       .post("/api/checkout-preorder")
       .send({
         cartItems: [],
-        userInfo: { email: "test@test.com" },
+        userInfo: {
+          email: "test@test.com",
+          contactName: "Tester",
+          contactPhone: "+421900000123",
+        },
         eventId: EVENT_ID,
       });
 
@@ -138,6 +144,8 @@ describe("Preorder Checkout Routes", () => {
           },
         ],
         userInfo: {
+          contactName: "Tester",
+          contactPhone: "+421900000123",
           deliveryCity: "Trnava",
           deliveryStreet: "No Name 3",
           deliveryRegion: "Trnavský",
@@ -170,7 +178,11 @@ describe("Preorder Checkout Routes", () => {
             sellerName: "Farmer A",
           },
         ],
-        userInfo: { email: "abc@test.com" },
+        userInfo: {
+          email: "abc@test.com",
+          contactName: "Tester",
+          contactPhone: "+421900000123",
+        },
       });
 
     expect(res.statusCode).toBe(400);

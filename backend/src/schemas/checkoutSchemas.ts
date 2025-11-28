@@ -17,6 +17,11 @@ export const checkoutSchema = z.object({
     .object({
       buyerId: z.number().int().positive().optional(),
       email: z.string().email("Invalid email address").optional(),
+      contactName: z.string().min(2, "Name must be at least 2 characters"),
+      contactPhone: z
+        .string()
+        .min(6, "Phone must have at least 6 digits")
+        .regex(/^\+?\d{6,15}$/, "Phone must contain only digits and optional +"),
 
       deliveryCity: z.string().min(2).max(100),
       deliveryStreet: z.string().min(2).max(150),

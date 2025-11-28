@@ -418,6 +418,8 @@
   },
   "checkoutPage": {
     "title": "Checkout",
+    "name": "Full name",
+    "phone": "Phone number",
     "deliveryStep": "Delivery",
     "paymentStep": "Payment",
     "summaryStep": "Summary",
@@ -527,6 +529,11 @@
   "checkoutPreoderPage": {
     "emptyCart": "Your cart is empty.",
     "title": "Preorder",
+    "name": "Full name",
+    "phone": "Phone number",
+    "contactNameRequired": "Please enter your name.",
+    "contactPhoneRequired": "Please enter your phone number.",
+    "contactPhoneInvalid": "Enter a valid phone number.",
     "pickupLocation": "Pickup location",
     "products": "Products",
     "total": "Total",

@@ -139,6 +139,8 @@ describe("Checkout Routes", () => {
         ],
         userInfo: {
           buyerId: CUSTOMER_ID,
+          contactName: "Customer",
+          contactPhone: "+421900000003",
           deliveryCity: "Bratislava",
           deliveryStreet: "Main 1",
           deliveryRegion: "Bratislavský",
@@ -191,6 +193,8 @@ describe("Checkout Routes", () => {
     const order = await prisma.order.create({
       data: {
         buyerId: CUSTOMER_ID,
+        contactName: "Customer",
+        contactPhone: "+421900000003",
         deliveryCity: "Nitra",
         deliveryStreet: "Short 3",
         deliveryRegion: "Nitriansky",
@@ -246,6 +250,8 @@ describe("Checkout Routes", () => {
     const order = await prisma.order.create({
       data: {
         buyerId: CUSTOMER_ID,
+        contactName: "Customer",
+        contactPhone: "+421900000003",
         deliveryCity: "Nitra",
         deliveryStreet: "Short 7",
         deliveryRegion: "Nitriansky",
@@ -279,6 +285,8 @@ describe("Checkout Routes", () => {
     const order = await prisma.order.create({
       data: {
         buyerId: CUSTOMER_ID,
+        contactName: "Customer",
+        contactPhone: "+421900000003",
         deliveryCity: "Košice",
         deliveryStreet: "Main 5",
         deliveryRegion: "Košický",
@@ -326,6 +334,8 @@ describe("Checkout Routes", () => {
     const order = await prisma.order.create({
       data: {
         buyerId: CUSTOMER_ID,
+        contactName: "Customer",
+        contactPhone: "+421900000003",
         deliveryCity: "Prešov",
         deliveryStreet: "East 2",
         deliveryRegion: "Prešovský",

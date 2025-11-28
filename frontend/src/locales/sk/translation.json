@@ -418,6 +418,8 @@
   },
   "checkoutPage": {
     "title": "Pokladňa",
+    "name": "Meno a priezvisko",
+    "phone": "Telefónne číslo",
     "deliveryStep": "Doručenie",
     "paymentStep": "Platba",
     "summaryStep": "Prehľad",
@@ -527,6 +529,11 @@
   "checkoutPreoderPage": {
     "emptyCart": "Váš košík je prázdny.",
     "title": "Predobjednávka",
+    "name": "Meno a priezvisko",
+    "phone": "Telefónne číslo",
+    "contactNameRequired": "Zadajte prosím svoje meno.",
+    "contactPhoneRequired": "Zadajte prosím telefónne číslo.",
+    "contactPhoneInvalid": "Zadajte platné telefónne číslo.",
     "pickupLocation": "Miesto prevzatia",
     "products": "Produkty",
     "total": "Celkom",

@@ -22,6 +22,8 @@ router.post("/", validateRequest(checkoutSchema), async (req, res) => {
     const {
       buyerId,
       email,
+      contactName,
+      contactPhone,
       deliveryCity,
       deliveryStreet,
       deliveryRegion,
@@ -40,6 +42,8 @@ router.post("/", validateRequest(checkoutSchema), async (req, res) => {
         buyerId: buyerId || null,
         anonymousEmail: buyerId ? null : email,
         orderType: "STANDARD",
+        contactName,
+        contactPhone,
 
         deliveryCity,
         deliveryStreet,
