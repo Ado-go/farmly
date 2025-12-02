@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/index.ts",
-    "start:prod": "prisma migrate deploy && tsx src/index.ts",
+    "start:prod": "prisma migrate deploy && prisma generate && tsx src/index.ts",
     "test": "jest --detectOpenHandles --runInBand",
     "prisma:seed": "ts-node prisma/seed/seed.ts",
     "prisma:clear": "ts-node prisma/seed/clear.ts"
