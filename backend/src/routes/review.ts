@@ -9,6 +9,18 @@ import {
 
 const router = Router();
 
+const recomputeProductRating = async (productId: number) => {
+  const agg = await prisma.review.aggregate({
+    where: { productId },
+    _avg: { rating: true },
+  });
+
+  await prisma.product.update({
+    where: { id: productId },
+    data: { rating: agg._avg.rating ?? 0 },
+  });
+};
+
 // GET /review
 router.get("/", async (req, res) => {
   try {
@@ -67,6 +79,8 @@ router.post(
         },
       });
 
+      await recomputeProductRating(Number(productId));
+
       res.status(201).json(review);
     } catch (error) {
       console.error(error);
@@ -97,6 +111,8 @@ router.put(
         data: { rating, comment },
       });
 
+      await recomputeProductRating(existing.productId);
+
       res.json(updated);
     } catch (error) {
       console.error(error);
@@ -117,6 +133,7 @@ router.delete("/:id", authenticateToken, async (req: any, res) => {
       return res.status(403).json({ error: "Not authorized" });
 
     await prisma.review.delete({ where: { id } });
+    await recomputeProductRating(review.productId);
 
     res.json({ message: "Review deleted" });
   } catch (error) {

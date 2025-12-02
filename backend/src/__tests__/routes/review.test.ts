@@ -120,6 +120,11 @@ describe("Review Routes", () => {
     expect(res.body).toHaveProperty("id");
     expect(res.body.rating).toBe(4);
     reviewId = res.body.id;
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+    expect(product?.rating).toBeCloseTo(4);
   });
 
   it("GET /review/product/:productId - should get reviews for product", async () => {
@@ -143,6 +148,11 @@ describe("Review Routes", () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.rating).toBe(5);
     expect(res.body.comment).toBe("Updated comment");
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+    expect(product?.rating).toBeCloseTo(5);
   });
 
   it("PUT /review/:id - should fail for other user", async () => {
@@ -165,6 +175,11 @@ describe("Review Routes", () => {
 
     const check = await prisma.review.findUnique({ where: { id: reviewId } });
     expect(check).toBeNull();
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+    expect(product?.rating).toBe(0);
   });
 
   it("POST /review - should fail without token", async () => {

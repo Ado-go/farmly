@@ -149,6 +149,18 @@ const reviewComments = [
   "Skvelá skúsenosť, odporúčam!",
 ];
 
+const recomputeProductRating = async (productId: number) => {
+  const agg = await prisma.review.aggregate({
+    where: { productId },
+    _avg: { rating: true },
+  });
+
+  await prisma.product.update({
+    where: { id: productId },
+    data: { rating: agg._avg.rating ?? 0 },
+  });
+};
+
 // ------------------ CLEAR DATABASE ------------------
 async function clearDatabase() {
   console.log("🧹 Clearing database...");
@@ -545,8 +557,10 @@ async function main() {
 
   // ------------------ REVIEWS ------------------
   console.log("⭐ Creating reviews...");
+  const productsWithReviews = new Set<number>();
   for (const prod of allProducts) {
-    for (let i = 0; i < randomInt(1, 3); i++) {
+    const reviewCount = randomInt(1, 3);
+    for (let i = 0; i < reviewCount; i++) {
       const reviewer = customers[randomInt(0, customers.length - 1)];
       await prisma.review.create({
         data: {
@@ -556,8 +570,16 @@ async function main() {
           productId: prod.id,
         },
       });
+      productsWithReviews.add(prod.id);
     }
   }
+
+  // Recompute stored rating for products that received reviews
+  await Promise.all(
+    Array.from(productsWithReviews).map((productId) =>
+      recomputeProductRating(productId)
+    )
+  );
 
   console.log("🌾 Seeding complete!");
 }

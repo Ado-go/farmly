@@ -8,14 +8,6 @@ import {
 
 const router = Router();
 
-const calculateAverageRating = (
-  reviews: { rating: number }[] = []
-): number | null => {
-  if (!reviews.length) return null;
-  const total = reviews.reduce((sum, review) => sum + (review.rating || 0), 0);
-  return Number((total / reviews.length).toFixed(2));
-};
-
 const SORT_OPTIONS = ["newest", "price", "rating", "popular"] as const;
 type SortOption = (typeof SORT_OPTIONS)[number];
 
@@ -38,7 +30,7 @@ const buildOrderBy = (
       return [{ price: direction }, { createdAt: "desc" }];
     case "rating":
       return [
-        { product: { reviews: { _count: direction } } },
+        { product: { rating: direction } },
         { createdAt: "desc" },
       ];
     case "popular":
@@ -126,7 +118,7 @@ router.get("/", async (req, res) => {
         name: fp.product.name,
         category: fp.product.category,
         description: fp.product.description,
-        rating: calculateAverageRating(fp.product.reviews),
+        rating: fp.product.rating ?? null,
         images: fp.product.images,
         reviews: fp.product.reviews,
         salesCount: fp.product._count?.orderItems ?? 0,
@@ -181,7 +173,7 @@ router.get("/:id", async (req, res) => {
         name: farmProduct.product.name,
         category: farmProduct.product.category,
         description: farmProduct.product.description,
-        rating: calculateAverageRating(farmProduct.product.reviews),
+        rating: farmProduct.product.rating ?? null,
         images: farmProduct.product.images,
         reviews: farmProduct.product.reviews,
       },
