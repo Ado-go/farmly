@@ -16,8 +16,6 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
   const { t } = useTranslation();
   const { addToCart } = useCart();
 
-  console.log(product);
-
   const { product: inner } = product;
   const ratingValue =
     inner.rating !== undefined && inner.rating !== null
