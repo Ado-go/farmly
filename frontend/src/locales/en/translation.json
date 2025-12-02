@@ -241,6 +241,8 @@
   },
   "productsPage": {
     "title": "All Products",
+    "heading": "Farm-fresh products",
+    "subtitle": "Fresh, honest food carefully picked from local farmers and delivered straight to you.",
     "loading": "Loading products...",
     "error": "Failed to load products.",
     "noProducts": "We don't have any products yet.",

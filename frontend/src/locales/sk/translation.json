@@ -241,6 +241,8 @@
   },
   "productsPage": {
     "title": "Všetky produkty",
+    "heading": "Farmárske produkty",
+    "subtitle": "Čerstvé poctivé potraviny starostlivo vyberané od lokálnych farmárov až k vám.",
     "loading": "Načítavam produkty...",
     "error": "Nepodarilo sa načítať produkty.",
     "noProducts": "Aktuálne nemáme žiadne produkty.",

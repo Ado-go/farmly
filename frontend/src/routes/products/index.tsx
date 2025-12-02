@@ -16,14 +16,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import {
-  PRODUCT_CATEGORIES,
-  getCategoryLabel,
-} from "@/lib/productCategories";
+import { PRODUCT_CATEGORIES, getCategoryLabel } from "@/lib/productCategories";
 import type { PaginatedResponse } from "@/types/pagination";
 import {
   ArrowUpNarrowWide,
   ArrowDownWideNarrow,
+  Store,
   Apple,
   Carrot,
   Drumstick,
@@ -31,6 +29,7 @@ import {
   Croissant,
   CupSoda,
   Package,
+  Search,
 } from "lucide-react";
 
 const SORT_OPTIONS = ["newest", "price", "rating", "popular"] as const;
@@ -137,27 +136,25 @@ function ProductsPage() {
     return () => clearTimeout(timeout);
   }, [searchTerm, category, sort, order, navigate, search]);
 
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useQuery<PaginatedResponse<FarmProduct>>({
-    queryKey: ["farmProducts", page, category, sort, order, search],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(DEFAULT_PAGE_SIZE),
-        sort,
-        order,
-      });
+  const { data, isLoading, isError } = useQuery<PaginatedResponse<FarmProduct>>(
+    {
+      queryKey: ["farmProducts", page, category, sort, order, search],
+      queryFn: async () => {
+        const params = new URLSearchParams({
+          page: String(page),
+          limit: String(DEFAULT_PAGE_SIZE),
+          sort,
+          order,
+        });
 
-      if (category) params.append("category", category);
-      if (search) params.append("search", search);
+        if (category) params.append("category", category);
+        if (search) params.append("search", search);
 
-      return apiFetch(`/public-farm-products?${params.toString()}`);
-    },
-    placeholderData: keepPreviousData,
-  });
+        return apiFetch(`/public-farm-products?${params.toString()}`);
+      },
+      placeholderData: keepPreviousData,
+    }
+  );
 
   const farmProducts = data?.items ?? [];
   const totalPages = data?.totalPages ?? 1;
@@ -223,7 +220,14 @@ function ProductsPage() {
   if (isLoading) {
     return (
       <div className="p-6 max-w-7xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6">{t("productsPage.title")}</h2>
+        <div className="mb-6 space-y-1">
+          <h2 className="text-2xl font-bold">
+            {t("productsPage.heading")}
+          </h2>
+          <p className="text-sm text-gray-600">
+            {t("productsPage.subtitle")}
+          </p>
+        </div>
         <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
           <Card className="p-4 h-fit space-y-2">
             <p className="text-lg font-semibold">
@@ -275,7 +279,17 @@ function ProductsPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">{t("productsPage.title")}</h2>
+      <div className="mb-6 space-y-2">
+        <div className="flex items-center gap-2">
+          <Store className="h-5 w-5 text-primary" />
+          <h2 className="text-2xl font-bold">
+            {t("productsPage.heading")}
+          </h2>
+        </div>
+        <p className="text-sm text-gray-600">
+          {t("productsPage.subtitle")}
+        </p>
+      </div>
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
         <Card className="p-4 h-fit">
           <p className="text-lg font-semibold mb-3">
@@ -321,7 +335,10 @@ function ProductsPage() {
               <span className="text-sm text-gray-600">
                 {t("productsPage.sortBy")}
               </span>
-              <Select value={sort} onValueChange={(v) => handleSortChange(v as SortOption)}>
+              <Select
+                value={sort}
+                onValueChange={(v) => handleSortChange(v as SortOption)}
+              >
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder={t("productsPage.sortBy")} />
                 </SelectTrigger>
@@ -357,11 +374,15 @@ function ProductsPage() {
             </div>
 
             <div className="w-full md:w-72">
-              <Input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={t("productsPage.searchPlaceholder")}
-              />
+              <div className="relative">
+                <Input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder={t("productsPage.searchPlaceholder")}
+                  className="pr-10"
+                />
+                <Search className="h-4 w-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
             </div>
           </div>
 
