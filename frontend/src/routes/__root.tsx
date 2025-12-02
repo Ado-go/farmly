@@ -281,7 +281,13 @@ function Footer() {
           <div className="flex flex-col gap-2 text-muted-foreground">
             <Link
               to="/products"
-              search={{ page: 1 }}
+              search={{
+                page: 1,
+                sort: "newest",
+                category: undefined,
+                order: "desc",
+                search: undefined,
+              }}
               className="hover:text-foreground"
             >
               {t("products")}
