@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { ProductCard } from "@/components/ProductCard";
@@ -21,7 +21,17 @@ import {
   getCategoryLabel,
 } from "@/lib/productCategories";
 import type { PaginatedResponse } from "@/types/pagination";
-import { ArrowUpNarrowWide, ArrowDownWideNarrow } from "lucide-react";
+import {
+  ArrowUpNarrowWide,
+  ArrowDownWideNarrow,
+  Apple,
+  Carrot,
+  Drumstick,
+  Milk,
+  Croissant,
+  CupSoda,
+  Package,
+} from "lucide-react";
 
 const SORT_OPTIONS = ["newest", "price", "rating", "popular"] as const;
 type SortOption = (typeof SORT_OPTIONS)[number];
@@ -35,6 +45,16 @@ type OrderDirection = (typeof ORDER_DIRECTIONS)[number];
 const isOrderDirection = (value: unknown): value is OrderDirection =>
   typeof value === "string" &&
   ORDER_DIRECTIONS.includes(value as OrderDirection);
+
+const CATEGORY_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  Fruits: Apple,
+  Vegetables: Carrot,
+  Meat: Drumstick,
+  Dairy: Milk,
+  Bakery: Croissant,
+  Drinks: CupSoda,
+  Other: Package,
+};
 
 export const Route = createFileRoute("/products/")({
   component: ProductsPage,
@@ -274,6 +294,7 @@ function ProductsPage() {
             </button>
             {PRODUCT_CATEGORIES.map((cat) => {
               const active = category === cat;
+              const Icon = CATEGORY_ICONS[cat];
               return (
                 <button
                   key={cat}
@@ -284,7 +305,10 @@ function ProductsPage() {
                   }`}
                   onClick={() => handleCategoryChange(cat)}
                 >
-                  {getCategoryLabel(cat, t)}
+                  <span className="flex items-center gap-2">
+                    {Icon ? <Icon className="h-4 w-4" /> : null}
+                    {getCategoryLabel(cat, t)}
+                  </span>
                 </button>
               );
             })}
