@@ -7,6 +7,19 @@ import {
 
 const router = Router();
 
+const toNumber = (value: unknown) => {
+  if (value === null || value === undefined) return null;
+  if (typeof (value as any)?.toNumber === "function")
+    return (value as any).toNumber();
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+};
+
+const deriveRating = (rawRating: unknown) => {
+  const numericRating = toNumber(rawRating);
+  return numericRating !== null ? Number(numericRating.toFixed(1)) : null;
+};
+
 // GET /farms
 router.get("/", async (req, res) => {
   try {
@@ -59,7 +72,7 @@ router.get("/", async (req, res) => {
           name: fp.product.name,
           category: fp.product.category,
           description: fp.product.description,
-          rating: fp.product.rating,
+          rating: deriveRating(fp.product.rating),
           images: fp.product.images,
           reviews: fp.product.reviews,
         },
@@ -129,7 +142,7 @@ router.get("/:id", async (req, res) => {
           name: fp.product.name,
           category: fp.product.category,
           description: fp.product.description,
-          rating: fp.product.rating,
+          rating: deriveRating(fp.product.rating),
           images: fp.product.images,
           reviews: fp.product.reviews,
         },

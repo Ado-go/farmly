@@ -21,6 +21,19 @@ const isOrderDirection = (value: unknown): value is OrderDirection =>
   typeof value === "string" &&
   ORDER_DIRECTIONS.includes(value as OrderDirection);
 
+const toNumber = (value: unknown) => {
+  if (value === null || value === undefined) return null;
+  if (typeof (value as any)?.toNumber === "function")
+    return (value as any).toNumber();
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+};
+
+const deriveRating = (rawRating: unknown) => {
+  const numericRating = toNumber(rawRating);
+  return numericRating !== null ? Number(numericRating.toFixed(1)) : null;
+};
+
 const buildOrderBy = (
   sort: SortOption,
   direction: OrderDirection
@@ -118,7 +131,7 @@ router.get("/", async (req, res) => {
         name: fp.product.name,
         category: fp.product.category,
         description: fp.product.description,
-        rating: fp.product.rating ?? null,
+        rating: deriveRating(fp.product.rating),
         images: fp.product.images,
         reviews: fp.product.reviews,
         salesCount: fp.product._count?.orderItems ?? 0,
@@ -173,7 +186,7 @@ router.get("/:id", async (req, res) => {
         name: farmProduct.product.name,
         category: farmProduct.product.category,
         description: farmProduct.product.description,
-        rating: farmProduct.product.rating ?? null,
+        rating: deriveRating(farmProduct.product.rating),
         images: farmProduct.product.images,
         reviews: farmProduct.product.reviews,
       },
