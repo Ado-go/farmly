@@ -161,6 +161,11 @@ const recomputeProductRating = async (productId: number) => {
   });
 };
 
+const recomputeAllProductRatings = async () => {
+  const products = await prisma.product.findMany({ select: { id: true } });
+  await Promise.all(products.map((p) => recomputeProductRating(p.id)));
+};
+
 // ------------------ CLEAR DATABASE ------------------
 async function clearDatabase() {
   console.log("🧹 Clearing database...");
@@ -580,6 +585,9 @@ async function main() {
       recomputeProductRating(productId)
     )
   );
+
+  // Safety net: ensure every product (even without new reviews) has rating set
+  await recomputeAllProductRatings();
 
   console.log("🌾 Seeding complete!");
 }
