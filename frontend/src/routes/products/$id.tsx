@@ -105,9 +105,13 @@ function ProductDetailPage() {
     );
 
   const product = farmProduct.product;
+  const ratingValue =
+    product.rating !== undefined && product.rating !== null
+      ? Number(product.rating)
+      : null;
   const avgRating =
-    typeof product.rating === "number" && product.rating > 0
-      ? product.rating.toFixed(1)
+    ratingValue !== null && Number.isFinite(ratingValue) && ratingValue > 0
+      ? ratingValue.toFixed(1)
       : null;
   const userReview = user
     ? product.reviews?.find((r) => r.user?.id === user.id)
