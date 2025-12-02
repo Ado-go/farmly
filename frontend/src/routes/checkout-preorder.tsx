@@ -126,7 +126,7 @@ function CheckoutPreorderPage() {
             <br />
             {event.street}, {event.postalCode} {event.city}
             <br />
-            {event.region}, {event.country}
+            {event.country}
           </p>
 
           <Separator className="my-4" />

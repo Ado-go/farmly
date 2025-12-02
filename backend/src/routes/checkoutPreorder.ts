@@ -33,7 +33,6 @@ router.post("/", validateRequest(preorderSchema), async (req, res) => {
         paymentMethod: "CASH",
         deliveryCity: event.city,
         deliveryStreet: event.street,
-        deliveryRegion: event.region,
         deliveryPostalCode: event.postalCode,
         deliveryCountry: event.country,
         totalPrice,

@@ -26,7 +26,6 @@ router.post("/", validateRequest(checkoutSchema), async (req, res) => {
       contactPhone,
       deliveryCity,
       deliveryStreet,
-      deliveryRegion,
       deliveryPostalCode,
       deliveryCountry,
       paymentMethod,
@@ -47,7 +46,6 @@ router.post("/", validateRequest(checkoutSchema), async (req, res) => {
 
         deliveryCity,
         deliveryStreet,
-        deliveryRegion,
         deliveryPostalCode,
         deliveryCountry,
 
@@ -97,7 +95,6 @@ router.post("/", validateRequest(checkoutSchema), async (req, res) => {
         delivery: {
           deliveryStreet,
           deliveryCity,
-          deliveryRegion,
           deliveryPostalCode,
           deliveryCountry,
         },
@@ -143,7 +140,6 @@ router.get("/my-orders", authenticateToken, async (req, res) => {
         delivery: {
           city: order.deliveryCity,
           street: order.deliveryStreet,
-          region: order.deliveryRegion,
           postalCode: order.deliveryPostalCode,
           country: order.deliveryCountry,
         },
@@ -448,7 +444,6 @@ router.post("/stripe/webhook", async (req, res) => {
             delivery: {
               deliveryStreet: order.deliveryStreet,
               deliveryCity: order.deliveryCity,
-              deliveryRegion: order.deliveryRegion,
               deliveryPostalCode: order.deliveryPostalCode,
               deliveryCountry: order.deliveryCountry,
             },

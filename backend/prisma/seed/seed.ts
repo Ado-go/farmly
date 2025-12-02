@@ -203,7 +203,6 @@ async function createOrderWithItems({
       contactPhone: buyer.phone ?? "+421900000000",
       deliveryCity: address.city,
       deliveryStreet: address.street,
-      deliveryRegion: address.region,
       deliveryPostalCode: address.postalCode,
       deliveryCountry: "Slovensko",
       eventId: event?.id ?? null,

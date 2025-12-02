@@ -25,7 +25,6 @@ export const checkoutSchema = z.object({
 
       deliveryCity: z.string().min(2).max(100),
       deliveryStreet: z.string().min(2).max(150),
-      deliveryRegion: z.string().min(2).max(100),
       deliveryPostalCode: z.string().min(3).max(20),
       deliveryCountry: z.string().min(2).max(100),
 

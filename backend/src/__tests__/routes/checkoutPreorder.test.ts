@@ -148,7 +148,6 @@ describe("Preorder Checkout Routes", () => {
           contactPhone: "+421900000123",
           deliveryCity: "Trnava",
           deliveryStreet: "No Name 3",
-          deliveryRegion: "Trnavský",
           deliveryPostalCode: "91701",
           deliveryCountry: "Slovensko",
           paymentMethod: "CASH",

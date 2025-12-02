@@ -9,7 +9,6 @@ type OrderItem = {
 type DeliveryInfo = {
   deliveryStreet: string;
   deliveryCity: string;
-  deliveryRegion: string;
   deliveryPostalCode: string;
   deliveryCountry: string;
 };
@@ -36,14 +35,30 @@ const itemsTable = (items: OrderItem[]) =>
     )
     .join("");
 
-const deliveryBlock = (delivery: DeliveryInfo) => `
-  <h3 style="margin: 0 0 6px;">Dodacia adresa</h3>
+const deliveryBlock = (delivery: DeliveryInfo) => {
+  const streetLine = [delivery.deliveryStreet, delivery.deliveryCity]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(", ");
+
+  const cityLine = [delivery.deliveryPostalCode, delivery.deliveryCity]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(" ");
+
+  const lines = [
+    streetLine || null,
+    cityLine || null,
+    delivery.deliveryCountry?.trim() || null,
+  ].filter(Boolean);
+
+  return `
+  <h3 style="margin: 0 0 6px;">Miesto doručenia/prevzatia</h3>
   <p style="margin: 0 0 16px; line-height: 1.5;">
-    ${delivery.deliveryStreet}, ${delivery.deliveryCity}<br/>
-    ${delivery.deliveryRegion}, ${delivery.deliveryPostalCode}<br/>
-    ${delivery.deliveryCountry}
+    ${lines.join("<br/>")}
   </p>
 `;
+};
 
 export const buildOrderConfirmationEmail = ({
   orderNumber,

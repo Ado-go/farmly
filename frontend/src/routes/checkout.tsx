@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/AuthContext";
+import { pickupLocations } from "@/lib/pickupLocations";
 
 export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
@@ -41,7 +42,6 @@ const addressSchema = z.object({
   deliveryOption: z.enum(["ADDRESS", "PICKUP"]),
   deliveryCity: z.string().min(2, "City required"),
   deliveryStreet: z.string().optional(),
-  deliveryRegion: z.string().min(2, "Region required"),
   deliveryPostalCode: z.string().min(2, "Postal code required"),
   deliveryCountry: z.string().min(2, "Country required"),
 });
@@ -61,6 +61,9 @@ function CheckoutPage() {
   const { cart, totalPrice, clearCart } = useCart();
 
   const [step, setStep] = useState(1);
+  const [selectedPickupId, setSelectedPickupId] = useState(
+    pickupLocations[0]?.id ?? ""
+  );
   const [addressData, setAddressData] = useState<AddressData | null>(null);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [loadingPayment, setLoadingPayment] = useState(false);
@@ -74,7 +77,6 @@ function CheckoutPage() {
       deliveryOption: "ADDRESS",
       deliveryCity: user?.city ?? "",
       deliveryStreet: user?.address ?? "",
-      deliveryRegion: "",
       deliveryPostalCode: user?.postalCode ?? "",
       deliveryCountry: user?.country ?? "",
     },
@@ -84,6 +86,17 @@ function CheckoutPage() {
     resolver: zodResolver(paymentSchema),
     defaultValues: { paymentMethod: "CASH" },
   });
+
+  const applyPickupLocation = (locationId: string) => {
+    const location = pickupLocations.find((p) => p.id === locationId);
+    if (!location) return;
+
+    setSelectedPickupId(location.id);
+    addressForm.setValue("deliveryCity", location.city);
+    addressForm.setValue("deliveryStreet", location.street);
+    addressForm.setValue("deliveryPostalCode", location.postalCode);
+    addressForm.setValue("deliveryCountry", location.country);
+  };
 
   const handleAddressSubmit = (data: AddressData) => {
     setAddressData(data);
@@ -98,6 +111,7 @@ function CheckoutPage() {
   const cleanupCheckout = () => {
     clearCart();
     setStep(1);
+    setSelectedPickupId(pickupLocations[0]?.id ?? "");
     setAddressData(null);
     setPaymentData(null);
     addressForm.reset();
@@ -143,7 +157,6 @@ function CheckoutPage() {
           email: addressData.email,
           deliveryCity: addressData.deliveryCity,
           deliveryStreet: addressData.deliveryStreet || "-",
-          deliveryRegion: addressData.deliveryRegion,
           deliveryPostalCode: addressData.deliveryPostalCode,
           deliveryCountry: addressData.deliveryCountry,
           paymentMethod: paymentData.paymentMethod,
@@ -197,22 +210,29 @@ function CheckoutPage() {
     addressForm.setValue("deliveryOption", value);
 
     if (value === "PICKUP") {
-      addressForm.setValue("deliveryCity", "Banská Bystrica");
-      addressForm.setValue("deliveryStreet", "Horná 54");
-      addressForm.setValue("deliveryRegion", "Banskobystrický kraj");
-      addressForm.setValue("deliveryPostalCode", "97401");
-      addressForm.setValue("deliveryCountry", "Slovensko");
-    } else {
-      addressForm.reset({
-        ...addressForm.getValues(),
-        deliveryCity: user?.city ?? "",
-        deliveryStreet: user?.address ?? "",
-        deliveryRegion: "",
-        deliveryPostalCode: user?.postalCode ?? "",
-        deliveryCountry: user?.country ?? "",
-      });
+      const fallbackPickupId =
+        selectedPickupId || pickupLocations[0]?.id || "";
+
+      if (fallbackPickupId) {
+        applyPickupLocation(fallbackPickupId);
+      }
+
+      return;
     }
+
+    addressForm.reset({
+      ...addressForm.getValues(),
+      deliveryOption: "ADDRESS",
+      deliveryCity: user?.city ?? "",
+      deliveryStreet: user?.address ?? "",
+      deliveryPostalCode: user?.postalCode ?? "",
+      deliveryCountry: user?.country ?? "",
+    });
   };
+
+  const selectedPickup = pickupLocations.find(
+    (pickup) => pickup.id === selectedPickupId
+  );
 
   if (cart.length === 0)
     return (
@@ -285,10 +305,6 @@ function CheckoutPage() {
                     {...addressForm.register("deliveryCity")}
                   />
                   <Input
-                    placeholder={t("checkoutPage.region")}
-                    {...addressForm.register("deliveryRegion")}
-                  />
-                  <Input
                     placeholder={t("checkoutPage.postalCode")}
                     {...addressForm.register("deliveryPostalCode")}
                   />
@@ -298,12 +314,41 @@ function CheckoutPage() {
                   />
                 </>
               ) : (
-                <div className="p-3 bg-gray-50 rounded-md text-sm text-gray-700">
-                  <p className="font-medium">{t("checkoutPage.pickupPoint")}</p>
-                  <p>Stará tržnica</p>
-                  <p>Horná 54, 97401 Banská Bystrica</p>
-                  <p>Slovensko</p>
-                </div>
+                <>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium">
+                      {t("checkoutPage.pickupPoint")}
+                    </label>
+                    <Select
+                      value={selectedPickupId}
+                      onValueChange={applyPickupLocation}
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={t("checkoutPage.pickupPoint")}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {pickupLocations.map((location) => (
+                          <SelectItem key={location.id} value={location.id}>
+                            {location.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedPickup && (
+                    <div className="p-3 bg-gray-50 rounded-md text-sm text-gray-700">
+                      <p className="font-medium">{selectedPickup.name}</p>
+                      <p>{selectedPickup.street}</p>
+                      <p>
+                        {selectedPickup.postalCode} {selectedPickup.city}
+                      </p>
+                      <p>{selectedPickup.country}</p>
+                    </div>
+                  )}
+                </>
               )}
 
               <div className="flex justify-end pt-4">
