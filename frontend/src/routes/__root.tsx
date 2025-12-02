@@ -58,12 +58,13 @@ function RootLayout() {
     setIsCartMenuOpen(false);
     navigate({ to: "/cart" });
   };
-  const homeLink = { to: "/", label: t("farmly") };
-  const navLinks = [
-    { to: "/products", label: t("products") },
-    { to: "/events", label: t("events") },
-    { to: "/offers", label: t("offers") },
-    { to: "/farms", label: t("farms") },
+  type NavLink = { to: string; label: string; search?: { page?: number } };
+  const homeLink: NavLink = { to: "/", label: t("farmly") };
+  const navLinks: NavLink[] = [
+    { to: "/products", label: t("products"), search: { page: 1 } },
+    { to: "/events", label: t("events"), search: { page: 1 } },
+    { to: "/offers", label: t("offers"), search: { page: 1 } },
+    { to: "/farms", label: t("farms"), search: { page: 1 } },
   ];
 
   return (
@@ -82,6 +83,7 @@ function RootLayout() {
               <Link
                 key={link.to}
                 to={link.to}
+                search={link.search}
                 className="font-semibold text-lg text-primary hover:text-secondary"
               >
                 {link.label}
@@ -99,7 +101,9 @@ function RootLayout() {
             <DropdownMenuContent align="start" className="w-56">
               {[homeLink, ...navLinks].map((link) => (
                 <DropdownMenuItem key={link.to} asChild>
-                  <Link to={link.to}>{link.label}</Link>
+                  <Link to={link.to} search={link.search}>
+                    {link.label}
+                  </Link>
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
@@ -275,16 +279,32 @@ function Footer() {
         <div className="space-y-3">
           <h3 className="text-base font-semibold">{t("footer.links")}</h3>
           <div className="flex flex-col gap-2 text-muted-foreground">
-            <Link to="/products" className="hover:text-foreground">
+            <Link
+              to="/products"
+              search={{ page: 1 }}
+              className="hover:text-foreground"
+            >
               {t("products")}
             </Link>
-            <Link to="/events" className="hover:text-foreground">
+            <Link
+              to="/events"
+              search={{ page: 1 }}
+              className="hover:text-foreground"
+            >
               {t("events")}
             </Link>
-            <Link to="/offers" className="hover:text-foreground">
+            <Link
+              to="/offers"
+              search={{ page: 1 }}
+              className="hover:text-foreground"
+            >
               {t("offers")}
             </Link>
-            <Link to="/farms" className="hover:text-foreground">
+            <Link
+              to="/farms"
+              search={{ page: 1 }}
+              className="hover:text-foreground"
+            >
               {t("farms")}
             </Link>
           </div>
