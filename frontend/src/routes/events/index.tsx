@@ -1,12 +1,18 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
+import { PaginationControls } from "@/components/PaginationControls";
 import { apiFetch } from "@/lib/api";
+import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
+import type { PaginatedResponse } from "@/types/pagination";
 
 export const Route = createFileRoute("/events/")({
   component: EventsPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    page: Math.max(1, Number(search.page) || 1),
+  }),
 });
 
 type EventProduct = {
@@ -40,14 +46,30 @@ function EventsPage() {
     document.title = `${t("events")} | ${t("farmly")}`;
   }, [t]);
 
+  const { page } = Route.useSearch();
+  const navigate = useNavigate();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page]);
+
   const {
-    data: events = [],
+    data,
     isLoading,
     isError,
-  } = useQuery<Event[]>({
-    queryKey: ["public-events"],
-    queryFn: async () => apiFetch("/public-events"),
+  } = useQuery<PaginatedResponse<Event>>({
+    queryKey: ["public-events", page],
+    queryFn: async () =>
+      apiFetch(`/public-events?page=${page}&limit=${DEFAULT_PAGE_SIZE}`),
+    placeholderData: keepPreviousData,
   });
+
+  const events = data?.items ?? [];
+  const totalPages = data?.totalPages ?? 1;
+
+  const handlePageChange = (nextPage: number) => {
+    const safePage = Math.max(1, Math.min(nextPage, totalPages || nextPage));
+    navigate({ to: "/events", search: { page: safePage } });
+  };
 
   if (isLoading) {
     return (
@@ -72,9 +94,10 @@ function EventsPage() {
 
   const now = new Date();
   const ongoing = events.filter(
-    (e) => new Date(e.startDate) <= now && new Date(e.endDate) >= now
+    (event: Event) =>
+      new Date(event.startDate) <= now && new Date(event.endDate) >= now
   );
-  const upcoming = events.filter((e) => new Date(e.startDate) > now);
+  const upcoming = events.filter((event: Event) => new Date(event.startDate) > now);
 
   const renderEventCard = (event: Event) => (
     <Link key={event.id} to="/events/$id" params={{ id: String(event.id) }}>
@@ -130,6 +153,15 @@ function EventsPage() {
           </div>
         )}
       </section>
+
+      <PaginationControls
+        page={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        prevLabel={t("pagination.previous")}
+        nextLabel={t("pagination.next")}
+        className="pt-2"
+      />
     </div>
   );
 }

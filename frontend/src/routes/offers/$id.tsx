@@ -36,10 +36,7 @@ function OfferDetailPage() {
     isError,
   } = useQuery<Offer>({
     queryKey: ["offerDetail", id],
-    queryFn: async () =>
-      apiFetch(`/offer/all`).then((offers) =>
-        offers.find((o: Offer) => o.id === Number(id))
-      ),
+    queryFn: async () => apiFetch(`/offer/${id}`),
   });
 
   if (isLoading) {

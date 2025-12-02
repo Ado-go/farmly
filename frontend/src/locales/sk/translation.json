@@ -15,6 +15,10 @@
   "events": "Udalosti",
   "offers": "Ponuky",
   "my_offers": "Moje ponuky",
+  "pagination": {
+    "previous": "Predchádzajúca",
+    "next": "Ďalšia"
+  },
   "footer": {
     "tagline": "Čerstvé potraviny priamo od farmárov do tvojho mesta.",
     "contact": "Kontakt",

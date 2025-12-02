@@ -15,6 +15,10 @@
   "events": "Events",
   "offers": "Offers",
   "my_offers": "My offers",
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next"
+  },
   "footer": {
     "tagline": "Fresh food directly from farmers to your city.",
     "contact": "Contact",

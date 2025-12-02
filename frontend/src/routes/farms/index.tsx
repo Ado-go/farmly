@@ -1,14 +1,20 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
+import { PaginationControls } from "@/components/PaginationControls";
 import { apiFetch } from "@/lib/api";
-import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 import { getCategoryLabel } from "@/lib/productCategories";
+import type { PaginatedResponse } from "@/types/pagination";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 
 export const Route = createFileRoute("/farms/")({
   component: FarmsPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    page: Math.max(1, Number(search.page) || 1),
+  }),
 });
 
 type Farm = {
@@ -37,14 +43,29 @@ function FarmsPage() {
     document.title = `${t("farms")} | ${t("farmly")}`;
   }, [t]);
 
+  const { page } = Route.useSearch();
+  const navigate = useNavigate();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page]);
+
   const {
-    data: farms = [],
+    data,
     isLoading,
     isError,
-  } = useQuery<Farm[]>({
-    queryKey: ["farms"],
-    queryFn: async () => apiFetch("/farms"),
+  } = useQuery<PaginatedResponse<Farm>>({
+    queryKey: ["farms", page],
+    queryFn: async () => apiFetch(`/farms?page=${page}&limit=${DEFAULT_PAGE_SIZE}`),
+    placeholderData: keepPreviousData,
   });
+
+  const farms = data?.items ?? [];
+  const totalPages = data?.totalPages ?? 1;
+
+  const handlePageChange = (nextPage: number) => {
+    const safePage = Math.max(1, Math.min(nextPage, totalPages || nextPage));
+    navigate({ to: "/farms", search: { page: safePage } });
+  };
 
   if (isLoading) {
     return (
@@ -69,7 +90,7 @@ function FarmsPage() {
 
   const farmersMap: Record<number, { farmer: Farm["farmer"]; farms: Farm[] }> =
     {};
-  farms.forEach((farm) => {
+  farms.forEach((farm: Farm) => {
     if (!farm.farmer) return;
 
     const farmerId = farm.farmer.id;
@@ -143,6 +164,15 @@ function FarmsPage() {
           </div>
         ))
       )}
+
+      <PaginationControls
+        page={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        prevLabel={t("pagination.previous")}
+        nextLabel={t("pagination.next")}
+        className="pt-4"
+      />
     </div>
   );
 }

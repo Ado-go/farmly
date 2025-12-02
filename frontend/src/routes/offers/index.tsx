@@ -1,13 +1,19 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
+import { PaginationControls } from "@/components/PaginationControls";
 import { apiFetch } from "@/lib/api";
+import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 import { getCategoryLabel } from "@/lib/productCategories";
+import type { PaginatedResponse } from "@/types/pagination";
 
 export const Route = createFileRoute("/offers/")({
   component: OffersAllPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    page: Math.max(1, Number(search.page) || 1),
+  }),
 });
 
 type Offer = {
@@ -36,14 +42,30 @@ function OffersAllPage() {
     document.title = `${t("offers")} | ${t("farmly")}`;
   }, [t]);
 
+  const { page } = Route.useSearch();
+  const navigate = useNavigate();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page]);
+
   const {
-    data: offers = [],
+    data,
     isLoading,
     isError,
-  } = useQuery<Offer[]>({
-    queryKey: ["offersAll"],
-    queryFn: async () => apiFetch("/offer/all"),
+  } = useQuery<PaginatedResponse<Offer>>({
+    queryKey: ["offersAll", page],
+    queryFn: async () =>
+      apiFetch(`/offer/all?page=${page}&limit=${DEFAULT_PAGE_SIZE}`),
+    placeholderData: keepPreviousData,
   });
+
+  const offers = data?.items ?? [];
+  const totalPages = data?.totalPages ?? 1;
+
+  const handlePageChange = (nextPage: number) => {
+    const safePage = Math.max(1, Math.min(nextPage, totalPages || nextPage));
+    navigate({ to: "/offers", search: { page: safePage } });
+  };
 
   if (isLoading) {
     return (
@@ -79,7 +101,7 @@ function OffersAllPage() {
       <h2 className="text-2xl font-bold mb-4">{t("offersPage.title")}</h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {offers.map((offer) => (
+        {offers.map((offer: Offer) => (
           <Link key={offer.id} to="/offers/$id" params={{ id: String(offer.id) }}>
             <Card className="p-4 hover:shadow-lg transition">
               <h3 className="font-semibold">{offer.title}</h3>
@@ -104,6 +126,15 @@ function OffersAllPage() {
           </Link>
         ))}
       </div>
+
+      <PaginationControls
+        page={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        prevLabel={t("pagination.previous")}
+        nextLabel={t("pagination.next")}
+        className="pt-2"
+      />
     </div>
   );
 }
