@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { Prisma } from "@prisma/client";
 import prisma from "../prisma.ts";
 import {
   buildPaginationResponse,
@@ -15,16 +16,84 @@ const calculateAverageRating = (
   return Number((total / reviews.length).toFixed(2));
 };
 
+const SORT_OPTIONS = ["newest", "price", "rating", "popular"] as const;
+type SortOption = (typeof SORT_OPTIONS)[number];
+
+const ORDER_DIRECTIONS = ["asc", "desc"] as const;
+type OrderDirection = (typeof ORDER_DIRECTIONS)[number];
+
+const isSortOption = (value: unknown): value is SortOption =>
+  typeof value === "string" && SORT_OPTIONS.includes(value as SortOption);
+
+const isOrderDirection = (value: unknown): value is OrderDirection =>
+  typeof value === "string" &&
+  ORDER_DIRECTIONS.includes(value as OrderDirection);
+
+const buildOrderBy = (
+  sort: SortOption,
+  direction: OrderDirection
+): Prisma.FarmProductOrderByWithRelationInput[] => {
+  switch (sort) {
+    case "price":
+      return [{ price: direction }, { createdAt: "desc" }];
+    case "rating":
+      return [
+        { product: { reviews: { _count: direction } } },
+        { createdAt: "desc" },
+      ];
+    case "popular":
+      return [
+        { product: { orderItems: { _count: direction } } },
+        { createdAt: "desc" },
+      ];
+    case "newest":
+    default:
+      return [{ createdAt: direction }];
+  }
+};
+
 // GET /public-farm-products
 router.get("/", async (req, res) => {
   try {
     const { page, pageSize, skip, take } = getPaginationParams(req.query);
+    const sort = isSortOption(req.query.sort) ? req.query.sort : "newest";
+    const order = isOrderDirection(req.query.order)
+      ? req.query.order
+      : sort === "price"
+      ? "asc"
+      : "desc";
+    const category =
+      typeof req.query.category === "string" && req.query.category.trim()
+        ? req.query.category.trim()
+        : undefined;
+    const search =
+      typeof req.query.search === "string" && req.query.search.trim()
+        ? req.query.search.trim()
+        : undefined;
+
+    const where: Prisma.FarmProductWhereInput = {};
+
+    if (category || search) {
+      where.product = {};
+
+      if (category) {
+        where.product.category = category as any;
+      }
+
+      if (search) {
+        where.product.name = {
+          contains: search,
+          mode: "insensitive",
+        };
+      }
+    }
 
     const [farmProducts, total] = await Promise.all([
       prisma.farmProduct.findMany({
         skip,
         take,
-        orderBy: { createdAt: "desc" },
+        where,
+        orderBy: buildOrderBy(sort, order),
         include: {
           farm: { select: { id: true, name: true, city: true, region: true } },
           product: {
@@ -38,11 +107,12 @@ router.get("/", async (req, res) => {
                   user: { select: { id: true, name: true } },
                 },
               },
+              _count: { select: { orderItems: true } },
             },
           },
         },
       }),
-      prisma.farmProduct.count(),
+      prisma.farmProduct.count({ where }),
     ]);
 
     const formatted = farmProducts.map((fp) => ({
@@ -59,6 +129,7 @@ router.get("/", async (req, res) => {
         rating: calculateAverageRating(fp.product.reviews),
         images: fp.product.images,
         reviews: fp.product.reviews,
+        salesCount: fp.product._count?.orderItems ?? 0,
       },
     }));
 

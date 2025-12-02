@@ -243,7 +243,22 @@
     "title": "All Products",
     "loading": "Loading products...",
     "error": "Failed to load products.",
-    "noProducts": "We don't have any products yet."
+    "noProducts": "We don't have any products yet.",
+    "categories": "Categories",
+    "allCategories": "All categories",
+    "sortBy": "Sort by",
+    "sortOptions": {
+      "newest": "Newest",
+      "price": "Price",
+      "rating": "Rating",
+      "popular": "Most popular"
+    },
+    "orderDirection": "Order",
+    "orderOptions": {
+      "asc": "Ascending",
+      "desc": "Descending"
+    },
+    "searchPlaceholder": "Search by product name"
   },
   "productCard": {
     "price": "Price",

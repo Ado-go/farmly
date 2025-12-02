@@ -243,7 +243,22 @@
     "title": "Všetky produkty",
     "loading": "Načítavam produkty...",
     "error": "Nepodarilo sa načítať produkty.",
-    "noProducts": "Aktuálne nemáme žiadne produkty."
+    "noProducts": "Aktuálne nemáme žiadne produkty.",
+    "categories": "Kategórie",
+    "allCategories": "Všetky kategórie",
+    "sortBy": "Zoradiť podľa",
+    "sortOptions": {
+      "newest": "Najnovšie",
+      "price": "Cena",
+      "rating": "Hodnotenie",
+      "popular": "Najpopulárnejšie"
+    },
+    "orderDirection": "Poradie",
+    "orderOptions": {
+      "asc": "Vzostupne",
+      "desc": "Zostupne"
+    },
+    "searchPlaceholder": "Hľadať podľa názvu"
   },
   "productCard": {
     "price": "Cena",
