@@ -17,9 +17,8 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
   const { addToCart } = useCart();
 
   const { product: inner } = product;
-  const hasReviews = (inner.reviews?.length ?? 0) > 0;
   const rating =
-    hasReviews && typeof inner.rating === "number"
+    typeof inner.rating === "number" && inner.rating > 0
       ? inner.rating.toFixed(1)
       : null;
   const displaySellerName = sellerNameOverride ?? product.farm?.name;

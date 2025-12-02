@@ -105,9 +105,8 @@ function ProductDetailPage() {
     );
 
   const product = farmProduct.product;
-  const hasReviews = (product.reviews?.length ?? 0) > 0;
   const avgRating =
-    hasReviews && typeof product.rating === "number"
+    typeof product.rating === "number" && product.rating > 0
       ? product.rating.toFixed(1)
       : null;
   const userReview = user
@@ -318,4 +317,3 @@ function ProductDetailPage() {
     </div>
   );
 }
-
