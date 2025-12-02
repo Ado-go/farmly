@@ -17,7 +17,11 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
   const { addToCart } = useCart();
 
   const { product: inner } = product;
-  const rating = averageRating(inner.reviews);
+  const hasReviews = (inner.reviews?.length ?? 0) > 0;
+  const rating =
+    hasReviews && typeof inner.rating === "number"
+      ? inner.rating.toFixed(1)
+      : null;
   const displaySellerName = sellerNameOverride ?? product.farm?.name;
 
   const handleAddToCart = (fp: FarmProduct) => {
@@ -97,11 +101,4 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
       </div>
     </Card>
   );
-}
-
-function averageRating(reviews: { rating: number }[] = []) {
-  if (reviews.length === 0) return null;
-  const avg =
-    reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length;
-  return avg.toFixed(1);
 }

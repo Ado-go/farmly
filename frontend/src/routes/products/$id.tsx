@@ -105,7 +105,11 @@ function ProductDetailPage() {
     );
 
   const product = farmProduct.product;
-  const avgRating = averageRating(product.reviews);
+  const hasReviews = (product.reviews?.length ?? 0) > 0;
+  const avgRating =
+    hasReviews && typeof product.rating === "number"
+      ? product.rating.toFixed(1)
+      : null;
   const userReview = user
     ? product.reviews?.find((r) => r.user?.id === user.id)
     : null;
@@ -315,9 +319,3 @@ function ProductDetailPage() {
   );
 }
 
-function averageRating(reviews: { rating: number }[] = []) {
-  if (reviews.length === 0) return null;
-  const avg =
-    reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length;
-  return avg.toFixed(1);
-}
