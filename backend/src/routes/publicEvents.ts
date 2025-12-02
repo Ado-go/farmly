@@ -1,5 +1,9 @@
 import { Router } from "express";
 import prisma from "../prisma.ts";
+import {
+  buildPaginationResponse,
+  getPaginationParams,
+} from "../utils/pagination.ts";
 
 const router = Router();
 
@@ -7,54 +11,61 @@ const router = Router();
 router.get("/", async (req, res) => {
   try {
     const now = new Date();
+    const { page, pageSize, skip, take } = getPaginationParams(req.query);
+    const where = {
+      endDate: { gte: now },
+    };
 
-    const events = await prisma.event.findMany({
-      where: {
-        endDate: { gte: now },
-      },
-      orderBy: {
-        startDate: "asc",
-      },
-      include: {
-        organizer: {
-          select: {
-            id: true,
-            name: true,
-            profileImageUrl: true,
-          },
+    const [events, total] = await Promise.all([
+      prisma.event.findMany({
+        where,
+        skip,
+        take,
+        orderBy: {
+          startDate: "asc",
         },
-        participants: {
-          select: {
-            user: {
-              select: { id: true, name: true, profileImageUrl: true },
+        include: {
+          organizer: {
+            select: {
+              id: true,
+              name: true,
+              profileImageUrl: true,
             },
           },
-        },
-        eventProducts: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                category: true,
-                description: true,
-                basePrice: true,
-                images: true,
-              },
-            },
-            user: {
-              select: {
-                id: true,
-                name: true,
-                profileImageUrl: true,
+          participants: {
+            select: {
+              user: {
+                select: { id: true, name: true, profileImageUrl: true },
               },
             },
           },
+          eventProducts: {
+            include: {
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  category: true,
+                  description: true,
+                  basePrice: true,
+                  images: true,
+                },
+              },
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  profileImageUrl: true,
+                },
+              },
+            },
+          },
         },
-      },
-    });
+      }),
+      prisma.event.count({ where }),
+    ]);
 
-    res.json(events);
+    res.json(buildPaginationResponse(events, page, pageSize, total));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Unable to fetch public events." });

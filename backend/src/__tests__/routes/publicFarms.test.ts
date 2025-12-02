@@ -125,14 +125,14 @@ describe("Public Farms Routes", () => {
     const res = await request(app).get("/api/farms");
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body.length).toBeGreaterThanOrEqual(2);
+    expect(Array.isArray(res.body.items)).toBe(true);
+    expect(res.body.items.length).toBeGreaterThanOrEqual(2);
 
-    const farmNames = res.body.map((f: any) => f.name);
+    const farmNames = res.body.items.map((f: any) => f.name);
     expect(farmNames).toContain("Green Valley");
     expect(farmNames).toContain("Sunny Hills");
 
-    const firstFarm = res.body.find((f: any) => f.name === "Green Valley");
+    const firstFarm = res.body.items.find((f: any) => f.name === "Green Valley");
     expect(firstFarm.farmer).toHaveProperty("name", "Public Farmer");
     expect(firstFarm).toHaveProperty("images");
     expect(firstFarm.farmProducts.length).toBeGreaterThanOrEqual(1);

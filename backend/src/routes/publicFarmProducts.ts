@@ -1,5 +1,9 @@
 import { Router } from "express";
 import prisma from "../prisma.ts";
+import {
+  buildPaginationResponse,
+  getPaginationParams,
+} from "../utils/pagination.ts";
 
 const router = Router();
 
@@ -14,24 +18,32 @@ const calculateAverageRating = (
 // GET /public-farm-products
 router.get("/", async (req, res) => {
   try {
-    const farmProducts = await prisma.farmProduct.findMany({
-      include: {
-        farm: { select: { id: true, name: true, city: true, region: true } },
-        product: {
-          include: {
-            images: true,
-            reviews: {
-              select: {
-                id: true,
-                rating: true,
-                comment: true,
-                user: { select: { id: true, name: true } },
+    const { page, pageSize, skip, take } = getPaginationParams(req.query);
+
+    const [farmProducts, total] = await Promise.all([
+      prisma.farmProduct.findMany({
+        skip,
+        take,
+        orderBy: { createdAt: "desc" },
+        include: {
+          farm: { select: { id: true, name: true, city: true, region: true } },
+          product: {
+            include: {
+              images: true,
+              reviews: {
+                select: {
+                  id: true,
+                  rating: true,
+                  comment: true,
+                  user: { select: { id: true, name: true } },
+                },
               },
             },
           },
         },
-      },
-    });
+      }),
+      prisma.farmProduct.count(),
+    ]);
 
     const formatted = farmProducts.map((fp) => ({
       id: fp.id,
@@ -50,7 +62,7 @@ router.get("/", async (req, res) => {
       },
     }));
 
-    res.json(formatted);
+    res.json(buildPaginationResponse(formatted, page, pageSize, total));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });

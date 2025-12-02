@@ -4,6 +4,10 @@ import { authenticateToken } from "../middleware/auth.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
 import { offerSchema } from "../schemas/offerSchemas.ts";
 import { v2 as cloudinary } from "cloudinary";
+import {
+  buildPaginationResponse,
+  getPaginationParams,
+} from "../utils/pagination.ts";
 
 const router = Router();
 
@@ -67,15 +71,24 @@ router.post(
 // GET /offer/all (public)
 router.get("/all", async (req, res) => {
   try {
-    const offers = await prisma.offer.findMany({
-      where: { isActive: true },
-      include: {
-        product: { include: { images: true } },
-        user: { select: { id: true, name: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-    res.json(offers);
+    const { page, pageSize, skip, take } = getPaginationParams(req.query);
+    const where = { isActive: true };
+
+    const [offers, total] = await Promise.all([
+      prisma.offer.findMany({
+        where,
+        skip,
+        take,
+        include: {
+          product: { include: { images: true } },
+          user: { select: { id: true, name: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.offer.count({ where }),
+    ]);
+
+    res.json(buildPaginationResponse(offers, page, pageSize, total));
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Unable to fetch offers." });
@@ -96,6 +109,34 @@ router.get("/my", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Unable to fetch your offers." });
+  }
+});
+
+// GET /offer/:id (public)
+router.get("/:id", async (req, res) => {
+  const offerId = parseInt(req.params.id, 10);
+
+  if (isNaN(offerId)) {
+    return res.status(400).json({ message: "Invalid offer id." });
+  }
+
+  try {
+    const offer = await prisma.offer.findFirst({
+      where: { id: offerId, isActive: true },
+      include: {
+        product: { include: { images: true } },
+        user: { select: { id: true, name: true } },
+      },
+    });
+
+    if (!offer) {
+      return res.status(404).json({ message: "Offer not found." });
+    }
+
+    res.json(offer);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Unable to fetch offer." });
   }
 });
 

@@ -1,31 +1,43 @@
 import { Router } from "express";
 import prisma from "../prisma.ts";
+import {
+  buildPaginationResponse,
+  getPaginationParams,
+} from "../utils/pagination.ts";
 
 const router = Router();
 
 // GET /farms
 router.get("/", async (req, res) => {
   try {
-    const farms = await prisma.farm.findMany({
-      include: {
-        images: true,
-        farmer: {
-          select: { id: true, name: true, profileImageUrl: true },
-        },
-        farmProducts: {
-          include: {
-            product: {
-              include: {
-                images: true,
-                reviews: {
-                  include: { user: { select: { id: true, name: true } } },
+    const { page, pageSize, skip, take } = getPaginationParams(req.query);
+
+    const [farms, total] = await Promise.all([
+      prisma.farm.findMany({
+        skip,
+        take,
+        orderBy: { createdAt: "desc" },
+        include: {
+          images: true,
+          farmer: {
+            select: { id: true, name: true, profileImageUrl: true },
+          },
+          farmProducts: {
+            include: {
+              product: {
+                include: {
+                  images: true,
+                  reviews: {
+                    include: { user: { select: { id: true, name: true } } },
+                  },
                 },
               },
             },
           },
         },
-      },
-    });
+      }),
+      prisma.farm.count(),
+    ]);
 
     const formatted = farms.map((farm) => ({
       id: farm.id,
@@ -53,7 +65,7 @@ router.get("/", async (req, res) => {
       })),
     }));
 
-    res.json(formatted);
+    res.json(buildPaginationResponse(formatted, page, pageSize, total));
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });

@@ -130,15 +130,16 @@ describe("Public Events Routes", () => {
     const res = await request(app).get("/api/public-events");
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
+    expect(Array.isArray(res.body.items)).toBe(true);
+    const items = res.body.items;
 
-    const titles = res.body.map((e: any) => e.title);
+    const titles = items.map((e: any) => e.title);
 
     expect(titles).toContain("Farmársky trh Bratislava");
     expect(titles).toContain("Jesenné farmárske dni Nitra");
     expect(titles).not.toContain("Letný trh Košice");
 
-    const event = res.body.find(
+    const event = items.find(
       (e: any) => e.title === "Farmársky trh Bratislava"
     );
     expect(event.organizer).toHaveProperty("name", "Event Farmer");

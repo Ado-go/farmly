@@ -78,9 +78,17 @@ describe("Offer routes", () => {
   it("should get all public offers", async () => {
     const res = await request(app).get("/api/offer/all");
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body[0]).toHaveProperty("product");
-    expect(res.body[0]).toHaveProperty("user");
+    expect(Array.isArray(res.body.items)).toBe(true);
+    expect(res.body.items[0]).toHaveProperty("product");
+    expect(res.body.items[0]).toHaveProperty("user");
+  });
+
+  it("should get public offer by id", async () => {
+    const res = await request(app).get(`/api/offer/${offerId}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty("id", offerId);
+    expect(res.body).toHaveProperty("product");
+    expect(res.body).toHaveProperty("user");
   });
 
   it("should get all offers of the logged-in user", async () => {
