@@ -240,14 +240,17 @@
     "Other": "Other"
   },
   "productsPage": {
-    "title": "All Products",
+    "title": "Farm-fresh products",
     "heading": "Farm-fresh products",
     "subtitle": "Fresh, honest food carefully picked from local farmers and delivered straight to you.",
     "loading": "Loading products...",
     "error": "Failed to load products.",
     "noProducts": "We don't have any products yet.",
+    "noFilteredProducts": "No products match your filters yet.",
     "categories": "Categories",
     "allCategories": "All categories",
+    "total": "{{count}} products available",
+    "activeCategory": "Category: {{category}}",
     "sortBy": "Sort by",
     "sortOptions": {
       "newest": "Newest",

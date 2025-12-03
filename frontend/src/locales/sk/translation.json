@@ -240,14 +240,17 @@
     "Other": "Iné"
   },
   "productsPage": {
-    "title": "Všetky produkty",
+    "title": "Farmárske produkty",
     "heading": "Farmárske produkty",
     "subtitle": "Čerstvé poctivé potraviny starostlivo vyberané od lokálnych farmárov až k vám.",
     "loading": "Načítavam produkty...",
     "error": "Nepodarilo sa načítať produkty.",
     "noProducts": "Aktuálne nemáme žiadne produkty.",
+    "noFilteredProducts": "Žiadne produkty nespĺňajú filtre.",
     "categories": "Kategórie",
     "allCategories": "Všetky kategórie",
+    "total": "{{count}} produktov k dispozícii",
+    "activeCategory": "Kategória: {{category}}",
     "sortBy": "Zoradiť podľa",
     "sortOptions": {
       "newest": "Najnovšie",

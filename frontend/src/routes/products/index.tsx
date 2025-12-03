@@ -30,6 +30,8 @@ import {
   CupSoda,
   Package,
   Search,
+  Sparkles,
+  Filter,
 } from "lucide-react";
 
 const SORT_OPTIONS = ["newest", "price", "rating", "popular"] as const;
@@ -157,7 +159,11 @@ function ProductsPage() {
   );
 
   const farmProducts = data?.items ?? [];
+  const totalItems = data?.total ?? 0;
   const totalPages = data?.totalPages ?? 1;
+  const activeCategoryLabel = category
+    ? getCategoryLabel(category, t)
+    : t("productsPage.allCategories");
 
   const handlePageChange = (nextPage: number) => {
     const safePage = Math.max(1, Math.min(nextPage, totalPages || nextPage));
@@ -217,46 +223,38 @@ function ProductsPage() {
     });
   };
 
+  const emptyMessage =
+    totalItems === 0
+      ? t("productsPage.noProducts")
+      : t("productsPage.noFilteredProducts");
+
   if (isLoading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
-        <div className="mb-6 space-y-1">
-          <h2 className="text-2xl font-bold">{t("productsPage.heading")}</h2>
-          <p className="text-sm text-gray-600">{t("productsPage.subtitle")}</p>
-        </div>
-        <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
-          <Card className="p-4 h-fit space-y-2">
-            <p className="text-lg font-semibold">
-              {t("productsPage.categories")}
-            </p>
-            <div className="h-6 bg-gray-200 rounded" />
-            {PRODUCT_CATEGORIES.map((cat) => (
-              <div key={cat} className="h-6 bg-gray-100 rounded" />
-            ))}
+      <div className="p-6">
+        <div className="mx-auto max-w-6xl space-y-8">
+          <Card className="space-y-4 border-primary/20 bg-white/80 p-6">
+            <div className="h-6 w-40 rounded bg-gray-200" />
+            <div className="h-10 w-60 rounded bg-gray-200" />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="h-11 rounded bg-gray-200" />
+              <div className="h-11 rounded bg-gray-200" />
+            </div>
           </Card>
 
-          <div className="space-y-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-600">
-                  {t("productsPage.sortBy")}
-                </span>
-                <div className="w-48 h-10 bg-gray-200 rounded" />
-                <div className="w-10 h-10 bg-gray-200 rounded" />
-              </div>
-              <div className="w-full md:w-72 h-10 bg-gray-200 rounded" />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <div className="h-40 bg-gray-200 rounded-t-2xl" />
-                  <div className="p-4 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded" />
-                    <div className="h-4 bg-gray-200 w-1/2 rounded" />
-                  </div>
-                </Card>
+          <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+            <Card className="space-y-2 p-4">
+              <div className="h-5 w-32 rounded bg-gray-200" />
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-8 rounded bg-gray-100" />
               ))}
+            </Card>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <Card key={i} className="h-64 animate-pulse bg-gray-100" />
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -271,64 +269,52 @@ function ProductsPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6 space-y-2">
-        <div className="flex items-center gap-2">
-          <Store className="h-5 w-5 text-primary" />
-          <h2 className="text-2xl font-bold">{t("productsPage.heading")}</h2>
-        </div>
-        <p className="text-sm text-gray-600">{t("productsPage.subtitle")}</p>
-      </div>
-      <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
-        <Card className="p-4 h-fit">
-          <p className="text-lg font-semibold mb-3">
-            {t("productsPage.categories")}
-          </p>
-          <div className="space-y-2">
-            <button
-              className={`w-full text-left px-3 py-2 rounded-md border transition ${
-                !category
-                  ? "border-primary text-primary bg-primary/5"
-                  : "border-gray-200 hover:bg-gray-50"
-              }`}
-              onClick={() => handleCategoryChange(undefined)}
-            >
-              {t("productsPage.allCategories")}
-            </button>
-            {PRODUCT_CATEGORIES.map((cat) => {
-              const active = category === cat;
-              const Icon = CATEGORY_ICONS[cat];
-              return (
-                <button
-                  key={cat}
-                  className={`w-full text-left px-3 py-2 rounded-md border transition ${
-                    active
-                      ? "border-primary text-primary bg-primary/5"
-                      : "border-gray-200 hover:bg-gray-50"
-                  }`}
-                  onClick={() => handleCategoryChange(cat)}
-                >
-                  <span className="flex items-center gap-2">
-                    {Icon ? <Icon className="h-4 w-4" /> : null}
-                    {getCategoryLabel(cat, t)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </Card>
+    <div className="p-6">
+      <div className="mx-auto max-w-6xl space-y-8">
+        <Card className="border-primary/20 bg-gradient-to-r from-primary/10 via-white to-white p-6 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-semibold text-primary shadow-sm">
+                <Store className="h-4 w-4" />
+                {t("productsPage.heading")}
+              </div>
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <h1 className="text-3xl font-bold">{t("productsPage.title")}</h1>
+              </div>
+              <p className="max-w-2xl text-sm text-gray-600">
+                {t("productsPage.subtitle")}
+              </p>
+            </div>
 
-        <div className="space-y-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600">
-                {t("productsPage.sortBy")}
-              </span>
+            <div className="flex flex-wrap gap-3 text-xs font-medium text-gray-700">
+              <div className="rounded-2xl bg-white px-4 py-3 shadow-sm">
+                {t("productsPage.total", { count: totalItems })}
+              </div>
+              <div className="rounded-2xl bg-white px-4 py-3 shadow-sm">
+                {t("productsPage.activeCategory", {
+                  category: activeCategoryLabel,
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-[1.5fr_1fr]">
+            <div className="relative">
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={t("productsPage.searchPlaceholder")}
+                className="w-full pr-10"
+              />
+              <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            </div>
+            <div className="flex flex-wrap gap-2 sm:justify-end">
               <Select
                 value={sort}
                 onValueChange={(v) => handleSortChange(v as SortOption)}
               >
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue placeholder={t("productsPage.sortBy")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -349,7 +335,7 @@ function ProductsPage() {
               <Button
                 variant="outline"
                 size="icon"
-                className={`h-10 w-10 ${order === "asc" ? "bg-primary/5 border-primary text-primary" : ""}`}
+                className={`h-11 w-11 ${order === "asc" ? "bg-primary/5 border-primary text-primary" : ""}`}
                 onClick={toggleOrder}
                 aria-label={t("productsPage.orderDirection")}
                 title={`${t("productsPage.orderDirection")}: ${t(`productsPage.orderOptions.${order}`)}`}
@@ -361,38 +347,73 @@ function ProductsPage() {
                 )}
               </Button>
             </div>
-
-            <div className="w-full md:w-72">
-              <div className="relative">
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder={t("productsPage.searchPlaceholder")}
-                  className="pr-10"
-                />
-                <Search className="h-4 w-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-            </div>
           </div>
+        </Card>
 
-          {farmProducts.length === 0 ? (
-            <p className="text-gray-500">{t("productsPage.noProducts")}</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {farmProducts.map((fp: FarmProduct) => (
-                <ProductCard key={fp.id} product={fp} />
-              ))}
+        <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+          <Card className="h-fit border-primary/15 bg-white/80">
+            <div className="flex items-center gap-2 border-b px-4 pb-3 pt-4">
+              <Filter className="h-4 w-4 text-primary" />
+              <p className="text-lg font-semibold">
+                {t("productsPage.categories")}
+              </p>
             </div>
-          )}
+            <div className="space-y-2 p-4">
+              <button
+                className={`w-full text-left rounded-lg border px-3 py-2 transition ${
+                  !category
+                    ? "border-primary text-primary bg-primary/5 shadow-sm"
+                    : "border-gray-200 hover:bg-gray-50"
+                }`}
+                onClick={() => handleCategoryChange(undefined)}
+              >
+                {t("productsPage.allCategories")}
+              </button>
+              {PRODUCT_CATEGORIES.map((cat) => {
+                const active = category === cat;
+                const Icon = CATEGORY_ICONS[cat];
+                return (
+                  <button
+                    key={cat}
+                    className={`w-full text-left rounded-lg border px-3 py-2 transition ${
+                      active
+                        ? "border-primary text-primary bg-primary/5 shadow-sm"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                    onClick={() => handleCategoryChange(cat)}
+                  >
+                    <span className="flex items-center gap-2">
+                      {Icon ? <Icon className="h-4 w-4" /> : null}
+                      {getCategoryLabel(cat, t)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
 
-          <PaginationControls
-            page={page}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            prevLabel={t("pagination.previous")}
-            nextLabel={t("pagination.next")}
-            className="pt-2"
-          />
+          <div className="space-y-4">
+            {farmProducts.length === 0 ? (
+              <Card className="border-dashed bg-white/70 p-6 text-center text-gray-500">
+                {emptyMessage}
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {farmProducts.map((fp: FarmProduct) => (
+                  <ProductCard key={fp.id} product={fp} />
+                ))}
+              </div>
+            )}
+
+            <PaginationControls
+              page={page}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              prevLabel={t("pagination.previous")}
+              nextLabel={t("pagination.next")}
+              className="pt-2"
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -1,11 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
+import { Star, Store } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import type { FarmProduct } from "@/types/farm";
+import { getCategoryLabel } from "@/lib/productCategories";
 
 type ProductCardProps = {
   product: FarmProduct;
@@ -25,6 +26,7 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
     ratingValue !== null && Number.isFinite(ratingValue) && ratingValue > 0
       ? ratingValue.toFixed(1)
       : null;
+  const reviewsCount = inner.reviews?.length ?? 0;
   const displaySellerName = sellerNameOverride ?? product.farm?.name;
 
   const handleAddToCart = (fp: FarmProduct) => {
@@ -45,50 +47,65 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow p-2">
+    <Card className="group h-full overflow-hidden border border-gray-100 bg-white/80 transition hover:-translate-y-1 hover:shadow-lg">
       <Link
         to="/products/$id"
         params={{ id: String(inner.id) }}
-        className="block cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary"
+        className="block cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
-        {inner.images?.[0]?.url ? (
-          <img
-            src={inner.images[0].url}
-            alt={inner.name}
-            className="w-full h-32 object-cover mt-2 rounded"
-          />
-        ) : (
-          <div className="w-full h-32 bg-gray-200 flex items-center justify-center text-gray-500 rounded">
-            {t("productCard.noImage")}
-          </div>
-        )}
-
-        <CardHeader>
-          <CardTitle className="text-lg truncate">{inner.name}</CardTitle>
-        </CardHeader>
-
-        <CardContent className="space-y-2">
-          <p className="text-sm text-gray-600">
-            {t("productCard.price")}: {product.price} €
-          </p>
-
-          <div className="flex items-center text-yellow-500">
-            <Star className="w-4 h-4 fill-yellow-400" />
-            <span className="ml-1 text-sm text-gray-700">
-              {rating ?? t("productCard.noRating")}
+        <div className="relative h-44 w-full overflow-hidden">
+          {inner.images?.[0]?.url ? (
+            <img
+              src={inner.images[0].url}
+              alt={inner.name}
+              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gray-100 text-sm text-gray-500">
+              {t("productCard.noImage")}
+            </div>
+          )}
+          <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+            <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm backdrop-blur">
+              {getCategoryLabel(inner.category, t)}
             </span>
+          </div>
+          <span className="absolute right-3 top-3 rounded-full bg-primary/90 px-3 py-1 text-xs font-semibold text-white shadow">
+            {product.price} €
+          </span>
+        </div>
+
+        <CardContent className="space-y-3 p-5">
+          <h3 className="text-lg font-semibold leading-tight line-clamp-2">
+            {inner.name}
+          </h3>
+
+          <div className="flex items-center gap-3 text-sm text-gray-700">
+            <div className="flex items-center gap-1 text-amber-500">
+              <Star className="h-4 w-4 fill-amber-400" />
+              <span className="font-medium">
+                {rating ?? t("productCard.noRating")}
+              </span>
+              {reviewsCount > 0 ? (
+                <span className="text-xs text-gray-500">
+                  ({reviewsCount})
+                </span>
+              ) : null}
+            </div>
+            {product.stock !== undefined ? (
+              <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
+                {t("productCard.stock")}: {product.stock}
+              </span>
+            ) : null}
           </div>
 
           {displaySellerName && (
-            <p className="text-xs text-gray-500">
-              {t("productCard.farmName")}: {displaySellerName}
-            </p>
-          )}
-
-          {product.stock !== undefined && (
-            <p className="text-xs text-gray-500">
-              {t("productCard.stock")}: {product.stock}
-            </p>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <Store className="h-4 w-4 text-primary" />
+              <span>
+                {t("productCard.farmName")}: {displaySellerName}
+              </span>
+            </div>
           )}
         </CardContent>
       </Link>
@@ -96,7 +113,7 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
       <div className="p-4 pt-0">
         <Button
           variant="outline"
-          className="w-full mt-2"
+          className="w-full"
           onClick={() => handleAddToCart(product)}
         >
           {t("productCard.addToCart")}
