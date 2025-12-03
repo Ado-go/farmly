@@ -22,6 +22,7 @@ import { format } from "date-fns";
 import DatePicker from "@/components/date-picker";
 import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@/types/event";
+import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
 
 const eventSchema = z.object({
   title: z.string().min(3, "Názov je povinný"),
@@ -47,6 +48,7 @@ function EventPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [images, setImages] = useState<UploadedImage[]>([]);
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
@@ -74,12 +76,32 @@ function EventPage() {
 
   const createEvent = useMutation({
     mutationFn: async (data: EventFormData) => {
+      const uploaded: { url: string; publicId: string }[] = [];
+
+      for (const img of images) {
+        if (img.file) {
+          const fd = new FormData();
+          fd.append("image", img.file);
+          const res = await apiFetch("/upload", { method: "POST", body: fd });
+          uploaded.push({
+            url: res.url,
+            publicId: res.publicId,
+          });
+        } else if (img.url && img.publicId) {
+          uploaded.push({
+            url: img.url,
+            publicId: img.publicId,
+          });
+        }
+      }
+
       return await apiFetch("/event", {
         method: "POST",
         body: JSON.stringify({
           ...data,
           startDate: data.startDate.toISOString(),
           endDate: data.endDate.toISOString(),
+          images: uploaded,
         }),
       });
     },
@@ -87,6 +109,7 @@ function EventPage() {
       toast.success(t("eventPage.eventCreated"));
       setOpen(false);
       form.reset();
+      setImages([]);
       queryClient.invalidateQueries({ queryKey: ["events"] });
     },
     onError: () => {
@@ -135,8 +158,23 @@ function EventPage() {
               onClick={() =>
                 navigate({ to: "/event/$id", params: { id: String(event.id) } })
               }
-              className="cursor-pointer hover:shadow-md transition"
+              className="cursor-pointer hover:shadow-md transition overflow-hidden"
             >
+              {(() => {
+                const cover =
+                  event.images?.[0]?.optimizedUrl || event.images?.[0]?.url;
+                return cover ? (
+                  <img
+                    src={cover}
+                    alt={event.title}
+                    className="h-36 w-full object-cover"
+                  />
+                ) : (
+                  <div className="h-36 w-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm">
+                    {t("eventsDetail.noImage")}
+                  </div>
+                );
+              })()}
               <CardHeader>
                 <CardTitle>{event.title}</CardTitle>
               </CardHeader>
@@ -185,6 +223,13 @@ function EventPage() {
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-3 mt-2"
             >
+              <ImageUploader
+                value={images}
+                onChange={setImages}
+                editable
+                height="h-56"
+              />
+
               <Input
                 placeholder={t("eventPage.name")}
                 {...form.register("title")}

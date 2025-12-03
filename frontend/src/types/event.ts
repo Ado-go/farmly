@@ -1,3 +1,5 @@
+import type { MediaImage } from "./farm";
+
 export type EventParticipant = {
   id: number;
   name: string;
@@ -18,4 +20,5 @@ export type Event = {
   country: string;
   organizer: EventParticipant;
   participants: EventParticipant[];
+  images?: MediaImage[];
 };

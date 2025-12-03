@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
 import { getCategoryLabel } from "@/lib/productCategories";
+import { ImageCarousel } from "@/components/ImageCarousel";
 
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ type EventDetail = {
   street: string;
   region: string;
   organizer: { id: number; name: string };
+  images?: { url: string; optimizedUrl?: string }[];
   eventProducts?: {
     id: number;
     product: {
@@ -67,6 +69,10 @@ function EventPageDetail() {
   const products = event.eventProducts ?? [];
   const now = new Date();
   const eventHasNotStarted = new Date(event.startDate) > now;
+  const carouselImages =
+    event.images?.map((img) => ({
+      url: img.optimizedUrl || img.url,
+    })) ?? [];
 
   type EventProductDetail = NonNullable<EventDetail["eventProducts"]>[number];
   const handleAddToPreorder = (ep: EventProductDetail) => {
@@ -91,6 +97,20 @@ function EventPageDetail() {
     <div className="p-6 space-y-6">
       <Card className="p-6">
         <h2 className="text-2xl font-bold mb-2">{event.title}</h2>
+        {carouselImages.length > 0 ? (
+          <div className="my-4">
+            <ImageCarousel
+              images={carouselImages}
+              editable={false}
+              height="h-56"
+              emptyLabel={t("eventsDetail.noImage")}
+            />
+          </div>
+        ) : (
+          <div className="w-full h-56 bg-gray-200 flex items-center justify-center rounded my-4 text-gray-500">
+            {t("eventsDetail.noImage")}
+          </div>
+        )}
         <p className="text-sm text-gray-600">
           {event.city}, {event.region}
         </p>

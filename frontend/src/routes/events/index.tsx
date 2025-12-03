@@ -38,6 +38,7 @@ type Event = {
   region: string;
   organizer: { id: number; name: string };
   eventProducts: EventProduct[];
+  images?: { url: string; optimizedUrl?: string }[];
 };
 
 function EventsPage() {
@@ -101,25 +102,43 @@ function EventsPage() {
 
   const renderEventCard = (event: Event) => (
     <Link key={event.id} to="/events/$id" params={{ id: String(event.id) }}>
-      <Card className="p-4 hover:shadow-lg transition">
-        <h3 className="font-bold">{event.title}</h3>
-        <p className="text-sm text-gray-600">{event.city}</p>
-        <p className="text-xs text-gray-500 mt-1">
-          {new Date(event.startDate).toLocaleDateString()} -{" "}
-          {new Date(event.endDate).toLocaleDateString()}
-        </p>
-        <p className="text-xs text-gray-500 mt-1">
-          {t("eventsPage.organizedBy")} {event.organizer.name}
-        </p>
+      <Card className="p-0 hover:shadow-lg transition overflow-hidden">
+        {(() => {
+          const cover =
+            event.images?.[0]?.optimizedUrl || event.images?.[0]?.url;
+          return cover ? (
+            <img
+              src={cover}
+              alt={event.title}
+              className="h-36 w-full object-cover"
+            />
+          ) : (
+            <div className="h-36 w-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm">
+              {t("eventsDetail.noImage")}
+            </div>
+          );
+        })()}
 
-        {event.eventProducts?.length > 0 && (
-          <ul className="text-xs text-gray-600 mt-2">
-            {event.eventProducts.slice(0, 2).map((p) => (
-              <li key={p.id}>• {p.product.name}</li>
-            ))}
-            {event.eventProducts.length > 2 && <li>…</li>}
-          </ul>
-        )}
+        <div className="p-4">
+          <h3 className="font-bold">{event.title}</h3>
+          <p className="text-sm text-gray-600">{event.city}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            {new Date(event.startDate).toLocaleDateString()} -{" "}
+            {new Date(event.endDate).toLocaleDateString()}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            {t("eventsPage.organizedBy")} {event.organizer.name}
+          </p>
+
+          {event.eventProducts?.length > 0 && (
+            <ul className="text-xs text-gray-600 mt-2">
+              {event.eventProducts.slice(0, 2).map((p) => (
+                <li key={p.id}>• {p.product.name}</li>
+              ))}
+              {event.eventProducts.length > 2 && <li>…</li>}
+            </ul>
+          )}
+        </div>
       </Card>
     </Link>
   );

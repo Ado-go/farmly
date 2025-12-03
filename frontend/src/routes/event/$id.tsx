@@ -18,7 +18,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import DatePicker from "@/components/date-picker";
 import { EventProductsSection } from "@/components/EventProductsSection";
@@ -26,6 +26,8 @@ import { useAuth } from "@/context/AuthContext";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import type { TFunction } from "i18next";
 import type { Event } from "@/types/event";
+import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
+import { ImageCarousel } from "@/components/ImageCarousel";
 
 const eventSchema = z.object({
   title: z.string().min(3, "Názov je povinný"),
@@ -53,11 +55,28 @@ function EventDetailPage() {
   const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
+  const [images, setImages] = useState<UploadedImage[]>([]);
 
   const { data: event, isLoading } = useQuery<Event>({
     queryKey: ["event", id],
     queryFn: async () => apiFetch(`/event/${id}`),
   });
+
+  const eventImages = useMemo(
+    () =>
+      event?.images
+        ? event.images.map((img) => ({
+            url: img.optimizedUrl || img.url,
+            publicId: img.publicId,
+            optimizedUrl: img.optimizedUrl,
+          }))
+        : [],
+    [event]
+  );
+
+  useEffect(() => {
+    setImages(eventImages);
+  }, [eventImages]);
 
   const isOrganizer = event?.organizer.id === user?.id;
   const isParticipant = event?.participants.some((p) => p.id === user?.id);
@@ -79,15 +98,36 @@ function EventDetailPage() {
   });
 
   const updateEvent = useMutation({
-    mutationFn: (data: EventFormData) =>
-      apiFetch(`/event/${id}`, {
+    mutationFn: async (data: EventFormData & { images: UploadedImage[] }) => {
+      const uploaded: { url: string; publicId: string }[] = [];
+
+      for (const img of data.images) {
+        if (img.file) {
+          const fd = new FormData();
+          fd.append("image", img.file);
+          const res = await apiFetch("/upload", { method: "POST", body: fd });
+          uploaded.push({
+            url: res.url,
+            publicId: res.publicId,
+          });
+        } else if (img.url && img.publicId) {
+          uploaded.push({
+            url: img.url,
+            publicId: img.publicId,
+          });
+        }
+      }
+
+      return apiFetch(`/event/${id}`, {
         method: "PUT",
         body: JSON.stringify({
           ...data,
+          images: uploaded,
           startDate: data.startDate.toISOString(),
           endDate: data.endDate.toISOString(),
         }),
-      }),
+      });
+    },
     onSuccess: () => {
       toast.success(t("eventPage.updated"));
       setEditMode(false);
@@ -120,6 +160,9 @@ function EventDetailPage() {
       </div>
     );
 
+  const displayImages =
+    images?.map((img) => ({ url: img.optimizedUrl || img.url })) ?? [];
+
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
       <Card>
@@ -132,10 +175,27 @@ function EventDetailPage() {
               event={event}
               t={t}
               onSave={updateEvent.mutate}
-              onCancel={() => setEditMode(false)}
+              onCancel={() => {
+                setImages(eventImages);
+                setEditMode(false);
+              }}
+              images={images}
+              onImagesChange={setImages}
             />
           ) : (
             <>
+              {displayImages.length > 0 ? (
+                <ImageCarousel
+                  images={displayImages}
+                  editable={false}
+                  height="h-56"
+                />
+              ) : (
+                <div className="w-full h-56 bg-gray-200 flex items-center justify-center rounded text-gray-500">
+                  {t("eventsDetail.noImage")}
+                </div>
+              )}
+
               <p>
                 <strong>{t("eventPage.description")}:</strong>{" "}
                 {event.description || "—"}
@@ -254,12 +314,21 @@ function EventDetailPage() {
 
 type EditFormProps = {
   event: Event;
-  onSave: (data: EventFormData) => void;
+  onSave: (data: EventFormData & { images: UploadedImage[] }) => void;
   onCancel: () => void;
   t: TFunction;
+  images: UploadedImage[];
+  onImagesChange: (imgs: UploadedImage[]) => void;
 };
 
-function EditForm({ event, onSave, onCancel, t }: EditFormProps) {
+function EditForm({
+  event,
+  onSave,
+  onCancel,
+  t,
+  images,
+  onImagesChange,
+}: EditFormProps) {
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
@@ -275,13 +344,24 @@ function EditForm({ event, onSave, onCancel, t }: EditFormProps) {
     },
   });
 
-  const onSubmit = (data: EventFormData) => onSave(data);
+  const onSubmit = (data: EventFormData) =>
+    onSave({
+      ...data,
+      images,
+    });
 
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
       className="space-y-2 text-sm mt-2"
     >
+      <ImageUploader
+        value={images}
+        onChange={onImagesChange}
+        editable
+        height="h-56"
+      />
+
       <Input {...form.register("title")} placeholder={t("eventPage.name")} />
       <Textarea
         {...form.register("description")}
