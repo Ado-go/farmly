@@ -141,6 +141,34 @@ const pickFarmName = (city: string) =>
 const pickEventTitle = (city: string) =>
   eventTitleTemplates[randomInt(0, eventTitleTemplates.length - 1)](city);
 
+type EventTiming = "past" | "ongoing" | "future";
+
+const buildEventDates = (timing: EventTiming) => {
+  const now = new Date();
+
+  if (timing === "past") {
+    const startDate = new Date(now);
+    startDate.setDate(startDate.getDate() - randomInt(7, 20));
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + randomInt(4, 24));
+    return { startDate, endDate };
+  }
+
+  if (timing === "ongoing") {
+    const startDate = new Date(now);
+    startDate.setHours(startDate.getHours() - randomInt(1, 12));
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + randomInt(16, 48));
+    return { startDate, endDate };
+  }
+
+  const startDate = new Date(now);
+  startDate.setDate(startDate.getDate() + randomInt(3, 20));
+  const endDate = new Date(startDate);
+  endDate.setHours(endDate.getHours() + randomInt(4, 24));
+  return { startDate, endDate };
+};
+
 const reviewComments = [
   "Výborná kvalita a rýchle doručenie!",
   "Veľmi chutné produkty, určite objednám znova.",
@@ -394,14 +422,15 @@ async function main() {
   // ------------------- EVENTS -------------------
   console.log("📅 Creating events...");
   for (const farmer of farmers) {
-    const numEvents = randomInt(1, 2);
+    const eventTimings: EventTiming[] = ["past", "ongoing", "future"];
+    const extraEvents = randomInt(0, 1);
+    for (let i = 0; i < extraEvents; i++) {
+      eventTimings.push("future");
+    }
 
-    for (let i = 0; i < numEvents; i++) {
+    for (const timing of eventTimings) {
       const cityIndex = randomInt(0, cities.length - 1);
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() + randomInt(-5, 20));
-      const endDate = new Date(startDate);
-      endDate.setHours(endDate.getHours() + randomInt(4, 24));
+      const { startDate, endDate } = buildEventDates(timing);
 
       const eventTitle = pickEventTitle(cities[cityIndex]);
       const event = await prisma.event.create({
