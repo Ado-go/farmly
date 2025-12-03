@@ -68,7 +68,6 @@ router.get("/", async (req, res) => {
         select: { id: true, name: true, profileImageUrl: true },
       },
       farmProducts: {
-        where: category ? { product: { category } } : undefined,
         include: {
           product: {
             include: {
