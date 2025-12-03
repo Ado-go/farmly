@@ -221,12 +221,8 @@ function ProductsPage() {
     return (
       <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-6 space-y-1">
-          <h2 className="text-2xl font-bold">
-            {t("productsPage.heading")}
-          </h2>
-          <p className="text-sm text-gray-600">
-            {t("productsPage.subtitle")}
-          </p>
+          <h2 className="text-2xl font-bold">{t("productsPage.heading")}</h2>
+          <p className="text-sm text-gray-600">{t("productsPage.subtitle")}</p>
         </div>
         <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
           <Card className="p-4 h-fit space-y-2">
@@ -262,9 +258,6 @@ function ProductsPage() {
                 </Card>
               ))}
             </div>
-            <p className="text-center text-gray-500">
-              {t("productsPage.loading")}
-            </p>
           </div>
         </div>
       </div>
@@ -282,13 +275,9 @@ function ProductsPage() {
       <div className="mb-6 space-y-2">
         <div className="flex items-center gap-2">
           <Store className="h-5 w-5 text-primary" />
-          <h2 className="text-2xl font-bold">
-            {t("productsPage.heading")}
-          </h2>
+          <h2 className="text-2xl font-bold">{t("productsPage.heading")}</h2>
         </div>
-        <p className="text-sm text-gray-600">
-          {t("productsPage.subtitle")}
-        </p>
+        <p className="text-sm text-gray-600">{t("productsPage.subtitle")}</p>
       </div>
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
         <Card className="p-4 h-fit">
