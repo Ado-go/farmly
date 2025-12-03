@@ -308,7 +308,7 @@ function Footer() {
             </Link>
             <Link
               to="/farms"
-              search={{ page: 1 }}
+              search={{ page: 1, category: undefined, search: undefined }}
               className="hover:text-foreground"
             >
               {t("farms")}
