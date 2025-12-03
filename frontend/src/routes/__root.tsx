@@ -75,7 +75,11 @@ function RootLayout() {
       label: t("events"),
       search: { page: 1, search: undefined, region: undefined },
     },
-    { to: "/offers", label: t("offers"), search: { page: 1 } },
+    {
+      to: "/offers",
+      label: t("offers"),
+      search: { page: 1, search: undefined, category: undefined },
+    },
     { to: "/farms", label: t("farms"), search: { page: 1 } },
   ];
 
@@ -313,7 +317,7 @@ function Footer() {
             </Link>
             <Link
               to="/offers"
-              search={{ page: 1 }}
+              search={{ page: 1, search: undefined, category: undefined }}
               className="hover:text-foreground"
             >
               {t("offers")}
