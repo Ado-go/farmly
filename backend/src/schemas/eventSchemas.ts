@@ -44,6 +44,14 @@ export const eventSchema = z
       .string()
       .min(2, "Country must be at least 2 characters long")
       .max(100, "Country must not exceed 100 characters"),
+    images: z
+      .array(
+        z.object({
+          url: z.string().url("Invalid image URL"),
+          publicId: z.string(),
+        })
+      )
+      .optional(),
   })
   .superRefine((data, ctx) => {
     const start = Date.parse(data.startDate);

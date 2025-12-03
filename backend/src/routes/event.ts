@@ -1,8 +1,10 @@
 import { Router } from "express";
 import prisma from "../prisma.ts";
+import type { Prisma } from "@prisma/client";
 import { authenticateToken, authorizeRole } from "../middleware/auth.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
 import { eventSchema } from "../schemas/eventSchemas.ts";
+import { v2 as cloudinary } from "cloudinary";
 
 const router = Router();
 
@@ -14,6 +16,10 @@ router.post(
   validateRequest(eventSchema),
   async (req, res) => {
     const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
     try {
       // max 5 events
@@ -27,11 +33,24 @@ router.post(
           .json({ message: "You can create a maximum of 5 events." });
       }
 
-      const event = await prisma.event.create({
-        data: {
-          ...req.body,
-          organizerId: userId,
+      const { images = [], ...eventData } = req.body as {
+        images?: { url: string; publicId: string }[];
+      } & Omit<Prisma.EventCreateInput, "organizer" | "images">;
+
+      const createData: Prisma.EventCreateInput = {
+        ...eventData,
+        organizer: { connect: { id: userId } },
+        images: {
+          create: images.map((img) => ({
+            url: img.url,
+            publicId: img.publicId,
+          })),
         },
+      };
+
+      const event = await prisma.event.create({
+        data: createData,
+        include: { images: true },
       });
 
       await prisma.eventParticipant.create({
@@ -69,6 +88,7 @@ router.get(
           postalCode: true,
           country: true,
           createdAt: true,
+          images: true,
 
           organizer: {
             select: {
@@ -138,6 +158,7 @@ router.get(
           postalCode: true,
           country: true,
           createdAt: true,
+          images: true,
 
           organizer: {
             select: {
@@ -203,6 +224,7 @@ router.put(
           id: eventId,
           organizerId: userId,
         },
+        include: { images: true },
       });
 
       if (!existingEvent) {
@@ -211,9 +233,62 @@ router.put(
           .json({ message: "Event not found or unauthorized" });
       }
 
-      const updatedEvent = await prisma.event.update({
+      const { images = [], ...data } = req.body as {
+        images?: { url: string; publicId: string }[];
+        [k: string]: any;
+      };
+
+      const existingPublicIds = existingEvent.images.map((i) => i.publicId);
+      const newPublicIds = (images || [])
+        .map((i) => i.publicId)
+        .filter(Boolean);
+
+      const toDelete = existingPublicIds.filter(
+        (pid) => !newPublicIds.includes(pid)
+      );
+
+      await prisma.$transaction(async (tx) => {
+        if (toDelete.length > 0) {
+          await Promise.all(
+            toDelete.map(async (pid) => {
+              try {
+                await cloudinary.uploader.destroy(pid, {
+                  resource_type: "image",
+                });
+              } catch (e) {
+                console.error("Failed to delete Cloudinary image:", pid, e);
+              }
+            })
+          );
+
+          await tx.eventImage.deleteMany({
+            where: { eventId, publicId: { in: toDelete } },
+          });
+        }
+
+        const newImages = (images || []).filter(
+          (img) => !existingPublicIds.includes(img.publicId)
+        );
+
+        if (newImages.length > 0) {
+          await tx.eventImage.createMany({
+            data: newImages.map((img) => ({
+              url: img.url,
+              publicId: img.publicId,
+              eventId,
+            })),
+          });
+        }
+
+        await tx.event.update({
+          where: { id: eventId },
+          data,
+        });
+      });
+
+      const updatedEvent = await prisma.event.findUnique({
         where: { id: eventId },
-        data: req.body,
+        include: { images: true },
       });
 
       res.json(updatedEvent);
@@ -243,6 +318,7 @@ router.delete(
           id: eventId,
           organizerId: userId,
         },
+        include: { images: true },
       });
 
       if (!existingEvent) {
@@ -251,8 +327,30 @@ router.delete(
           .json({ message: "Event not found or unauthorized" });
       }
 
-      await prisma.event.delete({
-        where: { id: eventId },
+      const publicIds = (existingEvent.images || []).map((i) => i.publicId);
+
+      await prisma.$transaction(async (tx) => {
+        if (publicIds.length > 0) {
+          await Promise.all(
+            publicIds.map(async (pid) => {
+              try {
+                await cloudinary.uploader.destroy(pid, {
+                  resource_type: "image",
+                });
+              } catch (e) {
+                console.error("Failed to delete Cloudinary image:", pid, e);
+              }
+            })
+          );
+
+          await tx.eventImage.deleteMany({
+            where: { eventId, publicId: { in: publicIds } },
+          });
+        }
+
+        await tx.event.delete({
+          where: { id: eventId },
+        });
       });
 
       res.json({ message: "Event was successfully deleted" });

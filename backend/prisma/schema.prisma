@@ -258,6 +258,7 @@ model Event {
   participants    EventParticipant[]
   eventProducts   EventProduct[]
   eventOrders     Order[]
+  images          EventImage[]
 }
 
 model EventParticipant {
@@ -279,6 +280,14 @@ model EventProduct {
   userId     Int
 
   @@unique([eventId, productId])
+}
+
+model EventImage {
+  id       Int   @id @default(autoincrement())
+  url      String
+  publicId String
+  event    Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId  Int
 }
 // ------------------- REVIEW -------------------
 

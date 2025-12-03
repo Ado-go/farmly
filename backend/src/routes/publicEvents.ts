@@ -32,6 +32,7 @@ router.get("/", async (req, res) => {
               profileImageUrl: true,
             },
           },
+          images: true,
           participants: {
             select: {
               user: {
@@ -91,6 +92,7 @@ router.get("/:id", async (req, res) => {
             profileImageUrl: true,
           },
         },
+        images: true,
         participants: {
           select: {
             user: {
