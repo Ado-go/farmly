@@ -272,7 +272,8 @@
     "noImage": "Bez obrázka"
   },
   "farmsPage": {
-    "title": "Farmy",
+    "title": "Naši farmári",
+    "subtitle": "Objavte lokálnych farmárov a ich čerstvé produkty.",
     "loading": "Načítavam farmy...",
     "error": "Nepodarilo sa načítať farmy.",
     "products": "Produkty",
@@ -280,6 +281,7 @@
     "errorLoading": "Chyba pri načítaní fárm.",
     "noFarms": "Zatiaľ tu nie sú žiadne farmy.",
     "noFilteredFarms": "Žiadne farmy nevyhovujú filtrom.",
+    "noProducts": "Na tejto farme zatiaľ nie sú žiadne produkty.",
     "filterByCategory": "Filtrovať podľa kategórie",
     "allCategories": "Všetky kategórie",
     "searchPlaceholder": "Hľadať podľa farmy alebo farmára",

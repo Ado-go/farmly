@@ -272,7 +272,8 @@
     "noImage": "No image"
   },
   "farmsPage": {
-    "title": "Farms",
+    "title": "Our farmers",
+    "subtitle": "Discover local farmers and their fresh produce.",
     "loading": "Loading farms...",
     "error": "Failed to load farms.",
     "products": "Products",
@@ -280,6 +281,7 @@
     "errorLoading": "Error loading farms.",
     "noFarms": "We don't have any farms yet.",
     "noFilteredFarms": "No farms match your filters yet.",
+    "noProducts": "No products on this farm yet.",
     "filterByCategory": "Filter by category",
     "allCategories": "All categories",
     "searchPlaceholder": "Search by farm or farmer",

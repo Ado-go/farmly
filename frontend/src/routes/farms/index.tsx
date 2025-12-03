@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Search, Sprout } from "lucide-react";
 
 export const Route = createFileRoute("/farms/")({
   component: FarmsPage,
@@ -193,8 +193,14 @@ function FarmsPage() {
 
   return (
     <div className="p-6 space-y-10">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h2 className="text-2xl font-bold">{t("farmsPage.title")}</h2>
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Sprout className="h-5 w-5 text-emerald-600" />
+            <h2 className="text-2xl font-bold">{t("farmsPage.title")}</h2>
+          </div>
+          <p className="text-sm text-gray-600">{t("farmsPage.subtitle")}</p>
+        </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <div className="relative w-full sm:w-64">
@@ -252,6 +258,7 @@ function FarmsPage() {
                   key={farm.id}
                   to="/farms/$id"
                   params={{ id: String(farm.id) }}
+                  search={{ page: 1, category, search }}
                 >
                   <Card className="p-4 hover:shadow-lg transition">
                     <h3 className="font-bold">{farm.name}</h3>
