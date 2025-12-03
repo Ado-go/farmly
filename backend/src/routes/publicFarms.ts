@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { Prisma, ProductCategory } from "@prisma/client";
 import prisma from "../prisma.ts";
 import {
   buildPaginationResponse,
@@ -6,6 +7,16 @@ import {
 } from "../utils/pagination.ts";
 
 const router = Router();
+
+const parseCategory = (
+  value: unknown
+): ProductCategory | undefined => {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return Object.values(ProductCategory).includes(trimmed as ProductCategory)
+    ? (trimmed as ProductCategory)
+    : undefined;
+};
 
 const toNumber = (value: unknown) => {
   if (value === null || value === undefined) return null;
@@ -24,32 +35,62 @@ const deriveRating = (rawRating: unknown) => {
 router.get("/", async (req, res) => {
   try {
     const { page, pageSize, skip, take } = getPaginationParams(req.query);
+    const category = parseCategory(req.query.category);
+    const search =
+      typeof req.query.search === "string" && req.query.search.trim()
+        ? req.query.search.trim()
+        : undefined;
+
+    const where: Prisma.FarmWhereInput = {};
+
+    const filters: Prisma.FarmWhereInput[] = [];
+
+    if (search) {
+      filters.push({
+        OR: [
+          { name: { contains: search, mode: "insensitive" } },
+          { farmer: { name: { contains: search, mode: "insensitive" } } },
+        ],
+      });
+    }
+
+    if (category) {
+      filters.push({ farmProducts: { some: { product: { category } } } });
+    }
+
+    if (filters.length > 0) {
+      where.AND = filters;
+    }
+
+    const farmInclude = {
+      images: true,
+      farmer: {
+        select: { id: true, name: true, profileImageUrl: true },
+      },
+      farmProducts: {
+        where: category ? { product: { category } } : undefined,
+        include: {
+          product: {
+            include: {
+              images: true,
+              reviews: {
+                include: { user: { select: { id: true, name: true } } },
+              },
+            },
+          },
+        },
+      },
+    } satisfies Prisma.FarmInclude;
 
     const [farms, total] = await Promise.all([
       prisma.farm.findMany({
         skip,
         take,
+        where,
         orderBy: { createdAt: "desc" },
-        include: {
-          images: true,
-          farmer: {
-            select: { id: true, name: true, profileImageUrl: true },
-          },
-          farmProducts: {
-            include: {
-              product: {
-                include: {
-                  images: true,
-                  reviews: {
-                    include: { user: { select: { id: true, name: true } } },
-                  },
-                },
-              },
-            },
-          },
-        },
+        include: farmInclude,
       }),
-      prisma.farm.count(),
+      prisma.farm.count({ where }),
     ]);
 
     const formatted = farms.map((farm) => ({
