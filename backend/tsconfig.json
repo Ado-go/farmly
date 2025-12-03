@@ -6,6 +6,7 @@
     "types": ["node", "jest"],
     "module": "nodenext",
     "moduleResolution": "NodeNext",
+    "isolatedModules": true,
     "outDir": "dist",
     "rootDir": "src",
     "esModuleInterop": true,
