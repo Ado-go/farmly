@@ -279,6 +279,10 @@
     "farmer": "Farmár",
     "errorLoading": "Chyba pri načítaní fárm.",
     "noFarms": "Zatiaľ tu nie sú žiadne farmy.",
+    "noFilteredFarms": "Žiadne farmy nevyhovujú filtrom.",
+    "filterByCategory": "Filtrovať podľa kategórie",
+    "allCategories": "Všetky kategórie",
+    "searchPlaceholder": "Hľadať podľa farmy alebo farmára",
     "noImage": "Bez obrázka"
   },
   "reviews": {

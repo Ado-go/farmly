@@ -279,6 +279,10 @@
     "farmer": "Farmer",
     "errorLoading": "Error loading farms.",
     "noFarms": "We don't have any farms yet.",
+    "noFilteredFarms": "No farms match your filters yet.",
+    "filterByCategory": "Filter by category",
+    "allCategories": "All categories",
+    "searchPlaceholder": "Search by farm or farmer",
     "noImage": "No image"
   },
   "reviews": {

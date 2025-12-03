@@ -1,19 +1,36 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { PaginationControls } from "@/components/PaginationControls";
 import { apiFetch } from "@/lib/api";
 import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
-import { getCategoryLabel } from "@/lib/productCategories";
+import { PRODUCT_CATEGORIES, getCategoryLabel } from "@/lib/productCategories";
 import type { PaginatedResponse } from "@/types/pagination";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search } from "lucide-react";
 
 export const Route = createFileRoute("/farms/")({
   component: FarmsPage,
   validateSearch: (search: Record<string, unknown>) => ({
     page: Math.max(1, Number(search.page) || 1),
+    category:
+      typeof search.category === "string" && search.category.trim()
+        ? search.category.trim()
+        : undefined,
+    search:
+      typeof search.search === "string" && search.search.trim()
+        ? search.search.trim()
+        : undefined,
   }),
 });
 
@@ -39,23 +56,53 @@ type Farm = {
 
 function FarmsPage() {
   const { t } = useTranslation();
+  const { page, category, search } = Route.useSearch();
+  const [searchTerm, setSearchTerm] = useState(search ?? "");
   useEffect(() => {
     document.title = `${t("farms")} | ${t("farmly")}`;
   }, [t]);
 
-  const { page } = Route.useSearch();
   const navigate = useNavigate();
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [page]);
 
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useQuery<PaginatedResponse<Farm>>({
-    queryKey: ["farms", page],
-    queryFn: async () => apiFetch(`/farms?page=${page}&limit=${DEFAULT_PAGE_SIZE}`),
+  useEffect(() => {
+    setSearchTerm(search ?? "");
+  }, [search]);
+
+  useEffect(() => {
+    const trimmed = searchTerm.trim();
+    if (trimmed === (search ?? "")) return;
+
+    const timeout = setTimeout(() => {
+      const nextSearch = trimmed || undefined;
+      navigate({
+        to: "/farms",
+        search: {
+          page: 1,
+          category,
+          search: nextSearch,
+        },
+      });
+    }, 350);
+
+    return () => clearTimeout(timeout);
+  }, [searchTerm, category, navigate, search]);
+
+  const { data, isLoading, isError } = useQuery<PaginatedResponse<Farm>>({
+    queryKey: ["farms", page, category, search],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(DEFAULT_PAGE_SIZE),
+      });
+
+      if (category) params.append("category", category);
+      if (search) params.append("search", search);
+
+      return apiFetch(`/farms?${params.toString()}`);
+    },
     placeholderData: keepPreviousData,
   });
 
@@ -64,18 +111,58 @@ function FarmsPage() {
 
   const handlePageChange = (nextPage: number) => {
     const safePage = Math.max(1, Math.min(nextPage, totalPages || nextPage));
-    navigate({ to: "/farms", search: { page: safePage } });
+    navigate({
+      to: "/farms",
+      search: { page: safePage, category, search },
+    });
+  };
+
+  const handleCategoryChange = (selected?: string) => {
+    const nextSearch = searchTerm.trim() || undefined;
+    navigate({
+      to: "/farms",
+      search: { page: 1, category: selected, search: nextSearch },
+    });
   };
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Card key={i} className="animate-pulse h-40" />
-        ))}
-        <p className="col-span-full text-center text-gray-500 mt-4">
-          {t("farmsPage.loading")}
-        </p>
+      <div className="p-6 space-y-8">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <div className="h-7 w-32 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-56 bg-gray-100 rounded animate-pulse" />
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <div className="h-10 w-full sm:w-64 bg-gray-100 rounded animate-pulse" />
+            <div className="h-10 w-full sm:w-48 bg-gray-100 rounded animate-pulse" />
+          </div>
+        </div>
+
+        <div className="space-y-8">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse" />
+                <div className="space-y-2">
+                  <div className="h-4 w-28 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, j) => (
+                  <Card key={j} className="p-4 space-y-3">
+                    <div className="h-5 w-2/3 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-32 w-full bg-gray-100 rounded animate-pulse" />
+                    <div className="h-4 w-1/2 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-3 w-3/4 bg-gray-100 rounded animate-pulse" />
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -102,12 +189,51 @@ function FarmsPage() {
 
   const farmers = Object.values(farmersMap);
 
+  const hasFilters = Boolean(category || search);
+
   return (
     <div className="p-6 space-y-10">
-      <h2 className="text-2xl font-bold mb-6">{t("farmsPage.title")}</h2>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <h2 className="text-2xl font-bold">{t("farmsPage.title")}</h2>
+
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder={t("farmsPage.searchPlaceholder")}
+              className="pl-10"
+            />
+          </div>
+
+          <Select
+            value={category ?? "all"}
+            onValueChange={(value) =>
+              handleCategoryChange(value === "all" ? undefined : value)
+            }
+          >
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue placeholder={t("farmsPage.filterByCategory")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                {t("farmsPage.allCategories")}
+              </SelectItem>
+              {PRODUCT_CATEGORIES.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {getCategoryLabel(cat, t)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
       {farmers?.length === 0 ? (
-        <p className="text-gray-500">{t("farmsPage.noFarms")}</p>
+        <p className="text-gray-500">
+          {hasFilters ? t("farmsPage.noFilteredFarms") : t("farmsPage.noFarms")}
+        </p>
       ) : (
         farmers.map(({ farmer, farms }) => (
           <div key={farmer.id}>
