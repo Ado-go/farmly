@@ -368,13 +368,24 @@
   },
   "eventsPage": {
     "title": "Events",
+    "subtitle": "Discover farmers' markets and local happenings near you.",
     "loading": "Loading events...",
     "errorLoading": "Failed to load events.",
     "ongoing": "Ongoing Events",
     "upcoming": "Upcoming Events",
+    "liveNow": "Live now",
+    "ongoingDescription": "See the events that are already buzzing.",
+    "upcomingDescription": "Plan what to visit next and add it to your calendar.",
+    "searchPlaceholder": "Search by title, city or organizer",
+    "regionLabel": "Region",
+    "regionPlaceholder": "Filter by region",
+    "regionAll": "All regions",
     "noOngoing": "There are no ongoing events at the moment.",
     "noUpcoming": "No upcoming events.",
-    "organizedBy": "Organized by"
+    "noDescription": "No description provided yet.",
+    "noResults": "No events match your search yet.",
+    "organizedBy": "Organized by",
+    "productsCount": "{{count}} products"
   },
   "eventsDetail": {
     "loading": "Loading event details...",

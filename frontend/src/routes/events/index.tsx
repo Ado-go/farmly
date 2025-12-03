@@ -1,186 +1,220 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
-import { PaginationControls } from "@/components/PaginationControls";
+import { EventsHeader } from "@/components/events/EventsHeader";
+import { OngoingCarousel } from "@/components/events/OngoingCarousel";
+import { UpcomingGrid } from "@/components/events/UpcomingGrid";
 import { apiFetch } from "@/lib/api";
 import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 import type { PaginatedResponse } from "@/types/pagination";
+import type { Event } from "@/types/events";
 
 export const Route = createFileRoute("/events/")({
   component: EventsPage,
-  validateSearch: (search: Record<string, unknown>) => ({
-    page: Math.max(1, Number(search.page) || 1),
-  }),
+  validateSearch: (search: Record<string, unknown>) => {
+    const parsedSearch =
+      typeof search.search === "string" && search.search.trim()
+        ? search.search.trim()
+        : undefined;
+    const parsedRegion =
+      typeof search.region === "string" && search.region.trim()
+        ? search.region.trim()
+        : undefined;
+
+    return {
+      page: Math.max(1, Number(search.page) || 1),
+      search: parsedSearch,
+      region: parsedRegion,
+    };
+  },
 });
 
-type EventProduct = {
-  id: number;
-  product: {
-    id: number;
-    name: string;
-    category: string;
-    description: string;
-    basePrice: number;
-    images: { url: string }[];
-  };
-  user: { id: number; name: string };
-};
-
-type Event = {
-  id: number;
-  title: string;
-  description?: string;
-  startDate: string;
-  endDate: string;
-  city: string;
-  region: string;
-  organizer: { id: number; name: string };
-  eventProducts: EventProduct[];
-  images?: { url: string; optimizedUrl?: string }[];
-};
+const REGIONS = [
+  { value: "all", label: "All regions" },
+  { value: "bratislavsky", label: "Bratislavský kraj" },
+  { value: "trnavsky", label: "Trnavský kraj" },
+  { value: "trenciansky", label: "Trenčiansky kraj" },
+  { value: "nitriansky", label: "Nitriansky kraj" },
+  { value: "zilinsky", label: "Žilinský kraj" },
+  { value: "banskobystricky", label: "Banskobystrický kraj" },
+  { value: "presovsky", label: "Prešovský kraj" },
+  { value: "kosicky", label: "Košický kraj" },
+];
 
 function EventsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { page, search, region } = Route.useSearch();
+  const [searchTerm, setSearchTerm] = useState(search ?? "");
+  const [selectedRegion, setSelectedRegion] = useState(region ?? "all");
+
   useEffect(() => {
     document.title = `${t("events")} | ${t("farmly")}`;
   }, [t]);
 
-  const { page } = Route.useSearch();
-  const navigate = useNavigate();
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [page]);
 
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useQuery<PaginatedResponse<Event>>({
-    queryKey: ["public-events", page],
-    queryFn: async () =>
-      apiFetch(`/public-events?page=${page}&limit=${DEFAULT_PAGE_SIZE}`),
+  useEffect(() => {
+    setSearchTerm(search ?? "");
+  }, [search]);
+
+  useEffect(() => {
+    setSelectedRegion(region ?? "all");
+  }, [region]);
+
+  useEffect(() => {
+    const trimmed = searchTerm.trim();
+    if (trimmed === (search ?? "")) return;
+
+    const timeout = setTimeout(() => {
+      navigate({
+        to: "/events",
+        search: {
+          page: 1,
+          search: trimmed || undefined,
+          region: selectedRegion === "all" ? undefined : selectedRegion,
+        },
+      });
+    }, 350);
+
+    return () => clearTimeout(timeout);
+  }, [searchTerm, search, navigate, selectedRegion]);
+
+  const handleRegionChange = (value: string) => {
+    const nextRegion = value === "all" ? undefined : value;
+    setSelectedRegion(value);
+    navigate({
+      to: "/events",
+      search: {
+        page: 1,
+        search: searchTerm.trim() || undefined,
+        region: nextRegion,
+      },
+    });
+  };
+
+  const { data, isLoading, isError } = useQuery<PaginatedResponse<Event>>({
+    queryKey: ["public-events", page, search],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(DEFAULT_PAGE_SIZE),
+      });
+
+      if (search) params.append("search", search);
+
+      return apiFetch(`/public-events?${params.toString()}`);
+    },
     placeholderData: keepPreviousData,
   });
 
-  const events = data?.items ?? [];
+  const events = useMemo(() => data?.items ?? [], [data]);
   const totalPages = data?.totalPages ?? 1;
 
   const handlePageChange = (nextPage: number) => {
     const safePage = Math.max(1, Math.min(nextPage, totalPages || nextPage));
-    navigate({ to: "/events", search: { page: safePage } });
+    navigate({
+      to: "/events",
+      search: {
+        page: safePage,
+        search: search ?? undefined,
+        region: selectedRegion === "all" ? undefined : selectedRegion,
+      },
+    });
   };
+
+  const filteredEvents = useMemo(() => {
+    if (!search) return events;
+    const term = search.toLowerCase();
+    return events.filter((event: Event) =>
+      [event.title, event.city, event.organizer?.name, event.region]
+        .filter(Boolean)
+        .some((value) => value?.toLowerCase().includes(term))
+    );
+  }, [events, search]);
+
+  const now = new Date();
+  const ongoing = filteredEvents.filter(
+    (event: Event) =>
+      new Date(event.startDate) <= now && new Date(event.endDate) >= now
+  );
+  const upcoming = filteredEvents.filter(
+    (event: Event) => new Date(event.startDate) > now
+  );
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Card key={i} className="animate-pulse h-40" />
-        ))}
-        <p className="col-span-full text-center text-gray-500 mt-4">
-          {t("eventsPage.loading")}
-        </p>
+      <div className="p-6">
+        <div className="mx-auto max-w-6xl space-y-8">
+          <Card className="space-y-4 border-primary/20 bg-white/80 p-6">
+            <div className="h-6 w-40 rounded bg-gray-200" />
+            <div className="h-10 w-60 rounded bg-gray-200" />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="h-11 rounded bg-gray-200" />
+              <div className="h-11 rounded bg-gray-200" />
+            </div>
+          </Card>
+
+          <div className="space-y-4">
+            <div className="h-6 w-48 rounded bg-gray-200" />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="h-64 animate-pulse bg-gray-100" />
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="h-6 w-56 rounded bg-gray-200" />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="h-60 animate-pulse bg-gray-100" />
+              ))}
+            </div>
+            <div className="mx-auto h-10 w-64 rounded-full bg-gray-100" />
+          </div>
+        </div>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <p className="text-center text-red-500 p-6">
+      <p className="p-6 text-center text-red-500">
         {t("eventsPage.errorLoading")}
       </p>
     );
   }
 
-  const now = new Date();
-  const ongoing = events.filter(
-    (event: Event) =>
-      new Date(event.startDate) <= now && new Date(event.endDate) >= now
-  );
-  const upcoming = events.filter((event: Event) => new Date(event.startDate) > now);
-
-  const renderEventCard = (event: Event) => (
-    <Link key={event.id} to="/events/$id" params={{ id: String(event.id) }}>
-      <Card className="p-0 hover:shadow-lg transition overflow-hidden">
-        {(() => {
-          const cover =
-            event.images?.[0]?.optimizedUrl || event.images?.[0]?.url;
-          return cover ? (
-            <img
-              src={cover}
-              alt={event.title}
-              className="h-36 w-full object-cover"
-            />
-          ) : (
-            <div className="h-36 w-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm">
-              {t("eventsDetail.noImage")}
-            </div>
-          );
-        })()}
-
-        <div className="p-4">
-          <h3 className="font-bold">{event.title}</h3>
-          <p className="text-sm text-gray-600">{event.city}</p>
-          <p className="text-xs text-gray-500 mt-1">
-            {new Date(event.startDate).toLocaleDateString()} -{" "}
-            {new Date(event.endDate).toLocaleDateString()}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">
-            {t("eventsPage.organizedBy")} {event.organizer.name}
-          </p>
-
-          {event.eventProducts?.length > 0 && (
-            <ul className="text-xs text-gray-600 mt-2">
-              {event.eventProducts.slice(0, 2).map((p) => (
-                <li key={p.id}>• {p.product.name}</li>
-              ))}
-              {event.eventProducts.length > 2 && <li>…</li>}
-            </ul>
-          )}
-        </div>
-      </Card>
-    </Link>
-  );
+  const hasNoMatches = ongoing.length === 0 && upcoming.length === 0;
 
   return (
-    <div className="p-6 space-y-10">
-      <h2 className="text-2xl font-bold mb-6">{t("eventsPage.title")}</h2>
+    <div className="p-6">
+      <div className="mx-auto max-w-6xl space-y-10">
+        <EventsHeader
+          ongoingCount={ongoing.length}
+          upcomingCount={upcoming.length}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedRegion={selectedRegion}
+          onRegionChange={handleRegionChange}
+          regions={REGIONS}
+        />
 
-      <section>
-        <h3 className="text-xl font-semibold mb-4">
-          {t("eventsPage.ongoing")}
-        </h3>
-        {ongoing.length === 0 ? (
-          <p className="text-gray-500">{t("eventsPage.noOngoing")}</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {ongoing.map(renderEventCard)}
-          </div>
-        )}
-      </section>
+        <OngoingCarousel events={ongoing} />
 
-      <section>
-        <h3 className="text-xl font-semibold mb-4">
-          {t("eventsPage.upcoming")}
-        </h3>
-        {upcoming.length === 0 ? (
-          <p className="text-gray-500">{t("eventsPage.noUpcoming")}</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {upcoming.map(renderEventCard)}
-          </div>
-        )}
-      </section>
-
-      <PaginationControls
-        page={page}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        prevLabel={t("pagination.previous")}
-        nextLabel={t("pagination.next")}
-        className="pt-2"
-      />
+        <UpcomingGrid
+          events={upcoming}
+          hasNoMatches={hasNoMatches}
+          page={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </div>
   );
 }

@@ -58,11 +58,23 @@ function RootLayout() {
     setIsCartMenuOpen(false);
     navigate({ to: "/cart" });
   };
-  type NavLink = { to: string; label: string; search?: { page?: number } };
+  type NavSearch = {
+    page?: number;
+    sort?: "newest" | "price" | "rating" | "popular";
+    category?: string;
+    order?: "asc" | "desc";
+    search?: string;
+    region?: string;
+  };
+  type NavLink = { to: string; label: string; search?: NavSearch };
   const homeLink: NavLink = { to: "/", label: t("farmly") };
   const navLinks: NavLink[] = [
     { to: "/products", label: t("products"), search: { page: 1 } },
-    { to: "/events", label: t("events"), search: { page: 1 } },
+    {
+      to: "/events",
+      label: t("events"),
+      search: { page: 1, search: undefined, region: undefined },
+    },
     { to: "/offers", label: t("offers"), search: { page: 1 } },
     { to: "/farms", label: t("farms"), search: { page: 1 } },
   ];
@@ -294,7 +306,7 @@ function Footer() {
             </Link>
             <Link
               to="/events"
-              search={{ page: 1 }}
+              search={{ page: 1, search: undefined, region: undefined }}
               className="hover:text-foreground"
             >
               {t("events")}

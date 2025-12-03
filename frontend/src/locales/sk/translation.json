@@ -368,13 +368,24 @@
   },
   "eventsPage": {
     "title": "Udalosti",
+    "subtitle": "Objav udalosti od farmárov a trhov vo svojom okolí.",
     "loading": "Načítavam udalosti...",
     "errorLoading": "Nepodarilo sa načítať udalosti.",
     "ongoing": "Prebiehajúce udalosti",
     "upcoming": "Nadchádzajúce udalosti",
+    "liveNow": "Práve prebieha",
+    "ongoingDescription": "Pozri si udalosti, ktoré už bežia.",
+    "upcomingDescription": "Naplánuj si, čo chceš stihnúť nabudúce.",
+    "searchPlaceholder": "Hľadať podľa názvu, mesta alebo organizátora",
+    "regionLabel": "Kraj",
+    "regionPlaceholder": "Filtrovať podľa kraja",
+    "regionAll": "Všetky kraje",
     "noOngoing": "Momentálne neprebiehajú žiadne udalosti.",
     "noUpcoming": "Žiadne nadchádzajúce udalosti.",
-    "organizedBy": "Organizuje"
+    "noDescription": "Bez popisu.",
+    "noResults": "Žiadne udalosti nespĺňajú vyhľadávanie.",
+    "organizedBy": "Organizuje",
+    "productsCount": "{{count}} produktov"
   },
   "eventsDetail": {
     "loading": "Načítavam údaje o udalosti...",
