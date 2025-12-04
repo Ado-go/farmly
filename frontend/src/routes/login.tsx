@@ -83,48 +83,51 @@ function LoginPage() {
 
       <div className="relative mx-auto max-w-5xl px-4 py-10">
         <Card className="w-full overflow-hidden border-primary/15 bg-white/95 shadow-2xl backdrop-blur">
-          <div className="grid md:grid-cols-[1.05fr_0.95fr]">
-            <div className="relative hidden md:flex flex-col gap-6 bg-gradient-to-br from-primary via-emerald-600 to-emerald-500 p-10 text-primary-foreground">
+          <div className="grid items-stretch md:grid-cols-[1.05fr_0.95fr] md:min-h-[520px]">
+            <div className="relative hidden h-full overflow-hidden md:flex text-primary-foreground">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary via-emerald-600 to-emerald-500" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.14),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.12),transparent_32%)]" />
 
-              <div className="relative flex items-center gap-3">
-                <div className="rounded-full bg-white/15 p-3">
-                  <Leaf className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-white/70">
-                    Farmly
-                  </p>
-                  <p className="text-lg font-semibold">
-                    {t("loginPage.welcome_back")}
-                  </p>
-                </div>
-              </div>
-
-              <p className="relative max-w-md text-sm text-primary-foreground/90">
-                {t("footer.tagline")}
-              </p>
-
-              <div className="relative grid gap-4">
-                {[
-                  { icon: ShieldCheck, label: t("loginPage.benefit_fresh") },
-                  { icon: Sparkles, label: t("loginPage.benefit_plan") },
-                  { icon: Lock, label: t("loginPage.benefit_support") },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 backdrop-blur"
-                  >
-                    <item.icon className="h-5 w-5 text-white" />
-                    <p className="text-sm font-medium text-primary-foreground">
-                      {item.label}
+              <div className="relative flex h-full flex-col gap-6 p-10">
+                <div className="relative flex items-center gap-3">
+                  <div className="rounded-full bg-white/15 p-3">
+                    <Leaf className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.3em] text-white/70">
+                      Farmly
+                    </p>
+                    <p className="text-lg font-semibold">
+                      {t("loginPage.welcome_back")}
                     </p>
                   </div>
-                ))}
+                </div>
+
+                <p className="relative max-w-md text-sm text-primary-foreground/90">
+                  {t("footer.tagline")}
+                </p>
+
+                <div className="relative grid gap-4">
+                  {[
+                    { icon: ShieldCheck, label: t("loginPage.benefit_fresh") },
+                    { icon: Sparkles, label: t("loginPage.benefit_plan") },
+                    { icon: Lock, label: t("loginPage.benefit_support") },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 backdrop-blur"
+                    >
+                      <item.icon className="h-5 w-5 text-white" />
+                      <p className="text-sm font-medium text-primary-foreground">
+                        {item.label}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="relative p-6 sm:p-10">
+            <div className="relative flex h-full flex-col p-6 sm:p-10">
               <div className="mb-6 rounded-2xl bg-gradient-to-r from-primary to-emerald-600 p-4 text-primary-foreground md:hidden">
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-white/20 p-2">
@@ -222,7 +225,7 @@ function LoginPage() {
                       <Button
                         variant="secondary"
                         asChild
-                        className="h-11 px-4 text-base shadow-md"
+                        className="h-10 px-3 text-sm shadow-md"
                       >
                         <Link to="/register">
                           {t("loginPage.cta_register_button")}
