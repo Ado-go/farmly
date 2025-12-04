@@ -2,26 +2,15 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { ProductCard } from "@/components/ProductCard";
 import { Card } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
-import { ImageCarousel } from "@/components/ImageCarousel";
-import { ProfileAvatar } from "@/components/ProfileAvatar";
-import {
-  PRODUCT_CATEGORIES,
-  getCategoryLabel,
-} from "@/lib/productCategories";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { PaginationControls } from "@/components/PaginationControls";
+import { getCategoryLabel } from "@/lib/productCategories";
 import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
-import { Leaf, MapPin, Search, Sprout } from "lucide-react";
+import { FarmDetailHero } from "@/components/farms/FarmDetailHero";
+import { FarmGalleryCard } from "@/components/farms/FarmGalleryCard";
+import { FarmOverviewCard } from "@/components/farms/FarmOverviewCard";
+import { FarmProductsSection } from "@/components/farms/FarmProductsSection";
+import type { Farm, FarmProduct } from "@/types/farm";
 
 export const Route = createFileRoute("/farms/$id")({
   component: FarmDetailPage,
@@ -38,34 +27,7 @@ export const Route = createFileRoute("/farms/$id")({
   }),
 });
 
-type FarmProduct = {
-  id: number;
-  price: number;
-  stock: number;
-  product: {
-    id: number;
-    name: string;
-    category: string;
-    description?: string;
-    rating?: number;
-    images: { url: string }[];
-    reviews?: { rating: number }[];
-  };
-};
-
-type FarmDetail = {
-  id: number;
-  name: string;
-  description?: string;
-  city: string;
-  street: string;
-  region: string;
-  postalCode: string;
-  country: string;
-  images?: { url: string; optimizedUrl?: string }[];
-  farmer?: { id: number; name: string; profileImageUrl?: string | null };
-  farmProducts: FarmProduct[];
-};
+type FarmDetail = Farm & { farmProducts: FarmProduct[] };
 
 function FarmDetailPage() {
   const { t } = useTranslation();
@@ -222,189 +184,45 @@ function FarmDetailPage() {
       url: img.optimizedUrl || img.url,
     })) ?? [];
 
+  const activeCategoryLabel = category
+    ? getCategoryLabel(category, t)
+    : t("farmsPage.allCategories");
+
   return (
     <div className="p-6">
       <div className="mx-auto max-w-6xl space-y-8">
-        <Card className="border-primary/20 bg-gradient-to-r from-primary/10 via-white to-white p-6 shadow-sm">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-semibold text-primary shadow-sm">
-                <Sprout className="h-4 w-4" />
-                {t("farmsPage.title")}
-              </div>
-              <div className="flex items-center gap-2">
-                <Leaf className="h-5 w-5 text-primary" />
-                <h2 className="text-3xl font-bold">{farm.name}</h2>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
-                <MapPin className="h-4 w-4 text-primary" />
-                <span className="font-semibold text-gray-800">
-                  {location.primary}
-                </span>
-                {location.secondary ? (
-                  <span className="text-gray-500">• {location.secondary}</span>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-3 text-xs font-medium text-gray-700">
-              <div className="rounded-2xl bg-white px-4 py-3 shadow-sm">
-                {t("farmsPage.products")}: {productCount}
-              </div>
-              <div className="rounded-2xl bg-white px-4 py-3 shadow-sm">
-                {t("farmsPage.farmer")}:{" "}
-                {farm.farmer?.name || t("farmsPage.unknownFarmer")}
-              </div>
-            </div>
-          </div>
-        </Card>
+        <FarmDetailHero
+          name={farm.name}
+          location={location}
+          productCount={productCount}
+          farmerName={farm.farmer?.name}
+        />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
-          <Card className="p-0 overflow-hidden border-primary/15 shadow-sm">
-            {carouselImages.length > 0 ? (
-              <ImageCarousel
-                images={carouselImages}
-                editable={false}
-                height="h-72"
-                emptyLabel={t("farmsPage.noImage")}
-              />
-            ) : (
-              <div className="flex h-72 w-full items-center justify-center bg-primary/5 text-primary">
-                {t("farmsPage.noImage")}
-              </div>
-            )}
-          </Card>
+          <FarmGalleryCard images={carouselImages} />
 
-          <Card className="space-y-4 border-primary/15 bg-white/90 p-5 shadow-sm">
-            {farm.description ? (
-              <p className="text-sm text-gray-700 leading-relaxed">
-                {farm.description}
-              </p>
-            ) : null}
-
-            <div className="flex items-start gap-3 text-sm text-gray-700">
-              <MapPin className="mt-0.5 h-5 w-5 text-primary" />
-              <div>
-                <p className="font-semibold text-gray-800">
-                  {location.primary}
-                </p>
-                {location.secondary ? (
-                  <p className="text-gray-500">{location.secondary}</p>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 rounded-lg bg-primary/5 px-3 py-2">
-              <ProfileAvatar
-                imageUrl={farm.farmer?.profileImageUrl}
-                name={farm.farmer?.name}
-                size={48}
-              />
-              <div>
-                <p className="text-xs uppercase tracking-wide text-gray-500">
-                  {t("farmsPage.farmer")}
-                </p>
-                <p className="font-semibold text-emerald-700">
-                  {farm.farmer?.name || t("farmsPage.unknownFarmer")}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2 text-xs font-semibold text-primary">
-              <span className="rounded-full bg-primary/10 px-3 py-1">
-                {t("farmsPage.products")}: {productCount}
-              </span>
-              <span className="rounded-full bg-white px-3 py-1 text-gray-700 shadow-sm">
-                {t("farmsPage.activeCategory", {
-                  category: category
-                    ? getCategoryLabel(category, t)
-                    : t("farmsPage.allCategories"),
-                })}
-              </span>
-            </div>
-          </Card>
+          <FarmOverviewCard
+            description={farm.description}
+            location={location}
+            farmer={farm.farmer}
+            productCount={productCount}
+            activeCategoryLabel={activeCategoryLabel}
+          />
         </div>
 
-        <Card className="space-y-5 border-primary/15 bg-white/90 p-5 shadow-sm">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-1">
-              <h3 className="text-xl font-semibold">
-                {t("farmsPage.products")}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {t("farmsPage.activeCategory", {
-                  category: category
-                    ? getCategoryLabel(category, t)
-                    : t("farmsPage.allCategories"),
-                })}
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder={t("productsPage.searchPlaceholder")}
-                  className="pl-10"
-                />
-              </div>
-
-              <Select
-                value={category ?? "all"}
-                onValueChange={(value) =>
-                  handleCategoryChange(value === "all" ? undefined : value)
-                }
-              >
-                <SelectTrigger className="w-full sm:w-56">
-                  <SelectValue
-                    placeholder={t("farmsPage.filterByCategory")}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    {t("farmsPage.allCategories")}
-                  </SelectItem>
-                  {PRODUCT_CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {getCategoryLabel(cat, t)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {filteredProducts?.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-primary/20 bg-primary/5 p-6 text-center text-gray-500">
-              {t("farmsPage.noProducts")}
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {paginatedProducts.map((fp) => (
-                  <ProductCard
-                    key={fp.id}
-                    product={fp}
-                    sellerNameOverride={farm.name}
-                  />
-                ))}
-              </div>
-
-              {totalPages > 1 ? (
-                <PaginationControls
-                  page={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                  prevLabel={t("pagination.previous")}
-                  nextLabel={t("pagination.next")}
-                  className="pt-2"
-                />
-              ) : null}
-            </>
-          )}
-        </Card>
+        <FarmProductsSection
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          category={category}
+          onCategoryChange={handleCategoryChange}
+          paginatedProducts={paginatedProducts}
+          filteredCount={filteredProducts.length}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          activeCategoryLabel={activeCategoryLabel}
+          farmName={farm.name}
+        />
       </div>
     </div>
   );
