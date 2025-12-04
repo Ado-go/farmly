@@ -30,15 +30,14 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 function RootLayout() {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const { cart, totalPrice } = useCart();
+  const { cart } = useCart();
   const navigate = useNavigate();
   const { location } = useRouterState();
-  const [isCartMenuOpen, setIsCartMenuOpen] = useState(false);
 
   useEffect(() => {
     const hasCustomTitle = ["/products", "/events", "/offers", "/farms"].some(
@@ -54,10 +53,7 @@ function RootLayout() {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [location.pathname]);
 
-  const handleGoToCart = () => {
-    setIsCartMenuOpen(false);
-    navigate({ to: "/cart" });
-  };
+  const handleGoToCart = () => navigate({ to: "/cart" });
   type NavSearch = {
     page?: number;
     sort?: "newest" | "price" | "rating" | "popular";
@@ -133,49 +129,19 @@ function RootLayout() {
 
         {/* RIGHT SIDE */}
         <div className="flex items-center gap-2">
-          <DropdownMenu open={isCartMenuOpen} onOpenChange={setIsCartMenuOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                {cart.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
-                    {cart.length}
-                  </span>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end" className="w-64">
-              {cart.length === 0 ? (
-                <div className="p-3 text-sm text-gray-500 text-center">
-                  {t("cart.empty")}
-                </div>
-              ) : (
-                <>
-                  <div className="max-h-64 overflow-y-auto divide-y">
-                    {cart.map((item) => (
-                      <div key={item.productId} className="p-2 text-sm">
-                        <p className="font-medium truncate">
-                          {item.productName}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {item.quantity}× {item.unitPrice} €
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="p-3 border-t text-sm flex justify-between items-center">
-                    <span className="font-medium">
-                      {t("cart.total")}: {totalPrice.toFixed(2)} €
-                    </span>
-                    <Button size="sm" onClick={handleGoToCart}>
-                      {t("cart.open")}
-                    </Button>
-                  </div>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            variant="outline"
+            size="icon"
+            className="relative"
+            onClick={handleGoToCart}
+          >
+            <ShoppingCart className="h-5 w-5" />
+            {cart.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                {cart.length}
+              </span>
+            )}
+          </Button>
 
           <div className="hidden md:flex items-center gap-2">
             <ModeToggle />
