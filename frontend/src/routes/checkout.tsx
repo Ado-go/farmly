@@ -1,59 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useCart } from "@/context/CartContext";
-import { apiFetch } from "@/lib/api";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
+
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
+import { apiFetch } from "@/lib/api";
 import { pickupLocations } from "@/lib/pickupLocations";
+import { CheckoutProgress } from "@/components/checkout/CheckoutProgress";
+import { DeliveryForm } from "@/components/checkout/DeliveryForm";
+import { PaymentForm } from "@/components/checkout/PaymentForm";
+import { OrderSummary } from "@/components/checkout/OrderSummary";
+import {
+  addressSchema,
+  paymentSchema,
+  type AddressData,
+  type DeliveryOption,
+  type PaymentData,
+} from "@/types/checkout";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
 });
-
-const addressSchema = z.object({
-  contactName: z.string().min(2, "Name is required"),
-  contactPhone: z
-    .string()
-    .min(6, "Phone number must have at least 6 digits")
-    .regex(/^\+?\d{6,15}$/, "Enter a valid phone number"),
-  email: z.string().email(),
-  deliveryOption: z.enum(["ADDRESS", "PICKUP"]),
-  deliveryCity: z.string().min(2, "City required"),
-  deliveryStreet: z.string().optional(),
-  deliveryPostalCode: z.string().min(2, "Postal code required"),
-  deliveryCountry: z.string().min(2, "Country required"),
-});
-
-const paymentSchema = z.object({
-  paymentMethod: z.enum(["CASH", "CARD"]),
-});
-
-type AddressData = z.infer<typeof addressSchema>;
-type PaymentData = z.infer<typeof paymentSchema>;
-type DeliveryOption = AddressData["deliveryOption"];
-type PaymentMethod = PaymentData["paymentMethod"];
 
 function CheckoutPage() {
   const { t } = useTranslation();
@@ -87,6 +58,24 @@ function CheckoutPage() {
     defaultValues: { paymentMethod: "CASH" },
   });
 
+  const steps = useMemo(
+    () => [
+      {
+        label: t("checkoutPage.deliveryStep"),
+        helper: t("checkoutPage.deliveryInfo"),
+      },
+      {
+        label: t("checkoutPage.paymentStep"),
+        helper: t("checkoutPage.paymentMethod"),
+      },
+      {
+        label: t("checkoutPage.summaryStep"),
+        helper: t("checkoutPage.summary"),
+      },
+    ],
+    [t]
+  );
+
   const applyPickupLocation = (locationId: string) => {
     const location = pickupLocations.find((p) => p.id === locationId);
     if (!location) return;
@@ -115,7 +104,7 @@ function CheckoutPage() {
     setAddressData(null);
     setPaymentData(null);
     addressForm.reset();
-    paymentForm.reset();
+    paymentForm.reset({ paymentMethod: "CASH" });
   };
 
   useEffect(() => {
@@ -210,8 +199,7 @@ function CheckoutPage() {
     addressForm.setValue("deliveryOption", value);
 
     if (value === "PICKUP") {
-      const fallbackPickupId =
-        selectedPickupId || pickupLocations[0]?.id || "";
+      const fallbackPickupId = selectedPickupId || pickupLocations[0]?.id || "";
 
       if (fallbackPickupId) {
         applyPickupLocation(fallbackPickupId);
@@ -230,277 +218,74 @@ function CheckoutPage() {
     });
   };
 
-  const selectedPickup = pickupLocations.find(
-    (pickup) => pickup.id === selectedPickupId
-  );
-
   if (cart.length === 0)
     return (
-      <p className="p-4 text-center text-gray-600">
-        {t("checkoutPage.emptyCart")}
-      </p>
+      <main className="relative min-h-screen bg-gradient-to-b from-primary/10 via-white to-emerald-50">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.12),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(245,158,11,0.12),transparent_32%)]" />
+        <div className="relative mx-auto max-w-3xl px-4 py-10">
+          <Card className="border-primary/15 shadow-xl">
+            <CardContent className="p-6 sm:p-10 text-center space-y-4">
+              <h1 className="text-2xl font-semibold text-primary">
+                {t("checkoutPage.title")}
+              </h1>
+              <p className="text-muted-foreground">
+                {t("checkoutPage.emptyCart")}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
     );
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-8">
-      <CheckoutBreadcrumb step={step} setStep={setStep} />
+    <main className="relative min-h-screen bg-gradient-to-b from-primary/10 via-white to-emerald-50">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.12),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(245,158,11,0.12),transparent_32%)]" />
+      <div className="relative mx-auto max-w-5xl px-4 py-10 space-y-8">
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-primary">
+            {t("checkoutPage.title")}
+          </p>
+          <h1 className="text-3xl font-semibold">
+            {t("checkoutPage.summaryStep")}
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            {t("checkoutPage.deliveryInfo")}
+          </p>
+        </div>
 
-      {step === 1 && (
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <h2 className="text-xl font-semibold mb-2">
-              {t("checkoutPage.deliveryInfo")}
-            </h2>
+        <CheckoutProgress step={step} steps={steps} onStepChange={setStep} />
 
-            <form
-              onSubmit={addressForm.handleSubmit(handleAddressSubmit)}
-              className="space-y-3"
-            >
-              <Input
-                placeholder={t("checkoutPage.name")}
-                {...addressForm.register("contactName")}
-              />
-              <Input
-                placeholder={t("checkoutPage.phone")}
-                {...addressForm.register("contactPhone")}
-              />
-              <Input
-                type="email"
-                placeholder={t("checkoutPage.email")}
-                {...addressForm.register("email")}
-              />
+        {step === 1 && (
+          <DeliveryForm
+            form={addressForm}
+            pickupLocations={pickupLocations}
+            selectedPickupId={selectedPickupId}
+            onPickupChange={applyPickupLocation}
+            onDeliveryOptionChange={handleDeliveryOptionChange}
+            onSubmit={handleAddressSubmit}
+          />
+        )}
 
-              <div className="space-y-1">
-                <label className="text-sm font-medium">
-                  {t("checkoutPage.deliveryOption")}
-                </label>
-                <Select
-                  value={addressForm.watch("deliveryOption")}
-                  onValueChange={handleDeliveryOptionChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={t("checkoutPage.selectDelivery")}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ADDRESS">
-                      {t("checkoutPage.toAddress")}
-                    </SelectItem>
-                    <SelectItem value="PICKUP">
-                      {t("checkoutPage.pickupPoint")}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+        {step === 2 && (
+          <PaymentForm
+            form={paymentForm}
+            onSubmit={handlePaymentSubmit}
+            onBack={() => setStep(1)}
+          />
+        )}
 
-              {addressForm.watch("deliveryOption") === "ADDRESS" ? (
-                <>
-                  <Input
-                    placeholder={t("checkoutPage.street")}
-                    {...addressForm.register("deliveryStreet")}
-                  />
-                  <Input
-                    placeholder={t("checkoutPage.city")}
-                    {...addressForm.register("deliveryCity")}
-                  />
-                  <Input
-                    placeholder={t("checkoutPage.postalCode")}
-                    {...addressForm.register("deliveryPostalCode")}
-                  />
-                  <Input
-                    placeholder={t("checkoutPage.country")}
-                    {...addressForm.register("deliveryCountry")}
-                  />
-                </>
-              ) : (
-                <>
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium">
-                      {t("checkoutPage.pickupPoint")}
-                    </label>
-                    <Select
-                      value={selectedPickupId}
-                      onValueChange={applyPickupLocation}
-                    >
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={t("checkoutPage.pickupPoint")}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {pickupLocations.map((location) => (
-                          <SelectItem key={location.id} value={location.id}>
-                            {location.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {selectedPickup && (
-                    <div className="p-3 bg-gray-50 rounded-md text-sm text-gray-700">
-                      <p className="font-medium">{selectedPickup.name}</p>
-                      <p>{selectedPickup.street}</p>
-                      <p>
-                        {selectedPickup.postalCode} {selectedPickup.city}
-                      </p>
-                      <p>{selectedPickup.country}</p>
-                    </div>
-                  )}
-                </>
-              )}
-
-              <div className="flex justify-end pt-4">
-                <Button type="submit">{t("checkoutPage.next")}</Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      {step === 2 && (
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <h2 className="text-xl font-semibold mb-2">
-              {t("checkoutPage.paymentMethod")}
-            </h2>
-
-            <form
-              onSubmit={paymentForm.handleSubmit(handlePaymentSubmit)}
-              className="space-y-3"
-            >
-              <Select
-                value={paymentForm.watch("paymentMethod")}
-                onValueChange={(v) =>
-                  paymentForm.setValue("paymentMethod", v as PaymentMethod)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("checkoutPage.selectPayment")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CASH">{t("checkoutPage.cash")}</SelectItem>
-                  <SelectItem value="CARD">{t("checkoutPage.card")}</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <div className="flex justify-between pt-4">
-                <Button variant="outline" onClick={() => setStep(1)}>
-                  {t("checkoutPage.back")}
-                </Button>
-                <Button type="submit">{t("checkoutPage.next")}</Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      {step === 3 && (
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <h2 className="text-xl font-semibold mb-4">
-              {t("checkoutPage.summary")}
-            </h2>
-
-            <div className="space-y-2 text-sm text-gray-700">
-              <p>
-                <strong>{t("checkoutPage.name")}:</strong>{" "}
-                {addressData?.contactName}
-              </p>
-              <p>
-                <strong>{t("checkoutPage.phone")}:</strong>{" "}
-                {addressData?.contactPhone}
-              </p>
-              <p>
-                <strong>{t("checkoutPage.email")}:</strong> {addressData?.email}
-              </p>
-              <p>
-                <strong>{t("checkoutPage.deliveryType")}:</strong>{" "}
-                {addressData?.deliveryOption === "ADDRESS"
-                  ? t("checkoutPage.toAddress")
-                  : t("checkoutPage.pickupPoint")}
-              </p>
-              <p>
-                <strong>{t("checkoutPage.paymentMethod")}:</strong>{" "}
-                {paymentData?.paymentMethod === "CARD"
-                  ? t("checkoutPage.card")
-                  : t("checkoutPage.cash")}
-              </p>
-            </div>
-
-            <Separator className="my-4" />
-
-            <h3 className="font-semibold">{t("checkoutPage.products")}</h3>
-            <ul className="divide-y divide-gray-200">
-              {cart.map((item, index) => (
-                <li key={index} className="py-2 flex justify-between text-sm">
-                  <span>
-                    {item.productName} × {item.quantity}
-                  </span>
-                  <span>{(item.unitPrice * item.quantity).toFixed(2)} €</span>
-                </li>
-              ))}
-            </ul>
-
-            <Separator className="my-4" />
-            <p className="text-lg font-semibold text-right">
-              {t("checkoutPage.total")}: {totalPrice.toFixed(2)} €
-            </p>
-
-            <div className="flex justify-between pt-4">
-              <Button variant="outline" onClick={() => setStep(2)}>
-                {t("checkoutPage.back")}
-              </Button>
-              <Button disabled={loadingPayment} onClick={handleConfirmOrder}>
-                {loadingPayment
-                  ? "Presmerovávam..."
-                  : t("checkoutPage.confirm")}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-}
-
-function CheckoutBreadcrumb({
-  step,
-  setStep,
-}: {
-  step: number;
-  setStep: (s: number) => void;
-}) {
-  const { t } = useTranslation();
-
-  const steps = [
-    { label: t("checkoutPage.deliveryStep") },
-    { label: t("checkoutPage.paymentStep") },
-    { label: t("checkoutPage.summaryStep") },
-  ];
-
-  return (
-    <Breadcrumb>
-      <BreadcrumbList>
-        {steps.map((s, i) => (
-          <BreadcrumbItem key={i}>
-            <BreadcrumbLink
-              onClick={() => step > i + 1 && setStep(i + 1)}
-              className={`cursor-pointer ${
-                step === i + 1
-                  ? "text-[var(--primary)] font-semibold"
-                  : step > i + 1
-                    ? "text-foreground hover:text-[var(--primary)]"
-                    : "text-muted-foreground cursor-default"
-              }`}
-            >
-              {s.label}
-            </BreadcrumbLink>
-            {i < steps.length - 1 && <BreadcrumbSeparator />}
-          </BreadcrumbItem>
-        ))}
-      </BreadcrumbList>
-    </Breadcrumb>
+        {step === 3 && (
+          <OrderSummary
+            addressData={addressData}
+            paymentData={paymentData}
+            cart={cart}
+            totalPrice={totalPrice}
+            loadingPayment={loadingPayment}
+            onBack={() => setStep(2)}
+            onConfirm={handleConfirmOrder}
+          />
+        )}
+      </div>
+    </main>
   );
 }

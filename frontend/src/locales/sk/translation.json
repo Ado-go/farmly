@@ -584,7 +584,11 @@
     "emptyCart": "Váš košík je prázdny.",
     "success": "Objednávka bola úspešne vytvorená!",
     "error": "Nepodarilo sa odoslať objednávku. Skúste to znova.",
-    "products": "Zoznam produktov"
+    "products": "Zoznam produktov",
+    "secureProcess": "Bezpečný priebeh",
+    "statusAwaiting": "Čaká",
+    "statusCompleted": "Hotovo",
+    "statusInProgress": "Prebieha"
   },
   "cart": {
     "empty": "Košík je prázdny",

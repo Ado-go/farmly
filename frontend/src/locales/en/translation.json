@@ -584,7 +584,11 @@
     "emptyCart": "Your cart is empty.",
     "success": "Order created successfully!",
     "error": "Failed to place order. Please try again.",
-    "products": "Product list"
+    "products": "Product list",
+    "secureProcess": "Secure process",
+    "statusAwaiting": "Awaiting",
+    "statusCompleted": "Completed",
+    "statusInProgress": "In progress"
   },
   "cart": {
     "empty": "Your cart is empty",
