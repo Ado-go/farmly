@@ -412,6 +412,7 @@
     "myTitle": "Moje ponuky",
     "loading": "Načítavam ponuky...",
     "errorLoading": "Nepodarilo sa načítať ponuky.",
+    "notFound": "Ponuku sa nepodarilo nájsť.",
     "noOffers": "Žiadne ponuky zatiaľ neexistujú.",
     "noResults": "Žiadne ponuky nespĺňajú filtre.",
     "noImage": "Bez obrázka",

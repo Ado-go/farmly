@@ -412,6 +412,7 @@
     "myTitle": "My Offers",
     "loading": "Loading offers...",
     "errorLoading": "Failed to load offers.",
+    "notFound": "Offer not found.",
     "noOffers": "No offers available yet.",
     "noResults": "No offers match your filters yet.",
     "noImage": "No image",
