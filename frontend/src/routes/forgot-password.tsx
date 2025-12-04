@@ -56,7 +56,7 @@ function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex flex-col items-center  min-h-[80vh] px-4">
+    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
       <div className="w-full max-w-sm space-y-6">
         <h1 className="text-2xl font-semibold text-center">
           {t("forgotPasswordPage.title")}

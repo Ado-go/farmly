@@ -73,6 +73,7 @@ function ResetPasswordPage() {
           <Field>
             <Label>{t("resetPasswordPage.passwordLabel")}</Label>
             <Input
+              className="bg-white"
               type="password"
               placeholder={t("resetPasswordPage.passwordPlaceholder")}
               {...register("newPassword")}
