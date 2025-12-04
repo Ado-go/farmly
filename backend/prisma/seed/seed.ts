@@ -592,8 +592,13 @@ async function main() {
   // ------------------ REVIEWS ------------------
   console.log("⭐ Creating reviews...");
   const productsWithReviews = new Set<number>();
-  for (const prod of allProducts) {
-    const reviewCount = randomInt(1, 3);
+
+  // Farm products: each gets 0-12 reviews; other products remain without reviews
+  const farmProductIds = new Set(
+    farmProductRecords.map((record) => record.product.id)
+  );
+  for (const record of farmProductRecords) {
+    const reviewCount = randomInt(0, 12);
     for (let i = 0; i < reviewCount; i++) {
       const reviewer = customers[randomInt(0, customers.length - 1)];
       await prisma.review.create({
@@ -601,10 +606,12 @@ async function main() {
           comment: reviewComments[randomInt(0, reviewComments.length - 1)],
           rating: randomInt(3, 5),
           userId: reviewer.id,
-          productId: prod.id,
+          productId: record.product.id,
         },
       });
-      productsWithReviews.add(prod.id);
+    }
+    if (reviewCount > 0) {
+      productsWithReviews.add(record.product.id);
     }
   }
 
