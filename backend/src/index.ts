@@ -26,6 +26,8 @@ import publicFarmsRoutes from "./routes/publicFarms.ts";
 
 import publicEventsRoutes from "./routes/publicEvents.ts";
 
+import publicStatsRoutes from "./routes/publicStats.ts";
+
 // checkouts
 
 import checkoutRoutes from "./routes/checkout.ts";
@@ -80,6 +82,8 @@ app.use("/api/public-farm-products", publicFarmProductsRoutes);
 app.use("/api/farms", publicFarmsRoutes);
 
 app.use("/api/public-events", publicEventsRoutes);
+
+app.use("/api/public-stats", publicStatsRoutes);
 
 // checkouts
 
