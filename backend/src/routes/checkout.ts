@@ -473,14 +473,11 @@ router.post("/stripe/webhook", async (req, res) => {
               deliveryStreet: order.deliveryStreet,
               deliveryCity: order.deliveryCity,
               deliveryPostalCode: order.deliveryPostalCode,
-              deliveryCountry: order.deliveryCountry,
-            },
-            items: order.items,
-            paymentMethod: order.paymentMethod as
-              | "CARD"
-              | "CASH"
-              | "BANK_TRANSFER",
-          });
+            deliveryCountry: order.deliveryCountry,
+          },
+          items: order.items,
+          paymentMethod: order.paymentMethod as "CARD" | "CASH",
+        });
 
           try {
             await sendEmail(recipient, subject, html);

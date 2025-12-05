@@ -72,7 +72,7 @@ describe("Profile Routes", () => {
       postalCode: "04001",
       city: "Kosice",
       country: "Slovakia",
-      role: "ADMIN",
+      role: "FARMER",
     };
 
     const res = await request(app)

@@ -1,4 +1,4 @@
-type PaymentMethod = "CARD" | "CASH" | "BANK_TRANSFER";
+type PaymentMethod = "CARD" | "CASH";
 
 type OrderItem = {
   productName: string;

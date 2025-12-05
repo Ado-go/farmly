@@ -58,7 +58,6 @@ type OrderItemSeed = {
 const paymentOptions = [
   PaymentMethod.CASH,
   PaymentMethod.CARD,
-  PaymentMethod.BANK_TRANSFER,
 ];
 
 const orderStatuses = [

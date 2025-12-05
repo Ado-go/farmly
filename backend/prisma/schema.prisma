@@ -15,13 +15,11 @@ datasource db {
 enum Role {
   CUSTOMER
   FARMER
-  ADMIN
 }
 
 enum PaymentMethod {
   CASH
   CARD
-  BANK_TRANSFER
 }
 
 enum OrderType {
