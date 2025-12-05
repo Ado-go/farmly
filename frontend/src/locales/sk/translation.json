@@ -675,6 +675,26 @@
     "conflictCancel": "Ponechať aktuálne položky",
     "conflictConfirm": "Vyčistiť košík a pokračovať"
   },
+  "orderLookup": {
+    "nav": "Sledovať objednávku",
+    "title": "Sledovanie objednávky",
+    "subtitle": "Zadaj celé číslo objednávky z potvrdzovacieho emailu.",
+    "inputLabel": "Číslo objednávky",
+    "inputPlaceholder": "napr. 123e4567-e89b-12d3-a456-426614174000",
+    "cta": "Vyhľadať objednávku",
+    "loading": "Hľadám...",
+    "invalid": "Zadaj celé číslo objednávky.",
+    "notFound": "Objednávku s týmto číslom sme nenašli.",
+    "genericError": "Pri hľadaní sa niečo nepodarilo. Skús to znova.",
+    "resultTitle": "Detail objednávky",
+    "orderType": "Typ objednávky",
+    "event": "Udalosť/odber",
+    "delivery": "Adresa doručenia",
+    "contact": "Kontakt",
+    "items": "Položky",
+    "createdAt": "Vytvorená",
+    "total": "Spolu"
+  },
   "ordersPage": {
     "loading": "Načítavam objednávky...",
     "empty": "Zatiaľ nemáš žiadne objednávky.",

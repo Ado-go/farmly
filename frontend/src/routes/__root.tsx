@@ -295,6 +295,9 @@ function Footer() {
             >
               {t("farms")}
             </Link>
+            <Link to="/orders" className="hover:text-foreground">
+              {t("orderLookup.nav")}
+            </Link>
           </div>
         </div>
 

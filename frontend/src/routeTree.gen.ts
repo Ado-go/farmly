@@ -14,6 +14,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PaymentSuccessRouteImport } from './routes/payment-success'
 import { Route as PaymentCancelledRouteImport } from './routes/payment-cancelled'
+import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CheckoutPreorderRouteImport } from './routes/checkout-preorder'
@@ -59,6 +60,11 @@ const PaymentSuccessRoute = PaymentSuccessRouteImport.update({
 const PaymentCancelledRoute = PaymentCancelledRouteImport.update({
   id: '/payment-cancelled',
   path: '/payment-cancelled',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersRoute = OrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/checkout-preorder': typeof CheckoutPreorderRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/orders': typeof OrdersRoute
   '/payment-cancelled': typeof PaymentCancelledRoute
   '/payment-success': typeof PaymentSuccessRoute
   '/profile': typeof ProfileRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/checkout-preorder': typeof CheckoutPreorderRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/orders': typeof OrdersRoute
   '/payment-cancelled': typeof PaymentCancelledRoute
   '/payment-success': typeof PaymentSuccessRoute
   '/profile': typeof ProfileRoute
@@ -231,6 +239,7 @@ export interface FileRoutesById {
   '/checkout-preorder': typeof CheckoutPreorderRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/orders': typeof OrdersRoute
   '/payment-cancelled': typeof PaymentCancelledRoute
   '/payment-success': typeof PaymentSuccessRoute
   '/profile': typeof ProfileRoute
@@ -261,6 +270,7 @@ export interface FileRouteTypes {
     | '/checkout-preorder'
     | '/forgot-password'
     | '/login'
+    | '/orders'
     | '/payment-cancelled'
     | '/payment-success'
     | '/profile'
@@ -289,6 +299,7 @@ export interface FileRouteTypes {
     | '/checkout-preorder'
     | '/forgot-password'
     | '/login'
+    | '/orders'
     | '/payment-cancelled'
     | '/payment-success'
     | '/profile'
@@ -317,6 +328,7 @@ export interface FileRouteTypes {
     | '/checkout-preorder'
     | '/forgot-password'
     | '/login'
+    | '/orders'
     | '/payment-cancelled'
     | '/payment-success'
     | '/profile'
@@ -346,6 +358,7 @@ export interface RootRouteChildren {
   CheckoutPreorderRoute: typeof CheckoutPreorderRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  OrdersRoute: typeof OrdersRoute
   PaymentCancelledRoute: typeof PaymentCancelledRoute
   PaymentSuccessRoute: typeof PaymentSuccessRoute
   ProfileRoute: typeof ProfileRoute
@@ -403,6 +416,13 @@ declare module '@tanstack/react-router' {
       path: '/payment-cancelled'
       fullPath: '/payment-cancelled'
       preLoaderRoute: typeof PaymentCancelledRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders': {
+      id: '/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof OrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -562,6 +582,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutPreorderRoute: CheckoutPreorderRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  OrdersRoute: OrdersRoute,
   PaymentCancelledRoute: PaymentCancelledRoute,
   PaymentSuccessRoute: PaymentSuccessRoute,
   ProfileRoute: ProfileRoute,

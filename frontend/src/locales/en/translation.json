@@ -675,6 +675,26 @@
     "conflictCancel": "Keep current items",
     "conflictConfirm": "Clear cart and continue"
   },
+  "orderLookup": {
+    "nav": "Track order",
+    "title": "Track your order",
+    "subtitle": "Enter the full order number from your confirmation email.",
+    "inputLabel": "Order number",
+    "inputPlaceholder": "e.g. 123e4567-e89b-12d3-a456-426614174000",
+    "cta": "Find order",
+    "loading": "Searching...",
+    "invalid": "Please enter the full order number.",
+    "notFound": "We couldn't find an order with this number.",
+    "genericError": "Something went wrong while searching. Please try again.",
+    "resultTitle": "Order detail",
+    "orderType": "Order type",
+    "event": "Pickup event",
+    "delivery": "Delivery address",
+    "contact": "Contact",
+    "items": "Items",
+    "createdAt": "Created at",
+    "total": "Total"
+  },
   "ordersPage": {
     "loading": "Loading orders...",
     "empty": "You have no orders yet.",
