@@ -143,7 +143,7 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
             <Button>{t("eventProducts.add")}</Button>
           </DialogTrigger>
 
-          <DialogContent>
+          <DialogContent className="sm:max-w-lg w-[min(92vw,34rem)] max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t("eventProducts.addDialogTitle")}</DialogTitle>
             </DialogHeader>
@@ -296,7 +296,7 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
                     {t("eventProducts.delete")}
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent className="sm:max-w-md w-[min(92vw,26rem)]">
                   <AlertDialogHeader>
                     <AlertDialogTitle>
                       {t("eventProducts.deleteConfirmTitle")}

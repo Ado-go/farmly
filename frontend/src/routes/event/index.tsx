@@ -319,7 +319,7 @@ function EventPage() {
                 {t("eventPage.addEvent")}
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-2xl w-[min(95vw,48rem)] max-h-[85vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{t("eventPage.newEvent")}</DialogTitle>
                 <DialogDescription>

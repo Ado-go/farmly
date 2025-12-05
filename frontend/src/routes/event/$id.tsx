@@ -303,7 +303,7 @@ function EventDetailPage() {
                                 {t("eventPage.delete")}
                               </Button>
                             </DialogTrigger>
-                            <DialogContent>
+                          <DialogContent className="sm:max-w-md w-[min(92vw,26rem)]">
                               <DialogHeader>
                                 <DialogTitle>
                                   {t("eventPage.confirmDelete")}
