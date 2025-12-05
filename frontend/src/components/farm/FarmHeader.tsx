@@ -198,7 +198,7 @@ export function FarmHeader({
       ) : (
         <form
           onSubmit={form.handleSubmit(handleSave)}
-          className="space-y-5 mt-6"
+          className="space-y-5 mt-6 max-h-[75vh] overflow-y-auto pr-1"
           noValidate
         >
           <div className="space-y-2">

@@ -311,6 +311,8 @@
     "save": "Save changes",
     "updated": "Product updated successfully",
     "deleted": "Product deleted.",
+    "confirmDeleteTitle": "Delete this product?",
+    "confirmDeleteText": "This action cannot be undone. The product will be removed.",
     "stockTooltip": "Stock is the limit one customer can order at once.",
     "validation": {
       "name": "Please enter a product name.",

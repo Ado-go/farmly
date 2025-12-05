@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -188,17 +189,22 @@ export function ProductForm({
           <Field>
             <FieldLabel htmlFor="price">{t("product.price")}</FieldLabel>
             <FieldContent>
-              <Input
-                id="price"
-                type="number"
-                className={inputTone}
-                placeholder={t("product.price")}
-                {...form.register("price", {
-                  valueAsNumber: true,
-                  setValueAs: (value) =>
-                    value === "" || value === null ? undefined : Number(value),
-                })}
-              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  €
+                </span>
+                <Input
+                  id="price"
+                  type="number"
+                  className={cn(inputTone, "pl-7")}
+                  placeholder={t("product.price")}
+                  {...form.register("price", {
+                    valueAsNumber: true,
+                    setValueAs: (value) =>
+                      value === "" || value === null ? undefined : Number(value),
+                  })}
+                />
+              </div>
               <FieldError errors={errors.price ? [errors.price] : undefined} />
             </FieldContent>
           </Field>

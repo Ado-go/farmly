@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -140,12 +140,12 @@ function FarmPage() {
                 {t("farmPage.addFarm")}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle className="space-y-1">
-                  <span className="block text-xs uppercase tracking-[0.28em] text-emerald-700">
-                    {t("farmPage.manageLabel")}
-                  </span>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto sm:max-h-[85vh]">
+            <DialogHeader>
+              <DialogTitle className="space-y-1">
+                <span className="block text-xs uppercase tracking-[0.28em] text-emerald-700">
+                  {t("farmPage.manageLabel")}
+                </span>
                   <span className="text-2xl font-semibold">
                     {t("farmPage.newFarm")}
                   </span>
@@ -349,29 +349,33 @@ function FarmPage() {
             return (
               <Card
                 key={farm.id}
-                className="shadow-md cursor-pointer hover:shadow-lg transition-all duration-200"
+                className="group relative overflow-hidden cursor-pointer rounded-2xl border border-emerald-100 bg-gradient-to-br from-white via-emerald-50/30 to-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
                 onClick={() =>
                   navigate({ to: "/farm/$id", params: { id: String(farm.id) } })
                 }
               >
-                <CardHeader className="p-0">
+                <div className="relative h-40 w-full overflow-hidden">
                   {imageUrl ? (
                     <img
                       src={imageUrl}
                       alt={farm.name}
-                      className="h-40 w-full object-cover rounded-t-md"
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="h-40 bg-gray-200 flex items-center justify-center text-gray-500">
+                    <div className="h-full bg-gray-100 flex items-center justify-center text-gray-500">
                       {t("farmPage.noImage")}
                     </div>
                   )}
-                </CardHeader>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
+                  <div className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-emerald-700 shadow-sm backdrop-blur">
+                    {farm.city || farm.region || t("farmPage.addressLabel")}
+                  </div>
+                </div>
                 <CardContent className="p-4">
-                  <CardTitle className="text-xl font-semibold mb-1">
+                  <CardTitle className="text-xl font-semibold mb-1 text-emerald-900">
                     {farm.name}
                   </CardTitle>
-                  <p className="text-gray-700 text-sm">
+                  <p className="text-gray-700 text-sm line-clamp-2">
                     {farm.description || t("farmPage.noDescription")}
                   </p>
                 </CardContent>

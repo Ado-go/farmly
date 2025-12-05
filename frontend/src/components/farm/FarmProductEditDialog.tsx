@@ -34,6 +34,18 @@ import {
 } from "@/components/ui/field";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const createProductSchema = (t: ReturnType<typeof useTranslation>["t"]) =>
   z.object({
@@ -242,19 +254,24 @@ export function FarmProductEditDialog({
                 <Field>
                   <FieldLabel htmlFor="price">{t("product.price")}</FieldLabel>
                   <FieldContent>
-                    <Input
-                      id="price"
-                      type="number"
-                      className={inputTone}
-                      placeholder={t("product.price")}
-                      {...form.register("price", {
-                        valueAsNumber: true,
-                        setValueAs: (value) =>
-                          value === "" || value === null
-                            ? undefined
-                            : Number(value),
-                      })}
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                        €
+                      </span>
+                      <Input
+                        id="price"
+                        type="number"
+                        className={cn(inputTone, "pl-7")}
+                        placeholder={t("product.price")}
+                        {...form.register("price", {
+                          valueAsNumber: true,
+                          setValueAs: (value) =>
+                            value === "" || value === null
+                              ? undefined
+                              : Number(value),
+                        })}
+                      />
+                    </div>
                     <FieldError
                       errors={errors.price ? [errors.price] : undefined}
                     />
@@ -300,10 +317,28 @@ export function FarmProductEditDialog({
               </FieldSet>
             </FieldSet>
 
-            <div className="flex justify-between pt-4">
-              <Button variant="destructive" type="button" onClick={handleDeleteProduct}>
-                {t("product.delete")}
-              </Button>
+            <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" type="button">
+                    {t("product.delete")}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("product.confirmDeleteTitle")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("product.confirmDeleteText")}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("farmPage.cancel")}</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteProduct}>
+                      {t("product.delete")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
 
               <Button type="submit" disabled={updateProduct.isPending}>
                 {updateProduct.isPending
