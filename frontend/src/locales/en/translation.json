@@ -404,6 +404,16 @@
     "title": "Events",
     "subtitle": "Host markets with your community or join fellow farmers.",
     "subtitleBody": "Plan the time and place so people know where to meet you.",
+    "errors": {
+      "title": "Title is required",
+      "city": "City is required",
+      "street": "Street is required",
+      "region": "Region is required",
+      "postalCode": "Postal code is required",
+      "country": "Country is required",
+      "startDate": "Please choose a start date",
+      "endDate": "Please choose an end date"
+    },
     "limitTitle": "Event limit",
     "limitRemaining": "Slots left: {{remaining}} / {{limit}}",
     "limitHelper": "Each farmer can have up to {{limit}} active events at the same time.",
@@ -464,6 +474,13 @@
     "title": "My Products",
     "add": "Add Product",
     "addDialogTitle": "Add Product",
+    "errors": {
+      "name": "Name is required",
+      "category": "Category is required",
+      "description": "Description is required",
+      "priceMin": "Price must be 0 or higher",
+      "priceType": "Please enter a numeric price"
+    },
     "nameLabel": "Name",
     "namePlaceholder": "Product Name",
     "categoryLabel": "Category",

@@ -404,6 +404,16 @@
     "title": "Udalosti",
     "subtitle": "Zdieľaj trhy s komunitou alebo sa pridaj k iným farmárom.",
     "subtitleBody": "Plánuj termíny, zdieľaj miesto konania a pomôž ľuďom prísť v správny čas.",
+    "errors": {
+      "title": "Názov je povinný",
+      "city": "Mesto je povinné",
+      "street": "Ulica je povinná",
+      "region": "Región je povinný",
+      "postalCode": "PSČ je povinné",
+      "country": "Krajina je povinná",
+      "startDate": "Zadaj dátum začiatku",
+      "endDate": "Zadaj dátum konca"
+    },
     "limitTitle": "Limit udalostí",
     "limitRemaining": "Voľné miesta: {{remaining}} / {{limit}}",
     "limitHelper": "Každý farmár môže mať naraz maximálne {{limit}} udalostí.",
@@ -464,6 +474,13 @@
     "title": "Moje produkty",
     "add": "Pridať produkt",
     "addDialogTitle": "Pridaj produkt",
+    "errors": {
+      "name": "Názov je povinný",
+      "category": "Kategória je povinná",
+      "description": "Popis je povinný",
+      "priceMin": "Cena musí byť 0 alebo viac",
+      "priceType": "Zadaj číselnú cenu"
+    },
     "nameLabel": "Názov",
     "namePlaceholder": "Názov produktu",
     "categoryLabel": "Kategória",

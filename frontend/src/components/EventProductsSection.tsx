@@ -13,7 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { TFunction } from "i18next";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,14 +45,26 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { EventProduct, FarmProduct } from "@/types/farm";
 
-const eventProductSchema = z.object({
-  name: z.string().min(2, "Názov je povinný"),
-  category: productCategorySchema,
-  description: z.string().min(5, "Popis je povinný"),
-  basePrice: z.number().min(0).optional(),
-  eventId: z.number(),
-});
-type EventProductForm = z.infer<typeof eventProductSchema>;
+const buildEventProductSchema = (t: TFunction) => {
+  const priceField = z
+    .number()
+    .refine((val) => !Number.isNaN(val), {
+      message: t("eventProducts.errors.priceType"),
+    })
+    .min(0, { message: t("eventProducts.errors.priceMin") })
+    .optional();
+
+  return z.object({
+    name: z.string().min(2, t("eventProducts.errors.name")),
+    category: z.enum(PRODUCT_CATEGORIES, {
+      message: t("eventProducts.errors.category"),
+    }),
+    description: z.string().min(5, t("eventProducts.errors.description")),
+    basePrice: priceField,
+    eventId: z.number(),
+  });
+};
+type EventProductForm = z.infer<ReturnType<typeof buildEventProductSchema>>;
 
 export function EventProductsSection({ eventId }: { eventId: number }) {
   const { t } = useTranslation();
@@ -60,6 +73,7 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
   const [selectedFarmProduct, setSelectedFarmProduct] = useState<number | null>(
     null
   );
+  const schema = useMemo(() => buildEventProductSchema(t), [t]);
 
   const { data: products, isLoading } = useQuery<EventProduct[]>({
     queryKey: ["event-products", eventId],
@@ -72,7 +86,7 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
   });
 
   const form = useForm<EventProductForm>({
-    resolver: zodResolver(eventProductSchema),
+    resolver: zodResolver(schema),
     defaultValues: { eventId },
   });
   const {

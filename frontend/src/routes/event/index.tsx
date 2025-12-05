@@ -18,29 +18,41 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import DatePicker from "@/components/date-picker";
 import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@/types/event";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
+import type { TFunction } from "i18next";
 
 const EVENT_LIMIT = 5;
 
-const eventSchema = z.object({
-  title: z.string().min(3, "Názov je povinný"),
-  description: z.string().optional(),
-  startDate: z.date(),
-  endDate: z.date(),
-  city: z.string().min(2, "Mesto je povinné"),
-  street: z.string().min(2, "Ulica je povinná"),
-  region: z.string().min(2, "Región je povinný"),
-  postalCode: z.string().min(2, "PSČ je povinné"),
-  country: z.string().min(2, "Krajina je povinná"),
-});
+const buildEventSchema = (t: TFunction) => {
+  const dateField = (msgKey: string) =>
+    z
+      .any()
+      .refine(
+        (val) => val instanceof Date && !Number.isNaN((val as Date).getTime()),
+        { message: t(msgKey) }
+      )
+      .transform((val) => val as Date);
 
-type EventFormData = z.infer<typeof eventSchema>;
+  return z.object({
+    title: z.string().min(3, t("eventPage.errors.title")),
+    description: z.string().optional(),
+    startDate: dateField("eventPage.errors.startDate"),
+    endDate: dateField("eventPage.errors.endDate"),
+    city: z.string().min(2, t("eventPage.errors.city")),
+    street: z.string().min(2, t("eventPage.errors.street")),
+    region: z.string().min(2, t("eventPage.errors.region")),
+    postalCode: z.string().min(2, t("eventPage.errors.postalCode")),
+    country: z.string().min(2, t("eventPage.errors.country")),
+  });
+};
+
+type EventFormData = z.infer<ReturnType<typeof buildEventSchema>>;
 
 export const Route = createFileRoute("/event/")({
   component: EventPage,
@@ -53,9 +65,10 @@ function EventPage() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [images, setImages] = useState<UploadedImage[]>([]);
+  const schema = useMemo(() => buildEventSchema(t), [t]);
 
   const form = useForm<EventFormData>({
-    resolver: zodResolver(eventSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       title: "",
       description: "",
