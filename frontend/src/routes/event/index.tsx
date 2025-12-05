@@ -68,6 +68,9 @@ function EventPage() {
       country: "",
     },
   });
+  const {
+    formState: { errors },
+  } = form;
 
   const {
     data: events = [],
@@ -348,6 +351,11 @@ function EventPage() {
                     placeholder={t("eventPage.name")}
                     {...form.register("title")}
                   />
+                  {errors.title?.message && (
+                    <p className="text-xs text-destructive">
+                      {errors.title.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
@@ -359,6 +367,11 @@ function EventPage() {
                     placeholder={t("eventPage.description")}
                     {...form.register("description")}
                   />
+                  {errors.description?.message && (
+                    <p className="text-xs text-destructive">
+                      {errors.description.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-3">
@@ -386,6 +399,9 @@ function EventPage() {
                       placeholder={t("eventPage.city")}
                       {...form.register("city")}
                     />
+                    {errors.city?.message && (
+                      <p className="text-xs text-destructive">{errors.city.message}</p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="street">{t("eventPage.street")}</Label>
@@ -394,6 +410,9 @@ function EventPage() {
                       placeholder={t("eventPage.street")}
                       {...form.register("street")}
                     />
+                    {errors.street?.message && (
+                      <p className="text-xs text-destructive">{errors.street.message}</p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="region">{t("eventPage.region")}</Label>
@@ -402,6 +421,9 @@ function EventPage() {
                       placeholder={t("eventPage.region")}
                       {...form.register("region")}
                     />
+                    {errors.region?.message && (
+                      <p className="text-xs text-destructive">{errors.region.message}</p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="postalCode">
@@ -412,6 +434,11 @@ function EventPage() {
                       placeholder={t("eventPage.postalCode")}
                       {...form.register("postalCode")}
                     />
+                    {errors.postalCode?.message && (
+                      <p className="text-xs text-destructive">
+                        {errors.postalCode.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-1.5 md:col-span-2">
                     <Label htmlFor="country">{t("eventPage.country")}</Label>
@@ -420,6 +447,9 @@ function EventPage() {
                       placeholder={t("eventPage.country")}
                       {...form.register("country")}
                     />
+                    {errors.country?.message && (
+                      <p className="text-xs text-destructive">{errors.country.message}</p>
+                    )}
                   </div>
                 </div>
 

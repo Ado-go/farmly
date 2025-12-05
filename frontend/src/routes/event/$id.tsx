@@ -428,6 +428,9 @@ function EditForm({
       country: event.country,
     },
   });
+  const {
+    formState: { errors },
+  } = form;
 
   const onSubmit = (data: EventFormData) =>
     onSave({
@@ -457,6 +460,9 @@ function EditForm({
           {...form.register("title")}
           placeholder={t("eventPage.name")}
         />
+        {errors.title?.message && (
+          <p className="text-xs text-destructive">{errors.title.message}</p>
+        )}
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="edit-description">{t("eventPage.description")}</Label>
@@ -465,6 +471,9 @@ function EditForm({
           {...form.register("description")}
           placeholder={t("eventPage.description")}
         />
+        {errors.description?.message && (
+          <p className="text-xs text-destructive">{errors.description.message}</p>
+        )}
       </div>
       <div className="grid md:grid-cols-2 gap-3">
         <DatePicker
@@ -486,6 +495,9 @@ function EditForm({
             {...form.register("city")}
             placeholder={t("eventPage.city")}
           />
+          {errors.city?.message && (
+            <p className="text-xs text-destructive">{errors.city.message}</p>
+          )}
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="edit-street">{t("eventPage.street")}</Label>
@@ -494,6 +506,9 @@ function EditForm({
             {...form.register("street")}
             placeholder={t("eventPage.street")}
           />
+          {errors.street?.message && (
+            <p className="text-xs text-destructive">{errors.street.message}</p>
+          )}
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="edit-region">{t("eventPage.region")}</Label>
@@ -502,6 +517,9 @@ function EditForm({
             {...form.register("region")}
             placeholder={t("eventPage.region")}
           />
+          {errors.region?.message && (
+            <p className="text-xs text-destructive">{errors.region.message}</p>
+          )}
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="edit-postal">{t("eventPage.postalCode")}</Label>
@@ -510,6 +528,9 @@ function EditForm({
             {...form.register("postalCode")}
             placeholder={t("eventPage.postalCode")}
           />
+          {errors.postalCode?.message && (
+            <p className="text-xs text-destructive">{errors.postalCode.message}</p>
+          )}
         </div>
         <div className="space-y-1.5 md:col-span-2">
           <Label htmlFor="edit-country">{t("eventPage.country")}</Label>
@@ -518,6 +539,9 @@ function EditForm({
             {...form.register("country")}
             placeholder={t("eventPage.country")}
           />
+          {errors.country?.message && (
+            <p className="text-xs text-destructive">{errors.country.message}</p>
+          )}
         </div>
       </div>
 

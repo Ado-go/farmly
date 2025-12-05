@@ -75,6 +75,9 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
     resolver: zodResolver(eventProductSchema),
     defaultValues: { eventId },
   });
+  const {
+    formState: { errors },
+  } = form;
 
   const addProduct = useMutation({
     mutationFn: (data: EventProductForm) =>
@@ -161,6 +164,9 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
                   {...form.register("name")}
                   placeholder={t("eventProducts.namePlaceholder")}
                 />
+                {errors.name?.message && (
+                  <p className="text-xs text-destructive">{errors.name.message}</p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -188,6 +194,11 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
                     </Select>
                   )}
                 />
+                {errors.category?.message && (
+                  <p className="text-xs text-destructive">
+                    {errors.category.message?.toString()}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -199,6 +210,11 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
                   {...form.register("description")}
                   placeholder={t("eventProducts.descriptionPlaceholder")}
                 />
+                {errors.description?.message && (
+                  <p className="text-xs text-destructive">
+                    {errors.description.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -212,6 +228,11 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
                   {...form.register("basePrice", { valueAsNumber: true })}
                   placeholder={t("eventProducts.pricePlaceholder")}
                 />
+                {errors.basePrice?.message && (
+                  <p className="text-xs text-destructive">
+                    {errors.basePrice.message}
+                  </p>
+                )}
               </div>
 
               <DialogFooter className="flex justify-end mt-2 gap-2">
