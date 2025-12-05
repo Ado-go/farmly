@@ -81,11 +81,55 @@ router.get("/my-orders", authenticateToken, async (req, res) => {
         buyerId: userId,
         orderType: "PREORDER",
       },
-      include: { items: true, event: true },
+      include: {
+        items: true,
+        event: true,
+        buyer: { select: { email: true, name: true, phone: true } },
+      },
       orderBy: { createdAt: "desc" },
     });
 
-    return res.json(orders);
+    return res.json(
+      orders.map((order) => ({
+        id: order.id,
+        orderNumber: order.orderNumber,
+        status: order.status,
+        orderType: order.orderType,
+        createdAt: order.createdAt,
+        isPaid: order.isPaid,
+        totalPrice: order.totalPrice ?? 0,
+        paymentMethod: order.paymentMethod,
+        delivery: {
+          city: order.deliveryCity,
+          street: order.deliveryStreet,
+          postalCode: order.deliveryPostalCode,
+          country: order.deliveryCountry,
+        },
+        contact: {
+          name: order.contactName,
+          phone: order.contactPhone,
+          email: order.anonymousEmail ?? order.buyer?.email ?? null,
+        },
+        event: order.event
+          ? {
+              title: order.event.title,
+              city: order.event.city,
+              street: order.event.street,
+              postalCode: order.event.postalCode,
+              country: order.event.country,
+            }
+          : null,
+        items: order.items.map((item) => ({
+          id: item.id,
+          productId: item.productId,
+          productName: item.productName,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          sellerName: item.sellerName,
+          status: item.status,
+        })),
+      }))
+    );
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Cannot fetch preorder orders" });
@@ -114,11 +158,61 @@ router.get(
             some: { productId: { in: productIds } },
           },
         },
-        include: { items: true, event: true },
+        include: {
+          items: true,
+          event: true,
+          buyer: { select: { email: true, name: true, phone: true } },
+        },
         orderBy: { createdAt: "desc" },
       });
 
-      return res.json(orders);
+      return res.json(
+        orders.map((order) => ({
+          id: order.id,
+          orderNumber: order.orderNumber,
+          status: order.status,
+          orderType: order.orderType,
+          createdAt: order.createdAt,
+          isPaid: order.isPaid,
+          totalPrice: order.totalPrice ?? 0,
+          paymentMethod: order.paymentMethod,
+          buyer: {
+            id: order.buyerId,
+            email: order.anonymousEmail ?? order.buyer?.email ?? null,
+            name: order.buyer?.name ?? null,
+            phone: order.buyer?.phone ?? null,
+          },
+          contact: {
+            name: order.contactName,
+            phone: order.contactPhone,
+            email: order.anonymousEmail ?? order.buyer?.email ?? null,
+          },
+          delivery: {
+            city: order.deliveryCity,
+            street: order.deliveryStreet,
+            postalCode: order.deliveryPostalCode,
+            country: order.deliveryCountry,
+          },
+          event: order.event
+            ? {
+                title: order.event.title,
+                city: order.event.city,
+                street: order.event.street,
+                postalCode: order.event.postalCode,
+                country: order.event.country,
+              }
+            : null,
+          items: order.items.map((item) => ({
+            id: item.id,
+            productId: item.productId,
+            productName: item.productName,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            sellerName: item.sellerName,
+            status: item.status,
+          })),
+        }))
+      );
     } catch (err) {
       console.error(err);
       return res

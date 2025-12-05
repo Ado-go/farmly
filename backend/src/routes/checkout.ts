@@ -127,7 +127,10 @@ router.get("/my-orders", authenticateToken, async (req, res) => {
         buyerId: userId,
         orderType: "STANDARD",
       },
-      include: { items: true },
+      include: {
+        items: true,
+        buyer: { select: { email: true, name: true, phone: true } },
+      },
       orderBy: { createdAt: "desc" },
     });
 
@@ -136,15 +139,22 @@ router.get("/my-orders", authenticateToken, async (req, res) => {
         id: order.id,
         orderNumber: order.orderNumber,
         status: order.status,
+        orderType: order.orderType,
         createdAt: order.createdAt,
+        isPaid: order.isPaid,
         delivery: {
           city: order.deliveryCity,
           street: order.deliveryStreet,
           postalCode: order.deliveryPostalCode,
           country: order.deliveryCountry,
         },
+        contact: {
+          name: order.contactName,
+          phone: order.contactPhone,
+          email: order.anonymousEmail ?? order.buyer?.email ?? null,
+        },
         paymentMethod: order.paymentMethod,
-        totalPrice: order.totalPrice,
+        totalPrice: order.totalPrice ?? 0,
         items: order.items.map((i) => ({
           id: i.id,
           productId: i.productId,
@@ -193,6 +203,7 @@ router.get(
           items: {
             where: { productId: { in: productIds } },
           },
+          buyer: { select: { id: true, email: true, name: true, phone: true } },
         },
         orderBy: { createdAt: "desc" },
       });
@@ -202,11 +213,28 @@ router.get(
           id: order.id,
           orderNumber: order.orderNumber,
           status: order.status,
+          orderType: order.orderType,
           createdAt: order.createdAt,
+          isPaid: order.isPaid,
+          paymentMethod: order.paymentMethod,
           buyer: {
             id: order.buyerId,
-            email: order.anonymousEmail ?? null,
+            email: order.anonymousEmail ?? order.buyer?.email ?? null,
+            name: order.buyer?.name ?? null,
+            phone: order.buyer?.phone ?? null,
           },
+          contact: {
+            name: order.contactName,
+            phone: order.contactPhone,
+            email: order.anonymousEmail ?? order.buyer?.email ?? null,
+          },
+          delivery: {
+            city: order.deliveryCity,
+            street: order.deliveryStreet,
+            postalCode: order.deliveryPostalCode,
+            country: order.deliveryCountry,
+          },
+          totalPrice: order.totalPrice ?? 0,
           items: order.items.map((i) => ({
             id: i.id,
             productId: i.productId,
