@@ -241,35 +241,37 @@ function FarmsPage() {
 
           <div className="mt-6 grid gap-3 sm:grid-cols-[1.5fr_1fr]">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={t("farmsPage.searchPlaceholder")}
-                className="pl-10"
+                className="pr-10 pl-3"
               />
+              <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             </div>
 
-            <Select
-              value={category ?? "all"}
-              onValueChange={(value) =>
-                handleCategoryChange(value === "all" ? undefined : value)
-              }
-            >
-              <SelectTrigger className="w-full sm:w-56">
-                <SelectValue placeholder={t("farmsPage.filterByCategory")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">
-                  {t("farmsPage.allCategories")}
-                </SelectItem>
-                {PRODUCT_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {getCategoryLabel(cat, t)}
+            <div className="flex w-full sm:justify-end">
+              <Select
+                value={category ?? "all"}
+                onValueChange={(value) =>
+                  handleCategoryChange(value === "all" ? undefined : value)
+                }
+              >
+                <SelectTrigger className="w-full sm:w-56">
+                  <SelectValue placeholder={t("farmsPage.filterByCategory")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    {t("farmsPage.allCategories")}
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  {PRODUCT_CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {getCategoryLabel(cat, t)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </Card>
 

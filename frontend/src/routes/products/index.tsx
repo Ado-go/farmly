@@ -334,8 +334,8 @@ function ProductsPage() {
               </Select>
               <Button
                 variant="outline"
-                size="icon"
-                className={`h-11 w-11 ${order === "asc" ? "bg-primary/5 border-primary text-primary" : ""}`}
+                size="icon-sm"
+                className={`${order === "asc" ? "bg-primary/5 border-primary text-primary" : ""}`}
                 onClick={toggleOrder}
                 aria-label={t("productsPage.orderDirection")}
                 title={`${t("productsPage.orderDirection")}: ${t(`productsPage.orderOptions.${order}`)}`}

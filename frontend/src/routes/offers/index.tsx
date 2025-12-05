@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { PaginatedResponse } from "@/types/pagination";
-import { Sparkles, Tag, Search } from "lucide-react";
+import { PackageSearch, Sparkles, Tag, Search } from "lucide-react";
 
 export const Route = createFileRoute("/offers/")({
   component: OffersAllPage,
@@ -139,6 +139,7 @@ function OffersAllPage() {
 
   const offers = useMemo(() => data?.items ?? [], [data]);
   const totalPages = data?.totalPages ?? 1;
+  const hasOffers = offers.length > 0;
 
   const handlePageChange = (nextPage: number) => {
     const safePage = Math.max(1, Math.min(nextPage, totalPages || nextPage));
@@ -171,6 +172,11 @@ function OffersAllPage() {
       return matchesCategory && matchesSearch;
     });
   }, [offers, search, selectedCategory]);
+
+  const hasNoMatches = filteredOffers.length === 0;
+  const emptyMessage = hasOffers
+    ? t("offersPage.noResults")
+    : t("offersPage.noOffers");
 
   if (isLoading) {
     return (
@@ -205,16 +211,6 @@ function OffersAllPage() {
       </p>
     );
   }
-
-  if (offers.length === 0) {
-    return (
-      <p className="p-6 text-center text-gray-500">
-        {t("offersPage.noOffers")}
-      </p>
-    );
-  }
-
-  const hasNoMatches = filteredOffers.length === 0;
 
   return (
     <div className="p-6">
@@ -276,8 +272,15 @@ function OffersAllPage() {
         </Card>
 
         {hasNoMatches ? (
-          <Card className="border-dashed bg-white/70 p-6 text-center text-gray-500">
-            {t("offersPage.noResults")}
+          <Card className="border-dashed bg-white/70 p-8 text-center">
+            <div className="mx-auto flex max-w-xl flex-col items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <PackageSearch className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {emptyMessage}
+              </h3>
+            </div>
           </Card>
         ) : (
           <>
