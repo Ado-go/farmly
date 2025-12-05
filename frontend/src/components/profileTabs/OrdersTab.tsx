@@ -560,7 +560,6 @@ function getPaymentLabel(method: string | undefined, t: (key: string) => string)
   const map: Record<string, string> = {
     CASH: t("ordersPage.paymentMethod.cash"),
     CARD: t("ordersPage.paymentMethod.card"),
-    BANK_TRANSFER: t("ordersPage.paymentMethod.bank"),
   };
 
   return map[method] ?? t("ordersPage.paymentUnknown");

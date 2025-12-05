@@ -219,8 +219,7 @@
   },
   "roles": {
     "CUSTOMER": "Zákazník",
-    "FARMER": "Farmár",
-    "ADMIN": "Admin"
+    "FARMER": "Farmár"
   },
   "farmPage": {
     "title": "Moje farmy",
@@ -578,7 +577,6 @@
     "selectPayment": "Vyberte spôsob platby",
     "cash": "Hotovosť na mieste",
     "card": "Platba kartou",
-    "bankTransfer": "Bankový prevod",
     "summary": "Zhrnutie objednávky",
     "deliveryType": "Typ doručenia",
     "total": "Spolu",
@@ -646,8 +644,7 @@
     "paymentUnknown": "Neznáma platba",
     "paymentMethod": {
       "cash": "Hotovosť",
-      "card": "Karta",
-      "bank": "Bankový prevod"
+      "card": "Karta"
     }
   },
   "salesPage": {

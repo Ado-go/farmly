@@ -219,8 +219,7 @@
   },
   "roles": {
     "CUSTOMER": "Customer",
-    "FARMER": "Farmer",
-    "ADMIN": "Admin"
+    "FARMER": "Farmer"
   },
   "farmPage": {
     "title": "My Farms",
@@ -578,7 +577,6 @@
     "selectPayment": "Select payment method",
     "cash": "Cash on delivery",
     "card": "Credit card",
-    "bankTransfer": "Bank transfer",
     "summary": "Order Summary",
     "deliveryType": "Delivery Type",
     "total": "Total",
@@ -646,8 +644,7 @@
     "paymentUnknown": "Payment unknown",
     "paymentMethod": {
       "cash": "Cash",
-      "card": "Card",
-      "bank": "Bank transfer"
+      "card": "Card"
     }
   },
   "salesPage": {

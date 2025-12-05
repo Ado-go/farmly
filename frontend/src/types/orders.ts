@@ -22,7 +22,7 @@ export type Buyer = {
   phone?: string | null;
 };
 
-export type PaymentMethod = "CARD" | "CASH" | "BANK_TRANSFER" | string;
+export type PaymentMethod = "CARD" | "CASH" | string;
 
 export type ContactInfo = {
   name?: string | null;
