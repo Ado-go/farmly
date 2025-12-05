@@ -6,11 +6,13 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -23,6 +25,8 @@ import DatePicker from "@/components/date-picker";
 import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@/types/event";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
+
+const EVENT_LIMIT = 5;
 
 const eventSchema = z.object({
   title: z.string().min(3, "Názov je povinný"),
@@ -143,152 +147,295 @@ function EventPage() {
       !e.participants.some((p) => p.id === user?.id)
   );
 
-  const onSubmit = (data: EventFormData) => createEvent.mutate(data);
+  const usedSlots = myEvents.length;
+  const limitReached = usedSlots >= EVENT_LIMIT;
+  const remainingSlots = Math.max(0, EVENT_LIMIT - usedSlots);
+
+  const onSubmit = (data: EventFormData) => {
+    if (limitReached) {
+      toast.error(t("eventPage.limitReached"));
+      return;
+    }
+
+    createEvent.mutate(data);
+  };
 
   const Section = ({ title, items }: { title: string; items: Event[] }) => (
-    <div className="mb-10">
-      <h2 className="text-xl font-semibold mb-3">{title}</h2>
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <h2 className="text-xl font-semibold">{title}</h2>
+        <div className="hidden md:block flex-1 h-px bg-gradient-to-r from-emerald-200 via-gray-200 to-transparent" />
+      </div>
       {items.length === 0 ? (
-        <p className="text-gray-500 text-sm">{t("eventPage.noEvents")}</p>
+        <p className="text-sm text-muted-foreground">
+          {t("eventPage.noEvents")}
+        </p>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((event) => (
-            <Card
-              key={event.id}
-              onClick={() =>
-                navigate({ to: "/event/$id", params: { id: String(event.id) } })
-              }
-              className="cursor-pointer hover:shadow-md transition overflow-hidden"
-            >
-              {(() => {
-                const cover =
-                  event.images?.[0]?.optimizedUrl || event.images?.[0]?.url;
-                return cover ? (
+          {items.map((event) => {
+            const cover =
+              event.images?.[0]?.optimizedUrl || event.images?.[0]?.url;
+            return (
+              <Card
+                key={event.id}
+                onClick={() =>
+                  navigate({
+                    to: "/event/$id",
+                    params: { id: String(event.id) },
+                  })
+                }
+                className="group cursor-pointer hover:-translate-y-0.5 hover:shadow-lg transition overflow-hidden border-2 border-transparent hover:border-emerald-100"
+              >
+                {cover ? (
                   <img
                     src={cover}
                     alt={event.title}
                     className="h-36 w-full object-cover"
                   />
                 ) : (
-                  <div className="h-36 w-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm">
+                  <div className="h-36 w-full bg-muted flex items-center justify-center text-muted-foreground text-sm">
                     {t("eventsDetail.noImage")}
                   </div>
-                );
-              })()}
-              <CardHeader>
-                <CardTitle>{event.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm space-y-1">
-                <p>
-                  <strong>{t("eventPage.region")}:</strong> {event.region}
-                </p>
-                <p>
-                  <strong>{t("eventPage.city")}:</strong> {event.city}
-                </p>
-                <p>
-                  <strong>{t("eventPage.participants")}:</strong>{" "}
-                  {event.participants.length}
-                </p>
-                <p>
-                  <strong>{t("eventPage.from")}:</strong>{" "}
-                  {format(new Date(event.startDate), "dd.MM.yyyy HH:mm")}
-                </p>
-                <p>
-                  <strong>{t("eventPage.to")}:</strong>{" "}
-                  {format(new Date(event.endDate), "dd.MM.yyyy HH:mm")}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+                )}
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg leading-tight">
+                    {event.title}
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {format(new Date(event.startDate), "dd.MM.yyyy")} •{" "}
+                    {event.city}
+                  </p>
+                </CardHeader>
+                <CardContent className="text-sm space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-md bg-emerald-50 text-emerald-800 px-2 py-1 text-xs font-semibold">
+                      {event.region}
+                    </div>
+                    <div className="rounded-md bg-slate-50 text-slate-700 px-2 py-1 text-xs font-semibold text-right">
+                      {t("eventPage.participants")}: {event.participants.length}
+                    </div>
+                  </div>
+                  <div className="text-muted-foreground flex justify-between text-xs">
+                    <span>
+                      {t("eventPage.from")}:{" "}
+                      {format(new Date(event.startDate), "dd.MM.yyyy HH:mm")}
+                    </span>
+                    <span>
+                      {t("eventPage.to")}:{" "}
+                      {format(new Date(event.endDate), "dd.MM.yyyy HH:mm")}
+                    </span>
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-emerald-700 hover:text-emerald-800"
+                    >
+                      {t("eventPage.openDetail")}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
   );
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-semibold">{t("eventPage.title")}</h2>
+    <div className="max-w-6xl mx-auto p-6 space-y-8">
+      <div className="grid gap-4 lg:grid-cols-[1.5fr,1fr] items-stretch">
+        <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-emerald-50 via-white to-lime-50 p-6">
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_20%,rgba(34,197,94,0.08),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(132,204,22,0.08),transparent_25%)]" />
+          <div className="relative space-y-3">
+            <p className="text-sm font-semibold text-emerald-700 uppercase tracking-wide">
+              {t("eventPage.title")}
+            </p>
+            <h2 className="text-3xl font-bold leading-tight">
+              {t("eventPage.subtitle")}
+            </h2>
+            <p className="text-muted-foreground max-w-2xl">
+              {t("eventPage.subtitleBody")}
+            </p>
+            <div className="flex flex-wrap gap-2 pt-2">
+              <span className="rounded-full border bg-white px-3 py-1 text-xs font-semibold text-emerald-800">
+                {t("eventPage.myEvents")}: {myEvents.length}
+              </span>
+              <span className="rounded-full border bg-white px-3 py-1 text-xs font-semibold text-amber-700">
+                {t("eventPage.joinedEvents")}: {joinedEvents.length}
+              </span>
+              <span className="rounded-full border bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                {t("eventPage.otherEvents")}: {otherEvents.length}
+              </span>
+            </div>
+          </div>
+        </div>
 
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button>{t("eventPage.addEvent")}</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t("eventPage.newEvent")}</DialogTitle>
-            </DialogHeader>
-
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-3 mt-2"
+        <div className="rounded-2xl border bg-white shadow-sm p-5 space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                {t("eventPage.limitTitle")}
+              </p>
+              <p className="font-semibold">
+                {t("eventPage.limitRemaining", {
+                  remaining: remainingSlots,
+                  limit: EVENT_LIMIT,
+                })}
+              </p>
+            </div>
+            <div
+              className={`text-xs font-semibold rounded-full px-3 py-1 ${
+                limitReached
+                  ? "bg-amber-100 text-amber-800"
+                  : "bg-emerald-100 text-emerald-800"
+              }`}
             >
-              <ImageUploader
-                value={images}
-                onChange={setImages}
-                editable
-                height="h-56"
-              />
+              {limitReached
+                ? t("eventPage.limitReachedShort")
+                : t("eventPage.addEvent")}
+            </div>
+          </div>
 
-              <Input
-                placeholder={t("eventPage.name")}
-                {...form.register("title")}
-              />
-              <Textarea
-                placeholder={t("eventPage.description")}
-                {...form.register("description")}
-              />
+          <div className="h-2 rounded-full bg-muted overflow-hidden">
+            <div
+              className={`h-full transition-all duration-300 ${
+                limitReached ? "bg-amber-500" : "bg-emerald-500"
+              }`}
+              style={{ width: `${(usedSlots / EVENT_LIMIT) * 100}%` }}
+            />
+          </div>
 
-              <div className="flex gap-2">
-                <DatePicker
-                  label={t("eventPage.startDate")}
-                  date={form.watch("startDate")}
-                  onSelect={(date) =>
-                    form.setValue("startDate", date || new Date())
-                  }
-                />
-                <DatePicker
-                  label={t("eventPage.endDate")}
-                  date={form.watch("endDate")}
-                  onSelect={(date) =>
-                    form.setValue("endDate", date || new Date())
-                  }
-                />
-              </div>
+          <p className="text-sm text-muted-foreground">
+            {limitReached
+              ? t("eventPage.limitReached")
+              : t("eventPage.limitHelper", { limit: EVENT_LIMIT })}
+          </p>
 
-              <Input
-                placeholder={t("eventPage.city")}
-                {...form.register("city")}
-              />
-              <Input
-                placeholder={t("eventPage.street")}
-                {...form.register("street")}
-              />
-              <Input
-                placeholder={t("eventPage.region")}
-                {...form.register("region")}
-              />
-              <Input
-                placeholder={t("eventPage.postalCode")}
-                {...form.register("postalCode")}
-              />
-              <Input
-                placeholder={t("eventPage.country")}
-                {...form.register("country")}
-              />
-
-              <Button
-                type="submit"
-                className="w-full mt-3"
-                disabled={createEvent.isPending}
-              >
-                {createEvent.isPending
-                  ? t("eventPage.creating")
-                  : t("eventPage.create")}
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="w-full" disabled={limitReached}>
+                {t("eventPage.addEvent")}
               </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t("eventPage.newEvent")}</DialogTitle>
+                <DialogDescription>
+                  {t("eventPage.formIntro")}
+                </DialogDescription>
+              </DialogHeader>
+
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4 mt-2"
+              >
+                <div className="space-y-2">
+                  <Label>{t("eventPage.images")}</Label>
+                  <ImageUploader
+                    value={images}
+                    onChange={setImages}
+                    editable
+                    height="h-56"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="title">{t("eventPage.name")}</Label>
+                  <Input
+                    id="title"
+                    placeholder={t("eventPage.name")}
+                    {...form.register("title")}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="description">
+                    {t("eventPage.description")}
+                  </Label>
+                  <Textarea
+                    id="description"
+                    placeholder={t("eventPage.description")}
+                    {...form.register("description")}
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-3">
+                  <DatePicker
+                    label={t("eventPage.startDate")}
+                    date={form.watch("startDate")}
+                    onSelect={(date) =>
+                      form.setValue("startDate", date || new Date())
+                    }
+                  />
+                  <DatePicker
+                    label={t("eventPage.endDate")}
+                    date={form.watch("endDate")}
+                    onSelect={(date) =>
+                      form.setValue("endDate", date || new Date())
+                    }
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="city">{t("eventPage.city")}</Label>
+                    <Input
+                      id="city"
+                      placeholder={t("eventPage.city")}
+                      {...form.register("city")}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="street">{t("eventPage.street")}</Label>
+                    <Input
+                      id="street"
+                      placeholder={t("eventPage.street")}
+                      {...form.register("street")}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="region">{t("eventPage.region")}</Label>
+                    <Input
+                      id="region"
+                      placeholder={t("eventPage.region")}
+                      {...form.register("region")}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="postalCode">
+                      {t("eventPage.postalCode")}
+                    </Label>
+                    <Input
+                      id="postalCode"
+                      placeholder={t("eventPage.postalCode")}
+                      {...form.register("postalCode")}
+                    />
+                  </div>
+                  <div className="space-y-1.5 md:col-span-2">
+                    <Label htmlFor="country">{t("eventPage.country")}</Label>
+                    <Input
+                      id="country"
+                      placeholder={t("eventPage.country")}
+                      {...form.register("country")}
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full mt-1"
+                  disabled={createEvent.isPending}
+                >
+                  {createEvent.isPending
+                    ? t("eventPage.creating")
+                    : t("eventPage.create")}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Section title={t("eventPage.myEvents")} items={myEvents} />

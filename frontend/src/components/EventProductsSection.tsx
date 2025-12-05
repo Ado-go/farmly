@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogTrigger,
@@ -30,6 +31,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import type { EventProduct, FarmProduct } from "@/types/farm";
 
 const eventProductSchema = z.object({
@@ -138,45 +150,69 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
 
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="flex flex-col gap-2 mt-2"
+              className="flex flex-col gap-3 mt-2"
             >
-              <Input
-                {...form.register("name")}
-                placeholder={t("eventProducts.namePlaceholder")}
-              />
-              <Controller
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <Select
-                    value={field.value ?? undefined}
-                    onValueChange={field.onChange}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue
-                        placeholder={t("eventProducts.categoryPlaceholder")}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PRODUCT_CATEGORIES.map((value) => (
-                        <SelectItem key={value} value={value}>
-                          {t(`productCategories.${value}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              <Textarea
-                {...form.register("description")}
-                placeholder={t("eventProducts.descriptionPlaceholder")}
-              />
-              <Input
-                type="number"
-                step="0.01"
-                {...form.register("basePrice", { valueAsNumber: true })}
-                placeholder={t("eventProducts.pricePlaceholder")}
-              />
+              <div className="space-y-1.5">
+                <Label htmlFor="event-product-name">
+                  {t("eventProducts.nameLabel")}
+                </Label>
+                <Input
+                  id="event-product-name"
+                  {...form.register("name")}
+                  placeholder={t("eventProducts.namePlaceholder")}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>{t("eventProducts.categoryLabel")}</Label>
+                <Controller
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value ?? undefined}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue
+                          placeholder={t("eventProducts.categoryPlaceholder")}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRODUCT_CATEGORIES.map((value) => (
+                          <SelectItem key={value} value={value}>
+                            {t(`productCategories.${value}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="event-product-description">
+                  {t("eventProducts.descriptionLabel")}
+                </Label>
+                <Textarea
+                  id="event-product-description"
+                  {...form.register("description")}
+                  placeholder={t("eventProducts.descriptionPlaceholder")}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="event-product-price">
+                  {t("eventProducts.priceLabel")}
+                </Label>
+                <Input
+                  id="event-product-price"
+                  type="number"
+                  step="0.01"
+                  {...form.register("basePrice", { valueAsNumber: true })}
+                  placeholder={t("eventProducts.pricePlaceholder")}
+                />
+              </div>
 
               <DialogFooter className="flex justify-end mt-2 gap-2">
                 <Button type="submit" disabled={addProduct.isPending}>
@@ -254,13 +290,33 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
                   {ep.product.basePrice?.toFixed(2)} €
                 </p>
               </div>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => deleteProduct.mutate(ep.id)}
-              >
-                {t("eventProducts.delete")}
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    {t("eventProducts.delete")}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {t("eventProducts.deleteConfirmTitle")}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("eventProducts.deleteConfirmDescription")}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>
+                      {t("eventProducts.cancel")}
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteProduct.mutate(ep.id)}
+                    >
+                      {t("eventProducts.deleteConfirmCta")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           ))
         )}

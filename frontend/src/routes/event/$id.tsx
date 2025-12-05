@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogTrigger,
@@ -164,12 +165,21 @@ function EventDetailPage() {
     images?.map((img) => ({ url: img.optimizedUrl || img.url })) ?? [];
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{event.title}</CardTitle>
+    <div className="max-w-5xl mx-auto p-6 space-y-6">
+      <Card className="overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-emerald-50 via-white to-lime-50 border-b">
+          <p className="text-xs uppercase text-emerald-700 font-semibold">
+            {t("eventPage.from")}:{" "}
+            {format(new Date(event.startDate), "dd.MM.yyyy HH:mm")}
+          </p>
+          <CardTitle className="text-3xl leading-tight">
+            {event.title}
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            {event.city}, {event.region} • {event.country}
+          </p>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm">
+        <CardContent className="space-y-6 text-sm">
           {editMode ? (
             <EditForm
               event={event}
@@ -183,98 +193,162 @@ function EventDetailPage() {
               onImagesChange={setImages}
             />
           ) : (
-            <>
+            <div className="space-y-6">
               {displayImages.length > 0 ? (
                 <ImageCarousel
                   images={displayImages}
                   editable={false}
-                  height="h-56"
+                  height="h-64"
                 />
               ) : (
-                <div className="w-full h-56 bg-gray-200 flex items-center justify-center rounded text-gray-500">
+                <div className="w-full h-64 bg-muted flex items-center justify-center rounded text-muted-foreground">
                   {t("eventsDetail.noImage")}
                 </div>
               )}
 
-              <p>
-                <strong>{t("eventPage.description")}:</strong>{" "}
-                {event.description || "—"}
-              </p>
-              <p>
-                <strong>{t("eventPage.city")}:</strong> {event.city}
-              </p>
-              <p>
-                <strong>{t("eventPage.region")}:</strong> {event.region}
-              </p>
-              <p>
-                <strong>{t("eventPage.from")}:</strong>{" "}
-                {format(new Date(event.startDate), "dd.MM.yyyy HH:mm")}
-              </p>
-              <p>
-                <strong>{t("eventPage.to")}:</strong>{" "}
-                {format(new Date(event.endDate), "dd.MM.yyyy HH:mm")}
-              </p>
-              <p>
-                <strong>{t("eventPage.organizer")}:</strong>{" "}
-                {event.organizer.name} ({event.organizer.email})
-              </p>
+              <div className="grid gap-4 lg:grid-cols-[1.25fr,0.9fr]">
+                <div className="space-y-4">
+                  <div className="rounded-lg border bg-muted/40 p-4 space-y-2">
+                    <p className="text-sm font-semibold text-slate-900">
+                      {t("eventPage.description")}
+                    </p>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {event.description || t("eventsPage.noDescription")}
+                    </p>
+                  </div>
 
-              <div className="mt-4 flex gap-2">
-                {isOrganizer ? (
-                  <>
-                    <Button onClick={() => setEditMode(true)}>
-                      {t("eventPage.edit")}
-                    </Button>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <InfoTile
+                      label={t("eventPage.from")}
+                      value={format(
+                        new Date(event.startDate),
+                        "dd.MM.yyyy HH:mm"
+                      )}
+                    />
+                    <InfoTile
+                      label={t("eventPage.to")}
+                      value={format(
+                        new Date(event.endDate),
+                        "dd.MM.yyyy HH:mm"
+                      )}
+                    />
+                    <InfoTile label={t("eventPage.city")} value={event.city} />
+                    <InfoTile
+                      label={t("eventPage.street")}
+                      value={event.street}
+                    />
+                    <InfoTile
+                      label={t("eventPage.region")}
+                      value={event.region}
+                    />
+                    <InfoTile
+                      label={t("eventPage.postalCode")}
+                      value={event.postalCode}
+                    />
+                    <InfoTile
+                      label={t("eventPage.country")}
+                      value={event.country}
+                    />
+                    <InfoTile
+                      label={t("eventPage.participants")}
+                      value={event.participants.length}
+                    />
+                  </div>
+                </div>
 
-                    <Dialog open={deleteDialog} onOpenChange={setDeleteDialog}>
-                      <DialogTrigger asChild>
-                        <Button variant="destructive">
-                          {t("eventPage.delete")}
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>
-                            {t("eventPage.confirmDelete")}
-                          </DialogTitle>
-                        </DialogHeader>
-                        <p className="text-sm text-gray-600">
-                          {t("eventPage.deleteMessage")}
+                <div className="space-y-3">
+                  <div className="rounded-lg border p-4 bg-white shadow-sm space-y-3">
+                    <p className="text-xs uppercase text-muted-foreground font-semibold">
+                      {t("eventPage.organizer")}
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <ProfileAvatar
+                        imageUrl={event.organizer.profileImageUrl}
+                        name={event.organizer.name}
+                        size={42}
+                      />
+                      <div>
+                        <p className="font-semibold">{event.organizer.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {event.organizer.email}
                         </p>
-                        <DialogFooter className="mt-4 flex justify-end gap-2">
-                          <Button
-                            variant="secondary"
-                            onClick={() => setDeleteDialog(false)}
-                          >
-                            {t("eventPage.cancel")}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border p-4 bg-emerald-50/70 space-y-3">
+                    <p className="text-sm font-semibold text-emerald-900">
+                      {t("eventPage.actionsTitle")}
+                    </p>
+                    <p className="text-xs text-emerald-900/80">
+                      {isOrganizer
+                        ? t("eventPage.actionsOrganizer")
+                        : isParticipant
+                          ? t("eventPage.actionsParticipant")
+                          : t("eventPage.actionsVisitor")}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {isOrganizer ? (
+                        <>
+                          <Button onClick={() => setEditMode(true)}>
+                            {t("eventPage.edit")}
                           </Button>
-                          <Button
-                            variant="destructive"
-                            onClick={() => {
-                              deleteEvent.mutate();
-                              setDeleteDialog(false);
-                            }}
+
+                          <Dialog
+                            open={deleteDialog}
+                            onOpenChange={setDeleteDialog}
                           >
-                            {t("eventPage.confirm")}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </>
-                ) : isParticipant ? (
-                  <Button
-                    variant="destructive"
-                    onClick={() => leaveEvent.mutate()}
-                  >
-                    {t("eventPage.leave")}
-                  </Button>
-                ) : (
-                  <Button onClick={() => joinEvent.mutate()}>
-                    {t("eventPage.join")}
-                  </Button>
-                )}
+                            <DialogTrigger asChild>
+                              <Button variant="destructive">
+                                {t("eventPage.delete")}
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>
+                                  {t("eventPage.confirmDelete")}
+                                </DialogTitle>
+                              </DialogHeader>
+                              <p className="text-sm text-muted-foreground">
+                                {t("eventPage.deleteMessage")}
+                              </p>
+                              <DialogFooter className="mt-4 flex justify-end gap-2">
+                                <Button
+                                  variant="secondary"
+                                  onClick={() => setDeleteDialog(false)}
+                                >
+                                  {t("eventPage.cancel")}
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  onClick={() => {
+                                    deleteEvent.mutate();
+                                    setDeleteDialog(false);
+                                  }}
+                                >
+                                  {t("eventPage.confirm")}
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        </>
+                      ) : isParticipant ? (
+                        <Button
+                          variant="destructive"
+                          onClick={() => leaveEvent.mutate()}
+                        >
+                          {t("eventPage.leave")}
+                        </Button>
+                      ) : (
+                        <Button onClick={() => joinEvent.mutate()}>
+                          {t("eventPage.join")}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -287,7 +361,9 @@ function EventDetailPage() {
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           {event.participants.length === 0 ? (
-            <p>{t("eventPage.noParticipants")}</p>
+            <p className="text-muted-foreground">
+              {t("eventPage.noParticipants")}
+            </p>
           ) : (
             event.participants.map((p) => (
               <div key={p.id} className="flex items-center gap-3">
@@ -308,6 +384,15 @@ function EventDetailPage() {
       {isParticipant && user?.role === "FARMER" && (
         <EventProductsSection eventId={Number(id)} />
       )}
+    </div>
+  );
+}
+
+function InfoTile({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="rounded-lg border bg-muted/40 px-3 py-2">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="font-medium text-sm text-slate-900">{value}</p>
     </div>
   );
 }
@@ -353,21 +438,35 @@ function EditForm({
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
-      className="space-y-2 text-sm mt-2"
+      className="space-y-4 text-sm mt-2"
     >
-      <ImageUploader
-        value={images}
-        onChange={onImagesChange}
-        editable
-        height="h-56"
-      />
+      <div className="space-y-2">
+        <Label>{t("eventPage.images")}</Label>
+        <ImageUploader
+          value={images}
+          onChange={onImagesChange}
+          editable
+          height="h-56"
+        />
+      </div>
 
-      <Input {...form.register("title")} placeholder={t("eventPage.name")} />
-      <Textarea
-        {...form.register("description")}
-        placeholder={t("eventPage.description")}
-      />
-      <div className="flex gap-2">
+      <div className="space-y-1.5">
+        <Label htmlFor="edit-title">{t("eventPage.name")}</Label>
+        <Input
+          id="edit-title"
+          {...form.register("title")}
+          placeholder={t("eventPage.name")}
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="edit-description">{t("eventPage.description")}</Label>
+        <Textarea
+          id="edit-description"
+          {...form.register("description")}
+          placeholder={t("eventPage.description")}
+        />
+      </div>
+      <div className="grid md:grid-cols-2 gap-3">
         <DatePicker
           label={t("eventPage.startDate")}
           date={form.watch("startDate")}
@@ -379,21 +478,52 @@ function EditForm({
           onSelect={(date) => form.setValue("endDate", date || new Date())}
         />
       </div>
-      <Input {...form.register("city")} placeholder={t("eventPage.city")} />
-      <Input {...form.register("street")} placeholder={t("eventPage.street")} />
-      <Input {...form.register("region")} placeholder={t("eventPage.region")} />
-      <Input
-        {...form.register("postalCode")}
-        placeholder={t("eventPage.postalCode")}
-      />
-      <Input
-        {...form.register("country")}
-        placeholder={t("eventPage.country")}
-      />
+      <div className="grid md:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="edit-city">{t("eventPage.city")}</Label>
+          <Input
+            id="edit-city"
+            {...form.register("city")}
+            placeholder={t("eventPage.city")}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="edit-street">{t("eventPage.street")}</Label>
+          <Input
+            id="edit-street"
+            {...form.register("street")}
+            placeholder={t("eventPage.street")}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="edit-region">{t("eventPage.region")}</Label>
+          <Input
+            id="edit-region"
+            {...form.register("region")}
+            placeholder={t("eventPage.region")}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="edit-postal">{t("eventPage.postalCode")}</Label>
+          <Input
+            id="edit-postal"
+            {...form.register("postalCode")}
+            placeholder={t("eventPage.postalCode")}
+          />
+        </div>
+        <div className="space-y-1.5 md:col-span-2">
+          <Label htmlFor="edit-country">{t("eventPage.country")}</Label>
+          <Input
+            id="edit-country"
+            {...form.register("country")}
+            placeholder={t("eventPage.country")}
+          />
+        </div>
+      </div>
 
-      <div className="flex gap-2 mt-3">
+      <div className="flex gap-2 mt-2">
         <Button type="submit">{t("eventPage.save")}</Button>
-        <Button variant="secondary" onClick={onCancel}>
+        <Button variant="secondary" type="button" onClick={onCancel}>
           {t("eventPage.cancel")}
         </Button>
       </div>
