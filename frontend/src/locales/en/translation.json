@@ -573,6 +573,16 @@
     "productCategory": "Product Category",
     "productDescription": "Product Description",
     "productBasePrice": "Product Base Price (€)",
+    "errors": {
+      "titleRequired": "Please enter an offer title (at least 3 characters).",
+      "categoryRequired": "Select a category for the offer.",
+      "priceRequired": "Enter a price (0 if it is free).",
+      "priceMin": "Price cannot be negative.",
+      "productNameRequired": "Please enter the product name (at least 2 characters).",
+      "productCategoryRequired": "Select a category for the product.",
+      "productPriceRequired": "Enter the product price.",
+      "productPriceMin": "Product price cannot be negative."
+    },
     "create": "Create",
     "creating": "Saving...",
     "createError": "Failed to create offer.",

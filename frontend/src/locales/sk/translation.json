@@ -573,6 +573,16 @@
     "productCategory": "Kategória produktu",
     "productDescription": "Popis produktu",
     "productBasePrice": "Základná cena produktu (€)",
+    "errors": {
+      "titleRequired": "Zadaj názov ponuky (minimálne 3 znaky).",
+      "categoryRequired": "Vyber kategóriu ponuky.",
+      "priceRequired": "Zadaj cenu (0 ak je zadarmo).",
+      "priceMin": "Cena nemôže byť záporná.",
+      "productNameRequired": "Zadaj názov produktu (minimálne 2 znaky).",
+      "productCategoryRequired": "Vyber kategóriu produktu.",
+      "productPriceRequired": "Zadaj cenu produktu.",
+      "productPriceMin": "Cena produktu nemôže byť záporná."
+    },
     "create": "Vytvoriť",
     "creating": "Ukladám...",
     "createError": "Nepodarilo sa vytvoriť ponuku.",
