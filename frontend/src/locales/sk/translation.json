@@ -217,6 +217,11 @@
     "tabPurchases": "Nákupy",
     "tabSalesCombined": "Predaje"
   },
+  "roles": {
+    "CUSTOMER": "Zákazník",
+    "FARMER": "Farmár",
+    "ADMIN": "Admin"
+  },
   "farmPage": {
     "title": "Moje farmy",
     "addFarm": "Pridať farmu",
@@ -610,6 +615,11 @@
     "statusCanceled": "Zrušená",
     "total": "Celková cena",
     "items": "Položky",
+    "sectionEmpty": "Žiadne objednávky v tejto sekcii.",
+    "searchPlaceholder": "Hľadať podľa čísla objednávky",
+    "page": "Strana",
+    "prev": "Predchádzajúca",
+    "next": "Ďalšia",
     "cancel": "Zrušiť objednávku",
     "cancelPreorder": "Zrušiť predobjednávku",
     "canceledOrder": "Objednávka bola zrušená.",
@@ -656,6 +666,7 @@
     "cancel": "Zrušiť",
     "confirm": "Potvrdiť",
     "canceled": "Zrušené",
+    "sectionEmpty": "Žiadne objednávky v tejto sekcii.",
     "sectionStandard": "Predaje",
     "sectionStandardDesc": "Objednávky na doručenie alebo rozvoz.",
     "sectionPreorders": "Predobjednávky z eventov",

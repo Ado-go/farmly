@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import { useTranslation } from "react-i18next";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -25,11 +26,16 @@ import type {
 type CancelTarget = { id: number; type: "STANDARD" | "PREORDER" };
 
 const statusSteps: OrderStatus[] = ["PENDING", "ONWAY", "COMPLETED"];
+const PAGE_SIZE = 4;
 
 export default function OrdersTab() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [cancelTarget, setCancelTarget] = useState<CancelTarget | null>(null);
+  const [searchOrders, setSearchOrders] = useState("");
+  const [searchPreorders, setSearchPreorders] = useState("");
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [preordersPage, setPreordersPage] = useState(1);
 
   const { data: orders, isLoading: loadingOrders } = useQuery<Order[]>({
     queryKey: ["myOrders"],
@@ -68,6 +74,43 @@ export default function OrdersTab() {
   const hasNoOrders =
     (!orders || orders.length === 0) && (!preorders || preorders.length === 0);
 
+  const filteredOrders = useMemo(() => {
+    const term = searchOrders.toLowerCase().trim();
+    return (orders ?? []).filter((o) =>
+      o.orderNumber.toLowerCase().includes(term)
+    );
+  }, [orders, searchOrders]);
+
+  const filteredPreorders = useMemo(() => {
+    const term = searchPreorders.toLowerCase().trim();
+    return (preorders ?? []).filter((o) =>
+      o.orderNumber.toLowerCase().includes(term)
+    );
+  }, [preorders, searchPreorders]);
+
+  useEffect(() => setOrdersPage(1), [searchOrders]);
+  useEffect(() => setPreordersPage(1), [searchPreorders]);
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
+    setOrdersPage((p) => Math.min(p, totalPages));
+  }, [filteredOrders.length]);
+
+  useEffect(() => {
+    const totalPages = Math.max(
+      1,
+      Math.ceil(filteredPreorders.length / PAGE_SIZE)
+    );
+    setPreordersPage((p) => Math.min(p, totalPages));
+  }, [filteredPreorders.length]);
+
+  const paginatedOrders = paginate(filteredOrders, ordersPage, PAGE_SIZE);
+  const paginatedPreorders = paginate(
+    filteredPreorders,
+    preordersPage,
+    PAGE_SIZE
+  );
+
   if (isLoading) return <p>{t("ordersPage.loading")}</p>;
   if (hasNoOrders)
     return <p className="text-gray-500">{t("ordersPage.combinedEmpty")}</p>;
@@ -92,12 +135,17 @@ export default function OrdersTab() {
 
   return (
     <>
-      <div className="space-y-8">
+      <div className="grid gap-6 lg:grid-cols-2">
         <OrderSection
           title={t("ordersPage.sectionOrders")}
           description={t("ordersPage.sectionOrdersDesc")}
-          orders={orders ?? []}
+          orders={paginatedOrders.items}
+          totalCount={filteredOrders.length}
+          page={ordersPage}
+          onPageChange={setOrdersPage}
           type="STANDARD"
+          searchTerm={searchOrders}
+          onSearchChange={setSearchOrders}
           statusLabels={statusLabels}
           onCancel={setCancelTarget}
           isCanceling={
@@ -109,8 +157,13 @@ export default function OrdersTab() {
         <OrderSection
           title={t("ordersPage.sectionPreorders")}
           description={t("ordersPage.sectionPreordersDesc")}
-          orders={preorders ?? []}
+          orders={paginatedPreorders.items}
+          totalCount={filteredPreorders.length}
+          page={preordersPage}
+          onPageChange={setPreordersPage}
           type="PREORDER"
+          searchTerm={searchPreorders}
+          onSearchChange={setSearchPreorders}
           statusLabels={statusLabels}
           onCancel={setCancelTarget}
           isCanceling={
@@ -154,7 +207,12 @@ type OrderSectionProps = {
   title: string;
   description: string;
   orders: (Order | EventOrder)[];
+  totalCount: number;
+  page: number;
+  onPageChange: (page: number) => void;
   type: CancelTarget["type"];
+  searchTerm: string;
+  onSearchChange: (val: string) => void;
   statusLabels: Record<string, string>;
   onCancel: (target: CancelTarget) => void;
   isCanceling: boolean;
@@ -165,24 +223,48 @@ function OrderSection({
   title,
   description,
   orders,
+  totalCount,
+  page,
+  onPageChange,
   type,
+  searchTerm,
+  onSearchChange,
   statusLabels,
   onCancel,
   isCanceling,
   t,
 }: OrderSectionProps) {
-  if (!orders.length) return null;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   return (
-    <section className="space-y-4">
-      <div className="flex flex-col gap-1">
-        <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-          {title}
-        </p>
-        <p className="text-sm text-muted-foreground">{description}</p>
+    <section className="space-y-3 rounded-2xl border border-emerald-50 bg-gradient-to-br from-white to-emerald-50/40 p-4 shadow-sm">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+              {title}
+            </p>
+            <p className="text-sm text-muted-foreground">{description}</p>
+          </div>
+
+          <Input
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder={t("ordersPage.searchPlaceholder")}
+            className="h-9 max-w-[220px]"
+          />
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4">
+        {orders.length === 0 && (
+          <Card className="border-dashed">
+            <CardContent className="py-6 text-sm text-muted-foreground">
+              {t("ordersPage.sectionEmpty")}
+            </CardContent>
+          </Card>
+        )}
+
         {orders.map((order) => (
           <Card
             key={order.id}
@@ -196,7 +278,7 @@ function OrderSection({
                       ? t("ordersPage.orderTypePreorder")
                       : t("ordersPage.orderTypeStandard")}
                   </p>
-                  <CardTitle className="text-lg">
+                  <CardTitle className="text-lg break-words">
                     {t("ordersPage.order")} #{order.orderNumber}
                   </CardTitle>
                 </div>
@@ -279,6 +361,15 @@ function OrderSection({
           </Card>
         ))}
       </div>
+
+      {totalCount > PAGE_SIZE && (
+        <PaginationBar
+          page={page}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          t={t}
+        />
+      )}
     </section>
   );
 }
@@ -412,9 +503,11 @@ function InfoGroup({ title, lines }: { title: string; lines: (string | null | un
       <p className="text-xs uppercase tracking-wide text-muted-foreground">
         {title}
       </p>
-      <div className="mt-1 space-y-1 text-sm text-gray-800">
+      <div className="mt-1 space-y-1 text-sm text-gray-800 break-words">
         {filtered.map((line, idx) => (
-          <p key={`${line}-${idx}`}>{line}</p>
+          <p key={`${line}-${idx}`} className="break-words">
+            {line}
+          </p>
         ))}
       </div>
     </div>
@@ -436,13 +529,13 @@ function ItemRow({
     >
       <div>
         <p
-          className={`font-medium ${
+          className={`font-medium break-words ${
             isCanceled ? "line-through text-muted-foreground" : "text-gray-900"
           }`}
         >
           {item.productName}
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground break-words">
           {item.quantity}× {item.unitPrice} €
         </p>
       </div>
@@ -471,4 +564,47 @@ function getPaymentLabel(method: string | undefined, t: (key: string) => string)
   };
 
   return map[method] ?? t("ordersPage.paymentUnknown");
+}
+
+function paginate<T>(items: T[], page: number, pageSize: number) {
+  const start = (page - 1) * pageSize;
+  return { items: items.slice(start, start + pageSize) };
+}
+
+function PaginationBar({
+  page,
+  totalPages,
+  onPageChange,
+  t,
+}: {
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  t: (key: string) => string;
+}) {
+  return (
+    <div className="flex items-center justify-between text-sm text-muted-foreground">
+      <span>
+        {t("ordersPage.page")} {page}/{totalPages}
+      </span>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page <= 1}
+          onClick={() => onPageChange(Math.max(1, page - 1))}
+        >
+          {t("ordersPage.prev")}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page >= totalPages}
+          onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+        >
+          {t("ordersPage.next")}
+        </Button>
+      </div>
+    </div>
+  );
 }

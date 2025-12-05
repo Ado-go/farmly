@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,11 +26,16 @@ import type {
 type CancelTarget = { id: number; type: "STANDARD" | "PREORDER" };
 
 const statusSteps: OrderStatus[] = ["PENDING", "ONWAY", "COMPLETED"];
+const PAGE_SIZE = 4;
 
 export default function SalesTab() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [cancelTarget, setCancelTarget] = useState<CancelTarget | null>(null);
+  const [searchSales, setSearchSales] = useState("");
+  const [searchEventSales, setSearchEventSales] = useState("");
+  const [salesPage, setSalesPage] = useState(1);
+  const [eventSalesPage, setEventSalesPage] = useState(1);
 
   const { data: sales, isLoading: loadingSales } = useQuery<Order[]>({
     queryKey: ["farmerOrders"],
@@ -70,6 +76,41 @@ export default function SalesTab() {
   const isCanceling =
     cancelItemMutation.isPending || cancelPreorderItemMutation.isPending;
 
+  const filteredSales = useMemo(() => {
+    const term = searchSales.toLowerCase().trim();
+    return (sales ?? []).filter((o) => o.orderNumber.toLowerCase().includes(term));
+  }, [sales, searchSales]);
+
+  const filteredEventSales = useMemo(() => {
+    const term = searchEventSales.toLowerCase().trim();
+    return (eventSales ?? []).filter((o) =>
+      o.orderNumber.toLowerCase().includes(term)
+    );
+  }, [eventSales, searchEventSales]);
+
+  useEffect(() => setSalesPage(1), [searchSales]);
+  useEffect(() => setEventSalesPage(1), [searchEventSales]);
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(filteredSales.length / PAGE_SIZE));
+    setSalesPage((p) => Math.min(p, totalPages));
+  }, [filteredSales.length]);
+
+  useEffect(() => {
+    const totalPages = Math.max(
+      1,
+      Math.ceil(filteredEventSales.length / PAGE_SIZE)
+    );
+    setEventSalesPage((p) => Math.min(p, totalPages));
+  }, [filteredEventSales.length]);
+
+  const paginatedSales = paginate(filteredSales, salesPage, PAGE_SIZE);
+  const paginatedEventSales = paginate(
+    filteredEventSales,
+    eventSalesPage,
+    PAGE_SIZE
+  );
+
   if (isLoading) return <p>{t("salesPage.loading")}</p>;
   if ((!sales || sales.length === 0) && (!eventSales || eventSales.length === 0))
     return <p className="text-gray-500">{t("salesPage.emptyCombined")}</p>;
@@ -93,12 +134,17 @@ export default function SalesTab() {
 
   return (
     <>
-      <div className="space-y-8">
+      <div className="grid gap-6 lg:grid-cols-2">
         <SalesSection
           title={t("salesPage.sectionStandard")}
           description={t("salesPage.sectionStandardDesc")}
-          orders={sales ?? []}
+          orders={paginatedSales.items}
+          totalCount={filteredSales.length}
+          page={salesPage}
+          onPageChange={setSalesPage}
           type="STANDARD"
+          searchTerm={searchSales}
+          onSearchChange={setSearchSales}
           onCancel={setCancelTarget}
           statusLabels={statusLabels}
           isCanceling={isCanceling}
@@ -108,8 +154,13 @@ export default function SalesTab() {
         <SalesSection
           title={t("salesPage.sectionPreorders")}
           description={t("salesPage.sectionPreordersDesc")}
-          orders={eventSales ?? []}
+          orders={paginatedEventSales.items}
+          totalCount={filteredEventSales.length}
+          page={eventSalesPage}
+          onPageChange={setEventSalesPage}
           type="PREORDER"
+          searchTerm={searchEventSales}
+          onSearchChange={setSearchEventSales}
           onCancel={setCancelTarget}
           statusLabels={statusLabels}
           isCanceling={isCanceling}
@@ -152,7 +203,12 @@ type SalesSectionProps = {
   title: string;
   description: string;
   orders: (Order | EventOrder)[];
+  totalCount: number;
+  page: number;
+  onPageChange: (page: number) => void;
   type: CancelTarget["type"];
+  searchTerm: string;
+  onSearchChange: (val: string) => void;
   onCancel: (target: CancelTarget) => void;
   statusLabels: Record<string, string>;
   isCanceling: boolean;
@@ -163,24 +219,47 @@ function SalesSection({
   title,
   description,
   orders,
+  totalCount,
+  page,
+  onPageChange,
   type,
+  searchTerm,
+  onSearchChange,
   onCancel,
   statusLabels,
   isCanceling,
   t,
 }: SalesSectionProps) {
-  if (!orders.length) return null;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   return (
-    <section className="space-y-4">
-      <div className="flex flex-col gap-1">
-        <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-          {title}
-        </p>
-        <p className="text-sm text-muted-foreground">{description}</p>
+    <section className="space-y-3 rounded-2xl border border-blue-50 bg-gradient-to-br from-white to-blue-50/50 p-4 shadow-sm">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+              {title}
+            </p>
+            <p className="text-sm text-muted-foreground">{description}</p>
+          </div>
+          <Input
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder={t("ordersPage.searchPlaceholder")}
+            className="h-9 max-w-[220px]"
+          />
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4">
+        {orders.length === 0 && (
+          <Card className="border-dashed">
+            <CardContent className="py-6 text-sm text-muted-foreground">
+              {t("salesPage.sectionEmpty")}
+            </CardContent>
+          </Card>
+        )}
+
         {orders.map((order) => (
           <Card
             key={order.id}
@@ -194,7 +273,7 @@ function SalesSection({
                       ? t("ordersPage.orderTypePreorder")
                       : t("ordersPage.orderTypeStandard")}
                   </p>
-                  <CardTitle className="text-lg">
+                  <CardTitle className="text-lg break-words">
                     {t("salesPage.order")} #{order.orderNumber}
                   </CardTitle>
                 </div>
@@ -270,6 +349,15 @@ function SalesSection({
           </Card>
         ))}
       </div>
+
+      {totalCount > PAGE_SIZE && (
+        <PaginationBar
+          page={page}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          t={t}
+        />
+      )}
     </section>
   );
 }
@@ -295,13 +383,13 @@ function ItemRow({
     <div className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
       <div>
         <p
-          className={`font-medium ${
+          className={`font-medium break-words ${
             isCanceled ? "line-through text-muted-foreground" : "text-gray-900"
           }`}
         >
           {item.productName}
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground break-words">
           {item.quantity}× {item.unitPrice} €
         </p>
       </div>
@@ -341,9 +429,11 @@ function InfoGroup({
       <p className="text-xs uppercase tracking-wide text-muted-foreground">
         {title}
       </p>
-      <div className="mt-1 space-y-1 text-sm text-gray-800">
+      <div className="mt-1 space-y-1 text-sm text-gray-800 break-words">
         {filtered.map((line, idx) => (
-          <p key={`${line}-${idx}`}>{line}</p>
+          <p key={`${line}-${idx}`} className="break-words">
+            {line}
+          </p>
         ))}
       </div>
     </div>
@@ -485,4 +575,47 @@ function getPaymentLabel(method: string | undefined, t: (key: string) => string)
   };
 
   return map[method] ?? t("ordersPage.paymentUnknown");
+}
+
+function paginate<T>(items: T[], page: number, pageSize: number) {
+  const start = (page - 1) * pageSize;
+  return { items: items.slice(start, start + pageSize) };
+}
+
+function PaginationBar({
+  page,
+  totalPages,
+  onPageChange,
+  t,
+}: {
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  t: (key: string) => string;
+}) {
+  return (
+    <div className="flex items-center justify-between text-sm text-muted-foreground">
+      <span>
+        {t("ordersPage.page")} {page}/{totalPages}
+      </span>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page <= 1}
+          onClick={() => onPageChange(Math.max(1, page - 1))}
+        >
+          {t("ordersPage.prev")}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page >= totalPages}
+          onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+        >
+          {t("ordersPage.next")}
+        </Button>
+      </div>
+    </div>
+  );
 }

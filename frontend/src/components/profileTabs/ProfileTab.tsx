@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import type React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +14,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -72,12 +72,14 @@ export default function ProfileTab() {
   });
 
   const user = data?.user;
+  const roleLabel =
+    user?.role && t(`roles.${user.role}`, { defaultValue: user.role });
 
   useEffect(() => {
     if (user) setUser(user);
   }, [user, setUser]);
 
-  const resetAvatarToUser = () => {
+  const resetAvatarToUser = useCallback(() => {
     if (objectUrlRef.current) {
       URL.revokeObjectURL(objectUrlRef.current);
       objectUrlRef.current = null;
@@ -85,11 +87,11 @@ export default function ProfileTab() {
     setAvatarPreview(user?.profileImageUrl ?? null);
     setAvatarFile(null);
     setRemoveAvatar(false);
-  };
+  }, [user]);
 
   useEffect(() => {
     resetAvatarToUser();
-  }, [user]);
+  }, [resetAvatarToUser]);
 
   useEffect(() => {
     return () => {
@@ -190,6 +192,8 @@ export default function ProfileTab() {
   };
 
   const onSubmitUpdate = updateForm.handleSubmit(async (values) => {
+    if (!isEditing) return;
+
     const payload: UpdateProfilePayload = { ...values };
     try {
       if (avatarFile) {
@@ -210,125 +214,129 @@ export default function ProfileTab() {
     }
   });
 
+  const readOnlyFields = (
+    <div className="grid gap-4 md:grid-cols-2">
+      <Field label={t("profilePage.name_label")} value={user?.name} />
+      <Field label={t("profilePage.email_label")} value={user?.email} />
+      <Field label={t("profilePage.phone_label")} value={user?.phone} />
+      <Field
+        label={t("profilePage.role_label")}
+        value={roleLabel || user?.role}
+      />
+      <Field label={t("profilePage.address_label")} value={user?.address} />
+      <Field label={t("profilePage.city_label")} value={user?.city} />
+      <Field label={t("profilePage.postal_label")} value={user?.postalCode} />
+      <Field label={t("profilePage.country_label")} value={user?.country} />
+    </div>
+  );
+
+  const editableFields = (
+    <div className="grid gap-4 md:grid-cols-2">
+      <Field label={t("profilePage.name_label")} editing value={user?.name}>
+        <Input {...updateForm.register("name")} />
+      </Field>
+      <Field label={t("profilePage.email_label")} value={user?.email} />
+      <Field label={t("profilePage.phone_label")} editing value={user?.phone}>
+        <Input {...updateForm.register("phone")} />
+      </Field>
+      <Field
+        label={t("profilePage.role_label")}
+        value={roleLabel || user?.role}
+      />
+      <Field
+        label={t("profilePage.address_label")}
+        editing
+        value={user?.address}
+      >
+        <Input {...updateForm.register("address")} />
+      </Field>
+      <Field label={t("profilePage.city_label")} editing value={user?.city}>
+        <Input {...updateForm.register("city")} />
+      </Field>
+      <Field
+        label={t("profilePage.postal_label")}
+        editing
+        value={user?.postalCode}
+      >
+        <Input {...updateForm.register("postalCode")} />
+      </Field>
+      <Field
+        label={t("profilePage.country_label")}
+        editing
+        value={user?.country}
+      >
+        <Input {...updateForm.register("country")} />
+      </Field>
+    </div>
+  );
+
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("profile")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <form
-            onSubmit={onSubmitUpdate}
-            className="space-y-4"
-          >
-            <div>
-              <Label>{t("profilePage.photo_label")}</Label>
-              <div className="flex flex-col sm:flex-row items-start gap-4 mt-2">
-                <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden border">
-                  {avatarPreview ? (
-                    <img
-                      src={avatarPreview}
-                      alt={t("profilePage.photo_label")}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <UserIcon className="w-10 h-10 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    {t("profilePage.photo_upload")}
-                  </Button>
-                  {(avatarPreview || removeAvatar) && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={handleRemoveAvatar}
-                    >
-                      {t("profilePage.photo_remove")}
-                    </Button>
-                  )}
-                </div>
+      <Card className="overflow-hidden border-none shadow-lg ring-1 ring-emerald-100 bg-gradient-to-br from-emerald-50 to-white">
+        <CardHeader className="relative pb-2">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-emerald-200 bg-white shadow-sm">
+                {avatarPreview ? (
+                  <img
+                    src={avatarPreview}
+                    alt={t("profilePage.photo_label")}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-emerald-100 text-emerald-700">
+                    <UserIcon className="h-8 w-8" />
+                  </div>
+                )}
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                className="hidden"
-                onChange={handleAvatarChange}
-              />
+              <div className="space-y-1">
+                <h2 className="text-2xl font-semibold text-emerald-900">
+                  {user?.name || t("profile")}
+                </h2>
+                <p className="text-sm text-muted-foreground break-words">
+                  {user?.email}
+                </p>
+                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  {roleLabel}
+                </span>
+              </div>
             </div>
 
-            <div>
-              <Label>{t("profilePage.name_label")}</Label>
-              {isEditing ? (
-                <Input {...updateForm.register("name")} />
-              ) : (
-                <p>{user?.name}</p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {t("profilePage.photo_upload")}
+              </Button>
+              {(avatarPreview || removeAvatar) && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleRemoveAvatar}
+                >
+                  {t("profilePage.photo_remove")}
+                </Button>
               )}
             </div>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
+        </CardHeader>
 
-            <div>
-              <Label>{t("profilePage.email_label")}</Label>
-              <p>{user?.email}</p>
-            </div>
+        <CardContent className="space-y-4">
+          {isEditing ? (
+            <form onSubmit={onSubmitUpdate} className="space-y-4">
+              {editableFields}
 
-            <div>
-              <Label>{t("profilePage.role_label")}</Label>
-              <p>{user?.role}</p>
-            </div>
-
-            <div>
-              <Label>{t("profilePage.phone_label")}</Label>
-              {isEditing ? (
-                <Input {...updateForm.register("phone")} />
-              ) : (
-                <p>{user?.phone}</p>
-              )}
-            </div>
-
-            <div>
-              <Label>{t("profilePage.address_label")}</Label>
-              {isEditing ? (
-                <Input {...updateForm.register("address")} />
-              ) : (
-                <p>{user?.address}</p>
-              )}
-            </div>
-
-            <div>
-              <Label>{t("profilePage.postal_label")}</Label>
-              {isEditing ? (
-                <Input {...updateForm.register("postalCode")} />
-              ) : (
-                <p>{user?.postalCode}</p>
-              )}
-            </div>
-
-            <div>
-              <Label>{t("profilePage.city_label")}</Label>
-              {isEditing ? (
-                <Input {...updateForm.register("city")} />
-              ) : (
-                <p>{user?.city}</p>
-              )}
-            </div>
-
-            <div>
-              <Label>{t("profilePage.country_label")}</Label>
-              {isEditing ? (
-                <Input {...updateForm.register("country")} />
-              ) : (
-                <p>{user?.country}</p>
-              )}
-            </div>
-
-            {isEditing ? (
-              <div className="flex gap-2">
+              <div className="flex flex-wrap justify-end gap-2">
                 <Button type="submit">{t("profilePage.save")}</Button>
                 <Button
                   type="button"
@@ -341,75 +349,123 @@ export default function ProfileTab() {
                   {t("profilePage.cancel")}
                 </Button>
               </div>
-            ) : (
-              <Button onClick={() => setIsEditing(true)}>
-                {t("profilePage.edit")}
-              </Button>
-            )}
-          </form>
+            </form>
+          ) : (
+            <>
+              {readOnlyFields}
+              <div className="flex justify-end">
+                <Button type="button" onClick={() => setIsEditing(true)}>
+                  {t("profilePage.edit")}
+                </Button>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
-      <Separator />
+      <div className="grid gap-4 md:grid-cols-2">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Card className="cursor-pointer border-muted-200 transition hover:-translate-y-0.5 hover:shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-base">
+                  {t("profilePage.changePassword")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground">
+                {t("profilePage.changePasswordTitle")}
+              </CardContent>
+            </Card>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("profilePage.changePasswordTitle")}</DialogTitle>
+            </DialogHeader>
+            <form
+              onSubmit={passwordForm.handleSubmit((v) =>
+                passwordMutation.mutate(v)
+              )}
+              className="space-y-4"
+            >
+              <Input
+                type="password"
+                {...passwordForm.register("oldPassword")}
+                placeholder={t("profilePage.oldPasswordLabel")}
+              />
+              <Input
+                type="password"
+                {...passwordForm.register("newPassword")}
+                placeholder={t("profilePage.newPasswordLabel")}
+              />
+              <Button type="submit" className="w-full">
+                {t("profilePage.savePassword")}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
 
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="destructive" className="w-full">
-            {t("profilePage.delete")}
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("profilePage.deleteTitle")}</DialogTitle>
-          </DialogHeader>
-          <form
-            onSubmit={deleteForm.handleSubmit((v) => deleteMutation.mutate(v))}
-            className="space-y-4"
-          >
-            <Input
-              type="password"
-              {...deleteForm.register("password")}
-              placeholder={t("profilePage.deletePasswordLabel")}
-            />
-            <Button variant="destructive" type="submit" className="w-full">
-              {t("profilePage.delete")}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Card className="cursor-pointer border-red-200/80 bg-red-50/50 transition hover:-translate-y-0.5 hover:shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-base text-red-700">
+                  {t("profilePage.delete")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-red-600">
+                {t("profilePage.deleteTitle")}
+              </CardContent>
+            </Card>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("profilePage.deleteTitle")}</DialogTitle>
+            </DialogHeader>
+            <form
+              onSubmit={deleteForm.handleSubmit((v) =>
+                deleteMutation.mutate(v)
+              )}
+              className="space-y-4"
+            >
+              <Input
+                type="password"
+                {...deleteForm.register("password")}
+                placeholder={t("profilePage.deletePasswordLabel")}
+              />
+              <Button variant="destructive" type="submit" className="w-full">
+                {t("profilePage.delete")}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
+}
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline" className="w-full">
-            {t("profilePage.changePassword")}
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("profilePage.changePasswordTitle")}</DialogTitle>
-          </DialogHeader>
-          <form
-            onSubmit={passwordForm.handleSubmit((v) =>
-              passwordMutation.mutate(v)
-            )}
-            className="space-y-4"
-          >
-            <Input
-              type="password"
-              {...passwordForm.register("oldPassword")}
-              placeholder={t("profilePage.oldPasswordLabel")}
-            />
-            <Input
-              type="password"
-              {...passwordForm.register("newPassword")}
-              placeholder={t("profilePage.newPasswordLabel")}
-            />
-            <Button type="submit" className="w-full">
-              {t("profilePage.savePassword")}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+function Field({
+  label,
+  value,
+  children,
+  editing = false,
+}: {
+  label: string;
+  value?: string | null;
+  children?: React.ReactNode;
+  editing?: boolean;
+}) {
+  return (
+    <div className="rounded-lg border bg-white/70 p-3 shadow-sm">
+      <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+        {label}
+      </Label>
+      <div className="mt-1 text-sm text-gray-900">
+        {editing && children ? (
+          <div className="mt-1">{children}</div>
+        ) : (
+          <p className="break-words">{value || "—"}</p>
+        )}
+      </div>
     </div>
   );
 }
