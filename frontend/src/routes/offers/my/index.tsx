@@ -124,11 +124,11 @@ function OffersMyPage() {
       title: "",
       description: "",
       category: undefined,
-      price: 0,
+      price: undefined,
       productName: "",
       productDescription: "",
       productCategory: undefined,
-      productPrice: 0,
+      productPrice: undefined,
     },
   });
 
@@ -190,11 +190,11 @@ function OffersMyPage() {
         title: "",
         description: "",
         category: undefined,
-        price: 0,
+        price: undefined,
         productName: "",
         productDescription: "",
         productCategory: undefined,
-        productPrice: 0,
+        productPrice: undefined,
       });
       setImages([]);
     }
@@ -354,7 +354,7 @@ function OffersMyPage() {
                   {t("offersPage.createButton")}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl border-primary/10 bg-white/95 shadow-2xl">
+              <DialogContent className="w-[min(100vw-1.5rem,760px)] max-h-[min(92vh,900px)] overflow-y-auto border-primary/10 bg-white/95 shadow-2xl sm:max-w-2xl">
                 <DialogHeader className="space-y-1">
                   <DialogTitle className="text-2xl">
                     {editingOffer
