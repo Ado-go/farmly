@@ -88,7 +88,7 @@ function FarmDetailPage() {
     );
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-8">
+    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
       <FarmHeader
         farm={farm}
         editing={editing}
@@ -99,11 +99,20 @@ function FarmDetailPage() {
         isSaving={editFarm.isPending}
       />
 
-      <div className="flex justify-between items-center mt-8">
-        <h2 className="text-2xl font-semibold">{t("farmPage.products")}</h2>
+      <div className="flex flex-col gap-3 rounded-3xl border border-emerald-100 bg-white/80 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700">
+            {t("farmPage.manageLabel")}
+          </p>
+          <h2 className="text-2xl font-semibold">{t("farmPage.products")}</h2>
+          <p className="text-sm text-muted-foreground">
+            {t("farmPage.productsSubtitle")}
+          </p>
+        </div>
+
         <Dialog open={showAdd} onOpenChange={setShowAdd}>
           <DialogTrigger asChild>
-            <Button>{t("farmPage.addProduct")}</Button>
+            <Button className="shadow-sm">{t("farmPage.addProduct")}</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
@@ -126,13 +135,15 @@ function FarmDetailPage() {
       {productsError ? (
         <p className="text-red-500">{t("farmPage.errorLoadingProducts")}</p>
       ) : farmProducts.length === 0 ? (
-        <p className="text-gray-500">{t("farmPage.noProducts")}</p>
+        <div className="rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/60 p-6 text-center text-muted-foreground">
+          {t("farmPage.noProducts")}
+        </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {farmProducts.map((fp) => (
             <div
               key={fp.id}
-              className="p-3 border rounded cursor-pointer hover:bg-emerald-50"
+              className="group rounded-2xl border border-emerald-50 bg-gradient-to-br from-white to-emerald-50/60 p-4 shadow-sm cursor-pointer transition hover:-translate-y-0.5 hover:shadow-md"
               onClick={() => {
                 setSelectedProduct(fp);
                 setShowEdit(true);
@@ -145,12 +156,25 @@ function FarmDetailPage() {
                   className="h-32 w-full object-cover rounded mb-2"
                 />
               ) : (
-                <div className="h-32 w-full bg-gray-200 text-gray-500 flex items-center justify-center rounded mb-2">
+                <div className="h-32 w-full bg-gray-100 text-gray-500 flex items-center justify-center rounded-xl border border-dashed border-emerald-200 mb-2">
                   {t("farmPage.noImage")}
                 </div>
               )}
-              <h3 className="font-semibold">{fp.product.name}</h3>
-              <p className="text-sm">{fp.price} €</p>
+              <h3 className="font-semibold text-lg">{fp.product.name}</h3>
+              <p className="text-sm text-muted-foreground">
+                {fp.product.description ||
+                  t(`productCategories.${fp.product.category}`, {
+                    defaultValue: fp.product.category,
+                  })}
+              </p>
+              <div className="flex items-center justify-between pt-2 text-sm">
+                <span className="font-semibold text-emerald-700">
+                  {fp.price} €
+                </span>
+                <span className="text-muted-foreground">
+                  {t("product.stock")}: {fp.stock}
+                </span>
+              </div>
             </div>
           ))}
         </div>

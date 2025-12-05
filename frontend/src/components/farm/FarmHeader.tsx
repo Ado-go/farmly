@@ -3,7 +3,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
@@ -16,22 +15,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import { apiFetch } from "@/lib/api";
 import type { Farm, MediaImage } from "@/types/farm";
-
-const farmSchema = z.object({
-  name: z.string().min(2),
-  description: z.string().optional(),
-  city: z.string().min(2),
-  street: z.string().min(2),
-  region: z.string().min(2),
-  postalCode: z.string().min(2),
-  country: z.string().min(2),
-});
-export type FarmFormData = z.infer<typeof farmSchema>;
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
+import { createFarmSchema, type FarmFormData } from "@/schemas/farm";
+export type { FarmFormData };
 
 export function FarmHeader({
   farm,
@@ -51,21 +48,40 @@ export function FarmHeader({
   isSaving: boolean;
 }) {
   const { t } = useTranslation();
+  const farmSchema = useMemo(() => createFarmSchema(t), [t]);
   const form = useForm<FarmFormData>({
     resolver: zodResolver(farmSchema),
-    defaultValues: farm || {},
+    defaultValues: {
+      name: farm?.name ?? "",
+      description: farm?.description ?? "",
+      city: farm?.city ?? "",
+      street: farm?.street ?? "",
+      region: farm?.region ?? "",
+      postalCode: farm?.postalCode ?? "",
+      country: farm?.country ?? "",
+    },
   });
 
   const [images, setImages] = useState<UploadedImage[]>([]);
+  const inputTone =
+    "bg-white/80 border-emerald-100 focus-visible:ring-emerald-200 focus:border-emerald-400";
 
   useEffect(() => {
-    form.reset(farm || {});
+    form.reset({
+      name: farm?.name ?? "",
+      description: farm?.description ?? "",
+      city: farm?.city ?? "",
+      street: farm?.street ?? "",
+      region: farm?.region ?? "",
+      postalCode: farm?.postalCode ?? "",
+      country: farm?.country ?? "",
+    });
     const imgs = (farm?.images ?? []).map((i: MediaImage) => ({
       url: i.optimizedUrl || i.url,
       publicId: i.publicId,
     }));
     setImages(imgs);
-  }, [farm]);
+  }, [farm, form]);
 
   const handleSave = async (data: FarmFormData) => {
     const uploaded: UploadedImage[] = [];
@@ -92,71 +108,229 @@ export function FarmHeader({
     onEdit({ ...data, images: uploaded });
   };
 
+  const errors = form.formState.errors;
+
   return (
-    <div>
-      <h1 className="text-4xl font-bold mb-4">{farm.name}</h1>
+    <div className="rounded-3xl border border-emerald-100 bg-white shadow-sm p-6">
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700">
+            {t("farmPage.manageLabel")}
+          </p>
+          <h1 className="text-4xl font-bold leading-tight">{farm.name}</h1>
+          <p className="text-muted-foreground">
+            {farm.street}, {farm.city}, {farm.region}, {farm.postalCode},{" "}
+            {farm.country}
+          </p>
+        </div>
+
+        {!editing && (
+          <div className="flex items-center gap-2">
+            <Button onClick={() => setEditing(true)} variant="default">
+              {t("farmPage.editFarm")}
+            </Button>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" disabled={isDeleting}>
+                  {isDeleting ? t("farmPage.deleting") : t("farmPage.delete")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {t("farmPage.confirmDeleteTitle")}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("farmPage.confirmDeleteText")}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("farmPage.cancel")}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={onDelete}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    {t("farmPage.delete")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
+      </div>
 
       {!editing ? (
-        images.length > 0 ? (
-          <div className="mb-4">
+        <div className="mt-6 space-y-4">
+          {images.length > 0 ? (
             <ImageCarousel
               images={images}
               editable={false}
               height="h-64"
               emptyLabel={t("farmPage.noImage")}
             />
-          </div>
-        ) : (
-          <div className="w-full h-64 bg-gray-200 flex items-center justify-center rounded mb-4">
-            <span className="text-gray-500">{t("farmPage.noImage")}</span>
-          </div>
-        )
-      ) : null}
+          ) : (
+            <div className="w-full h-64 bg-gray-100 flex items-center justify-center rounded-xl border border-dashed border-emerald-200">
+              <span className="text-gray-500">{t("farmPage.noImage")}</span>
+            </div>
+          )}
 
-      {!editing ? (
-        <div className="space-y-2">
-          <p>{farm.description || t("farmPage.noDescription")}</p>
-          <p>
-            {farm.street}, {farm.city}, {farm.region}, {farm.postalCode},{" "}
-            {farm.country}
-          </p>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border border-emerald-50 bg-emerald-50/40 p-4">
+              <p className="text-sm font-semibold text-emerald-900">
+                {t("farmPage.description")}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {farm.description || t("farmPage.noDescription")}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-emerald-50 bg-emerald-50/40 p-4">
+              <p className="text-sm font-semibold text-emerald-900">
+                {t("farmPage.addressLabel")}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {farm.street}, {farm.city}, {farm.region}, {farm.postalCode},{" "}
+                {farm.country}
+              </p>
+            </div>
+          </div>
         </div>
       ) : (
         <form
           onSubmit={form.handleSubmit(handleSave)}
-          className="space-y-3 mt-3"
+          className="space-y-5 mt-6"
+          noValidate
         >
-          <ImageUploader
-            value={images}
-            onChange={setImages}
-            editable
-            height="h-64"
-          />
+          <div className="space-y-2">
+            <FieldLabel className="text-sm font-medium">
+              {t("farmPage.uploadImage")}
+            </FieldLabel>
+            <ImageUploader
+              value={images}
+              onChange={setImages}
+              editable
+              height="h-64"
+            />
+          </div>
 
-          <Input {...form.register("name")} placeholder={t("farmPage.name")} />
-          <Textarea
-            {...form.register("description")}
-            placeholder={t("farmPage.description")}
-          />
-          <Input {...form.register("city")} placeholder={t("farmPage.city")} />
-          <Input
-            {...form.register("street")}
-            placeholder={t("farmPage.street")}
-          />
-          <Input
-            {...form.register("region")}
-            placeholder={t("farmPage.region")}
-          />
-          <Input
-            {...form.register("postalCode")}
-            placeholder={t("farmPage.postalCode")}
-          />
-          <Input
-            {...form.register("country")}
-            placeholder={t("farmPage.country")}
-          />
+          <FieldSet className="grid grid-cols-1 gap-4">
+            <Field>
+              <FieldLabel htmlFor="name">{t("farmPage.name")}</FieldLabel>
+              <FieldContent>
+                <Input
+                  id="name"
+                  className={inputTone}
+                  placeholder={t("farmPage.name")}
+                  {...form.register("name")}
+                />
+                <FieldError errors={errors.name ? [errors.name] : undefined} />
+              </FieldContent>
+            </Field>
 
-          <div className="flex items-center gap-2 pt-2">
+            <Field>
+              <FieldLabel htmlFor="description">
+                {t("farmPage.description")}
+              </FieldLabel>
+              <FieldContent>
+                <Textarea
+                  id="description"
+                  className={inputTone}
+                  placeholder={t("farmPage.description")}
+                  {...form.register("description")}
+                />
+                <FieldError
+                  errors={errors.description ? [errors.description] : undefined}
+                />
+              </FieldContent>
+            </Field>
+
+            <FieldSet className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Field>
+                <FieldLabel htmlFor="city">{t("farmPage.city")}</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id="city"
+                    className={inputTone}
+                    placeholder={t("farmPage.city")}
+                    {...form.register("city")}
+                  />
+                  <FieldError
+                    errors={errors.city ? [errors.city] : undefined}
+                  />
+                </FieldContent>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="street">
+                  {t("farmPage.street")}
+                </FieldLabel>
+                <FieldContent>
+                  <Input
+                    id="street"
+                    className={inputTone}
+                    placeholder={t("farmPage.street")}
+                    {...form.register("street")}
+                  />
+                  <FieldError
+                    errors={errors.street ? [errors.street] : undefined}
+                  />
+                </FieldContent>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="region">
+                  {t("farmPage.region")}
+                </FieldLabel>
+                <FieldContent>
+                  <Input
+                    id="region"
+                    className={inputTone}
+                    placeholder={t("farmPage.region")}
+                    {...form.register("region")}
+                  />
+                  <FieldError
+                    errors={errors.region ? [errors.region] : undefined}
+                  />
+                </FieldContent>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="postalCode">
+                  {t("farmPage.postalCode")}
+                </FieldLabel>
+                <FieldContent>
+                  <Input
+                    id="postalCode"
+                    className={inputTone}
+                    placeholder={t("farmPage.postalCode")}
+                    {...form.register("postalCode")}
+                  />
+                  <FieldError
+                    errors={errors.postalCode ? [errors.postalCode] : undefined}
+                  />
+                </FieldContent>
+              </Field>
+            </FieldSet>
+
+            <Field>
+              <FieldLabel htmlFor="country">
+                {t("farmPage.country")}
+              </FieldLabel>
+              <FieldContent>
+                <Input
+                  id="country"
+                  className={inputTone}
+                  placeholder={t("farmPage.country")}
+                  {...form.register("country")}
+                />
+                <FieldError
+                  errors={errors.country ? [errors.country] : undefined}
+                />
+              </FieldContent>
+            </Field>
+          </FieldSet>
+
+          <div className="flex items-center gap-2 pt-1">
             <Button type="submit" disabled={isSaving}>
               {isSaving ? t("farmPage.saving") : t("farmPage.save")}
             </Button>
@@ -169,41 +343,6 @@ export function FarmHeader({
             </Button>
           </div>
         </form>
-      )}
-
-      {!editing && (
-        <div className="flex items-center gap-2 mt-6">
-          <Button onClick={() => setEditing(true)} variant="default">
-            {t("farmPage.editFarm")}
-          </Button>
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" disabled={isDeleting}>
-                {isDeleting ? t("farmPage.deleting") : t("farmPage.delete")}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {t("farmPage.confirmDeleteTitle")}
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t("farmPage.confirmDeleteText")}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t("farmPage.cancel")}</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={onDelete}
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  {t("farmPage.delete")}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
       )}
     </div>
   );

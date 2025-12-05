@@ -2,7 +2,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
@@ -10,10 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
-import {
-  PRODUCT_CATEGORIES,
-  productCategorySchema,
-} from "@/lib/productCategories";
+import { PRODUCT_CATEGORIES } from "@/lib/productCategories";
 import {
   Select,
   SelectContent,
@@ -21,15 +18,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
-const productSchema = z.object({
-  name: z.string().min(1),
-  category: productCategorySchema,
-  description: z.string().optional(),
-  price: z.number().positive(),
-  stock: z.number().nonnegative(),
-});
-type ProductFormData = z.infer<typeof productSchema>;
+const createProductSchema = (t: ReturnType<typeof useTranslation>["t"]) =>
+  z.object({
+    name: z.string().min(1, { message: t("product.validation.name") }),
+    category: z.enum(PRODUCT_CATEGORIES),
+    description: z.string().optional(),
+    price: z.number().positive({ message: t("product.validation.pricePositive") }),
+    stock: z.number().min(0, { message: t("product.validation.stockNonNegative") }),
+  });
+type ProductFormData = z.infer<ReturnType<typeof createProductSchema>>;
 
 export function ProductForm({
   farmId,
@@ -41,7 +48,10 @@ export function ProductForm({
   onSuccess: () => void;
 }) {
   const { t } = useTranslation();
+  const productSchema = useMemo(() => createProductSchema(t), [t]);
   const [images, setImages] = useState<UploadedImage[]>([]);
+  const inputTone =
+    "bg-white/80 border-emerald-100 focus-visible:ring-emerald-200 focus:border-emerald-400";
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -49,10 +59,9 @@ export function ProductForm({
       name: "",
       category: undefined,
       description: "",
-      price: 0,
-      stock: 0,
-    },
+    } as Partial<ProductFormData>,
   });
+  const errors = form.formState.errors;
 
   const mutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
@@ -82,7 +91,13 @@ export function ProductForm({
     },
     onSuccess: () => {
       toast.success(t("farmPage.productAdded"));
-      form.reset();
+      form.reset({
+        name: "",
+        category: undefined,
+        description: "",
+        price: undefined,
+        stock: undefined,
+      } as Partial<ProductFormData>);
       setImages([]);
       onClose();
       onSuccess();
@@ -93,53 +108,132 @@ export function ProductForm({
   return (
     <form
       onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-      className="space-y-3"
+      className="space-y-5"
+      noValidate
     >
-      <ImageUploader
-        value={images}
-        onChange={setImages}
-        editable
-        height="h-48"
-      />
+      <div className="space-y-2">
+        <FieldLabel className="text-sm font-medium">
+          {t("product.uploadImage")}
+        </FieldLabel>
+        <ImageUploader
+          value={images}
+          onChange={setImages}
+          editable
+          height="h-48"
+        />
+      </div>
 
-      <Input {...form.register("name")} placeholder={t("product.name")} />
-      <Controller
-        control={form.control}
-        name="category"
-        render={({ field }) => (
-          <Select
-            onValueChange={field.onChange}
-            value={field.value ?? undefined}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("product.category")} />
-            </SelectTrigger>
-            <SelectContent>
-              {PRODUCT_CATEGORIES.map((value) => (
-                <SelectItem key={value} value={value}>
-                  {t(`productCategories.${value}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      />
-      <Textarea
-        {...form.register("description")}
-        placeholder={t("product.description")}
-      />
-      <Input
-        type="number"
-        {...form.register("price", { valueAsNumber: true })}
-        placeholder={t("product.price")}
-      />
-      <Input
-        type="number"
-        {...form.register("stock", { valueAsNumber: true })}
-        placeholder={t("product.stock")}
-      />
+      <FieldSet className="grid grid-cols-1 gap-4">
+        <Field>
+          <FieldLabel htmlFor="name">{t("product.name")}</FieldLabel>
+          <FieldContent>
+            <Input
+              id="name"
+              className={inputTone}
+              placeholder={t("product.name")}
+              {...form.register("name")}
+            />
+            <FieldError errors={errors.name ? [errors.name] : undefined} />
+          </FieldContent>
+        </Field>
 
-      <div className="flex justify-end gap-2 pt-4">
+        <Field>
+          <FieldLabel>{t("product.category")}</FieldLabel>
+          <FieldContent>
+            <Controller
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ?? undefined}
+                >
+                  <SelectTrigger className={inputTone}>
+                    <SelectValue placeholder={t("product.category")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PRODUCT_CATEGORIES.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        {t(`productCategories.${value}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            <FieldError
+              errors={errors.category ? [errors.category] : undefined}
+            />
+          </FieldContent>
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="description">
+            {t("product.description")}
+          </FieldLabel>
+          <FieldContent>
+            <Textarea
+              id="description"
+              className={inputTone}
+              placeholder={t("product.description")}
+              {...form.register("description")}
+            />
+            <FieldError
+              errors={errors.description ? [errors.description] : undefined}
+            />
+          </FieldContent>
+        </Field>
+
+        <FieldSet className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor="price">{t("product.price")}</FieldLabel>
+            <FieldContent>
+              <Input
+                id="price"
+                type="number"
+                className={inputTone}
+                placeholder={t("product.price")}
+                {...form.register("price", {
+                  valueAsNumber: true,
+                  setValueAs: (value) =>
+                    value === "" || value === null ? undefined : Number(value),
+                })}
+              />
+              <FieldError errors={errors.price ? [errors.price] : undefined} />
+            </FieldContent>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="stock" className="flex items-center gap-2">
+              {t("product.stock")}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+                    <Info className="h-3.5 w-3.5" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>{t("product.stockTooltip")}</TooltipContent>
+              </Tooltip>
+            </FieldLabel>
+            <FieldContent>
+              <Input
+                id="stock"
+                type="number"
+                className={inputTone}
+                placeholder={t("product.stock")}
+                {...form.register("stock", {
+                  valueAsNumber: true,
+                  setValueAs: (value) =>
+                    value === "" || value === null ? undefined : Number(value),
+                })}
+              />
+              <FieldError errors={errors.stock ? [errors.stock] : undefined} />
+            </FieldContent>
+          </Field>
+        </FieldSet>
+      </FieldSet>
+
+      <div className="flex justify-end gap-2 pt-1">
         <Button type="button" variant="outline" onClick={onClose}>
           {t("farmPage.cancel")}
         </Button>

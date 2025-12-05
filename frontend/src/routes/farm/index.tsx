@@ -13,24 +13,21 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../lib/api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
 import type { Farm } from "@/types/farm";
-
-const farmSchema = z.object({
-  name: z.string().min(2),
-  description: z.string().optional(),
-  city: z.string().min(2),
-  street: z.string().min(2),
-  region: z.string().min(2),
-  postalCode: z.string().min(2),
-  country: z.string().min(2),
-});
-type FarmFormData = z.infer<typeof farmSchema>;
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
+import { createFarmSchema, type FarmFormData } from "@/schemas/farm";
 
 export const Route = createFileRoute("/farm/")({
   component: FarmPage,
@@ -38,10 +35,13 @@ export const Route = createFileRoute("/farm/")({
 
 function FarmPage() {
   const { t } = useTranslation();
+  const farmSchema = useMemo(() => createFarmSchema(t), [t]);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [images, setImages] = useState<UploadedImage[]>([]);
+  const inputTone =
+    "bg-white/80 border-emerald-100 focus-visible:ring-emerald-200 focus:border-emerald-400";
 
   const form = useForm<FarmFormData>({
     resolver: zodResolver(farmSchema),
@@ -121,77 +121,222 @@ function FarmPage() {
     );
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-semibold">{t("farmPage.title")}</h2>
+    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+      <div className="rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-white p-6 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700">
+              {t("farmPage.manageLabel")}
+            </p>
+            <h2 className="text-3xl font-semibold">{t("farmPage.title")}</h2>
+            <p className="text-sm text-muted-foreground">
+              {t("farmPage.subtitle")}
+            </p>
+          </div>
 
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button>{t("farmPage.addFarm")}</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t("farmPage.newFarm")}</DialogTitle>
-            </DialogHeader>
-
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-3 mt-2"
-            >
-              <ImageUploader
-                value={images}
-                onChange={setImages}
-                editable
-                height="h-56"
-              />
-
-              <Input
-                placeholder={t("farmPage.name")}
-                {...form.register("name")}
-              />
-              {form.formState.errors.name && (
-                <p className="text-red-500 text-sm">
-                  {form.formState.errors.name.message}
-                </p>
-              )}
-
-              <Textarea
-                placeholder={t("farmPage.description")}
-                {...form.register("description")}
-              />
-              <Input
-                placeholder={t("farmPage.city")}
-                {...form.register("city")}
-              />
-              <Input
-                placeholder={t("farmPage.street")}
-                {...form.register("street")}
-              />
-              <Input
-                placeholder={t("farmPage.region")}
-                {...form.register("region")}
-              />
-              <Input
-                placeholder={t("farmPage.postalCode")}
-                {...form.register("postalCode")}
-              />
-              <Input
-                placeholder={t("farmPage.country")}
-                {...form.register("country")}
-              />
-
-              <Button
-                type="submit"
-                className="w-full mt-3"
-                disabled={createFarm.isPending}
-              >
-                {createFarm.isPending
-                  ? t("farmPage.creating")
-                  : t("farmPage.create")}
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="shadow-sm" variant="default">
+                {t("farmPage.addFarm")}
               </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="space-y-1">
+                  <span className="block text-xs uppercase tracking-[0.28em] text-emerald-700">
+                    {t("farmPage.manageLabel")}
+                  </span>
+                  <span className="text-2xl font-semibold">
+                    {t("farmPage.newFarm")}
+                  </span>
+                  <p className="text-sm text-muted-foreground font-normal">
+                    {t("farmPage.createSubtitle")}
+                  </p>
+                </DialogTitle>
+              </DialogHeader>
+
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-5"
+                noValidate
+              >
+                <div className="space-y-2">
+                  <FieldLabel className="text-sm font-medium">
+                    {t("farmPage.uploadImage")}
+                  </FieldLabel>
+                  <FieldDescription className="text-muted-foreground">
+                    {t("farmPage.imagesHelper")}
+                  </FieldDescription>
+                  <ImageUploader
+                    value={images}
+                    onChange={setImages}
+                    editable
+                    height="h-56"
+                  />
+                </div>
+
+                <FieldSet className="grid grid-cols-1 gap-4">
+                  <Field>
+                    <FieldLabel htmlFor="name">{t("farmPage.name")}</FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id="name"
+                        placeholder={t("farmPage.name")}
+                        className={inputTone}
+                        {...form.register("name")}
+                      />
+                      <FieldError
+                        errors={
+                          form.formState.errors.name
+                            ? [form.formState.errors.name]
+                            : undefined
+                        }
+                      />
+                    </FieldContent>
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor="description">
+                      {t("farmPage.description")}
+                    </FieldLabel>
+                    <FieldContent>
+                      <Textarea
+                        id="description"
+                        placeholder={t("farmPage.description")}
+                        className={inputTone}
+                        {...form.register("description")}
+                      />
+                      <FieldError
+                        errors={
+                          form.formState.errors.description
+                            ? [form.formState.errors.description]
+                            : undefined
+                        }
+                      />
+                    </FieldContent>
+                  </Field>
+
+                  <FieldSet className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <Field>
+                      <FieldLabel htmlFor="city">
+                        {t("farmPage.city")}
+                      </FieldLabel>
+                      <FieldContent>
+                        <Input
+                          id="city"
+                          placeholder={t("farmPage.city")}
+                          className={inputTone}
+                          {...form.register("city")}
+                        />
+                        <FieldError
+                          errors={
+                            form.formState.errors.city
+                              ? [form.formState.errors.city]
+                              : undefined
+                          }
+                        />
+                      </FieldContent>
+                    </Field>
+
+                    <Field>
+                      <FieldLabel htmlFor="street">
+                        {t("farmPage.street")}
+                      </FieldLabel>
+                      <FieldContent>
+                        <Input
+                          id="street"
+                          placeholder={t("farmPage.street")}
+                          className={inputTone}
+                          {...form.register("street")}
+                        />
+                        <FieldError
+                          errors={
+                            form.formState.errors.street
+                              ? [form.formState.errors.street]
+                              : undefined
+                          }
+                        />
+                      </FieldContent>
+                    </Field>
+
+                    <Field>
+                      <FieldLabel htmlFor="region">
+                        {t("farmPage.region")}
+                      </FieldLabel>
+                      <FieldContent>
+                        <Input
+                          id="region"
+                          placeholder={t("farmPage.region")}
+                          className={inputTone}
+                          {...form.register("region")}
+                        />
+                        <FieldError
+                          errors={
+                            form.formState.errors.region
+                              ? [form.formState.errors.region]
+                              : undefined
+                          }
+                        />
+                      </FieldContent>
+                    </Field>
+
+                    <Field>
+                      <FieldLabel htmlFor="postalCode">
+                        {t("farmPage.postalCode")}
+                      </FieldLabel>
+                      <FieldContent>
+                        <Input
+                          id="postalCode"
+                          placeholder={t("farmPage.postalCode")}
+                          className={inputTone}
+                          {...form.register("postalCode")}
+                        />
+                        <FieldError
+                          errors={
+                            form.formState.errors.postalCode
+                              ? [form.formState.errors.postalCode]
+                              : undefined
+                          }
+                        />
+                      </FieldContent>
+                    </Field>
+                  </FieldSet>
+
+                  <Field>
+                    <FieldLabel htmlFor="country">
+                      {t("farmPage.country")}
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id="country"
+                        placeholder={t("farmPage.country")}
+                        className={inputTone}
+                        {...form.register("country")}
+                      />
+                      <FieldError
+                        errors={
+                          form.formState.errors.country
+                            ? [form.formState.errors.country]
+                            : undefined
+                        }
+                      />
+                    </FieldContent>
+                  </Field>
+                </FieldSet>
+
+                <Button
+                  type="submit"
+                  className="w-full mt-2"
+                  disabled={createFarm.isPending}
+                >
+                  {createFarm.isPending
+                    ? t("farmPage.creating")
+                    : t("farmPage.create")}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {farms.length === 0 ? (

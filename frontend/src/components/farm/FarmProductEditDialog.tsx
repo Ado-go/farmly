@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -6,6 +6,9 @@ import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -13,10 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
-import {
-  PRODUCT_CATEGORIES,
-  productCategorySchema,
-} from "@/lib/productCategories";
+import { PRODUCT_CATEGORIES } from "@/lib/productCategories";
 import {
   Select,
   SelectContent,
@@ -25,7 +25,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { FarmProduct } from "@/types/farm";
-import type { ProductCategory } from "@/lib/productCategories";
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
+
+const createProductSchema = (t: ReturnType<typeof useTranslation>["t"]) =>
+  z.object({
+    name: z.string().min(1, { message: t("product.validation.name") }),
+    category: z.enum(PRODUCT_CATEGORIES),
+    description: z.string().optional(),
+    price: z.number().positive({ message: t("product.validation.pricePositive") }),
+    stock: z.number().min(0, { message: t("product.validation.stockNonNegative") }),
+  });
+
+type ProductFormData = z.infer<ReturnType<typeof createProductSchema>>;
 
 export function FarmProductEditDialog({
   product,
@@ -41,24 +60,46 @@ export function FarmProductEditDialog({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
+  const productSchema = useMemo(() => createProductSchema(t), [t]);
   const [images, setImages] = useState<UploadedImage[]>([]);
-  const [category, setCategory] = useState<ProductCategory | "">(
-    (product?.product?.category as ProductCategory | undefined) ?? ""
-  );
+  const inputTone =
+    "bg-white/80 border-emerald-100 focus-visible:ring-emerald-200 focus:border-emerald-400";
+  const form = useForm<ProductFormData>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: "",
+      category: undefined,
+      description: "",
+    } as Partial<ProductFormData>,
+  });
+  const errors = form.formState.errors;
 
   useEffect(() => {
-    if (product?.product?.images) {
-      setImages(product.product.images);
-    } else {
+    if (!product) {
+      form.reset({
+        name: "",
+        category: undefined,
+        description: "",
+        price: undefined,
+        stock: undefined,
+      } as Partial<ProductFormData>);
       setImages([]);
+      return;
     }
-    setCategory(
-      ((product?.product?.category as ProductCategory | undefined) ?? "") || ""
-    );
-  }, [product]);
+
+    setImages(product.product?.images ?? []);
+    form.reset({
+      name: product.product.name ?? "",
+      category: (product.product.category ??
+        undefined) as ProductFormData["category"],
+      description: product.product.description ?? "",
+      price: product.price,
+      stock: product.stock,
+    } as Partial<ProductFormData>);
+  }, [product, form]);
 
   const updateProduct = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (values: ProductFormData) => {
       if (!product) throw new Error("No product selected");
 
       const uploaded: UploadedImage[] = [];
@@ -77,14 +118,11 @@ export function FarmProductEditDialog({
       }
 
       const body = {
-        name: product.product.name,
-        category:
-          category && productCategorySchema.safeParse(category).success
-            ? category
-            : product.product.category,
-        description: product.product.description,
-        price: product.price,
-        stock: product.stock,
+        name: values.name,
+        category: values.category,
+        description: values.description,
+        price: values.price,
+        stock: values.stock,
         images: uploaded.map((i) => ({ url: i.url, publicId: i.publicId })),
       };
 
@@ -116,67 +154,164 @@ export function FarmProductEditDialog({
         </DialogHeader>
 
         {product && (
-          <div className="space-y-3">
-            <ImageUploader
-              value={images}
-              onChange={setImages}
-              editable
-              height="h-56"
-            />
+          <form
+            className="space-y-4"
+            onSubmit={form.handleSubmit((values) =>
+              updateProduct.mutate(values)
+            )}
+            noValidate
+          >
+            <div className="space-y-2">
+              <FieldLabel className="text-sm font-medium">
+                {t("product.uploadImage")}
+              </FieldLabel>
+              <ImageUploader
+                value={images}
+                onChange={setImages}
+                editable
+                height="h-56"
+              />
+            </div>
 
-            <Input
-              defaultValue={product.product.name}
-              onChange={(e) => (product.product.name = e.target.value)}
-              placeholder={t("product.name")}
-            />
-            <Select
-              value={category || undefined}
-              onValueChange={(value) => setCategory(value as ProductCategory)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={t("product.category")} />
-              </SelectTrigger>
-              <SelectContent>
-                {PRODUCT_CATEGORIES.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {t(`productCategories.${value}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Textarea
-              defaultValue={product.product.description}
-              onChange={(e) => (product.product.description = e.target.value)}
-              placeholder={t("product.description")}
-            />
-            <Input
-              type="number"
-              defaultValue={product.price}
-              onChange={(e) => (product.price = parseFloat(e.target.value))}
-              placeholder={t("product.price")}
-            />
-            <Input
-              type="number"
-              defaultValue={product.stock}
-              onChange={(e) => (product.stock = parseInt(e.target.value))}
-              placeholder={t("product.stock")}
-            />
+            <FieldSet className="grid grid-cols-1 gap-4">
+              <Field>
+                <FieldLabel htmlFor="name">{t("product.name")}</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id="name"
+                    className={inputTone}
+                    placeholder={t("product.name")}
+                    {...form.register("name")}
+                  />
+                  <FieldError
+                    errors={errors.name ? [errors.name] : undefined}
+                  />
+                </FieldContent>
+              </Field>
+
+              <Field>
+                <FieldLabel>{t("product.category")}</FieldLabel>
+                <FieldContent>
+                  <Controller
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value ?? undefined}
+                      >
+                        <SelectTrigger className={inputTone}>
+                          <SelectValue placeholder={t("product.category")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PRODUCT_CATEGORIES.map((value) => (
+                            <SelectItem key={value} value={value}>
+                              {t(`productCategories.${value}`)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  <FieldError
+                    errors={errors.category ? [errors.category] : undefined}
+                  />
+                </FieldContent>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="description">
+                  {t("product.description")}
+                </FieldLabel>
+                <FieldContent>
+                  <Textarea
+                    id="description"
+                    className={inputTone}
+                    placeholder={t("product.description")}
+                    {...form.register("description")}
+                  />
+                  <FieldError
+                    errors={
+                      errors.description ? [errors.description] : undefined
+                    }
+                  />
+                </FieldContent>
+              </Field>
+
+              <FieldSet className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="price">{t("product.price")}</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="price"
+                      type="number"
+                      className={inputTone}
+                      placeholder={t("product.price")}
+                      {...form.register("price", {
+                        valueAsNumber: true,
+                        setValueAs: (value) =>
+                          value === "" || value === null
+                            ? undefined
+                            : Number(value),
+                      })}
+                    />
+                    <FieldError
+                      errors={errors.price ? [errors.price] : undefined}
+                    />
+                  </FieldContent>
+                </Field>
+
+                <Field>
+                  <FieldLabel
+                    htmlFor="stock"
+                    className="flex items-center gap-2"
+                  >
+                    {t("product.stock")}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+                          <Info className="h-3.5 w-3.5" />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {t("product.stockTooltip")}
+                      </TooltipContent>
+                    </Tooltip>
+                  </FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="stock"
+                      type="number"
+                      className={inputTone}
+                      placeholder={t("product.stock")}
+                      {...form.register("stock", {
+                        valueAsNumber: true,
+                        setValueAs: (value) =>
+                          value === "" || value === null
+                            ? undefined
+                            : Number(value),
+                      })}
+                    />
+                    <FieldError
+                      errors={errors.stock ? [errors.stock] : undefined}
+                    />
+                  </FieldContent>
+                </Field>
+              </FieldSet>
+            </FieldSet>
 
             <div className="flex justify-between pt-4">
-              <Button variant="destructive" onClick={handleDeleteProduct}>
+              <Button variant="destructive" type="button" onClick={handleDeleteProduct}>
                 {t("product.delete")}
               </Button>
 
-              <Button
-                onClick={() => updateProduct.mutate()}
-                disabled={updateProduct.isPending}
-              >
+              <Button type="submit" disabled={updateProduct.isPending}>
                 {updateProduct.isPending
                   ? t("farmPage.saving")
                   : t("product.save")}
               </Button>
             </div>
-          </div>
+          </form>
         )}
       </DialogContent>
     </Dialog>

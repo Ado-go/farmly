@@ -222,9 +222,13 @@
     "FARMER": "Farmer"
   },
   "farmPage": {
+    "manageLabel": "Farm profile",
     "title": "My Farms",
     "addFarm": "Add Farm",
     "newFarm": "New Farm",
+    "subtitle": "Keep your farms up to date so customers see who grows their food.",
+    "createSubtitle": "Add photos, your story and the farm address so people can find you.",
+    "imagesHelper": "Show a few shots of your fields, animals or the people behind the farm.",
     "name": "Farm name",
     "description": "Description",
     "city": "City",
@@ -260,7 +264,17 @@
     "addProductTitle": "Add new product",
     "loadingProducts": "Loading products...",
     "noProducts": "No products",
-    "products": "Products"
+    "products": "Products",
+    "productsSubtitle": "Add seasonal products and keep prices and limits current.",
+    "addressLabel": "Address",
+    "validation": {
+      "name": "Please enter a farm name with at least 2 characters.",
+      "city": "City should be at least 2 characters long.",
+      "street": "Street should be at least 2 characters long.",
+      "region": "Region should be at least 2 characters long.",
+      "postalCode": "Postal code should be at least 2 characters long.",
+      "country": "Country should be at least 2 characters long."
+    }
   },
   "productPage": {
     "title": "Product Details",
@@ -295,7 +309,17 @@
     "stock": "Stock",
     "delete": "Delete product",
     "save": "Save changes",
-    "updated": "Product updated successfully"
+    "updated": "Product updated successfully",
+    "deleted": "Product deleted.",
+    "stockTooltip": "Stock is the limit one customer can order at once.",
+    "validation": {
+      "name": "Please enter a product name.",
+      "category": "Choose a category.",
+      "price": "Enter a price higher than 0.",
+      "pricePositive": "Price must be higher than 0.",
+      "stock": "Enter how many pieces can be ordered at once.",
+      "stockNonNegative": "Stock cannot be negative."
+    }
   },
   "productCategories": {
     "Fruits": "Fruits",

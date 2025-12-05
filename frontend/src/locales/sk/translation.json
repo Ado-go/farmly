@@ -222,9 +222,13 @@
     "FARMER": "Farmár"
   },
   "farmPage": {
+    "manageLabel": "Profil farmy",
     "title": "Moje farmy",
     "addFarm": "Pridať farmu",
     "newFarm": "Nová farma",
+    "subtitle": "Udržuj svoje farmy aktuálne, nech zákazníci vidia, kto pestuje ich jedlo.",
+    "createSubtitle": "Pridaj fotky, príbeh a adresu farmy, aby ťa ľudia ľahko našli.",
+    "imagesHelper": "Ukáž pár záberov z polí, zvierat alebo ľudí z farmy.",
     "name": "Názov farmy",
     "description": "Popis",
     "city": "Mesto",
@@ -260,7 +264,17 @@
     "addProductTitle": "Pridať nový produkt",
     "loadingProducts": "Načítavam produkty...",
     "noProducts": "Žiadne produkty",
-    "products": "Produkty"
+    "products": "Produkty",
+    "productsSubtitle": "Pridávaj sezónne produkty a udržuj ceny aj limity aktuálne.",
+    "addressLabel": "Adresa",
+    "validation": {
+      "name": "Zadaj názov farmy aspoň s 2 znakmi.",
+      "city": "Mesto musí mať aspoň 2 znaky.",
+      "street": "Ulica musí mať aspoň 2 znaky.",
+      "region": "Región musí mať aspoň 2 znaky.",
+      "postalCode": "PSČ musí mať aspoň 2 znaky.",
+      "country": "Krajina musí mať aspoň 2 znaky."
+    }
   },
   "productPage": {
     "title": "Detail produktu",
@@ -295,7 +309,17 @@
     "stock": "Počet kusov",
     "delete": "Zmazať produkt",
     "save": "Uložiť zmeny",
-    "updated": "Produkt bol aktualizovaný"
+    "updated": "Produkt bol aktualizovaný",
+    "deleted": "Produkt bol zmazaný.",
+    "stockTooltip": "Sklad je limit, koľko si môže jeden používateľ objednať naraz.",
+    "validation": {
+      "name": "Zadaj názov produktu.",
+      "category": "Vyber kategóriu produktu.",
+      "price": "Zadaj cenu vyššiu než 0.",
+      "pricePositive": "Cena musí byť vyššia než 0.",
+      "stock": "Zadaj, koľko kusov môže jeden zákazník objednať naraz.",
+      "stockNonNegative": "Počet kusov nemôže byť záporný."
+    }
   },
   "productCategories": {
     "Fruits": "Ovocie",
