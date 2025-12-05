@@ -160,14 +160,14 @@ export function FarmProductEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("product.editTitle")}</DialogTitle>
         </DialogHeader>
 
         {product && (
           <form
-            className="space-y-4"
+            className="space-y-4 max-h-[70vh] overflow-y-auto pr-1"
             onSubmit={form.handleSubmit((values) =>
               updateProduct.mutate(values)
             )}

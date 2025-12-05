@@ -109,7 +109,7 @@ export function ProductForm({
   return (
     <form
       onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-      className="space-y-5"
+      className="space-y-5 max-h-[70vh] overflow-y-auto pr-1"
       noValidate
     >
       <div className="space-y-2">

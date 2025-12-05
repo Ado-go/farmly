@@ -114,7 +114,7 @@ function FarmDetailPage() {
           <DialogTrigger asChild>
             <Button className="shadow-sm">{t("farmPage.addProduct")}</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t("farmPage.addProductTitle")}</DialogTitle>
             </DialogHeader>
@@ -179,8 +179,10 @@ function FarmDetailPage() {
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700">
                   {t("product.stock")}: {fp.stock}
                 </span>
-                <span className="text-muted-foreground">
-                  #{fp.product.category}
+                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100/70 px-3 py-1 text-xs font-semibold text-emerald-900">
+                  {t(`productCategories.${fp.product.category}`, {
+                    defaultValue: fp.product.category,
+                  })}
                 </span>
               </div>
             </div>
