@@ -64,6 +64,7 @@ const paymentOptions = [
 const orderStatuses = [
   OrderStatus.PENDING,
   OrderStatus.COMPLETED,
+  OrderStatus.ONWAY,
   OrderStatus.CANCELED,
 ];
 

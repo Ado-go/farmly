@@ -33,6 +33,7 @@ enum OrderStatus {
   PENDING
   CANCELED
   COMPLETED
+  ONWAY
 }
 
 enum OrderItemStatus {

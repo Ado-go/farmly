@@ -418,7 +418,7 @@ router.post("/stripe/webhook", async (req, res) => {
         await prisma.$transaction([
           prisma.order.update({
             where: { id: orderId },
-            data: { isPaid: true, status: "COMPLETED" },
+            data: { isPaid: true },
           }),
           prisma.orderHistory.create({
             data: {

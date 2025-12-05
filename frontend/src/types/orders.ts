@@ -3,6 +3,7 @@ export type OrderStatus =
   | "ACTIVE"
   | "CANCELED"
   | "COMPLETED"
+  | "ONWAY"
   | "CONFIRMED"
   | string;
 
