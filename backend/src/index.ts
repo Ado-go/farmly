@@ -34,6 +34,8 @@ import checkoutRoutes from "./routes/checkout.ts";
 
 import checkoutPreorderRoutes from "./routes/checkoutPreorder.ts";
 
+import ordersRoutes from "./routes/orders.ts";
+
 // uploads images
 import uploadRouter from "./routes/upload.ts";
 
@@ -90,6 +92,8 @@ app.use("/api/public-stats", publicStatsRoutes);
 app.use("/api/checkout", checkoutRoutes);
 
 app.use("/api/checkout-preorder", checkoutPreorderRoutes);
+
+app.use("/api/orders", ordersRoutes);
 
 // upload images
 
