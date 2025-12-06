@@ -27,6 +27,7 @@ import {
   Phone,
   Mail,
   Clock,
+  type LucideIcon,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
@@ -62,8 +63,13 @@ function RootLayout() {
     search?: string;
     region?: string;
   };
-  type NavLink = { to: string; label: string; search?: NavSearch };
-  const homeLink: NavLink = { to: "/", label: t("farmly") };
+  type NavLink = {
+    to: string;
+    label: string;
+    search?: NavSearch;
+    icon?: LucideIcon;
+  };
+  const homeLink: NavLink = { to: "/", label: t("farmly"), icon: Leaf };
   const navLinks: NavLink[] = [
     { to: "/products", label: t("products"), search: { page: 1 } },
     {
@@ -78,135 +84,178 @@ function RootLayout() {
     },
     { to: "/farms", label: t("farms"), search: { page: 1 } },
   ];
+  const navItems: NavLink[] = [homeLink, ...navLinks];
+
+  const isActive = (path: string) => {
+    if (path === "/") return location.pathname === "/";
+    return (
+      location.pathname === path || location.pathname.startsWith(`${path}/`)
+    );
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
-      <nav className="sticky top-0 z-40 flex items-center justify-between px-4 py-3 border-b bg-foreground shadow-sm">
-        {/* LEFT SIDE */}
-        <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-4">
-            <Link
-              to={homeLink.to}
-              className="font-semibold text-lg text-primary hover:text-secondary"
-            >
-              {homeLink.label}
-            </Link>
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                search={link.search}
-                className="font-semibold text-lg text-primary hover:text-secondary"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="start" className="w-56">
-              {[homeLink, ...navLinks].map((link) => (
-                <DropdownMenuItem key={link.to} asChild>
-                  <Link to={link.to} search={link.search}>
-                    {link.label}
+      <nav className="sticky top-0 z-40 w-full border-b border-primary/10 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3">
+          {/* LEFT SIDE */}
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-1 rounded-full border border-muted/60 bg-card/80 px-2 py-1 shadow-sm md:flex">
+              {navItems.map((link) => {
+                const active = isActive(link.to);
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    search={link.search}
+                    className={`group flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+                      active
+                        ? "border-primary/30 bg-primary/15 text-foreground shadow-sm"
+                        : "border-transparent text-muted-foreground hover:bg-primary/10 hover:text-foreground"
+                    }`}
+                  >
+                    {link.icon && (
+                      <link.icon
+                        className={`h-4 w-4 transition-transform duration-300 ${
+                          active
+                            ? "text-primary"
+                            : "text-muted-foreground group-hover:text-primary group-hover:rotate-3"
+                        }`}
+                      />
+                    )}
+                    <span>{link.label}</span>
                   </Link>
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <div className="flex items-center justify-between gap-2 px-2 py-1">
-                <ModeToggle />
-                <LanguageToggle />
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+                );
+              })}
+            </div>
 
-        {/* RIGHT SIDE */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="relative"
-            onClick={handleGoToCart}
-          >
-            <ShoppingCart className="h-5 w-5" />
-            {cart.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
-                {cart.length}
-              </span>
-            )}
-          </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="md:hidden">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
 
-          <div className="hidden md:flex items-center gap-2">
-            <ModeToggle />
-            <LanguageToggle />
+              <DropdownMenuContent align="start" className="w-56 p-1">
+                {navItems.map((link) => {
+                  const active = isActive(link.to);
+                  return (
+                    <DropdownMenuItem key={link.to} asChild>
+                      <Link
+                        to={link.to}
+                        search={link.search}
+                        className={`flex w-full items-center justify-between rounded-md px-2 py-2 ${
+                          active
+                            ? "bg-primary/10 text-foreground"
+                            : "text-muted-foreground hover:bg-muted"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          {link.icon && (
+                            <link.icon
+                              className={`h-4 w-4 ${
+                                active ? "text-primary" : "text-muted-foreground"
+                              }`}
+                            />
+                          )}
+                          <span>{link.label}</span>
+                        </div>
+                        {active && (
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                        )}
+                      </Link>
+                    </DropdownMenuItem>
+                  );
+                })}
+                <DropdownMenuSeparator />
+                <div className="flex items-center justify-between gap-2 rounded-lg border bg-card/70 px-2 py-2">
+                  <ModeToggle />
+                  <LanguageToggle />
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="rounded-full p-0 h-10 w-10 overflow-hidden"
-              >
-                {user ? (
-                  <ProfileAvatar
-                    imageUrl={user.profileImageUrl}
-                    name={user.name}
-                    size={36}
-                    className="border-0 bg-transparent"
-                  />
-                ) : (
-                  <User className="h-5 w-5" />
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end" className="w-48">
-              {user ? (
-                <>
-                  <div className="px-2 py-1.5 text-sm font-medium">
-                    {user.name}
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile">{t("profile")}</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/offers/my">{t("my_offers")}</Link>
-                  </DropdownMenuItem>
-                  {user.role === "FARMER" && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/farm">{t("my_farms")}</Link>
-                    </DropdownMenuItem>
-                  )}
-                  {user.role === "FARMER" && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/event">{t("my_events")}</Link>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem asChild>
-                    <LogoutButton />
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                <>
-                  <DropdownMenuItem asChild>
-                    <Link to="/login">{t("login")}</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/register">{t("register")}</Link>
-                  </DropdownMenuItem>
-                </>
+          {/* RIGHT SIDE */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative rounded-full border border-primary/20 bg-card/80 shadow-sm hover:bg-primary/10"
+              onClick={handleGoToCart}
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {cart.length > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-semibold text-white shadow-sm">
+                  {cart.length}
+                </span>
               )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </Button>
+
+            <div className="hidden items-center gap-2 rounded-full border border-muted/60 bg-card/80 px-2 py-1 shadow-sm md:flex">
+              <ModeToggle />
+              <LanguageToggle />
+            </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 overflow-hidden rounded-full border border-muted/70 bg-card/80 p-0 shadow-sm hover:bg-primary/10"
+                >
+                  {user ? (
+                    <ProfileAvatar
+                      imageUrl={user.profileImageUrl}
+                      name={user.name}
+                      size={36}
+                      className="border-0 bg-transparent"
+                    />
+                  ) : (
+                    <User className="h-5 w-5" />
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" className="w-48">
+                {user ? (
+                  <>
+                    <div className="px-2 py-1.5 text-sm font-medium">
+                      {user.name}
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile">{t("profile")}</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/offers/my">{t("my_offers")}</Link>
+                    </DropdownMenuItem>
+                    {user.role === "FARMER" && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/farm">{t("my_farms")}</Link>
+                      </DropdownMenuItem>
+                    )}
+                    {user.role === "FARMER" && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/event">{t("my_events")}</Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem asChild>
+                      <LogoutButton />
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/login">{t("login")}</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/register">{t("register")}</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </nav>
 

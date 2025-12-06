@@ -1,8 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
-import { Globe } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function LanguageToggle() {
+type LanguageToggleProps = {
+  className?: string;
+};
+
+export function LanguageToggle({ className }: LanguageToggleProps) {
   const { i18n } = useTranslation();
 
   const toggleLanguage = () => {
@@ -12,12 +16,18 @@ export function LanguageToggle() {
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
+      size="icon"
       onClick={toggleLanguage}
-      className="flex items-center gap-2"
+      className={cn(
+        "h-10 w-10 flex-col rounded-full border border-muted/60 bg-card/80 px-0 shadow-sm hover:bg-primary/10",
+        className
+      )}
+      aria-label="Toggle language"
     >
-      <Globe className="h-4 w-4" />
-      {i18n.language === "sk" ? "ENG" : "SK"}
+      <span className="text-[11px] font-semibold leading-none tracking-wide">
+        {i18n.language === "sk" ? "SK" : "EN"}
+      </span>
     </Button>
   );
 }
