@@ -32,6 +32,7 @@ import {
 import { useCart } from "@/context/CartContext";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useEffect } from "react";
+import { NotFound } from "@/components/notFound";
 
 function RootLayout() {
   const { user } = useAuth();
@@ -364,20 +365,6 @@ function Footer() {
         {t("footer.copyright", { year: currentYear })}
       </div>
     </footer>
-  );
-}
-
-function NotFound() {
-  const { t } = useTranslation();
-
-  return (
-    <div className="flex flex-col items-center justify-center h-screen text-center">
-      <h1 className="text-6xl font-bold">🌾404</h1>
-      <p className="mt-4 text-xl">{t("page_not_found")}</p>
-      <Link to="/" className="mt-6 text-blue-500 underline">
-        {t("go_home")}
-      </Link>
-    </div>
   );
 }
 
