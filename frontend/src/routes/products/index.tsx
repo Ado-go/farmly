@@ -30,7 +30,6 @@ import {
   CupSoda,
   Package,
   Search,
-  Sparkles,
   Filter,
 } from "lucide-react";
 
@@ -279,8 +278,9 @@ function ProductsPage() {
                 {t("productsPage.heading")}
               </div>
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <h1 className="text-3xl font-bold">{t("productsPage.title")}</h1>
+                <h1 className="text-3xl font-bold">
+                  {t("productsPage.title")}
+                </h1>
               </div>
               <p className="max-w-2xl text-sm text-gray-600">
                 {t("productsPage.subtitle")}

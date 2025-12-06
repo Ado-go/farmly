@@ -6,10 +6,7 @@ import { Card } from "@/components/ui/card";
 import { PaginationControls } from "@/components/PaginationControls";
 import { apiFetch } from "@/lib/api";
 import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
-import {
-  PRODUCT_CATEGORIES,
-  getCategoryLabel,
-} from "@/lib/productCategories";
+import { PRODUCT_CATEGORIES, getCategoryLabel } from "@/lib/productCategories";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -19,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { PaginatedResponse } from "@/types/pagination";
-import { PackageSearch, Sparkles, Tag, Search } from "lucide-react";
+import { PackageSearch, Tag, Search } from "lucide-react";
 
 export const Route = createFileRoute("/offers/")({
   component: OffersAllPage,
@@ -66,9 +63,7 @@ function OffersAllPage() {
   const navigate = useNavigate();
   const { page, search, category } = Route.useSearch();
   const [searchTerm, setSearchTerm] = useState(search ?? "");
-  const [selectedCategory, setSelectedCategory] = useState(
-    category ?? "all"
-  );
+  const [selectedCategory, setSelectedCategory] = useState(category ?? "all");
 
   useEffect(() => {
     document.title = `${t("offers")} | ${t("farmly")}`;
@@ -117,11 +112,7 @@ function OffersAllPage() {
     });
   };
 
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useQuery<PaginatedResponse<Offer>>({
+  const { data, isLoading, isError } = useQuery<PaginatedResponse<Offer>>({
     queryKey: ["offersAll", page, search, category],
     queryFn: async () => {
       const params = new URLSearchParams({
@@ -164,7 +155,12 @@ function OffersAllPage() {
         ? offer.category === categoryFilter
         : true;
       const matchesSearch = hasSearch
-        ? [offer.title, offer.description, offer.user?.name, offer.product?.name]
+        ? [
+            offer.title,
+            offer.description,
+            offer.user?.name,
+            offer.product?.name,
+          ]
             .filter(Boolean)
             .some((value) => value?.toLowerCase().includes(term!))
         : true;
@@ -223,7 +219,6 @@ function OffersAllPage() {
                 {t("offersPage.title")}
               </div>
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
                 <h1 className="text-3xl font-bold">{t("offersPage.title")}</h1>
               </div>
               <p className="max-w-2xl text-sm text-gray-600">

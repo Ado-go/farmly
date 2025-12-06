@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { CalendarRange, Search, Sparkles } from "lucide-react";
+import { CalendarRange, Search } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -42,7 +42,6 @@ export function EventsHeader({
             {t("eventsPage.title")}
           </div>
           <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
             <h1 className="text-3xl font-bold">{t("eventsPage.title")}</h1>
           </div>
           <p className="max-w-2xl text-sm text-gray-600">
@@ -84,10 +83,7 @@ export function EventsHeader({
             </SelectTrigger>
             <SelectContent>
               {regions.map((regionOption) => (
-                <SelectItem
-                  key={regionOption.value}
-                  value={regionOption.value}
-                >
+                <SelectItem key={regionOption.value} value={regionOption.value}>
                   {regionOption.value === "all"
                     ? t("eventsPage.regionAll")
                     : regionOption.label}

@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Sprout, Leaf, MapPin } from "lucide-react";
+import { Search, Sprout, MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/farms/")({
   component: FarmsPage,
@@ -203,7 +203,10 @@ function FarmsPage() {
       return { primary: t("farmsPage.locationUnknown"), secondary: "" };
     }
 
-    return { primary: primary || secondary, secondary: primary ? secondary : "" };
+    return {
+      primary: primary || secondary,
+      secondary: primary ? secondary : "",
+    };
   };
 
   return (
@@ -217,7 +220,6 @@ function FarmsPage() {
                 {t("farmsPage.title")}
               </div>
               <div className="flex items-center gap-2">
-                <Leaf className="h-5 w-5 text-primary" />
                 <h1 className="text-3xl font-bold">{t("farmsPage.title")}</h1>
               </div>
               <p className="max-w-2xl text-sm text-gray-600">
@@ -277,7 +279,9 @@ function FarmsPage() {
 
         {farmers?.length === 0 ? (
           <Card className="border-dashed bg-white/70 p-6 text-center text-gray-500">
-            {hasFilters ? t("farmsPage.noFilteredFarms") : t("farmsPage.noFarms")}
+            {hasFilters
+              ? t("farmsPage.noFilteredFarms")
+              : t("farmsPage.noFarms")}
           </Card>
         ) : (
           <div className="space-y-8">
@@ -360,7 +364,8 @@ function FarmsPage() {
                           <div className="flex items-start gap-2 text-xs text-gray-500">
                             <MapPin className="h-4 w-4 text-primary mt-0.5" />
                             {(() => {
-                              const { primary, secondary } = formatLocation(farm);
+                              const { primary, secondary } =
+                                formatLocation(farm);
                               return (
                                 <div className="space-y-0.5">
                                   <p className="font-semibold text-gray-700">
