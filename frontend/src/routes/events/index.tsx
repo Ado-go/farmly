@@ -43,12 +43,19 @@ const REGIONS = [
   { value: "kosicky", label: "Košický kraj" },
 ];
 
+const normalizeRegion = (value: string) =>
+  value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
 function EventsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { page, search, region } = Route.useSearch();
   const [searchTerm, setSearchTerm] = useState(search ?? "");
   const [selectedRegion, setSelectedRegion] = useState(region ?? "all");
+  const normalizedSelectedRegion = useMemo(
+    () => (selectedRegion === "all" ? null : normalizeRegion(selectedRegion)),
+    [selectedRegion]
+  );
 
   useEffect(() => {
     document.title = `${t("events")} | ${t("farmly")}`;
@@ -128,14 +135,23 @@ function EventsPage() {
   };
 
   const filteredEvents = useMemo(() => {
-    if (!search) return events;
-    const term = search.toLowerCase();
-    return events.filter((event: Event) =>
-      [event.title, event.city, event.organizer?.name, event.region]
+    const matchesSearch = (event: Event) => {
+      if (!search) return true;
+      const term = search.toLowerCase();
+      return [event.title, event.city, event.organizer?.name, event.region]
         .filter(Boolean)
-        .some((value) => value?.toLowerCase().includes(term))
-    );
-  }, [events, search]);
+        .some((value) => value?.toLowerCase().includes(term));
+    };
+
+    return events.filter((event: Event) => {
+      const matchesRegion =
+        !normalizedSelectedRegion ||
+        (event.region &&
+          normalizeRegion(event.region) === normalizedSelectedRegion);
+
+      return matchesRegion && matchesSearch(event);
+    });
+  }, [events, search, normalizedSelectedRegion]);
 
   const now = new Date();
   const ongoing = filteredEvents.filter(
