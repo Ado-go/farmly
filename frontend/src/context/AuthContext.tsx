@@ -28,7 +28,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const res = await apiFetch("/profile");
         setUser(res.user);
       } catch {
-        console.log("Not logged in");
         setUser(null);
       }
     };
