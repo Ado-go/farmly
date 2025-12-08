@@ -366,7 +366,7 @@ export default function ProfileTab() {
       <div className="grid gap-4 md:grid-cols-2">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Card className="cursor-pointer border-muted-200 transition hover:-translate-y-0.5 hover:shadow-lg">
+            <Card className="bg-secondary cursor-pointer border-muted-200 transition hover:-translate-y-0.5 hover:shadow-lg">
               <CardHeader>
                 <CardTitle className="text-base">
                   {t("profilePage.changePassword")}
@@ -406,13 +406,13 @@ export default function ProfileTab() {
 
         <Dialog>
           <DialogTrigger asChild>
-            <Card className="cursor-pointer border-red-200/80 bg-red-50/50 transition hover:-translate-y-0.5 hover:shadow-lg">
+            <Card className="cursor-pointer border-red-200/80 bg-destructive transition hover:-translate-y-0.5 hover:shadow-lg">
               <CardHeader>
-                <CardTitle className="text-base text-red-700">
+                <CardTitle className="text-base text-white">
                   {t("profilePage.delete")}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-sm text-red-600">
+              <CardContent className="text-sm text-white">
                 {t("profilePage.deleteTitle")}
               </CardContent>
             </Card>
