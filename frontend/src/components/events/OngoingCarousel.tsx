@@ -66,14 +66,18 @@ export function OngoingCarousel({ events }: OngoingCarouselProps) {
               <p className="line-clamp-2 text-sm text-gray-600">
                 {event.description || t("eventsPage.noDescription")}
               </p>
-              {event.eventProducts?.length ? (
+                  {event.eventProducts?.length ? (
                 <div className="flex flex-wrap gap-2">
                   {event.eventProducts.slice(0, 3).map((p) => (
                     <span
                       key={p.id}
                       className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
                     >
-                      {p.product.name}
+                      {p.product.name} • €
+                      {(p.price ?? p.product.basePrice ?? 0).toFixed(2)}
+                      {typeof p.stock === "number"
+                        ? ` • ${t("productCard.stock")}: ${p.stock}`
+                        : ""}
                     </span>
                   ))}
                   {event.eventProducts.length > 3 && (

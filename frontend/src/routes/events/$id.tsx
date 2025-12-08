@@ -30,12 +30,14 @@ type EventDetail = {
   images?: { url: string; optimizedUrl?: string }[];
   eventProducts?: {
     id: number;
+    price: number;
+    stock: number;
     product: {
       id: number;
       name: string;
       category: string;
       description: string;
-      basePrice: number;
+      basePrice?: number | null;
       images?: { url: string }[];
     };
     user: { id: number; name: string };
@@ -107,12 +109,13 @@ function EventPageDetail() {
     })) ?? [];
 
   const handleAddToPreorder = (ep: EventProductDetail) => {
+    const unitPrice = ep.price ?? ep.product.basePrice ?? 0;
     const added = addToCart(
       {
         productId: ep.product.id,
         productName: ep.product.name,
         sellerName: ep.user.name,
-        unitPrice: ep.product.basePrice,
+        unitPrice,
         quantity: 1,
       },
       "PREORDER",
@@ -300,11 +303,19 @@ function EventPageDetail() {
                               </div>
                             )}
                             <div className="flex items-center justify-between text-sm text-gray-600">
-                              <span className="rounded-full bg-primary/10 px-3 py-1 text-primary inline-flex items-center gap-2">
-                                {getCategoryLabel(ep.product.category, t)}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="rounded-full bg-primary/10 px-3 py-1 text-primary inline-flex items-center gap-2">
+                                  {getCategoryLabel(ep.product.category, t)}
+                                </span>
+                                <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
+                                  {t("productCard.stock")}: {ep.stock ?? 0}
+                                </span>
+                              </div>
                               <span className="font-semibold text-gray-800">
-                                €{ep.product.basePrice?.toFixed(2) ?? "N/A"}
+                                €
+                                {(ep.price ?? ep.product.basePrice ?? 0).toFixed(
+                                  2
+                                )}
                               </span>
                             </div>
                             {ep.product.description && (

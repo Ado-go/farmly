@@ -57,5 +57,8 @@ export type Farm = {
 export type EventProduct = {
   id: number;
   eventId: number;
+  price: number;
+  stock: number;
   product: Product;
+  user?: Farmer;
 };

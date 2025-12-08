@@ -1,12 +1,14 @@
 export type EventProduct = {
   id: number;
+  price: number;
+  stock: number;
   product: {
     id: number;
     name: string;
     category: string;
     description: string;
-    basePrice: number;
-    images: { url: string }[];
+    basePrice?: number | null;
+    images?: { url: string }[];
   };
   user: { id: number; name: string };
 };
@@ -20,6 +22,6 @@ export type Event = {
   city: string;
   region: string;
   organizer: { id: number; name: string };
-  eventProducts: EventProduct[];
+  eventProducts?: EventProduct[];
   images?: { url: string; optimizedUrl?: string }[];
 };

@@ -69,6 +69,25 @@ export function UpcomingGrid({
             <p className="line-clamp-2 text-sm text-gray-600">
               {event.description || t("eventsPage.noDescription")}
             </p>
+            {event.eventProducts?.length ? (
+              <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+                {event.eventProducts.slice(0, 2).map((p) => (
+                  <span
+                    key={p.id}
+                    className="rounded-full bg-gray-100 px-2 py-1"
+                  >
+                    {p.product.name} • €
+                    {(p.price ?? p.product.basePrice ?? 0).toFixed(2)} •{" "}
+                    {t("productCard.stock")}: {p.stock ?? 0}
+                  </span>
+                ))}
+                {event.eventProducts.length > 2 && (
+                  <span className="text-xs text-gray-500">
+                    +{event.eventProducts.length - 2}
+                  </span>
+                )}
+              </div>
+            ) : null}
             <div className="flex items-center justify-between text-xs text-gray-500">
               <span>
                 {t("eventsPage.organizedBy")} {event.organizer.name}
