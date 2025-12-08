@@ -57,8 +57,6 @@ describe("Offer routes", () => {
       .send({
         title: "Čerstvé jablká",
         description: "Sladké jablká z domácej farmy",
-        category: "Fruits",
-        price: 3.5,
         product: {
           name: "Jablká",
           category: "Fruits",
@@ -72,6 +70,7 @@ describe("Offer routes", () => {
     expect(res.body.title).toBe("Čerstvé jablká");
     expect(res.body.product).toHaveProperty("id");
     expect(res.body.product.name).toBe("Jablká");
+    expect(res.body.product.basePrice).toBe(2.5);
     offerId = res.body.id;
   });
 
@@ -106,12 +105,12 @@ describe("Offer routes", () => {
       .set("Cookie", [`accessToken=${token}`])
       .send({
         title: "Čerstvé jablká - nový názov",
-        price: 4.0,
+        product: { basePrice: 4.0 },
       });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.title).toBe("Čerstvé jablká - nový názov");
-    expect(res.body.price).toBe(4.0);
+    expect(res.body.product.basePrice).toBe(4.0);
   });
 
   it("should delete an offer", async () => {

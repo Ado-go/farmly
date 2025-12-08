@@ -522,12 +522,18 @@ async function main() {
     const offersSelection = shuffle(ownedProducts).slice(0, numOffers);
 
     for (const record of offersSelection) {
+      const offerPrice = parseFloat((record.price * 0.9).toFixed(2));
+
+      await prisma.product.update({
+        where: { id: record.product.id },
+        data: { basePrice: offerPrice },
+      });
+      record.product.basePrice = offerPrice;
+
       await prisma.offer.create({
         data: {
           title: `${record.product.name} - akciová ponuka`,
           description: "Limitovaná ponuka priamo od farmára.",
-          category: record.product.category,
-          price: parseFloat((record.price * 0.9).toFixed(2)),
           userId: farmer.id,
           productId: record.product.id,
         },

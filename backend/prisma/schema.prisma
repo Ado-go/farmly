@@ -162,10 +162,7 @@ model Offer {
   id          Int         @id @default(autoincrement())
   title       String
   description String?
-  category    ProductCategory
-  price       Float
   createdAt   DateTime    @default(now())
-  isActive    Boolean     @default(true)
 
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      Int

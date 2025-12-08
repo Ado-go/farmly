@@ -6,16 +6,23 @@ const imageSchema = z.object({
   publicId: z.string().min(1, "Missing publicId"),
 });
 
+const productSchema = z.object({
+  name: z.string().min(2, "Product name is required"),
+  category: productCategorySchema,
+  description: z.string().optional(),
+  basePrice: z.number().positive("Base price must be positive"),
+  images: z.array(imageSchema).optional(),
+});
+
 export const offerSchema = z.object({
   title: z.string().min(3, "Title is required"),
   description: z.string().optional(),
-  category: productCategorySchema,
-  price: z.number().positive("Price must be positive"),
-  product: z.object({
-    name: z.string().min(2, "Product name is required"),
-    category: productCategorySchema,
-    description: z.string().optional(),
-    basePrice: z.number().positive("Base price must be positive").optional(),
-    images: z.array(imageSchema).optional(),
-  }),
+  product: productSchema,
 });
+
+export const offerUpdateSchema = offerSchema
+  .omit({ product: true })
+  .partial()
+  .extend({
+    product: productSchema.partial(),
+  });

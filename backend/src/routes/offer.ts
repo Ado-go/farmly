@@ -2,7 +2,7 @@ import { Router } from "express";
 import prisma from "../prisma.ts";
 import { authenticateToken } from "../middleware/auth.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
-import { offerSchema } from "../schemas/offerSchemas.ts";
+import { offerSchema, offerUpdateSchema } from "../schemas/offerSchemas.ts";
 import { v2 as cloudinary } from "cloudinary";
 import {
   buildPaginationResponse,
@@ -32,7 +32,7 @@ router.post(
           name: product.name,
           category: product.category,
           description: product.description || "",
-          basePrice: product.basePrice ?? offerPayload.price,
+          basePrice: product.basePrice,
           images: productImages.length
             ? {
                 create: productImages.map((img: { url: string; publicId: string }) => ({
@@ -49,8 +49,6 @@ router.post(
         data: {
           title: offerPayload.title,
           description: offerPayload.description,
-          category: offerPayload.category,
-          price: offerPayload.price,
           userId,
           productId: newProduct.id,
         },
@@ -72,11 +70,10 @@ router.post(
 router.get("/all", async (req, res) => {
   try {
     const { page, pageSize, skip, take } = getPaginationParams(req.query);
-    const where = { isActive: true };
 
     const [offers, total] = await Promise.all([
       prisma.offer.findMany({
-        where,
+        where: {},
         skip,
         take,
         include: {
@@ -85,7 +82,7 @@ router.get("/all", async (req, res) => {
         },
         orderBy: { createdAt: "desc" },
       }),
-      prisma.offer.count({ where }),
+      prisma.offer.count(),
     ]);
 
     res.json(buildPaginationResponse(offers, page, pageSize, total));
@@ -122,7 +119,7 @@ router.get("/:id", async (req, res) => {
 
   try {
     const offer = await prisma.offer.findFirst({
-      where: { id: offerId, isActive: true },
+      where: { id: offerId },
       include: {
         product: { include: { images: true } },
         user: { select: { id: true, name: true } },
@@ -144,7 +141,7 @@ router.get("/:id", async (req, res) => {
 router.put(
   "/:id",
   authenticateToken,
-  validateRequest(offerSchema.partial()),
+  validateRequest(offerUpdateSchema),
   async (req, res) => {
     const userId = req.user?.id;
     const offerId = parseInt(req.params.id);
@@ -240,9 +237,6 @@ router.put(
           Object.entries({
             title: offerPayload.title,
             description: offerPayload.description,
-            category: offerPayload.category,
-            price: offerPayload.price,
-            isActive: offerPayload.isActive,
           }).filter(([, value]) => value !== undefined)
         );
 
