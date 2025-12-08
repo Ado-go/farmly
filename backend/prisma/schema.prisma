@@ -278,6 +278,9 @@ model EventProduct {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     Int
 
+  price      Float
+  stock      Int      @default(0)
+
   @@unique([eventId, productId])
 }
 

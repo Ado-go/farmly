@@ -1,4 +1,5 @@
 import { Router } from "express";
+import type { Prisma } from "@prisma/client";
 import prisma from "../prisma.ts";
 import { eventProductSchema } from "../schemas/eventProductSchema.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
@@ -37,7 +38,7 @@ router.post(
   validateRequest(eventProductSchema),
   async (req, res) => {
     try {
-      const { images, eventId, ...productData } = req.body;
+      const { images, eventId, price, stock, ...productData } = req.body;
       const userId = req.user?.id;
 
       await checkEventParticipation(eventId, userId);
@@ -45,6 +46,7 @@ router.post(
       const product = await prisma.product.create({
         data: {
           ...productData,
+          basePrice: price,
           images: images
             ? {
                 create: images.map((img: { url: string }) => ({
@@ -61,6 +63,8 @@ router.post(
           event: { connect: { id: eventId } },
           product: { connect: { id: product.id } },
           user: { connect: { id: userId! } },
+          price,
+          stock,
         },
         include: {
           product: { include: { images: true } },
@@ -85,10 +89,11 @@ router.get(
   async (req, res) => {
     try {
       const eventId = Number(req.params.eventId);
-      await checkEventParticipation(eventId, req.user?.id);
+      const userId = req.user?.id;
+      await checkEventParticipation(eventId, userId);
 
       const eventProducts = await prisma.eventProduct.findMany({
-        where: { eventId },
+        where: { eventId, userId },
         include: {
           product: { include: { images: true, reviews: true } },
           user: { select: { id: true, name: true } },
@@ -113,7 +118,7 @@ router.put(
   async (req, res) => {
     try {
       const id = Number(req.params.id);
-      const { images, name, category, description } = req.body;
+      const { images, name, category, description, price, stock } = req.body;
       const userId = req.user?.id;
 
       const eventProduct = await prisma.eventProduct.findUnique({
@@ -130,24 +135,45 @@ router.put(
           .json({ error: "You can only modify your own products" });
       }
 
+      const productUpdateData: Prisma.ProductUpdateInput = {};
+
+      if (name) productUpdateData.name = name;
+      if (category) productUpdateData.category = category;
+      if (description) productUpdateData.description = description;
+      if (typeof price === "number" && !Number.isNaN(price)) {
+        productUpdateData.basePrice = price;
+      }
+      if (images) {
+        productUpdateData.images = {
+          deleteMany: {},
+          create: images.map((img: { url: string }) => ({
+            url: img.url,
+          })),
+        };
+      }
+
+      const eventProductUpdateData: Prisma.EventProductUpdateInput = {};
+      if (typeof price === "number" && !Number.isNaN(price)) {
+        eventProductUpdateData.price = price;
+      }
+      if (typeof stock === "number" && !Number.isNaN(stock)) {
+        eventProductUpdateData.stock = stock;
+      }
+
+      if (
+        Object.keys(productUpdateData).length === 0 &&
+        Object.keys(eventProductUpdateData).length === 0
+      ) {
+        return res.status(400).json({ error: "No fields to update" });
+      }
+
       const updated = await prisma.eventProduct.update({
         where: { id },
         data: {
-          product: {
-            update: {
-              ...(name && { name }),
-              ...(category && { category }),
-              ...(description && { description }),
-              ...(images && {
-                images: {
-                  deleteMany: {},
-                  create: images.map((img: { url: string }) => ({
-                    url: img.url,
-                  })),
-                },
-              }),
-            },
-          },
+          ...eventProductUpdateData,
+          ...(Object.keys(productUpdateData).length
+            ? { product: { update: productUpdateData } }
+            : {}),
         },
         include: {
           product: { include: { images: true } },

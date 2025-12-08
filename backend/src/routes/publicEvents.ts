@@ -41,7 +41,10 @@ router.get("/", async (req, res) => {
             },
           },
           eventProducts: {
-            include: {
+            select: {
+              id: true,
+              price: true,
+              stock: true,
               product: {
                 select: {
                   id: true,
@@ -53,11 +56,7 @@ router.get("/", async (req, res) => {
                 },
               },
               user: {
-                select: {
-                  id: true,
-                  name: true,
-                  profileImageUrl: true,
-                },
+                select: { id: true, name: true, profileImageUrl: true },
               },
             },
           },
@@ -101,7 +100,10 @@ router.get("/:id", async (req, res) => {
           },
         },
         eventProducts: {
-          include: {
+          select: {
+            id: true,
+            price: true,
+            stock: true,
             product: {
               select: {
                 id: true,

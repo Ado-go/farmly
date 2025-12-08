@@ -69,8 +69,18 @@ beforeAll(async () => {
       organizerId: farmerId,
       eventProducts: {
         create: [
-          { productId: product1.id, userId: farmerId },
-          { productId: product2.id, userId: farmerId },
+          {
+            productId: product1.id,
+            userId: farmerId,
+            price: 2.5,
+            stock: 30,
+          },
+          {
+            productId: product2.id,
+            userId: farmerId,
+            price: 5.0,
+            stock: 18,
+          },
         ],
       },
     },
@@ -91,7 +101,14 @@ beforeAll(async () => {
       country: "Slovakia",
       organizerId: farmerId,
       eventProducts: {
-        create: [{ productId: product2.id, userId: farmerId }],
+        create: [
+          {
+            productId: product2.id,
+            userId: farmerId,
+            price: 5.0,
+            stock: 25,
+          },
+        ],
       },
     },
   });

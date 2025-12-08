@@ -477,12 +477,14 @@ async function main() {
       for (const template of chosenTemplates) {
         const seller =
           participants[randomInt(0, participants.length - 1)] ?? farmer;
+        const price = parseFloat((randomInt(100, 800) / 100).toFixed(2));
+        const stock = randomInt(10, 60);
         const product = await prisma.product.create({
           data: {
             name: template.name,
             category: template.category,
             description: `Produkt predávaný počas ${event.title}.`,
-            basePrice: parseFloat((randomInt(100, 800) / 100).toFixed(2)),
+            basePrice: price,
           },
         });
 
@@ -491,6 +493,8 @@ async function main() {
             eventId: event.id,
             userId: seller.id,
             productId: product.id,
+            price,
+            stock,
           },
         });
 

@@ -122,13 +122,16 @@ describe("EventProduct Routes", () => {
         name: "Event Product",
         category: "Fruits",
         description: "Fresh apples",
-        basePrice: 5,
+        price: 5,
+        stock: 25,
         eventId: EVENT_ID,
       });
 
     expect(res.statusCode).toBe(201);
     expect(res.body).toHaveProperty("id");
     expect(res.body.product).toHaveProperty("name", "Event Product");
+    expect(res.body).toHaveProperty("price", 5);
+    expect(res.body).toHaveProperty("stock", 25);
     eventProductId = res.body.id;
   });
 
@@ -140,7 +143,8 @@ describe("EventProduct Routes", () => {
         name: "Invalid Event Product",
         category: "Vegetables",
         description: "Should not work",
-        basePrice: 3,
+        price: 3,
+        stock: 10,
         eventId: OTHER_EVENT_ID,
       });
 
@@ -149,6 +153,23 @@ describe("EventProduct Routes", () => {
   });
 
   it("GET /event-product/event/:id - should list all products of event for participant", async () => {
+    await prisma.eventProduct.create({
+      data: {
+        event: { connect: { id: EVENT_ID } },
+        user: { connect: { id: OTHER_FARMER_ID } },
+        price: 7.5,
+        stock: 15,
+        product: {
+          create: {
+            name: "Other Farmer Event Product",
+            category: "Drinks",
+            description: "Belongs to other farmer",
+            basePrice: 7.5,
+          },
+        },
+      },
+    });
+
     const res = await request(app)
       .get(`/api/event-product/event/${EVENT_ID}`)
       .set("Cookie", [`accessToken=${accessToken}`]);
@@ -156,6 +177,9 @@ describe("EventProduct Routes", () => {
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
     expect(res.body[0].product).toHaveProperty("name", "Event Product");
+    expect(
+      res.body.every((p: any) => p.userId === FARMER_ID)
+    ).toBe(true);
   });
 
   it("GET /event-product/event/:id - should fail if not participant", async () => {
@@ -195,11 +219,14 @@ describe("EventProduct Routes", () => {
       data: {
         event: { connect: { id: EVENT_ID } },
         user: { connect: { id: FARMER_ID } },
+        price: 4.5,
+        stock: 5,
         product: {
           create: {
             name: "Temp Product",
             category: "Meat",
             description: "Temporary",
+            basePrice: 4.5,
           },
         },
       },
@@ -218,11 +245,14 @@ describe("EventProduct Routes", () => {
       data: {
         event: { connect: { id: EVENT_ID } },
         user: { connect: { id: OTHER_FARMER_ID } },
+        price: 6,
+        stock: 20,
         product: {
           create: {
             name: "Other Farmer Product",
             category: "Vegetables",
             description: "Owned by other farmer",
+            basePrice: 6,
           },
         },
       },
@@ -241,11 +271,14 @@ describe("EventProduct Routes", () => {
       data: {
         event: { connect: { id: EVENT_ID } },
         user: { connect: { id: FARMER_ID } },
+        price: 3.2,
+        stock: 8,
         product: {
           create: {
             name: "Bulk Product 1",
             category: "Fruits",
             description: "Batch test",
+            basePrice: 3.2,
           },
         },
       },
@@ -255,11 +288,14 @@ describe("EventProduct Routes", () => {
       data: {
         event: { connect: { id: EVENT_ID } },
         user: { connect: { id: FARMER_ID } },
+        price: 4.1,
+        stock: 12,
         product: {
           create: {
             name: "Bulk Product 2",
             category: "Vegetables",
             description: "Batch test 2",
+            basePrice: 4.1,
           },
         },
       },
