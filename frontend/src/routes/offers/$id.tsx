@@ -16,8 +16,6 @@ type Offer = {
   id: number;
   title: string;
   description?: string;
-  category: string;
-  price: number;
   user: { id: number; name: string };
   product: {
     id: number;
@@ -77,8 +75,8 @@ function OfferDetailPage() {
     );
   }
 
-  const offerCategoryLabel = getCategoryLabel(offer.category, t);
   const productCategoryLabel = getCategoryLabel(offer.product.category, t);
+  const price = offer.product?.basePrice ?? 0;
   const carouselImages =
     offer.product?.images?.map((img) => ({
       url: img.optimizedUrl || img.url,
@@ -100,7 +98,7 @@ function OfferDetailPage() {
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-semibold text-primary shadow-sm">
                 <Tag className="h-4 w-4" />
-                {offerCategoryLabel}
+                {productCategoryLabel}
               </div>
               <h1 className="text-3xl font-bold text-gray-900">
                 {offer.title}
@@ -123,7 +121,7 @@ function OfferDetailPage() {
                   {t("offersPage.priceLabel")}
                 </p>
                 <p className="text-3xl font-bold text-primary">
-                  {offer.price.toFixed(2)} €
+                  {price.toFixed(2)} €
                 </p>
               </div>
               <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
@@ -172,7 +170,7 @@ function OfferDetailPage() {
                       {t("offersPage.categoryLabel")}
                     </p>
                     <p className="font-semibold text-primary">
-                      {offerCategoryLabel}
+                      {productCategoryLabel}
                     </p>
                   </div>
                 </div>
@@ -216,7 +214,7 @@ function OfferDetailPage() {
                     {t("offersPage.priceLabel")}
                   </p>
                   <p className="font-semibold text-gray-800">
-                    {offer.price.toFixed(2)} €
+                    {price.toFixed(2)} €
                   </p>
                 </div>
               </div>

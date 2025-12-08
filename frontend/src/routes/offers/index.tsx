@@ -42,8 +42,6 @@ type Offer = {
   id: number;
   title: string;
   description?: string;
-  category: string;
-  price: number;
   user: {
     id: number;
     name: string;
@@ -152,7 +150,7 @@ function OffersAllPage() {
 
     return offers.filter((offer: Offer) => {
       const matchesCategory = categoryFilter
-        ? offer.category === categoryFilter
+        ? offer.product?.category === categoryFilter
         : true;
       const matchesSearch = hasSearch
         ? [
@@ -295,7 +293,9 @@ function OffersAllPage() {
                           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                         />
                         <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm backdrop-blur">
-                          {getCategoryLabel(offer.category, t)}
+                          {offer.product?.category
+                            ? getCategoryLabel(offer.product.category, t)
+                            : t("offersPage.categoryPlaceholder")}
                         </span>
                       </div>
                     ) : (
@@ -309,7 +309,7 @@ function OffersAllPage() {
                           {offer.title}
                         </h3>
                         <span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                          {offer.price} €
+                          {(offer.product?.basePrice ?? 0).toFixed(2)} €
                         </span>
                       </div>
                       <p className="line-clamp-2 text-sm text-gray-600">

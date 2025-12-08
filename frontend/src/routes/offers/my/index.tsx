@@ -54,7 +54,7 @@ const nonNegativeNumber = (requiredKey: string, minKey: string) =>
   z
     .number({ message: requiredKey })
     .refine((value) => Number.isFinite(value), { message: requiredKey })
-    .min(0, { message: minKey });
+    .gt(0, { message: minKey });
 
 const offerSchema = z.object({
   title: z
@@ -62,13 +62,6 @@ const offerSchema = z.object({
     .trim()
     .min(3, { message: "offersPage.errors.titleRequired" }),
   description: z.string().optional(),
-  category: z.enum(PRODUCT_CATEGORIES, {
-    message: "offersPage.errors.categoryRequired",
-  }),
-  price: nonNegativeNumber(
-    "offersPage.errors.priceRequired",
-    "offersPage.errors.priceMin"
-  ),
   productName: z
     .string({ message: "offersPage.errors.productNameRequired" })
     .trim()
@@ -89,8 +82,7 @@ type Offer = {
   id: number;
   title: string;
   description?: string;
-  category: string;
-  price: number;
+  userId?: number;
   product: {
     id: number;
     name: string;
@@ -123,8 +115,6 @@ function OffersMyPage() {
     defaultValues: {
       title: "",
       description: "",
-      category: undefined,
-      price: undefined,
       productName: "",
       productDescription: "",
       productCategory: undefined,
@@ -160,9 +150,6 @@ function OffersMyPage() {
 
   useEffect(() => {
     if (editingOffer) {
-      const parsedCategory = productCategorySchema.safeParse(
-        editingOffer.category
-      );
       const parsedProductCategory = productCategorySchema.safeParse(
         editingOffer.product?.category
       );
@@ -170,14 +157,12 @@ function OffersMyPage() {
       form.reset({
         title: editingOffer.title,
         description: editingOffer.description,
-        category: parsedCategory.success ? parsedCategory.data : undefined,
-        price: editingOffer.price,
         productName: editingOffer.product?.name || "",
         productDescription: editingOffer.product?.description || "",
         productCategory: parsedProductCategory.success
           ? parsedProductCategory.data
           : undefined,
-        productPrice: editingOffer.product?.basePrice ?? editingOffer.price,
+        productPrice: editingOffer.product?.basePrice,
       });
       setImages(
         (editingOffer.product?.images ?? []).map((img) => ({
@@ -189,8 +174,6 @@ function OffersMyPage() {
       form.reset({
         title: "",
         description: "",
-        category: undefined,
-        price: undefined,
         productName: "",
         productDescription: "",
         productCategory: undefined,
@@ -224,8 +207,6 @@ function OffersMyPage() {
       const payload = {
         title: data.title,
         description: data.description,
-        category: data.category,
-        price: Number(data.price),
         product: {
           name: data.productName,
           category: data.productCategory,
@@ -264,8 +245,6 @@ function OffersMyPage() {
       const payload = {
         title: data.title,
         description: data.description,
-        category: data.category,
-        price: Number(data.price),
         product: {
           name: data.productName,
           category: data.productCategory,
@@ -326,9 +305,8 @@ function OffersMyPage() {
     );
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-primary/5 via-white to-emerald-50">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(52,211,153,0.14),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(245,158,11,0.14),transparent_32%)]" />
-      <div className="relative mx-auto max-w-6xl space-y-8 px-4 py-8">
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-6xl space-y-8 px-4 py-8">
         <div className="flex flex-col gap-4 rounded-2xl border border-primary/10 bg-white/80 p-5 shadow-sm backdrop-blur">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="space-y-2">
@@ -415,62 +393,6 @@ function OffersMyPage() {
                           aria-invalid={!!errors.description}
                         />
                         <FieldError>{renderError(errors.description)}</FieldError>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="category"
-                          className="text-sm font-semibold text-slate-800"
-                        >
-                          {t("offersPage.categoryLabel")}
-                        </Label>
-                        <Controller
-                          control={form.control}
-                          name="category"
-                          render={({ field }) => (
-                            <Select
-                              value={field.value ?? undefined}
-                              onValueChange={field.onChange}
-                            >
-                              <SelectTrigger
-                                id="category"
-                                className={getSelectClass(!!errors.category)}
-                                aria-invalid={!!errors.category}
-                              >
-                                <SelectValue
-                                  placeholder={t("offersPage.categoryLabel")}
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {PRODUCT_CATEGORIES.map((value) => (
-                                  <SelectItem key={value} value={value}>
-                                    {t(`productCategories.${value}`)}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        />
-                        <FieldError>{renderError(errors.category)}</FieldError>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="price"
-                          className="text-sm font-semibold text-slate-800"
-                        >
-                          {t("offersPage.priceLabel")}
-                        </Label>
-                        <Input
-                          id="price"
-                          type="number"
-                          step="0.01"
-                          {...form.register("price", { valueAsNumber: true })}
-                          placeholder={t("offersPage.priceLabel")}
-                          className={getInputClass(!!errors.price)}
-                          aria-invalid={!!errors.price}
-                        />
-                        <FieldError>{renderError(errors.price)}</FieldError>
                       </div>
                     </div>
                   </div>
@@ -648,7 +570,9 @@ function OffersMyPage() {
                       )}
                     </div>
                     <span className="rounded-full border border-primary/25 bg-primary/5 px-2 py-1 text-xs font-medium text-primary">
-                      {getCategoryLabel(offer.category, t)}
+                      {offer.product?.category
+                        ? getCategoryLabel(offer.product.category, t)
+                        : t("offersPage.categoryPlaceholder")}
                     </span>
                   </div>
                   <ImageCarousel
@@ -658,7 +582,7 @@ function OffersMyPage() {
                   />
                   <div className="flex items-center justify-between">
                     <p className="text-2xl font-semibold text-slate-900">
-                      {offer.price} €
+                      {(offer.product?.basePrice ?? 0).toFixed(2)} €
                     </p>
                     {offer.product?.description && (
                       <p className="line-clamp-2 text-xs text-muted-foreground">
