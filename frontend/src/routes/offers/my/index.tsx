@@ -305,10 +305,11 @@ function OffersMyPage() {
     );
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="mx-auto max-w-6xl space-y-8 px-4 py-8">
-        <div className="flex flex-col gap-4 rounded-2xl border border-primary/10 bg-white/80 p-5 shadow-sm backdrop-blur">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="min-h-screen bg-muted/30">
+      <div className="mx-auto max-w-6xl space-y-8 p-6">
+        <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-emerald-50 via-white to-lime-50 p-6 shadow-sm">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(34,197,94,0.08),transparent_38%),radial-gradient(circle_at_85%_10%,rgba(251,191,36,0.1),transparent_32%)]" />
+          <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="space-y-2">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary/70">
                 {t("offersPage.title")}
