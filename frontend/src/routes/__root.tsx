@@ -27,6 +27,10 @@ import {
   Phone,
   Mail,
   Clock,
+  Package,
+  Tag,
+  CalendarRange,
+  Sprout,
   type LucideIcon,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
@@ -72,18 +76,20 @@ function RootLayout() {
   };
   const homeLink: NavLink = { to: "/", label: t("farmly"), icon: Leaf };
   const navLinks: NavLink[] = [
-    { to: "/products", label: t("products"), search: { page: 1 } },
+    { to: "/products", label: t("products"), search: { page: 1 }, icon: Package },
     {
       to: "/events",
       label: t("events"),
       search: { page: 1, search: undefined, region: undefined },
+      icon: CalendarRange,
     },
     {
       to: "/offers",
       label: t("offers"),
       search: { page: 1, search: undefined, category: undefined },
+      icon: Tag,
     },
-    { to: "/farms", label: t("farms"), search: { page: 1 } },
+    { to: "/farms", label: t("farms"), search: { page: 1 }, icon: Sprout },
   ];
   const navItems: NavLink[] = [homeLink, ...navLinks];
 
