@@ -3,6 +3,7 @@ import { productCategorySchema } from "../constants/productCategories.ts";
 
 const imageSchema = z.object({
   url: z.string("Image URL is required").url("Invalid image URL"),
+  publicId: z.string().optional(),
 });
 
 const priceSchema = z

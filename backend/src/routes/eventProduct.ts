@@ -4,6 +4,7 @@ import prisma from "../prisma.ts";
 import { eventProductSchema } from "../schemas/eventProductSchema.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
 import { authenticateToken, authorizeRole } from "../middleware/auth.ts";
+import { v2 as cloudinary } from "cloudinary";
 
 const router = Router();
 
@@ -43,15 +44,24 @@ router.post(
 
       await checkEventParticipation(eventId, userId);
 
+      const sanitizedImages = images?.filter(
+        (
+          img: { url: string; publicId?: string }
+        ): img is { url: string; publicId: string } => Boolean(img.url && img.publicId)
+      );
+
       const product = await prisma.product.create({
         data: {
           ...productData,
           basePrice: price,
-          images: images
+          images: sanitizedImages
             ? {
-                create: images.map((img: { url: string }) => ({
-                  url: img.url,
-                })),
+                create: sanitizedImages.map(
+                  (img: { url: string; publicId: string }) => ({
+                    url: img.url,
+                    publicId: img.publicId,
+                  })
+                ),
               }
             : undefined,
         },
@@ -123,7 +133,7 @@ router.put(
 
       const eventProduct = await prisma.eventProduct.findUnique({
         where: { id },
-        include: { product: true, event: true },
+        include: { product: { include: { images: true } }, event: true },
       });
 
       if (!eventProduct)
@@ -143,13 +153,61 @@ router.put(
       if (typeof price === "number" && !Number.isNaN(price)) {
         productUpdateData.basePrice = price;
       }
-      if (images) {
-        productUpdateData.images = {
-          deleteMany: {},
-          create: images.map((img: { url: string }) => ({
-            url: img.url,
-          })),
-        };
+      const incomingImages = images as
+        | { url: string; publicId?: string }[]
+        | undefined;
+      const existingImages = eventProduct.product.images || [];
+      const existingIds = existingImages
+        .map((img) => img.publicId)
+        .filter(Boolean) as string[];
+
+      if (incomingImages) {
+        const incomingIds = incomingImages
+          .map((img) => img.publicId)
+          .filter(Boolean) as string[];
+
+        const toDelete = existingImages.filter(
+          (img) => img.publicId && !incomingIds.includes(img.publicId)
+        );
+
+        if (toDelete.length) {
+          await Promise.all(
+            toDelete.map(async (img) => {
+              try {
+                if (img.publicId) {
+                  await cloudinary.uploader.destroy(img.publicId, {
+                    resource_type: "image",
+                  });
+                }
+              } catch (e) {
+                console.error("Failed to delete Cloudinary image:", img.publicId, e);
+              }
+            })
+          );
+
+          await prisma.productImage.deleteMany({
+            where: {
+              productId: eventProduct.productId,
+              publicId: { in: toDelete.map((img) => img.publicId!) },
+            },
+          });
+        }
+
+        const toAdd = incomingImages.filter(
+          (
+            img
+          ): img is { url: string; publicId: string } =>
+            Boolean(img.url && img.publicId && !existingIds.includes(img.publicId))
+        );
+
+        if (toAdd.length) {
+          productUpdateData.images = {
+            create: toAdd.map(({ url, publicId }) => ({
+              url,
+              publicId,
+            })),
+          };
+        }
       }
 
       const eventProductUpdateData: Prisma.EventProductUpdateInput = {};
@@ -202,7 +260,7 @@ router.delete(
 
       const eventProduct = await prisma.eventProduct.findUnique({
         where: { id },
-        include: { product: true, event: true },
+        include: { product: { include: { images: true } }, event: true },
       });
 
       if (!eventProduct)
@@ -212,6 +270,23 @@ router.delete(
         return res
           .status(403)
           .json({ error: "You can only delete your own products" });
+      }
+
+      const images = eventProduct.product.images || [];
+      if (images.length) {
+        await Promise.all(
+          images
+            .filter((img) => img.publicId)
+            .map(async (img) => {
+              try {
+                await cloudinary.uploader.destroy(img.publicId!, {
+                  resource_type: "image",
+                });
+              } catch (e) {
+                console.error("Failed to delete Cloudinary image:", img.publicId, e);
+              }
+            })
+        );
       }
 
       await prisma.eventProduct.delete({ where: { id } });
@@ -240,10 +315,30 @@ router.delete(
 
       const eventProducts = await prisma.eventProduct.findMany({
         where: { eventId, userId },
-        include: { product: true },
+        include: { product: { include: { images: true } } },
       });
 
       for (const ep of eventProducts) {
+        const imgs = ep.product.images || [];
+        if (imgs.length) {
+          await Promise.all(
+            imgs
+              .filter((img) => img.publicId)
+              .map(async (img) => {
+                try {
+                  await cloudinary.uploader.destroy(img.publicId!, {
+                    resource_type: "image",
+                  });
+                } catch (e) {
+                  console.error(
+                    "Failed to delete Cloudinary image:",
+                    img.publicId,
+                    e
+                  );
+                }
+              })
+          );
+        }
         await prisma.product.delete({ where: { id: ep.product.id } });
       }
 

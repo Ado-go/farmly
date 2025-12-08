@@ -45,6 +45,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import type { EventProduct, FarmProduct } from "@/types/farm";
+import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
 
 const buildEventProductSchema = (t: TFunction) => {
   const priceField = z
@@ -85,6 +86,7 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
   const [editingProduct, setEditingProduct] = useState<EventProduct | null>(
     null
   );
+  const [images, setImages] = useState<UploadedImage[]>([]);
   const schema = useMemo(() => buildEventProductSchema(t), [t]);
 
   const { data: products, isLoading } = useQuery<EventProduct[]>({
@@ -118,14 +120,34 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
     form.reset(getInitialValues());
     setSelectedFarmProduct(null);
     setEditingProduct(null);
+    setImages([]);
   }, [form, getInitialValues]);
 
   const addProduct = useMutation({
-    mutationFn: (data: EventProductForm) =>
-      apiFetch(`/event-product`, {
+    mutationFn: async (data: EventProductForm) => {
+      const uploaded: UploadedImage[] = [];
+      for (const img of images) {
+        if (img.file) {
+          const formData = new FormData();
+          formData.append("image", img.file);
+          const res = await apiFetch("/upload", {
+            method: "POST",
+            body: formData,
+          });
+          uploaded.push(res);
+        } else {
+          uploaded.push(img);
+        }
+      }
+
+      return apiFetch(`/event-product`, {
         method: "POST",
-        body: JSON.stringify(data),
-      }),
+        body: JSON.stringify({
+          ...data,
+          images: uploaded.map((u) => ({ url: u.url, publicId: u.publicId })),
+        }),
+      });
+    },
     onSuccess: () => {
       toast.success(t("eventProducts.added"));
       resetForm();
@@ -136,17 +158,36 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
   });
 
   const updateProduct = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       id,
       data,
     }: {
       id: number;
       data: Partial<EventProductForm>;
-    }) =>
-      apiFetch(`/event-product/${id}`, {
+    }) => {
+      const uploaded: UploadedImage[] = [];
+      for (const img of images) {
+        if (img.file) {
+          const formData = new FormData();
+          formData.append("image", img.file);
+          const res = await apiFetch("/upload", {
+            method: "POST",
+            body: formData,
+          });
+          uploaded.push(res);
+        } else {
+          uploaded.push(img);
+        }
+      }
+
+      return apiFetch(`/event-product/${id}`, {
         method: "PUT",
-        body: JSON.stringify(data),
-      }),
+        body: JSON.stringify({
+          ...data,
+          images: uploaded.map((u) => ({ url: u.url, publicId: u.publicId })),
+        }),
+      });
+    },
     onSuccess: () => {
       toast.success(t("eventProducts.updated"));
       resetForm();
@@ -181,6 +222,7 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
   useEffect(() => {
     if (editingProduct) return;
     if (!selectedFarmProduct) {
+      setImages([]);
       form.reset(getInitialValues());
       return;
     }
@@ -189,6 +231,12 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
     if (selected) {
       const parsedCategory = productCategorySchema.safeParse(
         selected.product.category
+      );
+      setImages(
+        (selected.product.images ?? []).map((img) => ({
+          url: img.url,
+          publicId: img.publicId,
+        }))
       );
       form.reset({
         name: selected.product.name,
@@ -212,6 +260,12 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
     if (!editingProduct) return;
     const parsedCategory = productCategorySchema.safeParse(
       editingProduct.product.category
+    );
+    setImages(
+      (editingProduct.product.images ?? []).map((img) => ({
+        url: img.url,
+        publicId: img.publicId,
+      }))
     );
     form.reset({
       name: editingProduct.product.name,
@@ -276,6 +330,16 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="flex flex-col gap-3"
               >
+                <div className="space-y-1.5">
+                  <Label>{t("product.uploadImage")}</Label>
+                  <ImageUploader
+                    value={images}
+                    onChange={setImages}
+                    editable
+                    height="h-40"
+                  />
+                </div>
+
                 <div className="space-y-1.5">
                   <Label htmlFor="event-product-name">
                     {t("eventProducts.nameLabel")}
