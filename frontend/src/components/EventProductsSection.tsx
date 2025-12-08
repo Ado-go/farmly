@@ -535,23 +535,36 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
           products.map((ep) => (
             <div
               key={ep.id}
-              className="border rounded-md p-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+              className="border rounded-md p-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
             >
-              <div className="space-y-1">
-                <p className="font-semibold">{ep.product.name}</p>
-                <p className="text-sm text-gray-500">
-                  {ep.product.description}
-                </p>
-                <div className="flex flex-wrap gap-2 text-xs text-gray-600">
-                  <span className="rounded-full bg-gray-100 px-2 py-1">
-                    €{(ep.price ?? 0).toFixed(2)}
-                  </span>
-                  <span className="rounded-full bg-gray-100 px-2 py-1">
-                    {t("productCard.stock")}: {ep.stock}
-                  </span>
-                  <span className="rounded-full bg-primary/10 px-2 py-1 text-primary">
-                    {getCategoryLabel(ep.product.category, t)}
-                  </span>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                {ep.product.images?.[0]?.url ? (
+                  <img
+                    src={ep.product.images[0].url}
+                    alt={ep.product.name}
+                    className="h-16 w-16 rounded object-cover border"
+                  />
+                ) : (
+                  <div className="h-16 w-16 rounded border bg-muted flex items-center justify-center text-[10px] text-gray-500">
+                    {t("eventsDetail.noImage")}
+                  </div>
+                )}
+                <div className="space-y-1">
+                  <p className="font-semibold">{ep.product.name}</p>
+                  <p className="text-sm text-gray-500 line-clamp-2">
+                    {ep.product.description}
+                  </p>
+                  <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+                    <span className="rounded-full bg-gray-100 px-2 py-1">
+                      €{(ep.price ?? 0).toFixed(2)}
+                    </span>
+                    <span className="rounded-full bg-gray-100 px-2 py-1">
+                      {t("productCard.stock")}: {ep.stock}
+                    </span>
+                    <span className="rounded-full bg-primary/10 px-2 py-1 text-primary">
+                      {getCategoryLabel(ep.product.category, t)}
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
