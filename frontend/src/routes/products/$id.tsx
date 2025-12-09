@@ -106,6 +106,7 @@ function ProductDetailPage() {
         sellerName: fp.farm?.name || "unknown",
         unitPrice: fp.price,
         quantity: finalQuantity,
+        stock: fp.stock,
       },
       "STANDARD"
     );

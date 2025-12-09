@@ -681,7 +681,7 @@
     "total": "Spolu",
     "open": "Otvoriť košík",
     "conflictTitle": "Vymazať položky z košíka?",
-    "conflictDescription": "V košíku je možné mať len produkty z ponuky alebo jednej udalosti.",
+    "conflictDescription": "V košíku je možné mať len produkty od farmárov alebo predobjednávky z jednej udalosti.",
     "conflictCancel": "Ponechať aktuálne položky",
     "conflictConfirm": "Vyčistiť košík a pokračovať"
   },

@@ -37,6 +37,7 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
         sellerName: sellerNameOverride ?? fp.farm?.name ?? "unknown",
         unitPrice: fp.price,
         quantity: 1,
+        stock: fp.stock,
       },
       "STANDARD"
     );

@@ -136,6 +136,7 @@ function EventPageDetail() {
         sellerName: ep.user.name,
         unitPrice,
         quantity,
+        stock: ep.stock,
       },
       "PREORDER",
       event.id

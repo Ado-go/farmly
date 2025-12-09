@@ -22,6 +22,7 @@ export interface CartItem {
   sellerName: string;
   unitPrice: number;
   quantity: number;
+  stock?: number | null;
 }
 
 type CartType = "STANDARD" | "PREORDER";
@@ -71,6 +72,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("cartState", JSON.stringify(state));
   }, [state]);
 
+  const clampQuantity = (quantity: number, stock?: number | null) => {
+    const safeQuantity = Number.isFinite(quantity)
+      ? Math.floor(quantity)
+      : 1;
+    const normalized = Math.max(1, safeQuantity);
+
+    if (stock === null || stock === undefined) return normalized;
+
+    const maxAllowed = Math.max(0, stock);
+    if (maxAllowed === 0) return 0;
+
+    return Math.min(normalized, maxAllowed);
+  };
+
   const requestCartReplacement = (
     item: CartItem,
     type: CartType,
@@ -99,16 +114,45 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
       const existing = prev.items.find((i) => i.productId === item.productId);
 
+      const resolvedStock = item.stock ?? existing?.stock ?? null;
+
+      if (
+        resolvedStock !== null &&
+        resolvedStock !== undefined &&
+        resolvedStock <= 0
+      ) {
+        return prev;
+      }
+
       if (existing) {
+        const newQuantity = clampQuantity(
+          existing.quantity + item.quantity,
+          resolvedStock
+        );
+
+        if (newQuantity === existing.quantity) {
+          return prev;
+        }
+
         added = true;
         return {
           ...prev,
           items: prev.items.map((i) =>
             i.productId === item.productId
-              ? { ...i, quantity: i.quantity + item.quantity }
+              ? {
+                  ...i,
+                  quantity: newQuantity,
+                  stock: resolvedStock ?? i.stock ?? null,
+                }
               : i
           ),
         };
+      }
+
+      const normalizedQuantity = clampQuantity(item.quantity, resolvedStock);
+
+      if (normalizedQuantity === 0) {
+        return prev;
       }
 
       added = true;
@@ -116,7 +160,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         ...prev,
         type,
         eventId: type === "PREORDER" ? (eventId ?? null) : null,
-        items: [...prev.items, item],
+        items: [
+          ...prev.items,
+          { ...item, quantity: normalizedQuantity, stock: resolvedStock },
+        ],
       };
     });
 
@@ -124,22 +171,30 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const removeFromCart = (productId: number) => {
-    setState((prev) => ({
-      ...prev,
-      items: prev.items.filter((i) => i.productId !== productId),
-    }));
+    setState((prev) => {
+      const updatedItems = prev.items.filter((i) => i.productId !== productId);
+      const isEmpty = updatedItems.length === 0;
+
+      return {
+        ...prev,
+        type: isEmpty ? null : prev.type,
+        eventId: isEmpty ? null : prev.eventId,
+        items: updatedItems,
+      };
+    });
   };
 
   const updateQuantity = (productId: number, quantity: number) => {
-    const sanitizedQuantity = Number.isFinite(quantity)
-      ? Math.floor(quantity)
-      : 1;
-    const normalizedQuantity = Math.max(1, sanitizedQuantity);
     setState((prev) => ({
       ...prev,
-      items: prev.items.map((i) =>
-        i.productId === productId ? { ...i, quantity: normalizedQuantity } : i
-      ),
+      items: prev.items.map((i) => {
+        if (i.productId !== productId) return i;
+
+        const normalized = clampQuantity(quantity, i.stock);
+        if (normalized === 0) return i;
+
+        return { ...i, quantity: normalized };
+      }),
     }));
   };
 
