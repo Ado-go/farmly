@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/api";
 import { getCategoryLabel } from "@/lib/productCategories";
 import { ImageCarousel } from "@/components/ImageCarousel";
@@ -51,6 +52,7 @@ function EventPageDetail() {
   const { id } = Route.useParams();
   const { t } = useTranslation();
   const [farmerPages, setFarmerPages] = useState<Record<number, number>>({});
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
   const { addToCart } = useCart();
 
   const {
@@ -108,21 +110,39 @@ function EventPageDetail() {
       url: img.optimizedUrl || img.url,
     })) ?? [];
 
+  const normalizeQuantity = (value: number, stock?: number) => {
+    const maxQty =
+      stock && stock > 0 ? stock : Number.MAX_SAFE_INTEGER;
+    return Math.max(1, Math.min(Math.floor(value), maxQty));
+  };
+
+  const handleQuantityChange = (
+    ep: EventProductDetail,
+    value: number
+  ) => {
+    if (Number.isNaN(value)) return;
+    const normalized = normalizeQuantity(value, ep.stock);
+    setQuantities((prev) => ({ ...prev, [ep.id]: normalized }));
+  };
+
   const handleAddToPreorder = (ep: EventProductDetail) => {
     const unitPrice = ep.price ?? ep.product.basePrice ?? 0;
+    const desiredQuantity = quantities[ep.id] ?? 1;
+    const quantity = normalizeQuantity(desiredQuantity, ep.stock);
     const added = addToCart(
       {
         productId: ep.product.id,
         productName: ep.product.name,
         sellerName: ep.user.name,
         unitPrice,
-        quantity: 1,
+        quantity,
       },
       "PREORDER",
       event.id
     );
 
     if (added) {
+      setQuantities((prev) => ({ ...prev, [ep.id]: quantity }));
       toast.success(t("eventsDetail.addedToCart"));
     }
   };
@@ -326,12 +346,32 @@ function EventPageDetail() {
                           </div>
 
                           {eventHasNotStarted ? (
-                            <Button
-                              className="w-full"
-                              onClick={() => handleAddToPreorder(ep)}
-                            >
-                              {t("eventsDetail.preorder")}
-                            </Button>
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-center gap-2">
+                                <label className="text-sm font-medium text-gray-700">
+                                  {t("cartPage.quantity")}
+                                </label>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={ep.stock ?? undefined}
+                                  value={quantities[ep.id] ?? 1}
+                                  className="w-24"
+                                  onChange={(e) =>
+                                    handleQuantityChange(
+                                      ep,
+                                      e.target.valueAsNumber
+                                    )
+                                  }
+                                />
+                              </div>
+                              <Button
+                                className="w-full"
+                                onClick={() => handleAddToPreorder(ep)}
+                              >
+                                {t("eventsDetail.preorder")}
+                              </Button>
+                            </div>
                           ) : (
                             <p className="text-center text-red-500 text-xs">
                               {t("eventsDetail.eventStarted")}
