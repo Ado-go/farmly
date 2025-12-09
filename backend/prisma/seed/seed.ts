@@ -229,11 +229,18 @@ async function createOrderWithItems({
 }) {
   if (!items.length) return;
 
-  const address = randomAddress();
-  const status =
-    orderType === OrderType.PREORDER
-      ? OrderStatus.PENDING
-      : orderStatuses[randomInt(0, orderStatuses.length - 1)];
+  const isPreorder = orderType === OrderType.PREORDER;
+  const address =
+    isPreorder && event
+      ? {
+          city: event.city,
+          street: event.street,
+          postalCode: event.postalCode,
+        }
+      : randomAddress();
+  const status = isPreorder
+    ? [OrderStatus.PENDING, OrderStatus.COMPLETED][randomInt(0, 1)]
+    : orderStatuses[randomInt(0, orderStatuses.length - 1)];
   const totalPrice = parseFloat(
     items
       .reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -252,8 +259,12 @@ async function createOrderWithItems({
       deliveryCountry: "Slovensko",
       eventId: event?.id ?? null,
       isDelivered: status === OrderStatus.COMPLETED,
-      isPaid: status === OrderStatus.COMPLETED || Math.random() > 0.4,
-      paymentMethod: paymentOptions[randomInt(0, paymentOptions.length - 1)],
+      isPaid: isPreorder
+        ? status === OrderStatus.COMPLETED
+        : status === OrderStatus.COMPLETED || Math.random() > 0.4,
+      paymentMethod: isPreorder
+        ? PaymentMethod.CASH
+        : paymentOptions[randomInt(0, paymentOptions.length - 1)],
       totalPrice,
       status,
     },
