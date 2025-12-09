@@ -482,7 +482,9 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
                     {t("eventProducts.cancel")}
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
-                    {t("eventProducts.save")}
+                    {isSubmitting
+                      ? t("eventProducts.saving")
+                      : t("eventProducts.save")}
                   </Button>
                 </div>
               </form>

@@ -196,6 +196,7 @@ function EventDetailPage() {
               event={event}
               t={t}
               onSave={updateEvent.mutate}
+              isSaving={updateEvent.isPending}
               onCancel={() => {
                 setImages(eventImages);
                 setEditMode(false);
@@ -415,6 +416,7 @@ type EditFormProps = {
   t: TFunction;
   images: UploadedImage[];
   onImagesChange: (imgs: UploadedImage[]) => void;
+  isSaving: boolean;
 };
 
 function EditForm({
@@ -424,6 +426,7 @@ function EditForm({
   t,
   images,
   onImagesChange,
+  isSaving,
 }: EditFormProps) {
   const schema = useMemo(() => buildEventSchema(t), [t]);
   const form = useForm<EventFormData>({
@@ -558,7 +561,9 @@ function EditForm({
       </div>
 
       <div className="flex gap-2 mt-2">
-        <Button type="submit">{t("eventPage.save")}</Button>
+        <Button type="submit" disabled={isSaving}>
+          {isSaving ? t("eventPage.saving") : t("eventPage.save")}
+        </Button>
         <Button variant="secondary" type="button" onClick={onCancel}>
           {t("eventPage.cancel")}
         </Button>
