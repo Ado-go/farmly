@@ -28,7 +28,7 @@ export function UpcomingGrid({
 
     return (
       <Link key={event.id} to="/events/$id" params={{ id: String(event.id) }}>
-        <Card className="group h-full overflow-hidden border border-gray-100 bg-white/80 transition hover:-translate-y-1 hover:shadow-lg">
+        <Card className="group h-full overflow-hidden border border-emerald-100 bg-gradient-to-br from-white via-emerald-50/40 to-white transition hover:-translate-y-1 hover:shadow-lg dark:border-primary/30 dark:from-primary/18 dark:via-emerald-900/40 dark:to-background">
           <div className="relative h-40 w-full overflow-hidden">
             {cover ? (
               <img
@@ -41,7 +41,7 @@ export function UpcomingGrid({
                 {t("eventsDetail.noImage")}
               </div>
             )}
-            <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm backdrop-blur">
+            <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm backdrop-blur dark:bg-emerald-900/70 dark:text-emerald-50">
               {formatDateRange(event.startDate, event.endDate)}
             </span>
           </div>
@@ -55,7 +55,7 @@ export function UpcomingGrid({
                   {event.title}
                 </h3>
               </div>
-              <span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+              <span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary dark:bg-emerald-900/60 dark:text-emerald-50">
                 {event.region || t("eventsPage.regionLabel")}
               </span>
             </div>
@@ -74,7 +74,7 @@ export function UpcomingGrid({
                 {event.eventProducts.slice(0, 2).map((p) => (
                   <span
                     key={p.id}
-                    className="rounded-full bg-gray-100 px-2 py-1"
+                    className="rounded-full bg-gray-100 px-2 py-1 dark:bg-emerald-900/50 dark:text-emerald-50"
                   >
                     {p.product.name} • €
                     {(p.price ?? p.product.basePrice ?? 0).toFixed(2)} •{" "}
@@ -93,7 +93,7 @@ export function UpcomingGrid({
                 {t("eventsPage.organizedBy")} {event.organizer.name}
               </span>
               {event.eventProducts?.length ? (
-                <span className="rounded-full bg-gray-100 px-3 py-1">
+                <span className="rounded-full bg-gray-100 px-3 py-1 dark:bg-emerald-900/50 dark:text-emerald-50">
                   {t("eventsPage.productsCount", {
                     count: event.eventProducts.length,
                   })}

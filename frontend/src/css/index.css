@@ -193,21 +193,69 @@ h1 {
     color: oklch(0.96 0.02 115);
   }
 
+  /* Badge-like brand colors tuned for dark mode readability */
+  .dark .bg-amber-50 {
+    background-color: color-mix(in srgb, #fef3c7 18%, var(--background) 82%);
+  }
+  .dark .bg-amber-100 {
+    background-color: color-mix(in srgb, #fde68a 25%, var(--background) 75%);
+  }
+  .dark .text-amber-600 {
+    color: color-mix(in srgb, #d97706 65%, white 35%);
+  }
+  .dark .text-amber-700 {
+    color: color-mix(in srgb, #b45309 68%, white 32%);
+  }
+  .dark .text-amber-800 {
+    color: color-mix(in srgb, #92400e 70%, white 30%);
+  }
+
+  .dark .bg-blue-100 {
+    background-color: color-mix(in srgb, #dbeafe 24%, var(--background) 76%);
+  }
+  .dark .text-blue-800 {
+    color: color-mix(in srgb, #1e40af 70%, white 30%);
+  }
+
+  .dark .bg-emerald-50 {
+    background-color: color-mix(in srgb, #ecfdf3 18%, var(--background) 82%);
+  }
+  .dark .bg-emerald-100 {
+    background-color: color-mix(in srgb, #d1fae5 24%, var(--background) 76%);
+  }
+  .dark .bg-emerald-100\/70 {
+    background-color: color-mix(in srgb, #d1fae5 24%, var(--background) 76%);
+  }
+  .dark .text-emerald-700 {
+    color: color-mix(in srgb, #047857 70%, white 30%);
+  }
+  .dark .text-emerald-800,
+  .dark .text-emerald-900 {
+    color: color-mix(in srgb, #065f46 72%, white 28%);
+  }
+
+  .dark .bg-red-100 {
+    background-color: color-mix(in srgb, #fee2e2 24%, var(--background) 76%);
+  }
+  .dark .text-red-700 {
+    color: color-mix(in srgb, #b91c1c 72%, white 28%);
+  }
+
   /* Neutralize light-only surfaces in dark mode */
   .dark .bg-white {
-    background-color: color-mix(in oklab, var(--background) 70%, white 30%);
+    background-color: color-mix(in oklab, var(--background) 60%, white 40%);
   }
   .dark .bg-white\/95 {
-    background-color: color-mix(in oklab, var(--background) 75%, white 25%);
+    background-color: color-mix(in oklab, var(--background) 58%, white 42%);
   }
   .dark .bg-white\/90 {
-    background-color: color-mix(in oklab, var(--background) 80%, white 20%);
+    background-color: color-mix(in oklab, var(--background) 62%, white 38%);
   }
   .dark .bg-white\/80 {
-    background-color: color-mix(in oklab, var(--background) 85%, white 15%);
+    background-color: color-mix(in oklab, var(--background) 70%, white 30%);
   }
   .dark .bg-white\/70 {
-    background-color: color-mix(in oklab, var(--background) 88%, white 12%);
+    background-color: color-mix(in oklab, var(--background) 75%, white 25%);
   }
 
   /* Softer borders on dark backgrounds */
@@ -225,51 +273,62 @@ h1 {
     border-color: color-mix(in oklab, var(--primary) 45%, var(--background) 55%);
   }
 
+  /* Gray surfaces used for badges/skeletons */
+  .dark .bg-gray-50 {
+    background-color: color-mix(in oklab, var(--background) 88%, white 12%);
+  }
+  .dark .bg-gray-100 {
+    background-color: color-mix(in oklab, var(--background) 84%, white 16%);
+  }
+  .dark .bg-gray-200 {
+    background-color: color-mix(in oklab, var(--background) 78%, white 22%);
+  }
+
   /* Gradient stop adjustments for dark mode */
   .dark .from-white {
-    --tw-gradient-from: color-mix(in oklab, var(--background) 82%, white 18%);
+    --tw-gradient-from: color-mix(in oklab, var(--background) 70%, white 30%);
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   }
   .dark .via-white {
     --tw-gradient-to: transparent;
-    --tw-gradient-stops: var(--tw-gradient-from), color-mix(in oklab, var(--background) 82%, white 18%), var(--tw-gradient-to);
+    --tw-gradient-stops: var(--tw-gradient-from), color-mix(in oklab, var(--background) 70%, white 30%), var(--tw-gradient-to);
   }
   .dark .to-white {
-    --tw-gradient-to: color-mix(in oklab, var(--background) 82%, white 18%);
+    --tw-gradient-to: color-mix(in oklab, var(--background) 70%, white 30%);
   }
   .dark .from-primary\/5 {
-    --tw-gradient-from: color-mix(in oklab, var(--primary) 24%, var(--background) 76%);
+    --tw-gradient-from: color-mix(in oklab, var(--primary) 45%, var(--background) 55%);
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   }
   .dark .from-primary\/10 {
-    --tw-gradient-from: color-mix(in oklab, var(--primary) 32%, var(--background) 68%);
+    --tw-gradient-from: color-mix(in oklab, var(--primary) 55%, var(--background) 45%);
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   }
   .dark .to-primary\/10 {
-    --tw-gradient-to: color-mix(in oklab, var(--primary) 32%, var(--background) 68%);
+    --tw-gradient-to: color-mix(in oklab, var(--primary) 55%, var(--background) 45%);
   }
   .dark .from-primary {
-    --tw-gradient-from: color-mix(in oklab, var(--primary) 65%, var(--background) 35%);
+    --tw-gradient-from: color-mix(in oklab, var(--primary) 75%, var(--background) 25%);
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   }
   .dark .from-emerald-50 {
-    --tw-gradient-from: color-mix(in oklab, var(--primary) 28%, var(--background) 72%);
+    --tw-gradient-from: color-mix(in oklab, var(--primary) 45%, var(--background) 55%);
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   }
   .dark .to-emerald-50 {
-    --tw-gradient-to: color-mix(in oklab, var(--primary) 30%, var(--background) 70%);
+    --tw-gradient-to: color-mix(in oklab, var(--primary) 42%, var(--background) 58%);
   }
   .dark .from-amber-50 {
-    --tw-gradient-from: color-mix(in oklab, oklch(0.74 0.18 85) 26%, var(--background) 74%);
+    --tw-gradient-from: color-mix(in oklab, oklch(0.74 0.18 85) 42%, var(--background) 58%);
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   }
   .dark .to-amber-50 {
-    --tw-gradient-to: color-mix(in oklab, oklch(0.74 0.18 85) 26%, var(--background) 74%);
+    --tw-gradient-to: color-mix(in oklab, oklch(0.74 0.18 85) 38%, var(--background) 62%);
   }
 }

@@ -28,7 +28,7 @@ export function OngoingCarousel({ events }: OngoingCarouselProps) {
         className="md:basis-1/2 lg:basis-1/3 xl:basis-1/3"
       >
         <Link to="/events/$id" params={{ id: String(event.id) }}>
-          <Card className="h-full overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/5 via-white to-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+          <Card className="h-full overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/5 via-white to-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-primary/35 dark:from-primary/18 dark:via-emerald-900/40 dark:to-background">
             <div className="relative h-44 w-full overflow-hidden">
               {cover ? (
                 <img
@@ -42,7 +42,7 @@ export function OngoingCarousel({ events }: OngoingCarouselProps) {
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
-              <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-red-600 shadow-sm backdrop-blur">
+              <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-red-600 shadow-sm backdrop-blur dark:bg-rose-900/70 dark:text-rose-50">
                 <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_0_6px_rgba(248,113,113,0.35)]" />
                 {t("eventsPage.liveNow")}
               </div>
@@ -59,7 +59,7 @@ export function OngoingCarousel({ events }: OngoingCarouselProps) {
                 <h3 className="text-lg font-semibold leading-snug">
                   {event.title}
                 </h3>
-                <span className="rounded-full bg-white px-2 py-1 text-xs font-medium text-primary shadow-sm">
+                <span className="rounded-full bg-white px-2 py-1 text-xs font-medium text-primary shadow-sm dark:bg-emerald-900/60 dark:text-emerald-50">
                   {event.region || t("eventsPage.regionLabel")}
                 </span>
               </div>

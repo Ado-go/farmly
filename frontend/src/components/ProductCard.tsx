@@ -48,7 +48,7 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
   };
 
   return (
-    <Card className="group h-full overflow-hidden border border-gray-100 bg-white/80 transition hover:-translate-y-1 hover:shadow-lg">
+    <Card className="group h-full overflow-hidden border border-emerald-100 bg-gradient-to-br from-white via-emerald-50/40 to-white transition hover:-translate-y-1 hover:shadow-lg dark:border-primary/30 dark:from-primary/18 dark:via-emerald-900/40 dark:to-background">
       <Link
         to="/products/$id"
         params={{ id: String(inner.id) }}
@@ -67,7 +67,7 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
             </div>
           )}
           <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-            <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm backdrop-blur">
+            <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm backdrop-blur dark:bg-emerald-900/70 dark:text-emerald-50">
               {getCategoryLabel(inner.category, t)}
             </span>
           </div>
@@ -94,7 +94,7 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
               ) : null}
             </div>
             {product.stock !== undefined ? (
-              <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
+              <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600 dark:bg-emerald-900/50 dark:text-emerald-50">
                 {t("productCard.stock")}: {product.stock}
               </span>
             ) : null}
