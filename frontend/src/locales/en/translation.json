@@ -6,6 +6,7 @@
   "logout": "Logout",
   "profile": "Profile",
   "farms": "Farms",
+  "farmer_stats": "My stats",
   "signedId": "Signed in as",
   "products": "Products",
   "preorder": "Preorder",
@@ -849,5 +850,28 @@
     "successTitle": "Payment successful 🎉",
     "successDescription": "Your order has been paid.",
     "goToOrders": "Go to orders"
+  },
+  "farmerStatsPage": {
+    "title": "My statistics",
+    "subtitle": "Overview of your orders, preorders, and ratings.",
+    "orders": "Orders",
+    "preorders": "Preorders",
+    "revenue": "Total revenue",
+    "standardRevenue": "Orders revenue",
+    "preorderRevenue": "Preorder revenue",
+    "itemsSold": "Items sold",
+    "avgTicket": "Average order value",
+    "bestSellers": "Best selling products",
+    "ratings": "Ratings",
+    "averageRating": "Average rating",
+    "reviews": "reviews",
+    "topRated": "Top rated",
+    "product": "Product",
+    "quantity": "Quantity",
+    "revenueLabel": "Revenue",
+    "empty": "No stats yet. Start selling to see your performance.",
+    "emptyBestSellers": "Your best sellers will appear once you sell something.",
+    "lastUpdated": "Updated a moment ago",
+    "unauthorized": "You need a farmer account to view this page."
   }
 }

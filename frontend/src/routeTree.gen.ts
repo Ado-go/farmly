@@ -17,6 +17,7 @@ import { Route as PaymentCancelledRouteImport } from './routes/payment-cancelled
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as FarmerStatsRouteImport } from './routes/farmer-stats'
 import { Route as CheckoutPreorderRouteImport } from './routes/checkout-preorder'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
@@ -75,6 +76,11 @@ const LoginRoute = LoginRouteImport.update({
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FarmerStatsRoute = FarmerStatsRouteImport.update({
+  id: '/farmer-stats',
+  path: '/farmer-stats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutPreorderRoute = CheckoutPreorderRouteImport.update({
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/checkout-preorder': typeof CheckoutPreorderRoute
+  '/farmer-stats': typeof FarmerStatsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/orders': typeof OrdersRoute
@@ -207,6 +214,7 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/checkout-preorder': typeof CheckoutPreorderRoute
+  '/farmer-stats': typeof FarmerStatsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/orders': typeof OrdersRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/checkout-preorder': typeof CheckoutPreorderRoute
+  '/farmer-stats': typeof FarmerStatsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/orders': typeof OrdersRoute
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/checkout-preorder'
+    | '/farmer-stats'
     | '/forgot-password'
     | '/login'
     | '/orders'
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/checkout-preorder'
+    | '/farmer-stats'
     | '/forgot-password'
     | '/login'
     | '/orders'
@@ -326,6 +337,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/checkout-preorder'
+    | '/farmer-stats'
     | '/forgot-password'
     | '/login'
     | '/orders'
@@ -356,6 +368,7 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   CheckoutPreorderRoute: typeof CheckoutPreorderRoute
+  FarmerStatsRoute: typeof FarmerStatsRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   OrdersRoute: typeof OrdersRoute
@@ -437,6 +450,13 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/farmer-stats': {
+      id: '/farmer-stats'
+      path: '/farmer-stats'
+      fullPath: '/farmer-stats'
+      preLoaderRoute: typeof FarmerStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout-preorder': {
@@ -580,6 +600,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   CheckoutPreorderRoute: CheckoutPreorderRoute,
+  FarmerStatsRoute: FarmerStatsRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   OrdersRoute: OrdersRoute,

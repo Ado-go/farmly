@@ -28,13 +28,15 @@ import publicEventsRoutes from "./routes/publicEvents.ts";
 
 import publicStatsRoutes from "./routes/publicStats.ts";
 
+import farmerStatsRoutes from "./routes/farmerStats.ts";
+
+import ordersRoutes from "./routes/orders.ts";
+
 // checkouts
 
 import checkoutRoutes from "./routes/checkout.ts";
 
 import checkoutPreorderRoutes from "./routes/checkoutPreorder.ts";
-
-import ordersRoutes from "./routes/orders.ts";
 
 // uploads images
 import uploadRouter from "./routes/upload.ts";
@@ -87,13 +89,15 @@ app.use("/api/public-events", publicEventsRoutes);
 
 app.use("/api/public-stats", publicStatsRoutes);
 
+app.use("/api/farmer-stats", farmerStatsRoutes);
+
+app.use("/api/orders", ordersRoutes);
+
 // checkouts
 
 app.use("/api/checkout", checkoutRoutes);
 
 app.use("/api/checkout-preorder", checkoutPreorderRoutes);
-
-app.use("/api/orders", ordersRoutes);
 
 // upload images
 

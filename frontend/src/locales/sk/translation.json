@@ -6,6 +6,7 @@
   "logout": "Odhlásiť sa",
   "profile": "Profil",
   "farms": "Farmy",
+  "farmer_stats": "Moje štatistiky",
   "signedIn": "Prihlásený ako:",
   "products": "Produkty",
   "preorder": "Predobjednávka",
@@ -849,5 +850,28 @@
     "successTitle": "Platba prebehla úspešne 🎉",
     "successDescription": "Tvoja objednávka je zaplatená.",
     "goToOrders": "Prejsť na objednávky"
+  },
+  "farmerStatsPage": {
+    "title": "Moje štatistiky",
+    "subtitle": "Prehľad objednávok, predobjednávok a hodnotení.",
+    "orders": "Objednávky",
+    "preorders": "Predobjednávky",
+    "revenue": "Celkový zisk",
+    "standardRevenue": "Obrat z objednávok",
+    "preorderRevenue": "Obrat z predobjednávok",
+    "itemsSold": "Predané kusy",
+    "avgTicket": "Priemerná hodnota objednávky",
+    "bestSellers": "Najpredávanejšie produkty",
+    "ratings": "Hodnotenia",
+    "averageRating": "Priemerné hodnotenie",
+    "reviews": "hodnotení",
+    "topRated": "Najlepšie hodnotené",
+    "product": "Produkt",
+    "quantity": "Kusy",
+    "revenueLabel": "Tržba",
+    "empty": "Zatiaľ tu nie sú údaje. Začni predávať a uvidíš štatistiky.",
+    "emptyBestSellers": "Najpredávanejšie produkty sa zobrazia po prvých predajoch.",
+    "lastUpdated": "Aktualizované pred chvíľou",
+    "unauthorized": "Na zobrazenie je potrebný účet farmára."
   }
 }
