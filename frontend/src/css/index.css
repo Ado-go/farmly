@@ -170,3 +170,106 @@ h1 {
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Improve text contrast for static gray shades in dark mode */
+  .dark .text-gray-700,
+  .dark .text-gray-600 {
+    color: oklch(0.88 0.02 115);
+  }
+  .dark .text-gray-500 {
+    color: oklch(0.82 0.02 115);
+  }
+  .dark .text-gray-400 {
+    color: oklch(0.78 0.02 115);
+  }
+  .dark .text-gray-300 {
+    color: oklch(0.72 0.02 115);
+  }
+  .dark .text-gray-200 {
+    color: oklch(0.68 0.02 115);
+  }
+  .dark .text-gray-800 {
+    color: oklch(0.96 0.02 115);
+  }
+
+  /* Neutralize light-only surfaces in dark mode */
+  .dark .bg-white {
+    background-color: color-mix(in oklab, var(--background) 70%, white 30%);
+  }
+  .dark .bg-white\/95 {
+    background-color: color-mix(in oklab, var(--background) 75%, white 25%);
+  }
+  .dark .bg-white\/90 {
+    background-color: color-mix(in oklab, var(--background) 80%, white 20%);
+  }
+  .dark .bg-white\/80 {
+    background-color: color-mix(in oklab, var(--background) 85%, white 15%);
+  }
+  .dark .bg-white\/70 {
+    background-color: color-mix(in oklab, var(--background) 88%, white 12%);
+  }
+
+  /* Softer borders on dark backgrounds */
+  .dark .border-gray-100 {
+    border-color: color-mix(in oklab, var(--foreground) 12%, var(--background) 88%);
+  }
+  .dark .border-emerald-100 {
+    border-color: color-mix(in oklab, var(--primary) 40%, var(--background) 60%);
+  }
+  .dark .border-amber-200 {
+    border-color: color-mix(in oklab, oklch(0.74 0.18 85) 40%, var(--background) 60%);
+  }
+  .dark .border-primary\/20,
+  .dark .border-primary\/15 {
+    border-color: color-mix(in oklab, var(--primary) 45%, var(--background) 55%);
+  }
+
+  /* Gradient stop adjustments for dark mode */
+  .dark .from-white {
+    --tw-gradient-from: color-mix(in oklab, var(--background) 82%, white 18%);
+    --tw-gradient-to: transparent;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .dark .via-white {
+    --tw-gradient-to: transparent;
+    --tw-gradient-stops: var(--tw-gradient-from), color-mix(in oklab, var(--background) 82%, white 18%), var(--tw-gradient-to);
+  }
+  .dark .to-white {
+    --tw-gradient-to: color-mix(in oklab, var(--background) 82%, white 18%);
+  }
+  .dark .from-primary\/5 {
+    --tw-gradient-from: color-mix(in oklab, var(--primary) 24%, var(--background) 76%);
+    --tw-gradient-to: transparent;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .dark .from-primary\/10 {
+    --tw-gradient-from: color-mix(in oklab, var(--primary) 32%, var(--background) 68%);
+    --tw-gradient-to: transparent;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .dark .to-primary\/10 {
+    --tw-gradient-to: color-mix(in oklab, var(--primary) 32%, var(--background) 68%);
+  }
+  .dark .from-primary {
+    --tw-gradient-from: color-mix(in oklab, var(--primary) 65%, var(--background) 35%);
+    --tw-gradient-to: transparent;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .dark .from-emerald-50 {
+    --tw-gradient-from: color-mix(in oklab, var(--primary) 28%, var(--background) 72%);
+    --tw-gradient-to: transparent;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .dark .to-emerald-50 {
+    --tw-gradient-to: color-mix(in oklab, var(--primary) 30%, var(--background) 70%);
+  }
+  .dark .from-amber-50 {
+    --tw-gradient-from: color-mix(in oklab, oklch(0.74 0.18 85) 26%, var(--background) 74%);
+    --tw-gradient-to: transparent;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .dark .to-amber-50 {
+    --tw-gradient-to: color-mix(in oklab, oklch(0.74 0.18 85) 26%, var(--background) 74%);
+  }
+}
