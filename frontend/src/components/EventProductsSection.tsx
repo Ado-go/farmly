@@ -3,7 +3,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogTrigger,
@@ -11,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -46,6 +44,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { EventProduct, FarmProduct } from "@/types/farm";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
+import { cn } from "@/lib/utils";
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
 
 const buildEventProductSchema = (t: TFunction) => {
   const priceField = z
@@ -88,6 +94,8 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
   );
   const [images, setImages] = useState<UploadedImage[]>([]);
   const schema = useMemo(() => buildEventProductSchema(t), [t]);
+  const inputTone =
+    "bg-white/80 border-emerald-100 focus-visible:ring-emerald-200 focus:border-emerald-400";
 
   const { data: products, isLoading } = useQuery<EventProduct[]>({
     queryKey: ["event-products", eventId],
@@ -328,133 +336,144 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
             <div className="grid gap-5 md:grid-cols-[1.2fr,0.9fr]">
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="flex flex-col gap-3"
+                className="space-y-5"
+                noValidate
               >
-                <div className="space-y-1.5">
-                  <Label>{t("product.uploadImage")}</Label>
+                <div className="space-y-2">
+                  <FieldLabel className="text-sm font-medium">
+                    {t("product.uploadImage")}
+                  </FieldLabel>
                   <ImageUploader
                     value={images}
                     onChange={setImages}
                     editable
-                    height="h-40"
+                    height="h-48"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="event-product-name">
-                    {t("eventProducts.nameLabel")}
-                  </Label>
-                  <Input
-                    id="event-product-name"
-                    {...form.register("name")}
-                    placeholder={t("eventProducts.namePlaceholder")}
-                  />
-                  {errors.name?.message && (
-                    <p className="text-xs text-destructive">
-                      {errors.name.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label>{t("eventProducts.categoryLabel")}</Label>
-                  <Controller
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <Select
-                        value={field.value ?? undefined}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue
-                            placeholder={t("eventProducts.categoryPlaceholder")}
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {PRODUCT_CATEGORIES.map((value) => (
-                            <SelectItem key={value} value={value}>
-                              {t(`productCategories.${value}`)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                  {errors.category?.message && (
-                    <p className="text-xs text-destructive">
-                      {errors.category.message?.toString()}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="event-product-description">
-                    {t("eventProducts.descriptionLabel")}
-                  </Label>
-                  <Textarea
-                    id="event-product-description"
-                    {...form.register("description")}
-                    placeholder={t("eventProducts.descriptionPlaceholder")}
-                  />
-                  {errors.description?.message && (
-                    <p className="text-xs text-destructive">
-                      {errors.description.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="event-product-price">
-                      {t("eventProducts.priceLabel")}
-                    </Label>
-                    <div className="relative">
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
-                        €
-                      </span>
+                <FieldSet className="grid grid-cols-1 gap-4">
+                  <Field>
+                    <FieldLabel htmlFor="event-product-name">
+                      {t("eventProducts.nameLabel")}
+                    </FieldLabel>
+                    <FieldContent>
                       <Input
-                        id="event-product-price"
-                        type="number"
-                        step="0.01"
-                        className="pl-7"
-                        {...form.register("price", { valueAsNumber: true })}
-                        placeholder={t("eventProducts.pricePlaceholder")}
+                        id="event-product-name"
+                        {...form.register("name")}
+                        placeholder={t("eventProducts.namePlaceholder")}
+                        className={inputTone}
                       />
-                    </div>
-                    {errors.price?.message && (
-                      <p className="text-xs text-destructive">
-                        {errors.price.message}
-                      </p>
-                    )}
-                  </div>
+                      <FieldError
+                        errors={errors.name ? [errors.name] : undefined}
+                      />
+                    </FieldContent>
+                  </Field>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="event-product-stock">
-                      {t("eventProducts.stockLabel")}
-                    </Label>
-                    <Input
-                      id="event-product-stock"
-                      type="number"
-                      min={0}
-                      {...form.register("stock", { valueAsNumber: true })}
-                      placeholder={t("eventProducts.stockPlaceholder")}
-                    />
-                    {errors.stock?.message && (
-                      <p className="text-xs text-destructive">
-                        {errors.stock.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                  <Field>
+                    <FieldLabel>{t("eventProducts.categoryLabel")}</FieldLabel>
+                    <FieldContent>
+                      <Controller
+                        control={form.control}
+                        name="category"
+                        render={({ field }) => (
+                          <Select
+                            value={field.value ?? undefined}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger className={inputTone}>
+                              <SelectValue
+                                placeholder={t(
+                                  "eventProducts.categoryPlaceholder"
+                                )}
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {PRODUCT_CATEGORIES.map((value) => (
+                                <SelectItem key={value} value={value}>
+                                  {t(`productCategories.${value}`)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                      <FieldError
+                        errors={
+                          errors.category ? [errors.category] : undefined
+                        }
+                      />
+                    </FieldContent>
+                  </Field>
 
-                <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-                  <Button type="submit" disabled={isSubmitting}>
-                    {t("eventProducts.save")}
-                  </Button>
+                  <Field>
+                    <FieldLabel htmlFor="event-product-description">
+                      {t("eventProducts.descriptionLabel")}
+                    </FieldLabel>
+                    <FieldContent>
+                      <Textarea
+                        id="event-product-description"
+                        {...form.register("description")}
+                        placeholder={t("eventProducts.descriptionPlaceholder")}
+                        className={inputTone}
+                      />
+                      <FieldError
+                        errors={
+                          errors.description ? [errors.description] : undefined
+                        }
+                      />
+                    </FieldContent>
+                  </Field>
+
+                  <FieldSet className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field>
+                      <FieldLabel htmlFor="event-product-price">
+                        {t("eventProducts.priceLabel")}
+                      </FieldLabel>
+                      <FieldContent>
+                        <div className="relative">
+                          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                            €
+                          </span>
+                          <Input
+                            id="event-product-price"
+                            type="number"
+                            step="0.01"
+                            className={cn(inputTone, "pl-7")}
+                            {...form.register("price", { valueAsNumber: true })}
+                            placeholder={t("eventProducts.pricePlaceholder")}
+                          />
+                        </div>
+                        <FieldError
+                          errors={errors.price ? [errors.price] : undefined}
+                        />
+                      </FieldContent>
+                    </Field>
+
+                    <Field>
+                      <FieldLabel htmlFor="event-product-stock">
+                        {t("eventProducts.stockLabel")}
+                      </FieldLabel>
+                      <FieldContent>
+                        <Input
+                          id="event-product-stock"
+                          type="number"
+                          min={0}
+                          className={inputTone}
+                          {...form.register("stock", { valueAsNumber: true })}
+                          placeholder={t("eventProducts.stockPlaceholder")}
+                        />
+                        <FieldError
+                          errors={errors.stock ? [errors.stock] : undefined}
+                        />
+                      </FieldContent>
+                    </Field>
+                  </FieldSet>
+                </FieldSet>
+
+                <div className="flex justify-end gap-2 pt-1">
                   <Button
-                    variant="secondary"
                     type="button"
+                    variant="outline"
                     onClick={() => {
                       resetForm();
                       setDialogOpen(false);
@@ -462,15 +481,18 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
                   >
                     {t("eventProducts.cancel")}
                   </Button>
-                </DialogFooter>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {t("eventProducts.save")}
+                  </Button>
+                </div>
               </form>
 
-              <div className="rounded-lg border bg-muted/40 p-3 md:p-4 space-y-3">
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold">
+              <div className="space-y-3 rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/70 via-white to-white p-4 shadow-sm">
+                <div className="space-y-1.5">
+                  <p className="text-sm font-semibold text-emerald-900">
                     {t("eventProducts.fromFarm")}
                   </p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-muted-foreground">
                     {t("eventProducts.fromFarmHint")}
                   </p>
                 </div>
@@ -483,10 +505,10 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
                         <button
                           key={fp.id}
                           type="button"
-                          className={`w-full rounded border p-3 text-left transition ${
+                          className={`w-full rounded-xl border p-3 text-left transition ${
                             isSelected
-                              ? "border-primary bg-primary/5 shadow-sm"
-                              : "hover:bg-muted"
+                              ? "border-emerald-300 bg-emerald-50 shadow-sm"
+                              : "border-emerald-50 bg-white/80 hover:border-emerald-200 hover:bg-emerald-50/70"
                           }`}
                           onClick={() => {
                             setEditingProduct(null);

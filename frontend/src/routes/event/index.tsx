@@ -6,13 +6,11 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,6 +24,13 @@ import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@/types/event";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
 import type { TFunction } from "i18next";
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
 
 const EVENT_LIMIT = 5;
 
@@ -66,6 +71,8 @@ function EventPage() {
   const [open, setOpen] = useState(false);
   const [images, setImages] = useState<UploadedImage[]>([]);
   const schema = useMemo(() => buildEventSchema(t), [t]);
+  const inputTone =
+    "bg-white/80 border-emerald-100 focus-visible:ring-emerald-200 focus:border-emerald-400";
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(schema),
@@ -337,18 +344,28 @@ function EventPage() {
             </DialogTrigger>
             <DialogContent className="sm:max-w-2xl w-[min(95vw,48rem)] max-h-[85vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{t("eventPage.newEvent")}</DialogTitle>
-                <DialogDescription>
-                  {t("eventPage.formIntro")}
-                </DialogDescription>
+                <DialogTitle className="space-y-1">
+                  <span className="block text-xs uppercase tracking-[0.28em] text-emerald-700">
+                    {t("eventPage.title")}
+                  </span>
+                  <span className="text-2xl font-semibold">
+                    {t("eventPage.newEvent")}
+                  </span>
+                  <p className="text-sm font-normal text-muted-foreground">
+                    {t("eventPage.formIntro")}
+                  </p>
+                </DialogTitle>
               </DialogHeader>
 
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4 mt-2"
+                className="mt-2 space-y-5"
+                noValidate
               >
                 <div className="space-y-2">
-                  <Label>{t("eventPage.images")}</Label>
+                  <FieldLabel className="text-sm font-medium">
+                    {t("eventPage.images")}
+                  </FieldLabel>
                   <ImageUploader
                     value={images}
                     onChange={setImages}
@@ -357,114 +374,163 @@ function EventPage() {
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="title">{t("eventPage.name")}</Label>
-                  <Input
-                    id="title"
-                    placeholder={t("eventPage.name")}
-                    {...form.register("title")}
-                  />
-                  {errors.title?.message && (
-                    <p className="text-xs text-destructive">
-                      {errors.title.message}
-                    </p>
-                  )}
-                </div>
+                <FieldSet className="grid grid-cols-1 gap-4">
+                  <Field>
+                    <FieldLabel htmlFor="title">
+                      {t("eventPage.name")}
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id="title"
+                        placeholder={t("eventPage.name")}
+                        className={inputTone}
+                        {...form.register("title")}
+                      />
+                      <FieldError
+                        errors={errors.title ? [errors.title] : undefined}
+                      />
+                    </FieldContent>
+                  </Field>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="description">
-                    {t("eventPage.description")}
-                  </Label>
-                  <Textarea
-                    id="description"
-                    placeholder={t("eventPage.description")}
-                    {...form.register("description")}
-                  />
-                  {errors.description?.message && (
-                    <p className="text-xs text-destructive">
-                      {errors.description.message}
-                    </p>
-                  )}
-                </div>
+                  <Field>
+                    <FieldLabel htmlFor="description">
+                      {t("eventPage.description")}
+                    </FieldLabel>
+                    <FieldContent>
+                      <Textarea
+                        id="description"
+                        placeholder={t("eventPage.description")}
+                        className={inputTone}
+                        {...form.register("description")}
+                      />
+                      <FieldError
+                        errors={
+                          errors.description ? [errors.description] : undefined
+                        }
+                      />
+                    </FieldContent>
+                  </Field>
 
-                <div className="grid md:grid-cols-2 gap-3">
-                  <DatePicker
-                    label={t("eventPage.startDate")}
-                    date={form.watch("startDate")}
-                    onSelect={(date) =>
-                      form.setValue("startDate", date || new Date())
-                    }
-                  />
-                  <DatePicker
-                    label={t("eventPage.endDate")}
-                    date={form.watch("endDate")}
-                    onSelect={(date) =>
-                      form.setValue("endDate", date || new Date())
-                    }
-                  />
-                </div>
+                  <FieldSet className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <Field>
+                      <FieldLabel>{t("eventPage.startDate")}</FieldLabel>
+                      <FieldContent>
+                        <DatePicker
+                          date={form.watch("startDate")}
+                          onSelect={(date) =>
+                            form.setValue("startDate", date || new Date())
+                          }
+                          buttonClassName={inputTone}
+                        />
+                        <FieldError
+                          errors={
+                            errors.startDate ? [errors.startDate] : undefined
+                          }
+                        />
+                      </FieldContent>
+                    </Field>
+                    <Field>
+                      <FieldLabel>{t("eventPage.endDate")}</FieldLabel>
+                      <FieldContent>
+                        <DatePicker
+                          date={form.watch("endDate")}
+                          onSelect={(date) =>
+                            form.setValue("endDate", date || new Date())
+                          }
+                          buttonClassName={inputTone}
+                        />
+                        <FieldError
+                          errors={errors.endDate ? [errors.endDate] : undefined}
+                        />
+                      </FieldContent>
+                    </Field>
+                  </FieldSet>
 
-                <div className="grid md:grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="city">{t("eventPage.city")}</Label>
-                    <Input
-                      id="city"
-                      placeholder={t("eventPage.city")}
-                      {...form.register("city")}
-                    />
-                    {errors.city?.message && (
-                      <p className="text-xs text-destructive">{errors.city.message}</p>
-                    )}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="street">{t("eventPage.street")}</Label>
-                    <Input
-                      id="street"
-                      placeholder={t("eventPage.street")}
-                      {...form.register("street")}
-                    />
-                    {errors.street?.message && (
-                      <p className="text-xs text-destructive">{errors.street.message}</p>
-                    )}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="region">{t("eventPage.region")}</Label>
-                    <Input
-                      id="region"
-                      placeholder={t("eventPage.region")}
-                      {...form.register("region")}
-                    />
-                    {errors.region?.message && (
-                      <p className="text-xs text-destructive">{errors.region.message}</p>
-                    )}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="postalCode">
-                      {t("eventPage.postalCode")}
-                    </Label>
-                    <Input
-                      id="postalCode"
-                      placeholder={t("eventPage.postalCode")}
-                      {...form.register("postalCode")}
-                    />
-                    {errors.postalCode?.message && (
-                      <p className="text-xs text-destructive">
-                        {errors.postalCode.message}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-1.5 md:col-span-2">
-                    <Label htmlFor="country">{t("eventPage.country")}</Label>
-                    <Input
-                      id="country"
-                      placeholder={t("eventPage.country")}
-                      {...form.register("country")}
-                    />
-                    {errors.country?.message && (
-                      <p className="text-xs text-destructive">{errors.country.message}</p>
-                    )}
-                  </div>
-                </div>
+                  <FieldSet className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <Field>
+                      <FieldLabel htmlFor="city">
+                        {t("eventPage.city")}
+                      </FieldLabel>
+                      <FieldContent>
+                        <Input
+                          id="city"
+                          placeholder={t("eventPage.city")}
+                          className={inputTone}
+                          {...form.register("city")}
+                        />
+                        <FieldError
+                          errors={errors.city ? [errors.city] : undefined}
+                        />
+                      </FieldContent>
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="street">
+                        {t("eventPage.street")}
+                      </FieldLabel>
+                      <FieldContent>
+                        <Input
+                          id="street"
+                          placeholder={t("eventPage.street")}
+                          className={inputTone}
+                          {...form.register("street")}
+                        />
+                        <FieldError
+                          errors={errors.street ? [errors.street] : undefined}
+                        />
+                      </FieldContent>
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="region">
+                        {t("eventPage.region")}
+                      </FieldLabel>
+                      <FieldContent>
+                        <Input
+                          id="region"
+                          placeholder={t("eventPage.region")}
+                          className={inputTone}
+                          {...form.register("region")}
+                        />
+                        <FieldError
+                          errors={errors.region ? [errors.region] : undefined}
+                        />
+                      </FieldContent>
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="postalCode">
+                        {t("eventPage.postalCode")}
+                      </FieldLabel>
+                      <FieldContent>
+                        <Input
+                          id="postalCode"
+                          placeholder={t("eventPage.postalCode")}
+                          className={inputTone}
+                          {...form.register("postalCode")}
+                        />
+                        <FieldError
+                          errors={
+                            errors.postalCode ? [errors.postalCode] : undefined
+                          }
+                        />
+                      </FieldContent>
+                    </Field>
+                    <Field className="md:col-span-2">
+                      <FieldLabel htmlFor="country">
+                        {t("eventPage.country")}
+                      </FieldLabel>
+                      <FieldContent>
+                        <Input
+                          id="country"
+                          placeholder={t("eventPage.country")}
+                          className={inputTone}
+                          {...form.register("country")}
+                        />
+                        <FieldError
+                          errors={errors.country ? [errors.country] : undefined}
+                        />
+                      </FieldContent>
+                    </Field>
+                  </FieldSet>
+                </FieldSet>
 
                 <Button
                   type="submit"
