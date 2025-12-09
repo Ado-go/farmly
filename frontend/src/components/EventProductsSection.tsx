@@ -112,8 +112,8 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
     name: "",
     category: undefined as unknown as EventProductForm["category"],
     description: "",
-    price: 0,
-    stock: 0,
+    price: undefined as unknown as EventProductForm["price"],
+    stock: undefined as unknown as EventProductForm["stock"],
   }), [eventId]);
 
   const form = useForm<EventProductForm>({
