@@ -83,7 +83,7 @@
   --accent-foreground: oklch(0.98 0.02 115);
 
   --muted: oklch(0.22 0.01 115);
-  --muted-foreground: oklch(0.72 0.02 115);
+  --muted-foreground: oklch(96.446% 0.00921 113.42);
 
   --destructive: oklch(0.6 0.23 25);
   --destructive-foreground: oklch(0.98 0.02 115);
@@ -260,17 +260,33 @@ h1 {
 
   /* Softer borders on dark backgrounds */
   .dark .border-gray-100 {
-    border-color: color-mix(in oklab, var(--foreground) 12%, var(--background) 88%);
+    border-color: color-mix(
+      in oklab,
+      var(--foreground) 12%,
+      var(--background) 88%
+    );
   }
   .dark .border-emerald-100 {
-    border-color: color-mix(in oklab, var(--primary) 40%, var(--background) 60%);
+    border-color: color-mix(
+      in oklab,
+      var(--primary) 40%,
+      var(--background) 60%
+    );
   }
   .dark .border-amber-200 {
-    border-color: color-mix(in oklab, oklch(0.74 0.18 85) 40%, var(--background) 60%);
+    border-color: color-mix(
+      in oklab,
+      oklch(0.74 0.18 85) 40%,
+      var(--background) 60%
+    );
   }
   .dark .border-primary\/20,
   .dark .border-primary\/15 {
-    border-color: color-mix(in oklab, var(--primary) 45%, var(--background) 55%);
+    border-color: color-mix(
+      in oklab,
+      var(--primary) 45%,
+      var(--background) 55%
+    );
   }
 
   /* Gray surfaces used for badges/skeletons */
@@ -292,43 +308,78 @@ h1 {
   }
   .dark .via-white {
     --tw-gradient-to: transparent;
-    --tw-gradient-stops: var(--tw-gradient-from), color-mix(in oklab, var(--background) 70%, white 30%), var(--tw-gradient-to);
+    --tw-gradient-stops:
+      var(--tw-gradient-from),
+      color-mix(in oklab, var(--background) 70%, white 30%),
+      var(--tw-gradient-to);
   }
   .dark .to-white {
     --tw-gradient-to: color-mix(in oklab, var(--background) 70%, white 30%);
   }
   .dark .from-primary\/5 {
-    --tw-gradient-from: color-mix(in oklab, var(--primary) 45%, var(--background) 55%);
+    --tw-gradient-from: color-mix(
+      in oklab,
+      var(--primary) 45%,
+      var(--background) 55%
+    );
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   }
   .dark .from-primary\/10 {
-    --tw-gradient-from: color-mix(in oklab, var(--primary) 55%, var(--background) 45%);
+    --tw-gradient-from: color-mix(
+      in oklab,
+      var(--primary) 55%,
+      var(--background) 45%
+    );
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   }
   .dark .to-primary\/10 {
-    --tw-gradient-to: color-mix(in oklab, var(--primary) 55%, var(--background) 45%);
+    --tw-gradient-to: color-mix(
+      in oklab,
+      var(--primary) 55%,
+      var(--background) 45%
+    );
   }
   .dark .from-primary {
-    --tw-gradient-from: color-mix(in oklab, var(--primary) 75%, var(--background) 25%);
+    --tw-gradient-from: color-mix(
+      in oklab,
+      var(--primary) 75%,
+      var(--background) 25%
+    );
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   }
   .dark .from-emerald-50 {
-    --tw-gradient-from: color-mix(in oklab, var(--primary) 45%, var(--background) 55%);
+    --tw-gradient-from: color-mix(
+      in oklab,
+      var(--primary) 45%,
+      var(--background) 55%
+    );
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   }
   .dark .to-emerald-50 {
-    --tw-gradient-to: color-mix(in oklab, var(--primary) 42%, var(--background) 58%);
+    --tw-gradient-to: color-mix(
+      in oklab,
+      var(--primary) 42%,
+      var(--background) 58%
+    );
   }
   .dark .from-amber-50 {
-    --tw-gradient-from: color-mix(in oklab, oklch(0.74 0.18 85) 42%, var(--background) 58%);
+    --tw-gradient-from: color-mix(
+      in oklab,
+      oklch(0.74 0.18 85) 42%,
+      var(--background) 58%
+    );
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   }
   .dark .to-amber-50 {
-    --tw-gradient-to: color-mix(in oklab, oklch(0.74 0.18 85) 38%, var(--background) 62%);
+    --tw-gradient-to: color-mix(
+      in oklab,
+      oklch(0.74 0.18 85) 38%,
+      var(--background) 62%
+    );
   }
 }
