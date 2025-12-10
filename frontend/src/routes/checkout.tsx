@@ -224,9 +224,8 @@ function CheckoutPage() {
 
   if (cart.length === 0)
     return (
-      <main className="relative min-h-screen bg-gradient-to-b from-primary/10 via-white to-emerald-50">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.12),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(245,158,11,0.12),transparent_32%)]" />
-        <div className="relative mx-auto max-w-3xl px-4 py-10">
+      <main className="min-h-screen bg-background">
+        <div className="mx-auto max-w-3xl px-4 py-10">
           <Card className="border-primary/15 shadow-xl">
             <CardContent className="p-6 sm:p-10 text-center space-y-4">
               <h1 className="text-2xl font-semibold text-primary">
@@ -242,9 +241,8 @@ function CheckoutPage() {
     );
 
   return (
-    <main className="relative min-h-screen bg-gradient-to-b from-primary/10 via-white to-emerald-50">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.12),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(245,158,11,0.12),transparent_32%)]" />
-      <div className="relative mx-auto max-w-5xl px-4 py-10 space-y-8">
+    <main className="min-h-screen bg-background">
+      <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-primary">
             {t("checkoutPage.title")}

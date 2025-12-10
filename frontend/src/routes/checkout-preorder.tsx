@@ -125,9 +125,8 @@ function CheckoutPreorderPage() {
 
   if (cart.length === 0)
     return (
-      <main className="relative min-h-screen bg-gradient-to-b from-amber-50 via-white to-emerald-50">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.12),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(16,185,129,0.12),transparent_32%)]" />
-        <div className="relative mx-auto max-w-3xl px-4 py-10">
+      <main className="min-h-screen bg-background">
+        <div className="mx-auto max-w-3xl px-4 py-10">
           <Card className="border-amber-200/60 shadow-xl">
             <CardContent className="p-6 sm:p-10 text-center space-y-4">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700">
@@ -146,9 +145,8 @@ function CheckoutPreorderPage() {
     );
 
   return (
-    <main className="relative min-h-screen bg-gradient-to-b from-amber-50 via-white to-emerald-50">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.12),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(16,185,129,0.12),transparent_32%)]" />
-      <div className="relative mx-auto max-w-5xl px-4 py-10 space-y-8">
+    <main className="min-h-screen bg-background">
+      <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.32em] text-amber-700">
