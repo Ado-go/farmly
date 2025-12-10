@@ -304,6 +304,7 @@
     "description": "Popis",
     "price": "Cena",
     "uploadImage": "Nahrať obrázok",
+    "uploadImageHint": "Pretiahni sem obrázky alebo klikni na výber",
     "add": "Pridať produkt",
     "saving": "Ukladám...",
     "editTitle": "Upraviť produkt",

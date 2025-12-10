@@ -306,6 +306,7 @@
     "add": "Add product",
     "saving": "Saving...",
     "uploadImage": "Upload image",
+    "uploadImageHint": "Drag & drop images here or click to browse",
     "editTitle": "Edit product",
     "stock": "Stock",
     "delete": "Delete product",
