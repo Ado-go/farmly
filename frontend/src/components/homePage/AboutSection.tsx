@@ -43,11 +43,11 @@ export function AboutSection({
             {point1}
           </li>
           <li className="flex items-start gap-2">
-            <span className="mt-1 h-2 w-2 rounded-full bg-secondary" />
+            <span className="mt-1 h-2 w-2 rounded-full bg-primary" />
             {point2}
           </li>
           <li className="flex items-start gap-2">
-            <span className="mt-1 h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="mt-1 h-2 w-2 rounded-full bg-primary" />
             {point3}
           </li>
         </ul>
