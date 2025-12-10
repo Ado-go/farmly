@@ -333,7 +333,7 @@ function OffersMyPage() {
                   {t("offersPage.createButton")}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="w-[min(100vw-1.5rem,760px)] max-h-[min(92vh,900px)] overflow-y-auto border-primary/10 bg-white/95 shadow-2xl sm:max-w-2xl">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-primary/10 bg-white/95 shadow-2xl sm:max-h-[85vh]">
                 <DialogHeader className="space-y-1">
                   <DialogTitle className="text-2xl">
                     {editingOffer
@@ -352,6 +352,7 @@ function OffersMyPage() {
                       : createOffer.mutate(data)
                   )}
                   className="space-y-5"
+                  noValidate
                 >
                   <div className="space-y-4 rounded-xl border border-primary/10 bg-white/70 p-4 shadow-sm">
                     <div className="flex items-center gap-2">
@@ -361,8 +362,8 @@ function OffersMyPage() {
                       </h4>
                     </div>
 
-                    <div className="grid gap-4">
-                      <div className="space-y-2">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-2 sm:col-span-2">
                         <Label
                           htmlFor="title"
                           className="text-sm font-semibold text-slate-800"
@@ -379,7 +380,7 @@ function OffersMyPage() {
                         <FieldError>{renderError(errors.title)}</FieldError>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-2 sm:col-span-2">
                         <Label
                           htmlFor="description"
                           className="text-sm font-semibold text-slate-800"
@@ -418,8 +419,8 @@ function OffersMyPage() {
                       />
                     </div>
 
-                    <div className="grid gap-4">
-                      <div className="space-y-2">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-2 sm:col-span-2">
                         <Label
                           htmlFor="productName"
                           className="text-sm font-semibold text-slate-800"
@@ -436,7 +437,7 @@ function OffersMyPage() {
                         <FieldError>{renderError(errors.productName)}</FieldError>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-2 sm:col-span-2">
                         <Label
                           htmlFor="productDescription"
                           className="text-sm font-semibold text-slate-800"
@@ -521,7 +522,7 @@ function OffersMyPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-2 pt-2">
+                  <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
                     <Button
                       type="button"
                       variant="destructive"
