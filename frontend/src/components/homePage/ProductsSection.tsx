@@ -38,7 +38,11 @@ export function ProductsSection({
           <h2 className="text-2xl font-semibold text-foreground">{title}</h2>
           <p className="text-muted-foreground">{description}</p>
         </div>
-        <Button asChild variant="outline">
+        <Button
+          asChild
+          variant="ghost"
+          className="border-primary/40 text-primary hover:bg-primary/10"
+        >
           <Link to={ctaLink.to} search={ctaLink.search}>
             {ctaLabel}
           </Link>

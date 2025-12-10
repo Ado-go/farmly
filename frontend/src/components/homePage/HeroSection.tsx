@@ -40,9 +40,7 @@ export function HeroSection({
         <h1 className="text-4xl font-semibold tracking-tight text-foreground">
           {title}
         </h1>
-        <p className="max-w-3xl text-lg text-muted-foreground">
-          {description}
-        </p>
+        <p className="max-w-3xl text-lg text-muted-foreground">{description}</p>
         <div className="flex flex-wrap gap-3">
           <Button asChild>
             <Link to={productsLink.to} search={productsLink.search}>
@@ -51,7 +49,7 @@ export function HeroSection({
           </Button>
           <Button
             asChild
-            variant="outline"
+            variant="ghost"
             className="border-primary/40 text-primary hover:bg-primary/10"
           >
             <Link to={eventsLink.to} search={eventsLink.search}>
