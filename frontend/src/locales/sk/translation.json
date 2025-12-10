@@ -315,6 +315,11 @@
     "confirmDeleteTitle": "Zmazať tento produkt?",
     "confirmDeleteText": "Túto akciu nemožno vrátiť späť. Produkt bude odstránený.",
     "stockTooltip": "Sklad je limit, koľko si môže jeden používateľ objednať naraz.",
+    "availability": "Dostupnosť",
+    "availabilityHelp": "Nedostupné produkty sa zákazníkom nezobrazia a nedajú sa objednať.",
+    "available": "Dostupný",
+    "unavailable": "Nedostupný",
+    "unavailableForSale": "Tento produkt je momentálne nedostupný a nemožno ho objednať.",
     "validation": {
       "name": "Zadaj názov produktu.",
       "category": "Vyber kategóriu produktu.",

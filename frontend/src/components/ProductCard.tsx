@@ -18,6 +18,7 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
   const { addToCart } = useCart();
 
   const { product: inner } = product;
+  const isUnavailable = product.isAvailable === false;
   const ratingValue =
     inner.rating !== undefined && inner.rating !== null
       ? Number(inner.rating)
@@ -30,6 +31,11 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
   const displaySellerName = sellerNameOverride ?? product.farm?.name;
 
   const handleAddToCart = (fp: FarmProduct) => {
+    if (fp.isAvailable === false) {
+      toast.error(t("product.unavailableForSale"));
+      return;
+    }
+
     const added = addToCart(
       {
         productId: fp.product.id,
@@ -116,8 +122,9 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
           variant="outline"
           className="w-full"
           onClick={() => handleAddToCart(product)}
+          disabled={isUnavailable}
         >
-          {t("productCard.addToCart")}
+          {isUnavailable ? t("product.unavailable") : t("productCard.addToCart")}
         </Button>
       </div>
     </Card>

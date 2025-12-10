@@ -402,6 +402,7 @@ async function main() {
       );
 
       for (const template of chosenTemplates) {
+        const isAvailable = Math.random() > 0.15;
         const product = await prisma.product.create({
           data: {
             name: template.name,
@@ -416,6 +417,7 @@ async function main() {
             farmId: farm.id,
             price: parseFloat((randomInt(150, 1200) / 100).toFixed(2)),
             stock: randomInt(5, 50),
+            isAvailable,
             productId: product.id,
           },
         });

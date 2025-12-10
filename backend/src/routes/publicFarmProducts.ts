@@ -76,7 +76,7 @@ router.get("/", async (req, res) => {
         ? req.query.search.trim()
         : undefined;
 
-    const where: Prisma.FarmProductWhereInput = {};
+    const where: Prisma.FarmProductWhereInput = { isAvailable: true };
 
     if (category || search) {
       where.product = {};
@@ -124,6 +124,7 @@ router.get("/", async (req, res) => {
       id: fp.id,
       price: fp.price,
       stock: fp.stock,
+      isAvailable: fp.isAvailable,
       createdAt: fp.createdAt,
       farm: fp.farm,
       product: {
@@ -155,7 +156,7 @@ router.get("/:id", async (req, res) => {
 
   try {
     const farmProduct = await prisma.farmProduct.findFirst({
-      where: { productId },
+      where: { productId, isAvailable: true },
       include: {
         farm: { select: { id: true, name: true, city: true, region: true } },
         product: {
@@ -179,6 +180,7 @@ router.get("/:id", async (req, res) => {
       id: farmProduct.id,
       price: farmProduct.price,
       stock: farmProduct.stock,
+      isAvailable: farmProduct.isAvailable,
       createdAt: farmProduct.createdAt,
       farm: farmProduct.farm,
       product: {

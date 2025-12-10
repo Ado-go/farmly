@@ -315,6 +315,11 @@
     "confirmDeleteTitle": "Delete this product?",
     "confirmDeleteText": "This action cannot be undone. The product will be removed.",
     "stockTooltip": "Stock is the limit one customer can order at once.",
+    "availability": "Availability",
+    "availabilityHelp": "Unavailable products are hidden from customers and cannot be ordered.",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "unavailableForSale": "This product is currently unavailable and cannot be ordered.",
     "validation": {
       "name": "Please enter a product name.",
       "category": "Choose a category.",

@@ -59,29 +59,29 @@ enum ProductCategory {
 // ------------------- USER -------------------
 
 model User {
-  id                  Int               @id @default(autoincrement())
-  email               String            @unique
-  password            String
-  name                String
-  phone               String
-  address             String            @default("")
-  postalCode          String            @default("")
-  city                String            @default("")
-  country             String            @default("")
-  profileImageUrl     String?
+  id                   Int               @id @default(autoincrement())
+  email                String            @unique
+  password             String
+  name                 String
+  phone                String
+  address              String            @default("")
+  postalCode           String            @default("")
+  city                 String            @default("")
+  country              String            @default("")
+  profileImageUrl      String?
   profileImagePublicId String?
-  role                Role              @default(CUSTOMER)
-  orders              Order[]           @relation("BuyerOrders")
-  orderHistory        OrderHistory[]
-  refreshToken        String?
-  resetToken          String?
+  role                 Role              @default(CUSTOMER)
+  orders               Order[]           @relation("BuyerOrders")
+  orderHistory         OrderHistory[]
+  refreshToken         String?
+  resetToken           String?
 
-  farms               Farm[]
-  offers              Offer[]
-  reviews             Review[]
-  organizedEvents     Event[]           @relation("OrganizedEvents")
-  eventParticipations EventParticipant[]
-  eventProducts       EventProduct[]
+  farms                Farm[]
+  offers               Offer[]
+  reviews              Review[]
+  organizedEvents      Event[]           @relation("OrganizedEvents")
+  eventParticipations  EventParticipant[]
+  eventProducts        EventProduct[]
 }
 
 // ------------------- FARM -------------------
@@ -115,13 +115,13 @@ model FarmImage {
 // ------------------- PRODUCT -------------------
 
 model Product {
-  id            Int             @id @default(autoincrement())
+  id            Int              @id @default(autoincrement())
   name          String
   category      ProductCategory
   description   String
   basePrice     Float?
-  rating        Float          @default(0)
-  createdAt     DateTime        @default(now())
+  rating        Float            @default(0)
+  createdAt     DateTime         @default(now())
 
   orderItems    OrderItem[]   
   reviews       Review[]
@@ -142,16 +142,17 @@ model ProductImage {
 // ------------------- FARM PRODUCT -------------------
 
 model FarmProduct {
-  id         Int       @id @default(autoincrement())
-  price      Float
-  stock      Int       @default(0)
-  createdAt  DateTime  @default(now())
+  id          Int       @id @default(autoincrement())
+  price       Float
+  stock       Int       @default(0)
+  isAvailable Boolean   @default(true)
+  createdAt   DateTime  @default(now())
 
-  farmId     Int
-  farm       Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  farmId      Int
+  farm        Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
 
-  productId  Int
-  product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId   Int
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([farmId, productId])
 }
@@ -174,44 +175,44 @@ model Offer {
 // ------------------- ORDER -------------------
 
 model Order {
-  id                 Int          @id @default(autoincrement())
-  orderNumber        String       @unique @default(uuid())
-  createdAt          DateTime     @default(now())
+  id                 Int            @id @default(autoincrement())
+  orderNumber        String         @unique @default(uuid())
+  createdAt          DateTime       @default(now())
 
-  buyer              User?         @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+  buyer              User?          @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
   buyerId            Int?
   anonymousEmail     String?
   contactName        String
   contactPhone       String
 
-  orderType          OrderType    @default(STANDARD)
+  orderType          OrderType      @default(STANDARD)
 
   deliveryCity       String
   deliveryStreet     String
   deliveryPostalCode String
   deliveryCountry    String
 
-  event              Event?       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event              Event?         @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId            Int?         
 
 
-  isDelivered        Boolean      @default(false)
-  isPaid             Boolean      @default(false)
+  isDelivered        Boolean        @default(false)
+  isPaid             Boolean        @default(false)
   paymentMethod      PaymentMethod
   totalPrice         Float?
 
-  status             OrderStatus  @default(PENDING)   
+  status             OrderStatus    @default(PENDING)   
 
   items              OrderItem[]
   history            OrderHistory[]
 }
 
 model OrderItem {
-  id           Int        @id @default(autoincrement())
-  order        Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id           Int               @id @default(autoincrement())
+  order        Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId      Int
 
-  product      Product?   @relation(fields: [productId], references: [id], onDelete: SetNull)
+  product      Product?          @relation(fields: [productId], references: [id], onDelete: SetNull)
   productId    Int?
   quantity     Int
 
@@ -219,11 +220,11 @@ model OrderItem {
   sellerName   String
   productName  String
 
-  status       OrderItemStatus @default(ACTIVE)
+  status       OrderItemStatus   @default(ACTIVE)
 }
 
 model OrderHistory {
-  id          Int           @id @default(autoincrement())
+  id          Int            @id @default(autoincrement())
   action      HistoryAction
   message     String
   createdAt   DateTime       @default(now())
@@ -282,10 +283,10 @@ model EventProduct {
 }
 
 model EventImage {
-  id       Int   @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   url      String
   publicId String
-  event    Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event    Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId  Int
 }
 // ------------------- REVIEW -------------------

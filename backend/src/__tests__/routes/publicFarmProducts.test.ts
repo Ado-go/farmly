@@ -10,6 +10,7 @@ let farmProduct1Id: number;
 let farmProduct2Id: number;
 let product1Id: number;
 let product2Id: number;
+let unavailableProductId: number;
 
 beforeAll(async () => {
   const farm1 = await prisma.farm.create({
@@ -95,6 +96,26 @@ beforeAll(async () => {
   farmProduct2Id = farmProduct2.id;
   product1Id = farmProduct1.product.id;
   product2Id = farmProduct2.product.id;
+
+  const unavailableFarmProduct = await prisma.farmProduct.create({
+    data: {
+      farm: { connect: { id: farm1Id } },
+      price: 2.5,
+      stock: 0,
+      isAvailable: false,
+      product: {
+        create: {
+          name: "Hidden Kale",
+          category: "Vegetables",
+          description: "Unavailable product",
+          basePrice: 2.5,
+        },
+      },
+    },
+    include: { product: true },
+  });
+
+  unavailableProductId = unavailableFarmProduct.product.id;
 });
 
 afterAll(async () => {
@@ -116,6 +137,7 @@ describe("Public FarmProducts Routes", () => {
     const names = res.body.items.map((p: any) => p.product.name);
     expect(names).toContain("Apple Juice");
     expect(names).toContain("Goat Cheese");
+    expect(names).not.toContain("Hidden Kale");
 
     const appleProduct = res.body.items.find(
       (p: any) => p.product.name === "Apple Juice"
@@ -138,6 +160,13 @@ describe("Public FarmProducts Routes", () => {
     const res = await request(app).get("/api/public-farm-products/99999");
     expect(res.statusCode).toBe(404);
     expect(res.body).toHaveProperty("error", "Product was not found");
+  });
+
+  it("GET /public-farm-products/:id - should return 404 for unavailable product", async () => {
+    const res = await request(app).get(
+      `/api/public-farm-products/${unavailableProductId}`
+    );
+    expect(res.statusCode).toBe(404);
   });
 
   it("GET /public-farm-products/:id - should return 400 for invalid id", async () => {

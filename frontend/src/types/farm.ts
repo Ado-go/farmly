@@ -35,6 +35,7 @@ export type FarmProduct = {
   id: number;
   price: number;
   stock: number;
+  isAvailable?: boolean;
   product: Product;
   farm?: { id: number; name: string };
   farmId?: number;

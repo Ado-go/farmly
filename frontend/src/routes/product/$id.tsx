@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, type Resolver } from "react-hook-form";
 import { apiFetch } from "../../lib/api";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -32,6 +32,7 @@ const productSchema = z.object({
   description: z.string().optional(),
   price: z.number().min(0, "Cena musí byť väčšia ako 0"),
   stock: z.number().min(0, "Sklad musí byť nezáporný"),
+  isAvailable: z.boolean().default(true),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -57,7 +58,10 @@ function ProductDetailPage() {
   });
 
   const form = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productSchema) as Resolver<ProductFormData>,
+    defaultValues: {
+      isAvailable: true,
+    },
   });
 
   useEffect(() => {
@@ -71,6 +75,7 @@ function ProductDetailPage() {
         description: farmProduct.product.description,
         price: farmProduct.price,
         stock: farmProduct.stock,
+        isAvailable: farmProduct.isAvailable ?? true,
       });
     }
   }, [farmProduct, form]);
@@ -85,6 +90,7 @@ function ProductDetailPage() {
           description: data.description,
           price: data.price,
           stock: data.stock,
+          isAvailable: data.isAvailable ?? true,
         }),
       }),
     onSuccess: () => {
@@ -120,6 +126,7 @@ function ProductDetailPage() {
 
   const inner = farmProduct.product;
   const imageUrl = inner.images?.[0]?.url || "/placeholder.jpg";
+  const isAvailable = farmProduct.isAvailable !== false;
 
   const categoryLabel = getCategoryLabel(inner.category, t);
 
@@ -145,6 +152,10 @@ function ProductDetailPage() {
           </p>
           <p>
             <strong>{t("productPage.stock")}:</strong> {farmProduct.stock}
+          </p>
+          <p>
+            <strong>{t("product.availability")}:</strong>{" "}
+            {isAvailable ? t("product.available") : t("product.unavailable")}
           </p>
           <p>
             <strong>{t("productPage.description")}:</strong>{" "}
@@ -211,6 +222,22 @@ function ProductDetailPage() {
             {...form.register("stock", { valueAsNumber: true })}
             placeholder={t("productPage.stock")}
           />
+          <label className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-2">
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">
+                {t("product.availability")}
+              </span>
+              <span className="text-xs text-gray-500">
+                {t("product.availabilityHelp")}
+              </span>
+            </div>
+            <input
+              type="checkbox"
+              className="h-5 w-5 accent-emerald-600"
+              checked={form.watch("isAvailable") ?? true}
+              onChange={(e) => form.setValue("isAvailable", e.target.checked)}
+            />
+          </label>
 
           <div className="flex justify-end gap-2 pt-4">
             <Button

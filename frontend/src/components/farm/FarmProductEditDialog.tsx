@@ -54,6 +54,7 @@ const createProductSchema = (t: ReturnType<typeof useTranslation>["t"]) =>
     description: z.string().optional(),
     price: z.number().positive({ message: t("product.validation.pricePositive") }),
     stock: z.number().min(0, { message: t("product.validation.stockNonNegative") }),
+    isAvailable: z.boolean().optional(),
   });
 
 type ProductFormData = z.infer<ReturnType<typeof createProductSchema>>;
@@ -82,6 +83,7 @@ export function FarmProductEditDialog({
       name: "",
       category: undefined,
       description: "",
+      isAvailable: true,
     } as Partial<ProductFormData>,
   });
   const errors = form.formState.errors;
@@ -94,6 +96,7 @@ export function FarmProductEditDialog({
         description: "",
         price: undefined,
         stock: undefined,
+        isAvailable: true,
       } as Partial<ProductFormData>);
       setImages([]);
       return;
@@ -107,6 +110,7 @@ export function FarmProductEditDialog({
       description: product.product.description ?? "",
       price: product.price,
       stock: product.stock,
+      isAvailable: product.isAvailable ?? true,
     } as Partial<ProductFormData>);
   }, [product, form]);
 
@@ -135,6 +139,7 @@ export function FarmProductEditDialog({
         description: values.description,
         price: values.price,
         stock: values.stock,
+        isAvailable: values.isAvailable ?? true,
         images: uploaded.map((i) => ({ url: i.url, publicId: i.publicId })),
       };
 
@@ -315,6 +320,33 @@ export function FarmProductEditDialog({
                   </FieldContent>
                 </Field>
               </FieldSet>
+
+              <Field>
+                <FieldLabel htmlFor="isAvailable">
+                  {t("product.availability")}
+                </FieldLabel>
+                <FieldContent>
+                  <label className="flex items-center justify-between rounded-lg border border-emerald-100 bg-white/70 px-3 py-2">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-sm text-emerald-900">
+                        {form.watch("isAvailable")
+                          ? t("product.available")
+                          : t("product.unavailable")}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {t("product.availabilityHelp")}
+                      </span>
+                    </div>
+                    <input
+                      id="isAvailable"
+                      type="checkbox"
+                      className="h-5 w-5 accent-emerald-600"
+                      checked={form.watch("isAvailable") ?? true}
+                      onChange={(e) => form.setValue("isAvailable", e.target.checked)}
+                    />
+                  </label>
+                </FieldContent>
+              </Field>
             </FieldSet>
 
             <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">

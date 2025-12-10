@@ -111,6 +111,7 @@ describe("FarmProduct Routes", () => {
     expect(res.statusCode).toBe(201);
     expect(res.body).toHaveProperty("id");
     expect(res.body.product).toHaveProperty("name", "Test Product");
+    expect(res.body).toHaveProperty("isAvailable", true);
     farmProductId = res.body.id;
   });
 
@@ -154,11 +155,12 @@ describe("FarmProduct Routes", () => {
     const res = await request(app)
       .put(`/api/farm-product/${farmProductId}`)
       .set("Cookie", [`accessToken=${accessToken}`])
-      .send({ price: 15, stock: 20 });
+      .send({ price: 15, stock: 20, isAvailable: false });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty("price", 15);
     expect(res.body).toHaveProperty("stock", 20);
+    expect(res.body).toHaveProperty("isAvailable", false);
   });
 
   it("PUT /farm-product/:id - should fail to update other farmer's product", async () => {

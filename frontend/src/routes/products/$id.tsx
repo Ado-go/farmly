@@ -93,6 +93,11 @@ function ProductDetailPage() {
   });
 
   const handleAddToCart = (fp: FarmProduct) => {
+    if (fp.isAvailable === false) {
+      toast.error(t("product.unavailableForSale"));
+      return;
+    }
+
     const normalizedQuantity = Math.max(1, Math.floor(quantity));
     const finalQuantity =
       fp.stock && fp.stock > 0

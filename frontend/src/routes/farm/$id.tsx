@@ -162,6 +162,11 @@ function FarmDetailPage() {
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent" />
+                {fp.isAvailable === false && (
+                  <div className="absolute left-2 top-2 rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white shadow">
+                    {t("product.unavailable")}
+                  </div>
+                )}
                 <div className="absolute bottom-2 right-2 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-emerald-700 shadow-sm backdrop-blur">
                   {fp.price} €
                 </div>

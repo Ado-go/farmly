@@ -87,6 +87,7 @@ type FarmProduct = {
   id: number;
   price: number;
   stock: number;
+  isAvailable?: boolean;
   farm?: { id: number; name: string };
   product: {
     id: number;

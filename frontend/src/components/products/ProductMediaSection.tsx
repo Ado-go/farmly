@@ -33,6 +33,8 @@ export function ProductMediaSection({
   onAddToCart,
   t,
 }: ProductMediaSectionProps) {
+  const isUnavailable = farmProduct.isAvailable === false;
+
   const handleQuantityInput = (value: number) => {
     if (Number.isNaN(value)) return;
     const maxQty =
@@ -104,6 +106,12 @@ export function ProductMediaSection({
               </div>
             </div>
 
+            {isUnavailable && (
+              <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {t("product.unavailableForSale")}
+              </div>
+            )}
+
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <label className="text-sm font-medium text-gray-700">
                 {t("cartPage.quantity")}
@@ -115,9 +123,10 @@ export function ProductMediaSection({
                   max={farmProduct.stock ?? undefined}
                   value={quantity}
                   className="w-28"
+                  disabled={isUnavailable}
                   onChange={(e) => handleQuantityInput(e.target.valueAsNumber)}
                 />
-                <Button onClick={onAddToCart}>
+                <Button onClick={onAddToCart} disabled={isUnavailable}>
                   {t("productCard.addToCart")}
                 </Button>
               </div>

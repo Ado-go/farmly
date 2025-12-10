@@ -41,7 +41,8 @@ router.post(
   validateRequest(productSchema),
   async (req, res) => {
     try {
-      const { images, farmId, price, stock, ...productData } = req.body;
+      const { images, farmId, price, stock, isAvailable, ...productData } =
+        req.body;
 
       await checkFarmOwnership(farmId, req.user?.id);
 
@@ -69,6 +70,7 @@ router.post(
           product: { connect: { id: product.id } },
           price: price ?? 0,
           stock: stock ?? 0,
+          isAvailable: isAvailable ?? true,
         },
         include: {
           product: { include: { images: true } },
@@ -191,6 +193,7 @@ router.put(
         name,
         category,
         description,
+        isAvailable,
       } = req.body;
 
       const farmProduct = await prisma.farmProduct.findUnique({
@@ -224,6 +227,7 @@ router.put(
         data: {
           price: price ?? farmProduct.price,
           stock: stock ?? farmProduct.stock,
+          ...(isAvailable !== undefined && { isAvailable }),
           product: {
             update: {
               ...(name && { name }),

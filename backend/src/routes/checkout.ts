@@ -36,6 +36,30 @@ router.post("/", validateRequest(checkoutSchema), async (req, res) => {
       0
     );
 
+    const productIds = cartItems.map((item: any) => item.productId);
+    const farmProducts = await prisma.farmProduct.findMany({
+      where: { productId: { in: productIds } },
+      select: { productId: true, isAvailable: true },
+    });
+
+    const availabilityByProduct = new Map(
+      farmProducts.map((fp) => [fp.productId, fp.isAvailable])
+    );
+
+    const unavailableProducts = cartItems
+      .filter((item: any) => {
+        const availability = availabilityByProduct.get(item.productId);
+        return availability === false || availability === undefined;
+      })
+      .map((item: any) => item.productId);
+
+    if (unavailableProducts.length > 0) {
+      return res.status(400).json({
+        message: "Some products are unavailable",
+        unavailableProducts,
+      });
+    }
+
     const order = await prisma.order.create({
       data: {
         buyerId: buyerId || null,

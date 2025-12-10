@@ -11,6 +11,7 @@ export const productSchema = z.object({
     .int()
     .nonnegative("Stock cannot be negative")
     .default(0),
+  isAvailable: z.boolean().optional().default(true),
   farmId: z.number("Farm ID is required"),
 
   images: z

@@ -1,4 +1,4 @@
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
@@ -36,6 +36,7 @@ const createProductSchema = (t: ReturnType<typeof useTranslation>["t"]) =>
     description: z.string().optional(),
     price: z.number().positive({ message: t("product.validation.pricePositive") }),
     stock: z.number().min(0, { message: t("product.validation.stockNonNegative") }),
+    isAvailable: z.boolean().default(true),
   });
 type ProductFormData = z.infer<ReturnType<typeof createProductSchema>>;
 
@@ -55,11 +56,12 @@ export function ProductForm({
     "bg-white/80 border-emerald-100 focus-visible:ring-emerald-200 focus:border-emerald-400";
 
   const form = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productSchema) as Resolver<ProductFormData>,
     defaultValues: {
       name: "",
       category: undefined,
       description: "",
+      isAvailable: true,
     } as Partial<ProductFormData>,
   });
   const errors = form.formState.errors;
@@ -85,6 +87,7 @@ export function ProductForm({
         method: "POST",
         body: {
           ...data,
+          isAvailable: data.isAvailable ?? true,
           farmId,
           images: uploaded.map((u) => ({ url: u.url, publicId: u.publicId })),
         },
@@ -98,6 +101,7 @@ export function ProductForm({
         description: "",
         price: undefined,
         stock: undefined,
+        isAvailable: true,
       } as Partial<ProductFormData>);
       setImages([]);
       onClose();
@@ -238,6 +242,31 @@ export function ProductForm({
           </Field>
         </FieldSet>
       </FieldSet>
+
+      <Field>
+        <FieldLabel htmlFor="isAvailable">
+          {t("product.availability")}
+        </FieldLabel>
+        <FieldContent>
+          <label className="flex items-center justify-between rounded-lg border border-emerald-100 bg-white/70 px-3 py-2">
+            <div className="flex flex-col">
+              <span className="font-medium text-sm text-emerald-900">
+                {form.watch("isAvailable") ? t("product.available") : t("product.unavailable")}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {t("product.availabilityHelp")}
+              </span>
+            </div>
+            <input
+              id="isAvailable"
+              type="checkbox"
+              className="h-5 w-5 accent-emerald-600"
+              checked={form.watch("isAvailable") ?? true}
+              onChange={(e) => form.setValue("isAvailable", e.target.checked)}
+            />
+          </label>
+        </FieldContent>
+      </Field>
 
       <div className="flex justify-end gap-2 pt-1">
         <Button type="button" variant="outline" onClick={onClose}>

@@ -190,8 +190,12 @@ function CheckoutPage() {
       toast.success(t("checkoutPage.success"));
       cleanupCheckout();
     } catch (err) {
-      console.error(err);
-      toast.error(t("checkoutPage.error"));
+      const message =
+        err instanceof Error ? err.message : t("checkoutPage.error");
+      const unavailable = message.toLowerCase().includes("unavailable");
+      toast.error(
+        unavailable ? t("product.unavailableForSale") : t("checkoutPage.error")
+      );
     }
   };
 

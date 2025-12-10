@@ -55,7 +55,9 @@ router.get("/", async (req, res) => {
     }
 
     if (category) {
-      filters.push({ farmProducts: { some: { product: { category } } } });
+      filters.push({
+        farmProducts: { some: { isAvailable: true, product: { category } } },
+      });
     }
 
     if (filters.length > 0) {
@@ -68,6 +70,7 @@ router.get("/", async (req, res) => {
         select: { id: true, name: true, profileImageUrl: true },
       },
       farmProducts: {
+        where: { isAvailable: true },
         include: {
           product: {
             include: {
@@ -144,6 +147,7 @@ router.get("/:id", async (req, res) => {
           select: { id: true, name: true, profileImageUrl: true },
         },
         farmProducts: {
+          where: { isAvailable: true },
           include: {
             product: {
               include: {
