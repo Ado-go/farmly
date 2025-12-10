@@ -37,6 +37,7 @@ export function EventsSection({
   formatDateRange,
 }: EventsSectionProps) {
   const sectionClasses = "space-y-4 rounded-3xl border bg-white p-6 shadow-sm";
+  const gradientCard = "border border-primary/10 bg-gradient-to-br from-primary/10 via-white to-secondary/10";
 
   if (loading) {
     return (
@@ -96,35 +97,39 @@ export function EventsSection({
               : "bg-amber-100 text-amber-700";
 
           return (
-            <Card
+            <Link
               key={event.id}
-              className="group h-full border border-primary/10 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              to="/events/$id"
+              params={{ id: String(event.id) }}
+              className="group block h-full"
             >
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 text-sm font-medium text-primary">
-                  <CalendarDays className="h-4 w-4" />
-                  <span>{formatDateRange(event.startDate, event.endDate)}</span>
+              <Card className={`h-full ${gradientCard} p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg`}>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                    <CalendarDays className="h-4 w-4" />
+                    <span>{formatDateRange(event.startDate, event.endDate)}</span>
+                  </div>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass}`}
+                  >
+                    {status}
+                  </span>
                 </div>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass}`}
-                >
-                  {status}
-                </span>
-              </div>
 
-              <h3 className="mt-3 text-lg font-semibold text-foreground">
-                {event.title}
-              </h3>
-              <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                {event.description || noDescriptionText}
-              </p>
-              <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4 text-secondary" />
-                <span>
-                  {[event.city, event.region].filter(Boolean).join(", ")}
-                </span>
-              </div>
-            </Card>
+                <h3 className="mt-3 text-lg font-semibold text-foreground">
+                  {event.title}
+                </h3>
+                <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                  {event.description || noDescriptionText}
+                </p>
+                <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="h-4 w-4 text-secondary" />
+                  <span>
+                    {[event.city, event.region].filter(Boolean).join(", ")}
+                  </span>
+                </div>
+              </Card>
+            </Link>
           );
         })}
       </div>
@@ -156,11 +161,7 @@ function HeaderBlock({
         <h2 className="text-2xl font-semibold text-foreground">{title}</h2>
         <p className="text-muted-foreground">{description}</p>
       </div>
-      <Button
-        asChild
-        variant="ghost"
-        className="border-primary/40 text-primary hover:bg-primary/10"
-      >
+      <Button asChild variant="ghost" className="text-primary">
         <Link to={ctaLink.to} search={ctaLink.search}>
           {ctaLabel}
         </Link>

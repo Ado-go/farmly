@@ -61,7 +61,7 @@ export function HeroSection({
           {statsItems.map((item) => (
             <div
               key={item.label}
-              className="flex items-start gap-3 rounded-2xl border border-primary/10 bg-white p-4 shadow-sm"
+              className="flex items-start gap-3 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/10 via-white to-secondary/10 p-4 shadow-sm"
             >
               <item.icon className="h-10 w-10 rounded-xl bg-primary/15 p-2 text-primary" />
               <div>
