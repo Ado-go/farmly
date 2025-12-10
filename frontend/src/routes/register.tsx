@@ -99,10 +99,8 @@ function RegisterPage() {
       : null;
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-primary/10 via-white to-emerald-50">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(76,175,80,0.14),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(245,166,35,0.15),transparent_30%)]" />
-
-      <div className="relative mx-auto max-w-5xl px-4 py-10">
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-5xl px-4 py-10">
         <Card className="w-full overflow-hidden border-primary/15 bg-white/95 shadow-2xl backdrop-blur">
           <div className="grid items-stretch md:grid-cols-[1.05fr_0.95fr] md:min-h-[680px]">
             <div className="relative hidden h-full overflow-hidden text-primary-foreground md:flex">
