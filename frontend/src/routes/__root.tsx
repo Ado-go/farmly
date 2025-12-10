@@ -76,7 +76,12 @@ function RootLayout() {
   };
   const homeLink: NavLink = { to: "/", label: t("farmly"), icon: Leaf };
   const navLinks: NavLink[] = [
-    { to: "/products", label: t("products"), search: { page: 1 }, icon: Package },
+    {
+      to: "/products",
+      label: t("products"),
+      search: { page: 1 },
+      icon: Package,
+    },
     {
       to: "/events",
       label: t("events"),
@@ -160,7 +165,9 @@ function RootLayout() {
                           {link.icon && (
                             <link.icon
                               className={`h-4 w-4 ${
-                                active ? "text-primary" : "text-muted-foreground"
+                                active
+                                  ? "text-primary"
+                                  : "text-muted-foreground"
                               }`}
                             />
                           )}
@@ -187,7 +194,7 @@ function RootLayout() {
             <Button
               variant="ghost"
               size="icon"
-              className="relative rounded-full border border-primary/20 bg-card/80 shadow-sm hover:bg-primary/10"
+              className="relative rounded-full border bg-card/80 shadow-sm hover:bg-primary/10"
               onClick={handleGoToCart}
             >
               <ShoppingCart className="h-5 w-5" />
