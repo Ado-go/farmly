@@ -269,8 +269,8 @@ function EventPage() {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">
       <div className="grid gap-4 lg:grid-cols-[1.5fr,1fr] items-stretch">
-        <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-emerald-50 via-white to-lime-50 p-6">
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_20%,rgba(34,197,94,0.08),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(132,204,22,0.08),transparent_25%)]" />
+        <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-emerald-50 via-white to-lime-50 p-6 shadow-sm">
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_20%,rgba(34,197,94,0.08),transparent_38%),radial-gradient(circle_at_85%_10%,rgba(251,191,36,0.1),transparent_32%)]" />
           <div className="relative space-y-3">
             <p className="text-sm font-semibold text-emerald-700 uppercase tracking-wide">
               {t("eventPage.title")}

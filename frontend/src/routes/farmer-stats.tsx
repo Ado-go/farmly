@@ -165,8 +165,9 @@ function FarmerStatsPage() {
   return (
     <div className="bg-gradient-to-b from-muted/40 via-background to-background">
       <div className="mx-auto max-w-6xl space-y-8 px-4 py-10">
-        <div className="rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-emerald-100 p-6 shadow-sm">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative overflow-hidden rounded-3xl border bg-gradient-to-r from-emerald-50 via-white to-lime-50 p-6 shadow-sm">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(34,197,94,0.08),transparent_38%),radial-gradient(circle_at_85%_10%,rgba(251,191,36,0.1),transparent_32%)]" />
+          <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
                 {t("farmerStatsPage.lastUpdated")}
