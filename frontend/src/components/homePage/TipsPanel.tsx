@@ -9,7 +9,7 @@ type TipsPanelProps = {
 
 export function TipsPanel({ label, title, description, tips }: TipsPanelProps) {
   return (
-    <div className="flex flex-col justify-between gap-4 rounded-3xl border bg-primary/5 p-6 shadow-sm">
+    <div className="flex flex-col justify-between gap-4 rounded-3xl border bg-white p-6 shadow-sm">
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-primary">
           <Sparkles className="h-4 w-4" />
@@ -22,7 +22,7 @@ export function TipsPanel({ label, title, description, tips }: TipsPanelProps) {
         {tips.map((tip) => (
           <div
             key={tip}
-            className="flex items-start gap-3 rounded-2xl border border-primary/10 bg-white/80 p-3"
+            className="flex items-start gap-3 rounded-2xl border border-primary/10 bg-white p-3"
           >
             <div className="mt-0.5 h-2.5 w-2.5 rounded-full bg-primary" />
             <p className="text-sm leading-relaxed text-foreground">{tip}</p>

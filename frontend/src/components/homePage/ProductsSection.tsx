@@ -29,7 +29,7 @@ export function ProductsSection({
   emptyText,
 }: ProductsSectionProps) {
   return (
-    <section className="space-y-4 rounded-3xl border bg-card/80 p-6 shadow-sm">
+    <section className="space-y-4 rounded-3xl border bg-white p-6 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
@@ -50,12 +50,12 @@ export function ProductsSection({
           {Array.from({ length: 3 }).map((_, idx) => (
             <Card
               key={idx}
-              className="h-64 animate-pulse border border-primary/10 bg-white/70"
+              className="h-64 animate-pulse border border-primary/10 bg-white"
             />
           ))}
         </div>
       ) : error || products.length === 0 ? (
-        <p className="rounded-2xl border bg-card/60 p-4 text-sm text-muted-foreground">
+        <p className="rounded-2xl border bg-white p-4 text-sm text-muted-foreground">
           {emptyText}
         </p>
       ) : (

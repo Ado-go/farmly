@@ -36,9 +36,11 @@ export function EventsSection({
   getEventStatus,
   formatDateRange,
 }: EventsSectionProps) {
+  const sectionClasses = "space-y-4 rounded-3xl border bg-white p-6 shadow-sm";
+
   if (loading) {
     return (
-      <section className="space-y-4">
+      <section className={sectionClasses}>
         <HeaderBlock
           label={label}
           title={title}
@@ -50,7 +52,7 @@ export function EventsSection({
           {Array.from({ length: 3 }).map((_, idx) => (
             <Card
               key={idx}
-              className="h-40 animate-pulse border border-primary/10 bg-white/70"
+              className="h-40 animate-pulse border border-primary/10 bg-white"
             />
           ))}
         </div>
@@ -60,7 +62,7 @@ export function EventsSection({
 
   if (error || events.length === 0) {
     return (
-      <section className="space-y-4">
+      <section className={sectionClasses}>
         <HeaderBlock
           label={label}
           title={title}
@@ -68,7 +70,7 @@ export function EventsSection({
           ctaLabel={ctaLabel}
           ctaLink={ctaLink}
         />
-        <p className="rounded-2xl border bg-card/60 p-4 text-sm text-muted-foreground">
+        <p className="rounded-2xl border bg-white p-4 text-sm text-muted-foreground">
           {emptyText}
         </p>
       </section>
@@ -76,7 +78,7 @@ export function EventsSection({
   }
 
   return (
-    <section className="space-y-4">
+    <section className={sectionClasses}>
       <HeaderBlock
         label={label}
         title={title}
@@ -96,7 +98,7 @@ export function EventsSection({
           return (
             <Card
               key={event.id}
-              className="group h-full border border-primary/10 bg-white/75 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              className="group h-full border border-primary/10 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 text-sm font-medium text-primary">

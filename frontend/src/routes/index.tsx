@@ -113,7 +113,7 @@ function HomePage() {
   };
 
   return (
-    <main className="bg-gradient-to-b from-muted/40 via-background to-background">
+    <main className="bg-background">
       <div className="mx-auto max-w-6xl space-y-12 px-4 py-10">
         <AlertBanner
           title={t("homePage.alertTitle")}

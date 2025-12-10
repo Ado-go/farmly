@@ -30,7 +30,7 @@ export function AboutSection({
   badgeLessWaste,
 }: AboutSectionProps) {
   return (
-    <section className="grid gap-6 rounded-3xl border bg-white/80 p-6 shadow-sm md:grid-cols-[1.1fr,0.9fr]">
+    <section className="grid gap-6 rounded-3xl border bg-white p-6 shadow-sm md:grid-cols-[1.1fr,0.9fr]">
       <div className="space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
           {label}
@@ -52,7 +52,7 @@ export function AboutSection({
           </li>
         </ul>
       </div>
-      <div className="flex flex-col justify-center gap-4 rounded-2xl bg-gradient-to-br from-primary/15 via-white to-secondary/15 p-5">
+      <div className="flex flex-col justify-center gap-4 rounded-2xl border border-primary/10 bg-white p-5">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
             <Sprout className="h-6 w-6" />
