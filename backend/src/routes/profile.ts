@@ -8,6 +8,8 @@ import {
   deleteProfileSchema,
   updateProfileSchema,
 } from "../schemas/profileSchema.ts";
+import { sendEmail } from "../utils/sendEmails.ts";
+import { buildAccountDeletionEmail } from "../emailTemplates/accountDeletionTemplate.ts";
 
 const router = Router();
 
@@ -161,6 +163,17 @@ router.delete(
       await prisma.user.delete({ where: { id: userId } });
       res.clearCookie("accessToken");
       res.clearCookie("refreshToken");
+
+      const deletionDate = new Date().toISOString().split("T")[0];
+      try {
+        const { subject, html } = buildAccountDeletionEmail({
+          name: user.name,
+          deletionDate,
+        });
+        await sendEmail(user.email, subject, html);
+      } catch (emailErr) {
+        console.error("Failed to send account deletion email:", emailErr);
+      }
 
       res.json({ message: "User deleted successfully" });
     } catch (err) {

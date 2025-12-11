@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import prisma from "../prisma.ts";
 import { sendEmail } from "../utils/sendEmails.ts";
 import { buildResetPasswordEmail } from "../emailTemplates/resetPasswordTemplate.ts";
+import { buildRegistrationEmail } from "../emailTemplates/registrationTemplate.ts";
+import { buildPasswordChangedEmail } from "../emailTemplates/passwordChangedTemplate.ts";
 import type { User } from "@prisma/client";
 import { validateRequest } from "../middleware/validateRequest.ts";
 import { loginSchema, registerSchema } from "../schemas/authSchemas.ts";
@@ -120,6 +122,17 @@ router.post("/register", validateRequest(registerSchema), async (req, res) => {
         profileImagePublicId: user.profileImagePublicId,
       },
     });
+
+    const dashboardUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL;
+    try {
+      const { subject, html } = buildRegistrationEmail({
+        name: user.name,
+        dashboardUrl,
+      });
+      await sendEmail(user.email, subject, html);
+    } catch (emailErr) {
+      console.error("Failed to send registration email:", emailErr);
+    }
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
@@ -258,6 +271,20 @@ router.post("/change-password", authenticateToken, async (req, res) => {
         password: hashedPassword,
       },
     });
+
+    try {
+      const loginUrl =
+        (process.env.CLIENT_URL || process.env.FRONTEND_URL)?.concat(
+          "/login"
+        ) ?? undefined;
+      const { subject, html } = buildPasswordChangedEmail({
+        name: user.name,
+        loginUrl,
+      });
+      await sendEmail(user.email, subject, html);
+    } catch (emailErr) {
+      console.error("Failed to send password changed email:", emailErr);
+    }
 
     res.json({ message: "Password successfully changed" });
   } catch (err) {

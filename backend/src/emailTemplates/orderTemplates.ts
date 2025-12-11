@@ -1,3 +1,5 @@
+import { renderEmailLayout } from "./layout.ts";
+
 type PaymentMethod = "CARD" | "CASH";
 
 type OrderItem = {
@@ -81,55 +83,55 @@ export const buildOrderConfirmationEmail = ({
   const payLinkHtml =
     paymentMethod === "CARD" && paymentLink
       ? `
-    <p style="margin-top: 18px;">Kliknite nižšie a zaplaťte objednávku:</p>
-    <a href="${paymentLink}"
-      style="display: inline-block; padding: 10px 18px; background: #34d399; color: #fff;
-             text-decoration: none; border-radius: 6px; font-weight: 600;">
-      Zaplatiť objednávku
-    </a>
-  `
+      <p style="margin: 14px 0 10px; color: #374151;">Zaplať objednávku online, aby sme ju mohli rýchlejšie spracovať.</p>
+      <a href="${paymentLink}"
+        style="display: inline-block; padding: 12px 18px; background: #16a34a; color: #ffffff;
+               text-decoration: none; border-radius: 10px; font-weight: 700;">
+        Zaplatiť objednávku
+      </a>
+    `
       : `
-    <p style="margin-top: 18px;">Spôsob platby: <strong>${paymentLabel}</strong>. Zaplatíte pri prevzatí.</p>
+      <p style="margin: 14px 0 0; color: #374151; line-height: 1.6;">Spôsob platby: <strong>${paymentLabel}</strong>. Zaplatíš pri prevzatí.</p>
+    `;
+
+  const content = `
+    <p style="margin: 0 0 10px; color: #374151; line-height: 1.6;">Číslo objednávky: <strong>${orderNumber}</strong></p>
+    <p style="margin: 0 0 16px; color: #374151; line-height: 1.6;">Celková cena: <strong>${totalPrice.toFixed(
+      2
+    )} €</strong></p>
+    ${deliveryBlock(delivery)}
+    <h3 style="margin: 0 0 6px;">Položky objednávky</h3>
+    <table style="border-collapse: collapse; width: 100%; font-size: 14px;">
+      <thead>
+        <tr>
+          <th style="text-align: left; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Produkt</th>
+          <th style="text-align: center; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Množstvo</th>
+          <th style="text-align: right; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Cena/ks</th>
+          <th style="text-align: right; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Spolu</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsTable(items)}
+        <tr>
+          <td colspan="3" style="padding: 10px 8px; text-align: right; font-weight: 700;">Celkom</td>
+          <td style="padding: 10px 8px; text-align: right; font-weight: 700;">${totalPrice.toFixed(
+            2
+          )} €</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 style="margin: 18px 0 6px;">Spôsob platby</h3>
+    <p style="margin: 0 0 6px;">${paymentLabel}</p>
+    ${payLinkHtml}
   `;
 
   return {
     subject: "Vaša objednávka bola vytvorená",
-    html: `
-      <div style="font-family: Arial, sans-serif; color: #111827;">
-        <h2 style="color: #16a34a; margin-bottom: 8px;">Ďakujeme za objednávku!</h2>
-        <p style="margin: 0 0 8px;">Číslo objednávky: <strong>${orderNumber}</strong></p>
-        <p style="margin: 0 0 16px;">Celková cena: <strong>${totalPrice.toFixed(
-          2
-        )} €</strong></p>
-
-        ${deliveryBlock(delivery)}
-
-        <h3 style="margin: 0 0 6px;">Položky objednávky</h3>
-        <table style="border-collapse: collapse; width: 100%; font-size: 14px;">
-          <thead>
-            <tr>
-              <th style="text-align: left; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Produkt</th>
-              <th style="text-align: center; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Množstvo</th>
-              <th style="text-align: right; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Cena/ks</th>
-              <th style="text-align: right; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Spolu</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsTable(items)}
-            <tr>
-              <td colspan="3" style="padding: 10px 8px; text-align: right; font-weight: 700;">Celkom</td>
-              <td style="padding: 10px 8px; text-align: right; font-weight: 700;">${totalPrice.toFixed(
-                2
-              )} €</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <h3 style="margin: 18px 0 6px;">Spôsob platby</h3>
-        <p style="margin: 0 0 6px;">${paymentLabel}</p>
-        ${payLinkHtml}
-      </div>
-    `,
+    html: renderEmailLayout({
+      title: "Objednávka vytvorená",
+      intro: "Ďakujeme za objednávku. Tu je zhrnutie a pokyny k platbe.",
+      content,
+    }),
   };
 };
 
@@ -149,43 +151,46 @@ export const buildPaymentSuccessEmail = ({
   const paymentLabel =
     paymentMethod === "CARD" ? "Platba kartou" : "Platba v hotovosti";
 
+  const content = `
+    <p style="margin: 0 0 10px; color: #374151; line-height: 1.6;">Číslo objednávky: <strong>${orderNumber}</strong></p>
+    <p style="margin: 0 0 16px; color: #374151; line-height: 1.6;">Celková cena: <strong>${totalPrice.toFixed(
+      2
+    )} €</strong></p>
+
+    ${deliveryBlock(delivery)}
+
+    <h3 style="margin: 0 0 6px;">Zhrnutie objednávky</h3>
+    <table style="border-collapse: collapse; width: 100%; font-size: 14px;">
+      <thead>
+        <tr>
+          <th style="text-align: left; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Produkt</th>
+          <th style="text-align: center; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Množstvo</th>
+          <th style="text-align: right; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Cena/ks</th>
+          <th style="text-align: right; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Spolu</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsTable(items)}
+        <tr>
+          <td colspan="3" style="padding: 10px 8px; text-align: right; font-weight: 700;">Celkom</td>
+          <td style="padding: 10px 8px; text-align: right; font-weight: 700;">${totalPrice.toFixed(
+            2
+          )} €</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin: 18px 0 6px;">Spôsob platby</h3>
+    <p style="margin: 0 0 6px;">${paymentLabel}</p>
+    <p style="margin: 12px 0 0; color: #374151; line-height: 1.6;">Ďakujeme za platbu. Objednávka je označená ako zaplatená.</p>
+  `;
+
   return {
     subject: "Platba bola potvrdená",
-    html: `
-      <div style="font-family: Arial, sans-serif; color: #111827;">
-        <h2 style="color: #16a34a; margin-bottom: 8px;">Platba bola potvrdená 🎉</h2>
-        <p style="margin: 0 0 8px;">Číslo objednávky: <strong>${orderNumber}</strong></p>
-        <p style="margin: 0 0 16px;">Celková cena: <strong>${totalPrice.toFixed(
-          2
-        )} €</strong></p>
-
-        ${deliveryBlock(delivery)}
-
-        <h3 style="margin: 0 0 6px;">Zhrnutie objednávky</h3>
-        <table style="border-collapse: collapse; width: 100%; font-size: 14px;">
-          <thead>
-            <tr>
-              <th style="text-align: left; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Produkt</th>
-              <th style="text-align: center; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Množstvo</th>
-              <th style="text-align: right; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Cena/ks</th>
-              <th style="text-align: right; padding: 6px 8px; border-bottom: 1px solid #d1d5db;">Spolu</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsTable(items)}
-            <tr>
-              <td colspan="3" style="padding: 10px 8px; text-align: right; font-weight: 700;">Celkom</td>
-              <td style="padding: 10px 8px; text-align: right; font-weight: 700;">${totalPrice.toFixed(
-                2
-              )} €</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <h3 style="margin: 18px 0 6px;">Spôsob platby</h3>
-        <p style="margin: 0 0 6px;">${paymentLabel}</p>
-        <p style="margin: 12px 0 0;">Ďakujeme za vašu platbu. Objednávka je označená ako zaplatená.</p>
-      </div>
-    `,
+    html: renderEmailLayout({
+      title: "Platba bola potvrdená",
+      intro: "Platba prebehla úspešne. Tu je potvrdenie a zhrnutie objednávky.",
+      content,
+    }),
   };
 };

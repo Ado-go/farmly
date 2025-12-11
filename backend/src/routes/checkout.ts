@@ -9,10 +9,104 @@ import {
   buildOrderConfirmationEmail,
   buildPaymentSuccessEmail,
 } from "../emailTemplates/orderTemplates.ts";
+import { buildOrderCancellationEmail } from "../emailTemplates/orderCancellationTemplate.ts";
+import { buildOrderItemCancellationEmail } from "../emailTemplates/orderItemCancellationTemplate.ts";
+import { buildFarmerOrderNotificationEmail } from "../emailTemplates/farmerOrderNotificationTemplate.ts";
+import { buildFarmerOrderCancellationEmail } from "../emailTemplates/farmerOrderCancellationTemplate.ts";
 
 const router = Router();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+type FarmerGroupItem = {
+  name: string;
+  quantity: number;
+  unitPrice?: number;
+};
+
+type FarmerGroup = {
+  farmerId: number;
+  farmerEmail: string;
+  farmerName?: string | null;
+  items: FarmerGroupItem[];
+  totalPrice: number;
+};
+
+const buildDeliveryInfo = (
+  deliveryStreet: string,
+  deliveryPostalCode: string,
+  deliveryCity: string,
+  deliveryCountry: string
+) => {
+  const line1 = [deliveryStreet, deliveryCity].filter(Boolean).join(", ");
+  const line2 = [deliveryPostalCode, deliveryCity].filter(Boolean).join(" ");
+  const parts = [line1 || null, line2 || null, deliveryCountry || null].filter(
+    Boolean
+  );
+  return parts.join(" • ");
+};
+
+const fetchFarmProductsWithFarm = async (productIds: number[]) => {
+  if (!productIds.length) return [];
+
+  return prisma.farmProduct.findMany({
+    where: { productId: { in: productIds } },
+    include: {
+      farm: {
+        select: {
+          id: true,
+          name: true,
+          city: true,
+          street: true,
+          postalCode: true,
+          country: true,
+          farmer: { select: { id: true, email: true, name: true, phone: true } },
+        },
+      },
+    },
+  });
+};
+
+const groupItemsByFarmer = (
+  orderItems: {
+    productId: number | null;
+    productName: string;
+    quantity: number;
+    unitPrice: number;
+  }[],
+  farmProducts: Awaited<ReturnType<typeof fetchFarmProductsWithFarm>>
+): FarmerGroup[] => {
+  const byProductId = new Map(
+    farmProducts.map((fp) => [fp.productId, fp])
+  );
+
+  const groups = new Map<number, FarmerGroup>();
+
+  for (const item of orderItems) {
+    const fp = item.productId ? byProductId.get(item.productId) : undefined;
+    const farmer = fp?.farm?.farmer;
+    if (!farmer?.email || !farmer.id) continue;
+
+    const existing = groups.get(farmer.id) ?? {
+      farmerId: farmer.id,
+      farmerEmail: farmer.email,
+      farmerName: farmer.name,
+      items: [],
+      totalPrice: 0,
+    };
+
+    existing.items.push({
+      name: item.productName,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+    });
+    existing.totalPrice += item.unitPrice * item.quantity;
+
+    groups.set(farmer.id, existing);
+  }
+
+  return Array.from(groups.values());
+};
 
 // POST /checkout
 router.post("/", validateRequest(checkoutSchema), async (req, res) => {
@@ -37,10 +131,7 @@ router.post("/", validateRequest(checkoutSchema), async (req, res) => {
     );
 
     const productIds = cartItems.map((item: any) => item.productId);
-    const farmProducts = await prisma.farmProduct.findMany({
-      where: { productId: { in: productIds } },
-      select: { productId: true, isAvailable: true },
-    });
+    const farmProducts = await fetchFarmProductsWithFarm(productIds);
 
     const availabilityByProduct = new Map(
       farmProducts.map((fp) => [fp.productId, fp.isAvailable])
@@ -129,6 +220,36 @@ router.post("/", validateRequest(checkoutSchema), async (req, res) => {
 
       await sendEmail(recipientEmail, subject, html);
     }
+
+    const farmerGroups = groupItemsByFarmer(order.items, farmProducts);
+    const deliveryInfo = buildDeliveryInfo(
+      deliveryStreet,
+      deliveryPostalCode,
+      deliveryCity,
+      deliveryCountry
+    );
+
+    await Promise.all(
+      farmerGroups.map(async (group) => {
+        const { subject, html } = buildFarmerOrderNotificationEmail({
+          orderNumber: order.orderNumber,
+          isPreorder: false,
+          customerName: contactName,
+          customerEmail: recipientEmail ?? undefined,
+          customerPhone: contactPhone ?? undefined,
+          items: group.items,
+          totalPrice: group.totalPrice,
+          deliveryInfo,
+          paymentMethod,
+        });
+
+        try {
+          await sendEmail(group.farmerEmail, subject, html);
+        } catch (emailErr) {
+          console.error("Failed to notify farmer about order:", emailErr);
+        }
+      })
+    );
 
     res.json({
       message: "Order was successfully created",
@@ -284,7 +405,10 @@ router.patch("/:id/cancel", authenticateToken, async (req, res) => {
   try {
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      include: { items: true },
+      include: {
+        items: true,
+        buyer: { select: { email: true, name: true, phone: true } },
+      },
     });
 
     if (!order) return res.status(404).json({ message: "Order not found" });
@@ -309,6 +433,47 @@ router.patch("/:id/cancel", authenticateToken, async (req, res) => {
       }),
     ]);
 
+    const recipientEmail =
+      order.anonymousEmail ?? order.buyer?.email ?? null;
+
+    if (recipientEmail) {
+      try {
+        const { subject, html } = buildOrderCancellationEmail({
+          orderNumber: order.orderNumber,
+          isPreorder: false,
+          reason: "Objednávku si zrušil.",
+        });
+        await sendEmail(recipientEmail, subject, html);
+      } catch (emailErr) {
+        console.error("Failed to send order cancellation email:", emailErr);
+      }
+    }
+
+    const farmProducts = await fetchFarmProductsWithFarm(
+      order.items
+        .map((i) => i.productId)
+        .filter((id): id is number => typeof id === "number")
+    );
+    const farmerGroups = groupItemsByFarmer(order.items, farmProducts);
+
+    await Promise.all(
+      farmerGroups.map(async (group) => {
+        const { subject, html } = buildFarmerOrderCancellationEmail({
+          orderNumber: order.orderNumber,
+          isPreorder: false,
+          items: group.items,
+          totalPrice: group.totalPrice,
+          reason: "Zákazník zrušil objednávku.",
+        });
+
+        try {
+          await sendEmail(group.farmerEmail, subject, html);
+        } catch (emailErr) {
+          console.error("Failed to notify farmer about cancellation:", emailErr);
+        }
+      })
+    );
+
     res.json({ message: "Order canceled successfully" });
   } catch (err) {
     console.error(err);
@@ -329,7 +494,9 @@ router.patch(
       const item = await prisma.orderItem.findUnique({
         where: { id: itemId },
         include: {
-          order: true,
+          order: {
+            include: { buyer: { select: { email: true, name: true } } },
+          },
           product: { include: { farmLinks: { include: { farm: true } } } },
         },
       });
@@ -375,6 +542,29 @@ router.patch(
         message: "Product from order canceled successfully",
         newTotalPrice: newTotal,
       });
+
+      const recipientEmail =
+        item.order.anonymousEmail ?? item.order.buyer?.email ?? null;
+      if (recipientEmail) {
+        try {
+          const { subject, html } = buildOrderItemCancellationEmail({
+            orderNumber: item.order.orderNumber,
+            itemName: item.productName,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            isPreorder: false,
+            reason: "Položku zrušil farmár.",
+            remainingTotal: newTotal,
+          });
+
+          await sendEmail(recipientEmail, subject, html);
+        } catch (emailErr) {
+          console.error(
+            "Failed to send order item cancellation email:",
+            emailErr
+          );
+        }
+      }
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: "Failed to cancel product in order" });
@@ -497,11 +687,11 @@ router.post("/stripe/webhook", async (req, res) => {
               deliveryStreet: order.deliveryStreet,
               deliveryCity: order.deliveryCity,
               deliveryPostalCode: order.deliveryPostalCode,
-            deliveryCountry: order.deliveryCountry,
-          },
-          items: order.items,
-          paymentMethod: order.paymentMethod as "CARD" | "CASH",
-        });
+              deliveryCountry: order.deliveryCountry,
+            },
+            items: order.items,
+            paymentMethod: order.paymentMethod as "CARD" | "CASH",
+          });
 
           try {
             await sendEmail(recipient, subject, html);
