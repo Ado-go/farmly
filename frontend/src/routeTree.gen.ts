@@ -33,10 +33,11 @@ import { Route as ProductIdRouteImport } from './routes/product/$id'
 import { Route as OffersIdRouteImport } from './routes/offers/$id'
 import { Route as FarmsIdRouteImport } from './routes/farms/$id'
 import { Route as FarmIdRouteImport } from './routes/farm/$id'
-import { Route as EventsIdRouteImport } from './routes/events/$id'
 import { Route as EventIdRouteImport } from './routes/event/$id'
 import { Route as OffersMyIndexRouteImport } from './routes/offers/my/index'
+import { Route as EventsIdIndexRouteImport } from './routes/events/$id/index'
 import { Route as OrderIdPayRouteImport } from './routes/order/$id/pay'
+import { Route as EventsIdProductsProductIdRouteImport } from './routes/events/$id/products/$productId'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -158,11 +159,6 @@ const FarmIdRoute = FarmIdRouteImport.update({
   path: '/farm/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EventsIdRoute = EventsIdRouteImport.update({
-  id: '/events/$id',
-  path: '/events/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const EventIdRoute = EventIdRouteImport.update({
   id: '/event/$id',
   path: '/event/$id',
@@ -173,11 +169,22 @@ const OffersMyIndexRoute = OffersMyIndexRouteImport.update({
   path: '/offers/my/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsIdIndexRoute = EventsIdIndexRouteImport.update({
+  id: '/events/$id/',
+  path: '/events/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrderIdPayRoute = OrderIdPayRouteImport.update({
   id: '/order/$id/pay',
   path: '/order/$id/pay',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsIdProductsProductIdRoute =
+  EventsIdProductsProductIdRouteImport.update({
+    id: '/events/$id/products/$productId',
+    path: '/events/$id/products/$productId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -194,7 +201,6 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/event/$id': typeof EventIdRoute
-  '/events/$id': typeof EventsIdRoute
   '/farm/$id': typeof FarmIdRoute
   '/farms/$id': typeof FarmsIdRoute
   '/offers/$id': typeof OffersIdRoute
@@ -207,7 +213,9 @@ export interface FileRoutesByFullPath {
   '/offers': typeof OffersIndexRoute
   '/products': typeof ProductsIndexRoute
   '/order/$id/pay': typeof OrderIdPayRoute
+  '/events/$id': typeof EventsIdIndexRoute
   '/offers/my': typeof OffersMyIndexRoute
+  '/events/$id/products/$productId': typeof EventsIdProductsProductIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -224,7 +232,6 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/event/$id': typeof EventIdRoute
-  '/events/$id': typeof EventsIdRoute
   '/farm/$id': typeof FarmIdRoute
   '/farms/$id': typeof FarmsIdRoute
   '/offers/$id': typeof OffersIdRoute
@@ -237,7 +244,9 @@ export interface FileRoutesByTo {
   '/offers': typeof OffersIndexRoute
   '/products': typeof ProductsIndexRoute
   '/order/$id/pay': typeof OrderIdPayRoute
+  '/events/$id': typeof EventsIdIndexRoute
   '/offers/my': typeof OffersMyIndexRoute
+  '/events/$id/products/$productId': typeof EventsIdProductsProductIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -255,7 +264,6 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/event/$id': typeof EventIdRoute
-  '/events/$id': typeof EventsIdRoute
   '/farm/$id': typeof FarmIdRoute
   '/farms/$id': typeof FarmsIdRoute
   '/offers/$id': typeof OffersIdRoute
@@ -268,7 +276,9 @@ export interface FileRoutesById {
   '/offers/': typeof OffersIndexRoute
   '/products/': typeof ProductsIndexRoute
   '/order/$id/pay': typeof OrderIdPayRoute
+  '/events/$id/': typeof EventsIdIndexRoute
   '/offers/my/': typeof OffersMyIndexRoute
+  '/events/$id/products/$productId': typeof EventsIdProductsProductIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -287,7 +297,6 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/event/$id'
-    | '/events/$id'
     | '/farm/$id'
     | '/farms/$id'
     | '/offers/$id'
@@ -300,7 +309,9 @@ export interface FileRouteTypes {
     | '/offers'
     | '/products'
     | '/order/$id/pay'
+    | '/events/$id'
     | '/offers/my'
+    | '/events/$id/products/$productId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -317,7 +328,6 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/event/$id'
-    | '/events/$id'
     | '/farm/$id'
     | '/farms/$id'
     | '/offers/$id'
@@ -330,7 +340,9 @@ export interface FileRouteTypes {
     | '/offers'
     | '/products'
     | '/order/$id/pay'
+    | '/events/$id'
     | '/offers/my'
+    | '/events/$id/products/$productId'
   id:
     | '__root__'
     | '/'
@@ -347,7 +359,6 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/event/$id'
-    | '/events/$id'
     | '/farm/$id'
     | '/farms/$id'
     | '/offers/$id'
@@ -360,7 +371,9 @@ export interface FileRouteTypes {
     | '/offers/'
     | '/products/'
     | '/order/$id/pay'
+    | '/events/$id/'
     | '/offers/my/'
+    | '/events/$id/products/$productId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -378,7 +391,6 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   EventIdRoute: typeof EventIdRoute
-  EventsIdRoute: typeof EventsIdRoute
   FarmIdRoute: typeof FarmIdRoute
   FarmsIdRoute: typeof FarmsIdRoute
   OffersIdRoute: typeof OffersIdRoute
@@ -391,7 +403,9 @@ export interface RootRouteChildren {
   OffersIndexRoute: typeof OffersIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
   OrderIdPayRoute: typeof OrderIdPayRoute
+  EventsIdIndexRoute: typeof EventsIdIndexRoute
   OffersMyIndexRoute: typeof OffersMyIndexRoute
+  EventsIdProductsProductIdRoute: typeof EventsIdProductsProductIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -564,13 +578,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FarmIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/events/$id': {
-      id: '/events/$id'
-      path: '/events/$id'
-      fullPath: '/events/$id'
-      preLoaderRoute: typeof EventsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/event/$id': {
       id: '/event/$id'
       path: '/event/$id'
@@ -585,11 +592,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OffersMyIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$id/': {
+      id: '/events/$id/'
+      path: '/events/$id'
+      fullPath: '/events/$id'
+      preLoaderRoute: typeof EventsIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/order/$id/pay': {
       id: '/order/$id/pay'
       path: '/order/$id/pay'
       fullPath: '/order/$id/pay'
       preLoaderRoute: typeof OrderIdPayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$id/products/$productId': {
+      id: '/events/$id/products/$productId'
+      path: '/events/$id/products/$productId'
+      fullPath: '/events/$id/products/$productId'
+      preLoaderRoute: typeof EventsIdProductsProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -610,7 +631,6 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   EventIdRoute: EventIdRoute,
-  EventsIdRoute: EventsIdRoute,
   FarmIdRoute: FarmIdRoute,
   FarmsIdRoute: FarmsIdRoute,
   OffersIdRoute: OffersIdRoute,
@@ -623,7 +643,9 @@ const rootRouteChildren: RootRouteChildren = {
   OffersIndexRoute: OffersIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
   OrderIdPayRoute: OrderIdPayRoute,
+  EventsIdIndexRoute: EventsIdIndexRoute,
   OffersMyIndexRoute: OffersMyIndexRoute,
+  EventsIdProductsProductIdRoute: EventsIdProductsProductIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

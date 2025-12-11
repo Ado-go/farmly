@@ -552,6 +552,10 @@
     "noProducts": "There are no products available for this event yet.",
     "soldBy": "Sold by",
     "noImage": "No image",
+    "viewProduct": "View details",
+    "productDetailsTitle": "Product details",
+    "backToEvent": "Back to event",
+    "productNotFound": "This product is not available for this event.",
     "preorder": "Preorder",
     "addedToCart": "Added to cart",
     "eventStarted": "The event has already started – preorders are closed"

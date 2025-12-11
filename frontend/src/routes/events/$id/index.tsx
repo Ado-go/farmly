@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -13,37 +13,11 @@ import { CalendarDays, Clock, MapPin, Store } from "lucide-react";
 
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
+import type { EventDetail } from "@/types/events";
 
-export const Route = createFileRoute("/events/$id")({
+export const Route = createFileRoute("/events/$id/")({
   component: EventPageDetail,
 });
-
-type EventDetail = {
-  id: number;
-  title: string;
-  description?: string;
-  startDate: string;
-  endDate: string;
-  city: string;
-  street: string;
-  region: string;
-  organizer: { id: number; name: string };
-  images?: { url: string; optimizedUrl?: string }[];
-  eventProducts?: {
-    id: number;
-    price: number;
-    stock: number;
-    product: {
-      id: number;
-      name: string;
-      category: string;
-      description: string;
-      basePrice?: number | null;
-      images?: { url: string }[];
-    };
-    user: { id: number; name: string };
-  }[];
-};
 
 type EventProductDetail = NonNullable<EventDetail["eventProducts"]>[number];
 const PRODUCTS_PER_FARMER_PAGE = 6;
@@ -309,9 +283,28 @@ function EventPageDetail() {
                           className="p-4 border border-gray-100 bg-white/95 shadow-sm flex flex-col gap-3"
                         >
                           <div className="space-y-2">
-                            <h5 className="font-semibold text-gray-800">
-                              {ep.product.name}
-                            </h5>
+                            <div className="flex items-start justify-between gap-3">
+                              <Link
+                                to="/events/$id/products/$productId"
+                                params={{
+                                  id: String(event.id),
+                                  productId: String(ep.id),
+                                }}
+                                className="font-semibold text-gray-800 transition-colors hover:text-primary hover:underline"
+                              >
+                                {ep.product.name}
+                              </Link>
+                              <Link
+                                to="/events/$id/products/$productId"
+                                params={{
+                                  id: String(event.id),
+                                  productId: String(ep.id),
+                                }}
+                                className="text-xs font-semibold text-primary hover:underline"
+                              >
+                                {t("eventsDetail.viewProduct")}
+                              </Link>
+                            </div>
                             {ep.product.images?.[0]?.url ? (
                               <img
                                 src={ep.product.images[0].url}

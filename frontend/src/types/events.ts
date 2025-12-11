@@ -20,8 +20,14 @@ export type Event = {
   startDate: string;
   endDate: string;
   city: string;
+  street?: string;
   region: string;
   organizer: { id: number; name: string };
   eventProducts?: EventProduct[];
   images?: { url: string; optimizedUrl?: string }[];
+};
+
+export type EventDetail = Event & {
+  street: string;
+  eventProducts?: EventProduct[];
 };

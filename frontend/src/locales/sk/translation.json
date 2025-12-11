@@ -552,6 +552,10 @@
     "noProducts": "Na tejto udalosti zatiaľ nie sú žiadne produkty.",
     "soldBy": "Predáva",
     "noImage": "Bez obrázka",
+    "viewProduct": "Zobraziť detail",
+    "productDetailsTitle": "Detail produktu",
+    "backToEvent": "Späť na udalosť",
+    "productNotFound": "Produkt sa na tejto udalosti nenašiel.",
     "preorder": "Predobjednať",
     "addedToCart": "Pridané do košíka",
     "eventStarted": "Udalosť už začala - predobjednávky sú uzavreté"
