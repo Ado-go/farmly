@@ -1,13 +1,11 @@
 {
   "farmly": "Farmly",
-  "welcome": "Welcome to Farmly",
   "login": "Login",
   "register": "Register",
   "logout": "Logout",
   "profile": "Profile",
   "farms": "Farms",
   "farmer_stats": "My stats",
-  "signedId": "Signed in as",
   "products": "Products",
   "preorder": "Preorder",
   "page_not_found": "The page you are looking for does not exist.",
@@ -83,9 +81,7 @@
     "benefit_plan": "Plan purchases ahead with preorders",
     "benefit_support": "Support ready to help if you need it",
     "email_label": "Email",
-    "email_placeholder": "Email",
     "password_label": "Password",
-    "password_placeholder": "Password",
     "cta_register_question": "Don’t have an account?",
     "cta_register_button": "Create account",
     "invalid_credentials": "Incorrect login details. Please try again.",
@@ -97,7 +93,6 @@
     "invalid_email": "Enter a valid email",
     "required_password": "Password is required"
   },
-
   "registerPage": {
     "title": "Registration",
     "subtitle": "Create your account",
@@ -123,7 +118,6 @@
     "role_step_description": "Start by choosing how you'll use Farmly.",
     "role_customer_desc": "Shop directly from local farmers and track your orders.",
     "role_farmer_desc": "Showcase your harvest, manage farms, and handle preorders.",
-    "selected": "Selected",
     "details_title": "Your details",
     "details_description": "Share contact info so we can connect you with farmers.",
     "hero_heading": "Create your Farmly account",
@@ -148,7 +142,6 @@
     "email_invalid": "Enter a valid email",
     "password_min": "Password must have at least 6 characters"
   },
-
   "forgotPasswordPage": {
     "title": "Forgot Password",
     "subtitle": "Enter your email and we’ll send you instructions to reset your password.",
@@ -156,9 +149,7 @@
     "emailPlaceholder": "Enter your email",
     "submit": "Send",
     "sending": "Sending...",
-    "successTitle": "Email Sent!",
     "success": "An email with instructions has been successfully sent.",
-    "errorTitle": "Sending Error",
     "error": "Failed to send the email. Please try again.",
     "errors": {
       "requiredEmail": "Email is required.",
@@ -182,8 +173,6 @@
     }
   },
   "profilePage": {
-    "loading": "Loading profile…",
-    "loadError": "Cannot load profile",
     "name_label": "Name",
     "email_label": "Email",
     "role_label": "Role",
@@ -204,7 +193,6 @@
     "updateSuccess": "Profile updated successfully",
     "updateError": "Failed to update profile",
     "deleteSuccess": "Account deleted successfully",
-    "deleteError": "Incorrect password or deletion failed",
     "changePassword": "Change password",
     "changePasswordTitle": "Change your password",
     "oldPasswordLabel": "Current password",
@@ -213,7 +201,6 @@
     "oldPasswordRequired": "Please enter your current password",
     "newPasswordMin": "New password must be at least 6 characters",
     "passwordChangeSuccess": "Password changed successfully",
-    "passwordChangeError": "Failed to change password",
     "tabProfile": "Profile",
     "tabPurchases": "Purchases",
     "tabSalesCombined": "Sales"
@@ -257,13 +244,11 @@
     "editSuccess": "Farm updated successfully.",
     "editError": "Failed to update the farm.",
     "deleteSuccess": "Farm deleted successfully.",
-    "deleteError": "Error deleting the farm.",
     "confirmDeleteTitle": "Are you sure you want to delete this farm?",
     "confirmDeleteText": "This action cannot be undone. All farm data will be permanently removed.",
     "productAdded": "Product was successfully added.",
     "productAddError": "Failed to add product.",
     "addProductTitle": "Add new product",
-    "loadingProducts": "Loading products...",
     "noProducts": "No products",
     "products": "Products",
     "productsSubtitle": "Add seasonal products and keep prices and limits current.",
@@ -275,10 +260,10 @@
       "region": "Region should be at least 2 characters long.",
       "postalCode": "Postal code should be at least 2 characters long.",
       "country": "Country should be at least 2 characters long."
-    }
+    },
+    "errorLoadingProducts": "Error loading products."
   },
   "productPage": {
-    "title": "Product Details",
     "name": "Product Name",
     "category": "Category",
     "description": "Description",
@@ -289,14 +274,14 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "deleting": "Deleting...",
-    "noImage": "No image",
     "noDescription": "No description",
     "loading": "Loading product...",
     "errorLoading": "Failed to load product.",
     "editSuccess": "Product was successfully updated.",
     "editError": "Failed to update product.",
     "deleteSuccess": "Product was deleted.",
-    "deleteError": "Failed to delete product."
+    "deleteError": "Failed to delete product.",
+    "stock": "Stock"
   },
   "product": {
     "name": "Product name",
@@ -304,7 +289,6 @@
     "description": "Description",
     "price": "Price",
     "add": "Add product",
-    "saving": "Saving...",
     "uploadImage": "Upload image",
     "uploadImageHint": "Drag & drop images here or click to browse",
     "editTitle": "Edit product",
@@ -323,10 +307,7 @@
     "unavailableForSale": "This product is currently unavailable and cannot be ordered.",
     "validation": {
       "name": "Please enter a product name.",
-      "category": "Choose a category.",
-      "price": "Enter a price higher than 0.",
       "pricePositive": "Price must be higher than 0.",
-      "stock": "Enter how many pieces can be ordered at once.",
       "stockNonNegative": "Stock cannot be negative."
     }
   },
@@ -372,7 +353,8 @@
     "noRating": "No rating",
     "stock": "Stock",
     "addedToCart": "Product {{name}} has been added to the cart.",
-    "noImage": "No image"
+    "noImage": "No image",
+    "noDescription": "No description"
   },
   "farmsPage": {
     "title": "Our farmers",
@@ -392,7 +374,8 @@
     "filterByCategory": "Filter by category",
     "allCategories": "All categories",
     "searchPlaceholder": "Search by farm or farmer",
-    "noImage": "No image"
+    "noImage": "No image",
+    "unknownFarmer": "Unknown farmer"
   },
   "reviews": {
     "title": "Reviews",
@@ -512,7 +495,6 @@
     "fromFarm": "Or add from farm:",
     "fromFarmHint": "Pick one of your farm products to prefill the form.",
     "noFarmProducts": "No farm products available",
-    "addSelected": "Add selected product",
     "myProductsEmpty": "You have no products",
     "added": "Product added successfully",
     "deleted": "Product deleted",
@@ -526,7 +508,6 @@
   "eventsPage": {
     "title": "Events",
     "subtitle": "Discover farmers' markets and local happenings near you.",
-    "loading": "Loading events...",
     "errorLoading": "Failed to load events.",
     "ongoing": "Ongoing Events",
     "upcoming": "Upcoming Events",
@@ -591,10 +572,8 @@
     "productCategoryLabel": "Product category",
     "productPriceLabel": "Product price (€)",
     "noDescription": "No description",
-    "productInfo": "Product Information",
     "productName": "Product Name",
     "productCategory": "Product Category",
-    "productDescription": "Product Description",
     "productBasePrice": "Product Base Price (€)",
     "respond": {
       "cta": "Respond",
@@ -614,16 +593,12 @@
     },
     "errors": {
       "titleRequired": "Please enter an offer title (at least 3 characters).",
-      "categoryRequired": "Select a category for the offer.",
-      "priceRequired": "Enter a price (0 if it is free).",
-      "priceMin": "Price cannot be negative.",
       "productNameRequired": "Please enter the product name (at least 2 characters).",
       "productCategoryRequired": "Select a category for the product.",
       "productPriceRequired": "Enter the product price.",
       "productPriceMin": "Product price cannot be negative."
     },
     "create": "Create",
-    "creating": "Saving...",
     "createError": "Failed to create offer.",
     "created": "Offer created successfully.",
     "edit": "Edit",
@@ -683,7 +658,6 @@
     "email": "Email Address",
     "city": "City",
     "street": "Street",
-    "region": "Region",
     "postalCode": "Postal Code",
     "country": "Country",
     "paymentMethod": "Payment Method",
@@ -706,9 +680,6 @@
     "statusInProgress": "In progress"
   },
   "cart": {
-    "empty": "Your cart is empty",
-    "total": "Total",
-    "open": "Open cart",
     "conflictTitle": "Replace cart items?",
     "conflictDescription": "The cart can only contain standard products or products from a single event.",
     "conflictCancel": "Keep current items",
@@ -731,12 +702,10 @@
     "delivery": "Delivery address",
     "contact": "Contact",
     "items": "Items",
-    "createdAt": "Created at",
-    "total": "Total"
+    "createdAt": "Created at"
   },
   "ordersPage": {
     "loading": "Loading orders...",
-    "empty": "You have no orders yet.",
     "combinedEmpty": "You have no orders or preorders yet.",
     "order": "Order",
     "status": "Status",
@@ -782,12 +751,9 @@
   },
   "salesPage": {
     "loading": "Loading sales...",
-    "empty": "No orders yet.",
     "emptyCombined": "No sales or event preorders yet.",
     "order": "Order",
-    "status": "Status",
     "total": "Total",
-    "buyer": "Buyer",
     "cancelItem": "Cancel item",
     "itemCanceled": "Item has been canceled.",
     "itemCancelError": "Failed to cancel item.",
@@ -806,44 +772,6 @@
     "customer": "Customer",
     "payment": "Payment",
     "itemsHeading": "Items"
-  },
-  "upload": {
-    "button": "Upload images",
-    "uploading": "Uploading...",
-    "failed": "Upload failed",
-    "deleted": "Image deleted successfully",
-    "deleteFailed": "Failed to delete image",
-    "addMore": "Add more images"
-  },
-  "preordersPage": {
-    "loading": "Loading preorders...",
-    "empty": "You have no preorders.",
-    "order": "Preorder",
-    "event": "Event",
-    "pickup": "Pickup location",
-    "total": "Total",
-    "cancel": "Cancel preorder",
-    "canceled": "Preorder was canceled",
-    "cancelDelete": "Back",
-    "confirmDelete": "Cancel",
-    "confirmCancelTitle": "Cancel preorder?",
-    "confirmCancelText": "Are you sure you want to cancel this entire preorder?",
-    "itemCanceled": "Item has been canceled",
-    "itemCancelError": "Failed to cancel item",
-    "orderCanceled": "Order canceled",
-    "cancelItem": "Cancel item"
-  },
-  "eventSalesPage": {
-    "loading": "Loading event sales...",
-    "empty": "No event preorders found.",
-    "order": "Order",
-    "event": "Event",
-    "buyer": "Buyer",
-    "itemCanceled": "Item was canceled",
-    "cancelItem": "Cancel",
-    "cancelError": "Failed to cancel item",
-    "confirmCancelTitle": "Cancel item?",
-    "confirmCancelText": "Are you sure you want to cancel this item?"
   },
   "checkoutPreoderPage": {
     "emptyCart": "Your cart is empty.",
@@ -876,8 +804,7 @@
     "retry": "Try paying again",
     "retryError": "Failed to open the payment gateway.",
     "successTitle": "Payment successful 🎉",
-    "successDescription": "Your order has been paid.",
-    "goToOrders": "Go to orders"
+    "successDescription": "Your order has been paid."
   },
   "farmerStatsPage": {
     "title": "My statistics",
@@ -888,18 +815,17 @@
     "standardRevenue": "Orders revenue",
     "preorderRevenue": "Preorder revenue",
     "itemsSold": "Items sold",
-    "avgTicket": "Average order value",
     "bestSellers": "Best selling products",
     "ratings": "Ratings",
     "averageRating": "Average rating",
     "reviews": "reviews",
-    "topRated": "Top rated",
-    "product": "Product",
     "quantity": "Quantity",
-    "revenueLabel": "Revenue",
     "empty": "No stats yet. Start selling to see your performance.",
     "emptyBestSellers": "Your best sellers will appear once you sell something.",
     "lastUpdated": "Updated a moment ago",
     "unauthorized": "You need a farmer account to view this page."
+  },
+  "common": {
+    "selectDate": "Select date"
   }
 }

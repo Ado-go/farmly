@@ -1,13 +1,11 @@
 {
   "farmly": "Farmly",
-  "welcome": "Vitaj na Farmly",
   "login": "Prihlásiť sa",
   "register": "Registrovať sa",
   "logout": "Odhlásiť sa",
   "profile": "Profil",
   "farms": "Farmy",
   "farmer_stats": "Moje štatistiky",
-  "signedIn": "Prihlásený ako:",
   "products": "Produkty",
   "preorder": "Predobjednávka",
   "page_not_found": "Stránka, ktorú hľadáš, neexistuje.",
@@ -83,9 +81,7 @@
     "benefit_plan": "Plánuj nákup vopred cez predobjednávky",
     "benefit_support": "Podpora pripravená pomôcť, keď ju potrebuješ",
     "email_label": "Email",
-    "email_placeholder": "Email",
     "password_label": "Heslo",
-    "password_placeholder": "Heslo",
     "cta_register_question": "Nemáš účet?",
     "cta_register_button": "Vytvoriť účet",
     "invalid_credentials": "Nesprávne prihlasovacie údaje. Skús to znova.",
@@ -97,7 +93,6 @@
     "invalid_email": "Zadaj platný email",
     "required_password": "Heslo je povinné"
   },
-
   "registerPage": {
     "title": "Registrácia",
     "subtitle": "Vytvor si svoj účet",
@@ -123,7 +118,6 @@
     "role_step_description": "Začni výberom toho, ako budeš Farmly používať.",
     "role_customer_desc": "Nakupuj priamo od lokálnych farmárov a sleduj svoje objednávky.",
     "role_farmer_desc": "Zdieľaj svoju úrodu, spravuj farmy a prijímaj predobjednávky.",
-    "selected": "Vybrané",
     "details_title": "Tvoje údaje",
     "details_description": "Vyplň kontaktné informácie, aby sme ťa vedeli spojiť s farmármi.",
     "hero_heading": "Vytvor si účet na Farmly",
@@ -148,7 +142,6 @@
     "email_invalid": "Zadaj platný email",
     "password_min": "Heslo musí mať aspoň 6 znakov"
   },
-
   "forgotPasswordPage": {
     "title": "Zabudnuté heslo",
     "subtitle": "Zadaj svoj email a pošleme ti inštrukcie na obnovenie hesla.",
@@ -156,9 +149,7 @@
     "emailPlaceholder": "Zadaj svoj email",
     "submit": "Odoslať",
     "sending": "Odosielam...",
-    "successTitle": "Email odoslaný!",
     "success": "Email s inštrukciami bol úspešne odoslaný.",
-    "errorTitle": "Chyba pri odosielaní",
     "error": "Nepodarilo sa odoslať email. Skús to znova.",
     "errors": {
       "requiredEmail": "Email je povinný.",
@@ -182,8 +173,6 @@
     }
   },
   "profilePage": {
-    "loading": "Načítavam profil…",
-    "loadError": "Nepodarilo sa načítať profil",
     "name_label": "Meno",
     "email_label": "Email",
     "role_label": "Rola",
@@ -204,7 +193,6 @@
     "updateSuccess": "Profil bol úspešne aktualizovaný",
     "updateError": "Nepodarilo sa aktualizovať profil",
     "deleteSuccess": "Účet bol úspešne zmazaný",
-    "deleteError": "Nesprávne heslo alebo zmazanie zlyhalo",
     "changePassword": "Zmeniť heslo",
     "changePasswordTitle": "Zmeňte svoje heslo",
     "oldPasswordLabel": "Aktuálne heslo",
@@ -213,7 +201,6 @@
     "oldPasswordRequired": "Zadajte svoje aktuálne heslo",
     "newPasswordMin": "Nové heslo musí mať aspoň 6 znakov",
     "passwordChangeSuccess": "Heslo bolo úspešne zmenené",
-    "passwordChangeError": "Zmena hesla zlyhala",
     "tabProfile": "Profil",
     "tabPurchases": "Nákupy",
     "tabSalesCombined": "Predaje"
@@ -257,13 +244,11 @@
     "editSuccess": "Úprava farmy bola úspešná.",
     "editError": "Nepodarilo sa upraviť farmu.",
     "deleteSuccess": "Farma bola úspešne odstránená.",
-    "deleteError": "Chyba pri odstraňovaní farmy.",
     "confirmDeleteTitle": "Naozaj chcete odstrániť túto farmu?",
     "confirmDeleteText": "Túto akciu nie je možné vrátiť späť. Všetky údaje o farme budú odstránené.",
     "productAdded": "Produkt bol úspešne pridaný.",
     "productAddError": "Nepodarilo sa pridať produkt.",
     "addProductTitle": "Pridať nový produkt",
-    "loadingProducts": "Načítavam produkty...",
     "noProducts": "Žiadne produkty",
     "products": "Produkty",
     "productsSubtitle": "Pridávaj sezónne produkty a udržuj ceny aj limity aktuálne.",
@@ -275,10 +260,10 @@
       "region": "Kraj musí mať aspoň 2 znaky.",
       "postalCode": "PSČ musí mať aspoň 2 znaky.",
       "country": "Krajina musí mať aspoň 2 znaky."
-    }
+    },
+    "errorLoadingProducts": "Chyba pri načítaní produktov."
   },
   "productPage": {
-    "title": "Detail produktu",
     "name": "Názov produktu",
     "category": "Kategória",
     "description": "Popis",
@@ -289,14 +274,14 @@
     "cancel": "Zrušiť",
     "delete": "Zmazať",
     "deleting": "Mažem...",
-    "noImage": "Bez obrázka",
     "noDescription": "Bez popisu",
     "loading": "Načítavam produkt...",
     "errorLoading": "Nepodarilo sa načítať produkt.",
     "editSuccess": "Produkt bol úspešne upravený.",
     "editError": "Nepodarilo sa upraviť produkt.",
     "deleteSuccess": "Produkt bol zmazaný.",
-    "deleteError": "Nepodarilo sa zmazať produkt."
+    "deleteError": "Nepodarilo sa zmazať produkt.",
+    "stock": "Sklad"
   },
   "product": {
     "name": "Názov produktu",
@@ -306,7 +291,6 @@
     "uploadImage": "Nahrať obrázok",
     "uploadImageHint": "Pretiahni sem obrázky alebo klikni na výber",
     "add": "Pridať produkt",
-    "saving": "Ukladám...",
     "editTitle": "Upraviť produkt",
     "stock": "Sklad",
     "delete": "Zmazať produkt",
@@ -323,10 +307,7 @@
     "unavailableForSale": "Tento produkt je momentálne nedostupný a nemožno ho objednať.",
     "validation": {
       "name": "Zadaj názov produktu.",
-      "category": "Vyber kategóriu produktu.",
-      "price": "Zadaj cenu vyššiu než 0.",
       "pricePositive": "Cena musí byť vyššia než 0.",
-      "stock": "Zadaj, koľko kusov môže jeden zákazník objednať naraz.",
       "stockNonNegative": "Počet kusov nemôže byť záporný."
     }
   },
@@ -372,7 +353,8 @@
     "noRating": "Bez hodnotenia",
     "stock": "Sklad",
     "addedToCart": "Produkt {{name}} bol pridaný do košíka.",
-    "noImage": "Bez obrázka"
+    "noImage": "Bez obrázka",
+    "noDescription": "Bez popisu"
   },
   "farmsPage": {
     "title": "Naši farmári",
@@ -392,7 +374,8 @@
     "filterByCategory": "Filtrovať podľa kategórie",
     "allCategories": "Všetky kategórie",
     "searchPlaceholder": "Hľadať podľa farmy alebo farmára",
-    "noImage": "Bez obrázka"
+    "noImage": "Bez obrázka",
+    "unknownFarmer": "Neznámy farmár"
   },
   "reviews": {
     "title": "Recenzie",
@@ -512,7 +495,6 @@
     "fromFarm": "Alebo pridaj z farmy:",
     "fromFarmHint": "Vyber produkt z farmy a predvyplníme formulár.",
     "noFarmProducts": "Žiadne produkty na farme",
-    "addSelected": "Pridať vybraný produkt",
     "myProductsEmpty": "Nemáš žiadne produkty",
     "added": "Produkt bol pridaný",
     "deleted": "Produkt bol odstránený",
@@ -526,7 +508,6 @@
   "eventsPage": {
     "title": "Udalosti",
     "subtitle": "Objav udalosti od farmárov a trhov vo svojom okolí.",
-    "loading": "Načítavam udalosti...",
     "errorLoading": "Nepodarilo sa načítať udalosti.",
     "ongoing": "Prebiehajúce udalosti",
     "upcoming": "Nadchádzajúce udalosti",
@@ -591,10 +572,8 @@
     "productCategoryLabel": "Kategória produktu",
     "productPriceLabel": "Cena produktu (€)",
     "noDescription": "Bez popisu",
-    "productInfo": "Informácie o produkte",
     "productName": "Názov produktu",
     "productCategory": "Kategória produktu",
-    "productDescription": "Popis produktu",
     "productBasePrice": "Základná cena produktu (€)",
     "respond": {
       "cta": "Reagovať",
@@ -614,16 +593,12 @@
     },
     "errors": {
       "titleRequired": "Zadaj názov ponuky (minimálne 3 znaky).",
-      "categoryRequired": "Vyber kategóriu ponuky.",
-      "priceRequired": "Zadaj cenu (0 ak je zadarmo).",
-      "priceMin": "Cena nemôže byť záporná.",
       "productNameRequired": "Zadaj názov produktu (minimálne 2 znaky).",
       "productCategoryRequired": "Vyber kategóriu produktu.",
       "productPriceRequired": "Zadaj cenu produktu.",
       "productPriceMin": "Cena produktu nemôže byť záporná."
     },
     "create": "Vytvoriť",
-    "creating": "Ukladám...",
     "createError": "Nepodarilo sa vytvoriť ponuku.",
     "created": "Ponuka bola úspešne vytvorená.",
     "edit": "Upraviť",
@@ -683,7 +658,6 @@
     "email": "E-mailová adresa",
     "city": "Mesto",
     "street": "Ulica",
-    "region": "Kraj",
     "postalCode": "PSČ",
     "country": "Krajina",
     "paymentMethod": "Spôsob platby",
@@ -706,9 +680,6 @@
     "statusInProgress": "Prebieha"
   },
   "cart": {
-    "empty": "Košík je prázdny",
-    "total": "Spolu",
-    "open": "Otvoriť košík",
     "conflictTitle": "Vymazať položky z košíka?",
     "conflictDescription": "V košíku je možné mať len produkty od farmárov alebo predobjednávky z jednej udalosti.",
     "conflictCancel": "Ponechať aktuálne položky",
@@ -731,12 +702,10 @@
     "delivery": "Adresa doručenia",
     "contact": "Kontakt",
     "items": "Položky",
-    "createdAt": "Vytvorená",
-    "total": "Spolu"
+    "createdAt": "Vytvorená"
   },
   "ordersPage": {
     "loading": "Načítavam objednávky...",
-    "empty": "Zatiaľ nemáš žiadne objednávky.",
     "combinedEmpty": "Zatiaľ nemáš žiadne objednávky ani predobjednávky.",
     "order": "Objednávka",
     "status": "Stav",
@@ -782,12 +751,9 @@
   },
   "salesPage": {
     "loading": "Načítavam predaje...",
-    "empty": "Zatiaľ nemáš žiadne objednávky.",
     "emptyCombined": "Zatiaľ nemáš žiadne predaje ani predobjednávky.",
     "order": "Objednávka",
-    "status": "Stav",
     "total": "Celková cena",
-    "buyer": "Zákazník",
     "cancelItem": "Zrušiť produkt",
     "itemCanceled": "Produkt bol zrušený.",
     "itemCancelError": "Nepodarilo sa zrušiť produkt.",
@@ -806,44 +772,6 @@
     "customer": "Zákazník",
     "payment": "Platba",
     "itemsHeading": "Položky"
-  },
-  "upload": {
-    "button": "Nahrať obrázky",
-    "uploading": "Nahrávam...",
-    "failed": "Nahrávanie zlyhalo",
-    "deleted": "Obrázok bol odstránený",
-    "deleteFailed": "Nepodarilo sa odstrániť obrázok",
-    "addMore": "Pridať ďalšie obrázky"
-  },
-  "preordersPage": {
-    "loading": "Načítavam predobjednávky...",
-    "empty": "Nemáš žiadne predobjednávky.",
-    "order": "Predobjednávka",
-    "event": "Udalosť",
-    "pickup": "Miesto vyzdvihnutia",
-    "total": "Celkom",
-    "cancel": "Zrušiť predobjednávku",
-    "canceled": "Predobjednávka bola zrušená",
-    "cancelDelete": "Naspäť",
-    "confirmDelete": "Zrušiť",
-    "confirmCancelTitle": "Zrušiť predobjednávku?",
-    "confirmCancelText": "Rozhodneš sa zrušiť celú predobjednávku.",
-    "itemCanceled": "Položka bola zrušená",
-    "itemCancelError": "Položku sa nepodarilo zrušiť",
-    "orderCanceled": "Objednávka zrušená",
-    "cancelItem": "Zrušiť produkt"
-  },
-  "eventSalesPage": {
-    "loading": "Načítavam predaj eventov...",
-    "empty": "Žiadne predobjednávky.",
-    "order": "Objednávka",
-    "event": "Udalosť",
-    "buyer": "Kupujúci",
-    "itemCanceled": "Položka bola zrušená",
-    "cancelItem": "Zrušiť",
-    "cancelError": "Položku sa nepodarilo zrušiť",
-    "confirmCancelTitle": "Zrušiť položku?",
-    "confirmCancelText": "Naozaj chceš zrušiť túto položku?"
   },
   "checkoutPreoderPage": {
     "emptyCart": "Váš košík je prázdny.",
@@ -876,8 +804,7 @@
     "retry": "Skúsiť znova zaplatiť",
     "retryError": "Nepodarilo sa otvoriť platobnú bránu.",
     "successTitle": "Platba prebehla úspešne 🎉",
-    "successDescription": "Tvoja objednávka je zaplatená.",
-    "goToOrders": "Prejsť na objednávky"
+    "successDescription": "Tvoja objednávka je zaplatená."
   },
   "farmerStatsPage": {
     "title": "Moje štatistiky",
@@ -888,18 +815,17 @@
     "standardRevenue": "Obrat z objednávok",
     "preorderRevenue": "Obrat z predobjednávok",
     "itemsSold": "Predané kusy",
-    "avgTicket": "Priemerná hodnota objednávky",
     "bestSellers": "Najpredávanejšie produkty",
     "ratings": "Hodnotenia",
     "averageRating": "Priemerné hodnotenie",
     "reviews": "hodnotení",
-    "topRated": "Najlepšie hodnotené",
-    "product": "Produkt",
     "quantity": "Kusy",
-    "revenueLabel": "Tržba",
     "empty": "Zatiaľ tu nie sú údaje. Začni predávať a uvidíš štatistiky.",
     "emptyBestSellers": "Najpredávanejšie produkty sa zobrazia po prvých predajoch.",
     "lastUpdated": "Aktualizované pred chvíľou",
     "unauthorized": "Na zobrazenie je potrebný účet farmára."
+  },
+  "common": {
+    "selectDate": "Vyber dátum"
   }
 }
