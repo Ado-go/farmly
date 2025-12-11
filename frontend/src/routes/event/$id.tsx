@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -28,6 +28,14 @@ import { ProfileAvatar } from "@/components/ProfileAvatar";
 import type { TFunction } from "i18next";
 import type { Event } from "@/types/event";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { REGION_OPTIONS } from "@/constants/regions";
 import { ImageCarousel } from "@/components/ImageCarousel";
 
 const buildEventSchema = (t: TFunction) => {
@@ -527,10 +535,30 @@ function EditForm({
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="edit-region">{t("eventPage.region")}</Label>
-          <Input
-            id="edit-region"
-            {...form.register("region")}
-            placeholder={t("eventPage.region")}
+          <Controller
+            control={form.control}
+            name="region"
+            render={({ field }) => (
+              <Select
+                value={field.value || ""}
+                onValueChange={(value) => field.onChange(value)}
+              >
+                <SelectTrigger
+                  id="edit-region"
+                  className="w-full"
+                  onBlur={field.onBlur}
+                >
+                  <SelectValue placeholder={t("eventPage.region")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {REGION_OPTIONS.map((region) => (
+                    <SelectItem key={region.value} value={region.value}>
+                      {region.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           />
           {errors.region?.message && (
             <p className="text-xs text-destructive">{errors.region.message}</p>

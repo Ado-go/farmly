@@ -88,11 +88,14 @@ const customerNames = [
 const cities = ["Bratislava", "Košice", "Nitra", "Trnava", "Žilina"];
 const streets = ["Hlavná", "Ulica 5", "Kvetinová", "Ružová", "Oranžová"];
 const regions = [
-  "Bratislavský",
-  "Košický",
-  "Nitriansky",
-  "Trnavský",
-  "Žilinský",
+  "Bratislavský kraj",
+  "Trnavský kraj",
+  "Trenčiansky kraj",
+  "Nitriansky kraj",
+  "Žilinský kraj",
+  "Banskobystrický kraj",
+  "Prešovský kraj",
+  "Košický kraj",
 ];
 
 const farmNamePool = [

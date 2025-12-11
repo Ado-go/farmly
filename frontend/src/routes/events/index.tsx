@@ -8,6 +8,10 @@ import { OngoingCarousel } from "@/components/events/OngoingCarousel";
 import { UpcomingGrid } from "@/components/events/UpcomingGrid";
 import { apiFetch } from "@/lib/api";
 import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
+import {
+  normalizeRegion,
+  REGION_OPTIONS_WITH_ALL,
+} from "@/constants/regions";
 import type { PaginatedResponse } from "@/types/pagination";
 import type { Event } from "@/types/events";
 
@@ -32,19 +36,8 @@ export const Route = createFileRoute("/events/")({
 });
 
 const REGIONS = [
-  { value: "all", label: "All regions" },
-  { value: "bratislavsky", label: "Bratislavský kraj" },
-  { value: "trnavsky", label: "Trnavský kraj" },
-  { value: "trenciansky", label: "Trenčiansky kraj" },
-  { value: "nitriansky", label: "Nitriansky kraj" },
-  { value: "zilinsky", label: "Žilinský kraj" },
-  { value: "banskobystricky", label: "Banskobystrický kraj" },
-  { value: "presovsky", label: "Prešovský kraj" },
-  { value: "kosicky", label: "Košický kraj" },
+  ...REGION_OPTIONS_WITH_ALL,
 ];
-
-const normalizeRegion = (value: string) =>
-  value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 function EventsPage() {
   const { t } = useTranslation();

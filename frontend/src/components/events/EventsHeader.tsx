@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { CalendarRange, Search } from "lucide-react";
+import type { RegionOption } from "@/constants/regions";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,8 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-type RegionOption = { value: string; label: string };
 
 type EventsHeaderProps = {
   ongoingCount: number;

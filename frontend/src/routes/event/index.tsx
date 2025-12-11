@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
@@ -31,6 +31,14 @@ import {
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { REGION_OPTIONS } from "@/constants/regions";
 
 const EVENT_LIMIT = 5;
 
@@ -484,11 +492,35 @@ function EventPage() {
                         {t("eventPage.region")}
                       </FieldLabel>
                       <FieldContent>
-                        <Input
-                          id="region"
-                          placeholder={t("eventPage.region")}
-                          className={inputTone}
-                          {...form.register("region")}
+                        <Controller
+                          control={form.control}
+                          name="region"
+                          render={({ field }) => (
+                            <Select
+                              value={field.value || ""}
+                              onValueChange={(value) => field.onChange(value)}
+                            >
+                              <SelectTrigger
+                                id="region"
+                                className={`${inputTone} w-full`}
+                                onBlur={field.onBlur}
+                              >
+                                <SelectValue
+                                  placeholder={t("eventPage.region")}
+                                />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {REGION_OPTIONS.map((region) => (
+                                  <SelectItem
+                                    key={region.value}
+                                    value={region.value}
+                                  >
+                                    {region.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
                         />
                         <FieldError
                           errors={errors.region ? [errors.region] : undefined}
