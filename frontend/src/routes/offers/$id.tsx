@@ -1,12 +1,32 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
 import { getCategoryLabel } from "@/lib/productCategories";
 import { ImageCarousel } from "@/components/ImageCarousel";
-import { Package, Sparkles, Tag, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { FieldError } from "@/components/ui/field";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
+import { type TFunction } from "i18next";
+import { Loader2, Mail, Package, Sparkles, Tag, User } from "lucide-react";
 
 export const Route = createFileRoute("/offers/$id")({
   component: OfferDetailPage,
@@ -16,7 +36,7 @@ type Offer = {
   id: number;
   title: string;
   description?: string;
-  user: { id: number; name: string };
+  user: { id: number; name: string; email?: string | null };
   product: {
     id: number;
     name: string;
@@ -27,9 +47,37 @@ type Offer = {
   };
 };
 
+const buildRespondSchema = (t: TFunction) =>
+  z.object({
+    email: z
+      .string()
+      .trim()
+      .email(t("offersPage.respond.emailError")),
+    message: z
+      .string()
+      .trim()
+      .min(10, t("offersPage.respond.messageError"))
+      .max(1000, t("offersPage.respond.messageMax")),
+  });
+
+type RespondForm = z.infer<ReturnType<typeof buildRespondSchema>>;
+
 function OfferDetailPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const respondSchema = useMemo(() => buildRespondSchema(t), [t]);
   const { id } = Route.useParams();
+  const [respondOpen, setRespondOpen] = useState(false);
+  const respondForm = useForm<RespondForm>({
+    resolver: zodResolver(respondSchema),
+    defaultValues: {
+      email: user?.email ?? "",
+      message: "",
+    },
+  });
+  const {
+    formState: { errors },
+  } = respondForm;
   const {
     data: offer,
     isLoading,
@@ -38,6 +86,30 @@ function OfferDetailPage() {
     queryKey: ["offerDetail", id],
     queryFn: async () => apiFetch(`/offer/${id}`),
   });
+  const respondToOffer = useMutation({
+    mutationFn: async (payload: RespondForm) =>
+      apiFetch(`/offer/${id}/respond`, {
+        method: "POST",
+        body: payload,
+      }),
+    onSuccess: () => {
+      toast.success(t("offersPage.respond.success"));
+      setRespondOpen(false);
+      respondForm.reset({
+        email: user?.email ?? "",
+        message: "",
+      });
+    },
+    onError: (err: Error) => {
+      toast.error(err?.message || t("offersPage.respond.error"));
+    },
+  });
+
+  useEffect(() => {
+    if (user?.email) {
+      respondForm.setValue("email", user.email);
+    }
+  }, [respondForm, user?.email]);
 
   useEffect(() => {
     if (offer?.title) {
@@ -115,8 +187,8 @@ function OfferDetailPage() {
               </div>
             </div>
 
-            <div className="flex flex-col items-end gap-3">
-              <div className="rounded-xl border border-primary/20 bg-white px-4 py-3 text-right shadow-sm">
+            <div className="flex w-full flex-col items-end gap-3 sm:w-auto">
+              <div className="w-full rounded-xl border border-primary/20 bg-white px-4 py-3 text-right shadow-sm sm:w-auto">
                 <p className="text-xs text-gray-500">
                   {t("offersPage.priceLabel")}
                 </p>
@@ -124,6 +196,117 @@ function OfferDetailPage() {
                   {price.toFixed(2)} €
                 </p>
               </div>
+              <Dialog
+                open={respondOpen}
+                onOpenChange={(open) => {
+                  setRespondOpen(open);
+                  if (!open) {
+                    respondForm.reset({
+                      email:
+                        respondForm.getValues("email") ||
+                        user?.email ||
+                        "",
+                      message: "",
+                    });
+                  }
+                }}
+              >
+                <DialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    className="w-full gap-2 rounded-full px-4 shadow-sm sm:w-auto"
+                    variant="default"
+                  >
+                    {respondToOffer.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {t("offersPage.respond.sending")}
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="h-4 w-4" />
+                        {t("offersPage.respond.cta")}
+                      </>
+                    )}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-[min(95vw,40rem)] max-w-2xl max-h-[90vh] overflow-y-auto border-primary/10 bg-white/95 shadow-2xl sm:max-h-[85vh]">
+                  <DialogHeader>
+                    <DialogTitle>{t("offersPage.respond.title")}</DialogTitle>
+                    <DialogDescription className="text-left">
+                      {t("offersPage.respond.description", {
+                        seller: offer.user?.name ?? t("offersPage.seller"),
+                      })}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <form
+                    className="space-y-4 rounded-lg border border-primary/10 bg-white/70 p-4 shadow-sm"
+                    onSubmit={respondForm.handleSubmit((values) =>
+                      respondToOffer.mutate(values)
+                    )}
+                  >
+                    <div className="space-y-2">
+                      <Label htmlFor="respondEmail">
+                        {t("offersPage.respond.emailLabel")}
+                      </Label>
+                      <Input
+                        id="respondEmail"
+                        type="email"
+                        placeholder={t("offersPage.respond.emailPlaceholder")}
+                        autoComplete="email"
+                        disabled={respondToOffer.isPending}
+                        className="w-full"
+                        {...respondForm.register("email")}
+                      />
+                      <FieldError>{errors.email?.message}</FieldError>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="respondMessage">
+                        {t("offersPage.respond.messageLabel")}
+                      </Label>
+                      <Textarea
+                        id="respondMessage"
+                        rows={4}
+                        placeholder={t("offersPage.respond.messagePlaceholder")}
+                        disabled={respondToOffer.isPending}
+                        className="w-full max-w-full resize-y"
+                        {...respondForm.register("message")}
+                      />
+                      <FieldError>{errors.message?.message}</FieldError>
+                    </div>
+
+                    <DialogFooter className="pt-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setRespondOpen(false)}
+                        disabled={respondToOffer.isPending}
+                      >
+                        {t("offersPage.cancel")}
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="gap-2"
+                        disabled={respondToOffer.isPending}
+                      >
+                        {respondToOffer.isPending ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            {t("offersPage.respond.sending")}
+                          </>
+                        ) : (
+                          <>
+                            <Mail className="h-4 w-4" />
+                            {t("offersPage.respond.send")}
+                          </>
+                        )}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
               <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
                 <User className="h-4 w-4 text-primary" />
                 <span>

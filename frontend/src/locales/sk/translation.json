@@ -592,6 +592,22 @@
     "productCategory": "Kategória produktu",
     "productDescription": "Popis produktu",
     "productBasePrice": "Základná cena produktu (€)",
+    "respond": {
+      "cta": "Reagovať",
+      "title": "Kontaktovať predajcu",
+      "description": "Pošli autorovi ponuky e-mail. Zadáš svoj e-mail a správu a doručíme ju používateľovi {{seller}}.",
+      "emailLabel": "Tvoj e-mail",
+      "emailPlaceholder": "meno@example.com",
+      "messageLabel": "Správa",
+      "messagePlaceholder": "Napíš, čo ťa zaujíma alebo dohodni podrobnosti.",
+      "send": "Odoslať správu",
+      "sending": "Odosielam...",
+      "success": "Správa bola odoslaná predajcovi.",
+      "error": "Správu sa nepodarilo odoslať.",
+      "emailError": "Zadaj platný e-mail.",
+      "messageError": "Správa by mala mať aspoň 10 znakov.",
+      "messageMax": "Správa môže mať najviac 1000 znakov."
+    },
     "errors": {
       "titleRequired": "Zadaj názov ponuky (minimálne 3 znaky).",
       "categoryRequired": "Vyber kategóriu ponuky.",

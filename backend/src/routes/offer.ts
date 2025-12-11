@@ -2,12 +2,18 @@ import { Router } from "express";
 import prisma from "../prisma.ts";
 import { authenticateToken } from "../middleware/auth.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
-import { offerSchema, offerUpdateSchema } from "../schemas/offerSchemas.ts";
+import {
+  offerRespondSchema,
+  offerSchema,
+  offerUpdateSchema,
+} from "../schemas/offerSchemas.ts";
 import { v2 as cloudinary } from "cloudinary";
 import {
   buildPaginationResponse,
   getPaginationParams,
 } from "../utils/pagination.ts";
+import { buildOfferResponseEmail } from "../emailTemplates/offerResponseTemplate.ts";
+import { sendEmail } from "../utils/sendEmails.ts";
 
 const router = Router();
 
@@ -136,6 +142,48 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ message: "Unable to fetch offer." });
   }
 });
+
+// POST /offer/:id/respond (public)
+router.post(
+  "/:id/respond",
+  validateRequest(offerRespondSchema),
+  async (req, res) => {
+    const offerId = parseInt(req.params.id, 10);
+
+    if (isNaN(offerId)) {
+      return res.status(400).json({ message: "Invalid offer id." });
+    }
+
+    try {
+      const offer = await prisma.offer.findUnique({
+        where: { id: offerId },
+        select: {
+          title: true,
+          user: { select: { email: true, name: true } },
+        },
+      });
+
+      if (!offer || !offer.user?.email) {
+        return res.status(404).json({ message: "Offer not found." });
+      }
+
+      const { email, message } = req.body;
+      const { subject, html } = buildOfferResponseEmail({
+        offerTitle: offer.title,
+        senderEmail: email,
+        message,
+        sellerName: offer.user.name,
+      });
+
+      await sendEmail(offer.user.email, subject, html);
+
+      res.json({ message: "Offer response sent." });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Unable to send offer response." });
+    }
+  }
+);
 
 // UPDATE /offer/:id
 router.put(

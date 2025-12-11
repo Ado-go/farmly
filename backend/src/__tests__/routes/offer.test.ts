@@ -90,6 +90,31 @@ describe("Offer routes", () => {
     expect(res.body).toHaveProperty("user");
   });
 
+  it("should allow responding to an offer via email", async () => {
+    const res = await request(app)
+      .post(`/api/offer/${offerId}/respond`)
+      .send({
+        email: "customer@test.com",
+        message: "Mám záujem o ponuku, ozvi sa mi prosím.",
+      });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toBe("Offer response sent.");
+  });
+
+  it("should validate respond payload", async () => {
+    const res = await request(app)
+      .post(`/api/offer/${offerId}/respond`)
+      .send({
+        email: "invalid-email",
+        message: "short",
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty("error", "Invalid request data");
+    expect(Array.isArray(res.body.details)).toBe(true);
+  });
+
   it("should get all offers of the logged-in user", async () => {
     const res = await request(app)
       .get("/api/offer/my")

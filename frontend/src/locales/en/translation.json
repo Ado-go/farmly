@@ -592,6 +592,22 @@
     "productCategory": "Product Category",
     "productDescription": "Product Description",
     "productBasePrice": "Product Base Price (€)",
+    "respond": {
+      "cta": "Respond",
+      "title": "Contact the seller",
+      "description": "Send an email to the offer owner. Enter your email and message and we'll deliver it to {{seller}}.",
+      "emailLabel": "Your email",
+      "emailPlaceholder": "you@example.com",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Write what you're interested in or agree on details.",
+      "send": "Send message",
+      "sending": "Sending...",
+      "success": "Message sent to the seller.",
+      "error": "Failed to send the message.",
+      "emailError": "Please enter a valid email.",
+      "messageError": "Message should be at least 10 characters.",
+      "messageMax": "Message can be at most 1000 characters."
+    },
     "errors": {
       "titleRequired": "Please enter an offer title (at least 3 characters).",
       "categoryRequired": "Select a category for the offer.",

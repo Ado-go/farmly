@@ -26,3 +26,12 @@ export const offerUpdateSchema = offerSchema
   .extend({
     product: productSchema.partial(),
   });
+
+export const offerRespondSchema = z.object({
+  email: z.string().trim().email("Valid email is required"),
+  message: z
+    .string()
+    .trim()
+    .min(10, "Message must be at least 10 characters long")
+    .max(1000, "Message must be at most 1000 characters long"),
+});
