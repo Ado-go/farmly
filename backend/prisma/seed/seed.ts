@@ -138,6 +138,92 @@ const productTemplates: ProductTemplate[] = [
   { name: "Med", category: ProductCategory.Other },
 ];
 
+type DescriptionLength = "none" | "short" | "medium" | "long";
+type DescriptionsByLength = Record<Exclude<DescriptionLength, "none">, string[]>;
+
+const descriptionLibrary: Record<
+  "farm" | "product" | "event" | "offer",
+  DescriptionsByLength
+> = {
+  farm: {
+    short: [
+      "Malá rodinná farma so sezónnou ponukou.",
+      "Pestujeme bez chémie a s ohľadom na pôdu.",
+      "Čerstvé produkty priamo z dvora.",
+    ],
+    medium: [
+      "Rodinná farma, ktorá sa stará o pôdu aj zvieratá s rešpektom k prírode.",
+      "Zameriavame sa na poctivé ovocie a zeleninu pestovanú v menších šaržiach.",
+      "Z farmy posielame iba to, čo by sme dali vlastnej rodine.",
+    ],
+    long: [
+      "Rodinná farma založená na trpezlivosti, ručnej práci a udržateľnom hospodárení, kde pestujeme sezónne plodiny bez zbytočnej chémie.",
+      "Obhospodarujeme menšie polia a sady na okraji dediny, staráme sa o pôdu prirodzenými postupmi a zdieľame úrodu so susedmi aj zákazníkmi.",
+      "Na farme spájame tradičné postupy s modernými nápadmi, pestujeme rozmanité plodiny a radi sa delíme o to najlepšie, čo kraj dá.",
+    ],
+  },
+  product: {
+    short: [
+      "Sezónny produkt v limitovanom množstve.",
+      "Poctivo dopestované za čerstva zbalené.",
+      "Ideálne na každodenné varenie.",
+    ],
+    medium: [
+      "Pestované v malých dávkach, zbierané ručne a spracované v deň objednávky.",
+      "Bez zbytočnej chémie, aby zostala prirodzená chuť a vôňa.",
+      "Produkty držíme v malých šaržiach, aby sme udržali kvalitu a čerstvosť.",
+    ],
+    long: [
+      "Pestované s dôrazom na šetrné postupy, aby si zachovalo prirodzenú sladkosť aj sviežosť, či už ho použijete čerstvé alebo na zaváranie.",
+      "Vhodné na varenie, pečenie aj čerstvú konzumáciu, s dôrazom na plnú chuť a arómu, ktoré vznikajú pri pomalom dozrievaní.",
+      "Ručne zbierané a triedené, aby sa k vám dostali len najlepšie kusy, ktoré vydržia dlhšie a potešia aj náročnejších gurmánov.",
+    ],
+  },
+  event: {
+    short: [
+      "Menšie stretnutie s farmárskymi stánkami.",
+      "Degustácia produktov priamo od výrobcov.",
+      "Trh so sprievodným programom pre rodiny.",
+    ],
+    medium: [
+      "Podujatie spája lokálnych farmárov, ochutnávky a príjemnú atmosféru pre návštevníkov.",
+      "Stretnutie ľudí, ktorí majú radi poctivé jedlo, regionálne špeciality a priateľské rozhovory.",
+      "Čakajú vás ukážky pestovania, dielničky aj možnosť nakúpiť čerstvé produkty.",
+    ],
+    long: [
+      "Celodenný festival, ktorý prepája farmárov, kuchárov a nadšencov poctivého jedla, s množstvom stánkov a sprievodných aktivít.",
+      "Priestor na spoznávanie nových chutí, rozhovory s pestovateľmi a degustácie, ktoré ukážu, čo všetko sa dá vypestovať v našom regióne.",
+      "Podujatie vytvára komunitnú atmosféru, kde sa stretávajú rodiny, priatelia aj odborníci, aby oslávili sezónnu úrodu a lokálnu gastronómiu.",
+    ],
+  },
+  offer: {
+    short: [
+      "Krátkodobná akcia na obľúbený produkt.",
+      "Zvýhodnená cena pre verných zákazníkov.",
+      "Limitovaná ponuka do vypredania zásob.",
+    ],
+    medium: [
+      "Zľava na obmedzený počet kusov, vhodná na rýchly nákup čerstvých produktov.",
+      "Ponuka pre tých, ktorí chcú ochutnať naše výrobky za zvýhodnených podmienok.",
+      "Akciový balíček pripravený priamo na tento týždeň.",
+    ],
+    long: [
+      "Výhodná ponuka pripravená na podporu sezónnej úrody, platná do vypredania zásob alebo konca mesiaca.",
+      "Zľava určená pre zákazníkov, ktorí chcú vyskúšať viac druhov produktov a spoznať náš spôsob pestovania.",
+      "Akcia spája čerstvosť, férovú cenu a transparentný pôvod, aby ste mohli nakúpiť s istotou kvality.",
+    ],
+  },
+};
+
+const randomDescription = (type: keyof typeof descriptionLibrary) => {
+  const lengths: DescriptionLength[] = ["none", "short", "medium", "long"];
+  const length = lengths[randomInt(0, lengths.length - 1)];
+  if (length === "none") return null;
+
+  const options = descriptionLibrary[type][length];
+  return options[randomInt(0, options.length - 1)];
+};
+
 const pickFarmName = (city: string) =>
   `${farmNamePool[randomInt(0, farmNamePool.length - 1)]} (${city})`;
 
@@ -387,7 +473,7 @@ async function main() {
       const farm = await prisma.farm.create({
         data: {
           name: farmName,
-          description: "Rodinná farma s rôznymi produktami.",
+          description: randomDescription("farm"),
           city: cities[cityIndex],
           street: streets[randomInt(0, streets.length - 1)],
           region: regions[randomInt(0, regions.length - 1)],
@@ -410,7 +496,7 @@ async function main() {
           data: {
             name: template.name,
             category: template.category,
-            description: `Čerstvé ${template.name.toLowerCase()} z ${farm.name}.`,
+            description: randomDescription("product") ?? "",
             basePrice: parseFloat((randomInt(100, 800) / 100).toFixed(2)),
           },
         });
@@ -452,7 +538,7 @@ async function main() {
       const event = await prisma.event.create({
         data: {
           title: eventTitle,
-          description: "Udalosť pre farmárov a priateľov farmy.",
+          description: randomDescription("event"),
           startDate,
           endDate,
           city: cities[cityIndex],
@@ -499,7 +585,7 @@ async function main() {
           data: {
             name: template.name,
             category: template.category,
-            description: `Produkt predávaný počas ${event.title}.`,
+            description: randomDescription("product") ?? "",
             basePrice: price,
           },
         });
@@ -549,7 +635,7 @@ async function main() {
       await prisma.offer.create({
         data: {
           title: `${record.product.name} - akciová ponuka`,
-          description: "Limitovaná ponuka priamo od farmára.",
+          description: randomDescription("offer"),
           userId: farmer.id,
           productId: record.product.id,
         },
