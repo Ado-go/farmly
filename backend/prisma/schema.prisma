@@ -68,6 +68,7 @@ model User {
   postalCode           String            @default("")
   city                 String            @default("")
   country              String            @default("")
+  createdAt            DateTime          @default(now())
   profileImageUrl      String?
   profileImagePublicId String?
   role                 Role              @default(CUSTOMER)
@@ -108,6 +109,7 @@ model FarmImage {
   id       Int    @id @default(autoincrement())
   url      String
   publicId String
+  createdAt DateTime @default(now())
   farm     Farm   @relation(fields: [farmId], references: [id], onDelete: Cascade)
   farmId   Int
 }
@@ -135,6 +137,7 @@ model ProductImage {
   id          Int       @id @default(autoincrement())
   url         String
   publicId    String
+  createdAt   DateTime  @default(now())
   product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId   Int
 }
@@ -221,6 +224,7 @@ model OrderItem {
   productName  String
 
   status       OrderItemStatus   @default(ACTIVE)
+  createdAt    DateTime          @default(now())
 }
 
 model OrderHistory {
@@ -264,6 +268,7 @@ model EventParticipant {
   eventId   Int
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
+  createdAt DateTime @default(now())
 }
 
 model EventProduct {
@@ -278,6 +283,7 @@ model EventProduct {
 
   price      Float
   stock      Int      @default(0)
+  createdAt  DateTime @default(now())
 
   @@unique([eventId, productId])
 }
@@ -286,6 +292,7 @@ model EventImage {
   id       Int     @id @default(autoincrement())
   url      String
   publicId String
+  createdAt DateTime @default(now())
   event    Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId  Int
 }
