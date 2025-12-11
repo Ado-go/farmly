@@ -4,21 +4,12 @@ Farmly is a full-stack e-commerce platform that connects farms with customers th
 
 ---
 
-## 🚧 Current Progress
-
-- Auth, profiles, farms, events, offers, and reviews endpoints are implemented in the API.
-- Stripe checkout (with webhooks) and Cloudinary uploads are wired up for the demo environment.
-- Frontend currently focuses on authenticated dashboards and farm management flows.
-- More public pages, moderation tooling, and production-ready content are still pending.
-
----
-
 ## 🛠️ Tech & Requirements
 
-- Node.js v20+ and npm (or pnpm) for running both apps.
+- Node.js v22.x and npm for running both apps.
 - PostgreSQL v15+ for the Prisma database.
-- Stripe CLI for forwarding webhooks locally (`npm start` spawns it automatically).
-- Optional integrations: SMTP account for transactional emails and a Cloudinary account for media uploads.
+- Stripe CLI if you want to receive webhooks locally (`npm start` spawns it automatically).
+- Optional integrations: SMTP/Resend for transactional emails and a Cloudinary account for media uploads.
 
 ---
 
@@ -37,19 +28,25 @@ npm run install:all          # installs frontend + backend dependencies
 - `backend/.env` (create if it does not exist):
 
   ```bash
-  DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/farmly"
+  DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/farmly
   PORT=5000
   CLIENT_URL=http://localhost:5173
+  FRONTEND_URL=http://localhost:5173
+  BACKEND_URL=http://localhost:5000
 
   ACCESS_TOKEN_SECRET=replace_me
   REFRESH_TOKEN_SECRET=replace_me
   RESET_TOKEN_SECRET=replace_me
 
+  # email (SMTP)
   EMAIL_HOST=smtp.example.com
   EMAIL_PORT=587
   EMAIL_USER=your_inbox@example.com
   EMAIL_PASS=app_password
-  EMAIL_FROM="Farmly Support <noreply@example.com>"
+  EMAIL_FROM=Farmly Support <noreply@example.com>
+  # or Resend
+  RESEND_API_KEY=re_xxx
+  RESEND_FROM=your_inbox@example.com
 
   CLOUDINARY_CLOUD_NAME=your_cloud
   CLOUDINARY_API_KEY=your_key
@@ -57,15 +54,14 @@ npm run install:all          # installs frontend + backend dependencies
 
   STRIPE_SECRET_KEY=sk_test_xxx
   STRIPE_WEBHOOK_SECRET=whsec_xxx
-  FRONTEND_URL=http://localhost:5173
-  BACKEND_URL=http://localhost:5000
   ```
 
   The Stripe secrets come from the Stripe dashboard + `stripe listen`. Cloudinary and email credentials are optional but needed for the corresponding features.
 
 - `frontend/.env` (Vite-style variables):
+
   ```bash
-  VITE_STRIPE_PUBLIC_KEY=pk_test_xxx
+  VITE_API_BASE=http://localhost:5000/api
   ```
 
 ### 3. Prepare the database
