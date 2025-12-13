@@ -7,8 +7,8 @@ export const checkoutSchema = z.object({
         productId: z.number().int().positive(),
         quantity: z.number().int().positive("Quantity must be at least 1"),
         unitPrice: z.number().min(0),
-        productName: z.string().min(1),
-        sellerName: z.string().min(1),
+        productName: z.string().trim().min(1, "Product name is required"),
+        sellerName: z.string().trim().min(1, "Seller name is required"),
       })
     )
     .min(1, "Cart cannot be empty"),
@@ -16,17 +16,22 @@ export const checkoutSchema = z.object({
   userInfo: z
     .object({
       buyerId: z.number().int().positive().optional(),
-      email: z.string().email("Invalid email address").optional(),
-      contactName: z.string().min(2, "Name must be at least 2 characters"),
+      email: z.string().trim().email("Invalid email address").optional(),
+      contactName: z.string().trim().min(1, "Name is required"),
       contactPhone: z
         .string()
-        .min(6, "Phone must have at least 6 digits")
-        .regex(/^\+?\d{6,15}$/, "Phone must contain only digits and optional +"),
+        .trim()
+        .min(1, "Phone is required")
+        .regex(/^\+?\d{6,15}$/, "Phone must contain 6-15 digits and optional +"),
 
-      deliveryCity: z.string().min(2).max(100),
-      deliveryStreet: z.string().min(2).max(150),
-      deliveryPostalCode: z.string().min(3).max(20),
-      deliveryCountry: z.string().min(2).max(100),
+      deliveryCity: z.string().trim().min(1, "City is required").max(100),
+      deliveryStreet: z.string().trim().min(1, "Street is required").max(150),
+      deliveryPostalCode: z
+        .string()
+        .trim()
+        .min(1, "Postal code is required")
+        .max(20),
+      deliveryCountry: z.string().trim().min(1, "Country is required").max(100),
 
       paymentMethod: z.enum(["CARD", "CASH"]),
     })

@@ -4,8 +4,8 @@ export const preorderItemSchema = z.object({
   productId: z.number(),
   quantity: z.number().min(1, "Quantity must be at least 1"),
   unitPrice: z.number().min(0),
-  productName: z.string().min(1),
-  sellerName: z.string().min(1),
+  productName: z.string().trim().min(1, "Product name is required"),
+  sellerName: z.string().trim().min(1, "Seller name is required"),
 });
 
 export const preorderSchema = z.object({
@@ -14,11 +14,12 @@ export const preorderSchema = z.object({
   userInfo: z
     .object({
       buyerId: z.number().int().positive().optional(),
-      email: z.string().email("Invalid email address"),
-      contactName: z.string().min(2, "Name must be at least 2 characters"),
+      email: z.string().trim().email("Invalid email address"),
+      contactName: z.string().trim().min(1, "Name is required"),
       contactPhone: z
         .string()
-        .min(6, "Phone must have at least 6 digits")
+        .trim()
+        .min(1, "Phone is required")
         .regex(/^\+?\d{6,15}$/, "Phone must contain only digits and optional +"),
     })
     .superRefine((data, ctx) => {

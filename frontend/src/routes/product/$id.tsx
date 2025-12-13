@@ -27,9 +27,9 @@ import {
 import type { FarmProduct, ProductReview } from "@/types/farm";
 
 const productSchema = z.object({
-  name: z.string().min(2, "Názov je povinný"),
+  name: z.string().trim().min(1, "Názov je povinný"),
   category: productCategorySchema.optional(),
-  description: z.string().optional(),
+  description: z.string().trim().optional(),
   price: z.number().min(0, "Cena musí byť väčšia ako 0"),
   stock: z.number().min(0, "Sklad musí byť nezáporný"),
   isAvailable: z.boolean().default(true),

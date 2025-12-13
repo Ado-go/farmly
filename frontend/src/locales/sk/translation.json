@@ -131,16 +131,16 @@
     "highlight_trust_desc": "Overené profily a komunikácia na jednom mieste pre zákazníkov aj farmárov.",
     "button": "Registrovať sa",
     "loading": "Registrujem...",
-    "name_min": "Meno musí mať aspoň 2 znaky",
-    "phone_min": "Telefónne číslo musí mať aspoň 6 číslic",
+    "name_min": "Meno je povinné",
+    "phone_min": "Telefónne číslo je povinné",
     "phone_invalid": "Zadaj platné telefónne číslo",
-    "address_min": "Adresa musí mať aspoň 5 znakov",
-    "postal_min": "PSČ musí mať aspoň 3 znaky",
-    "city_min": "Mesto musí mať aspoň 2 znaky",
-    "country_min": "Štát musí mať aspoň 2 znaky",
+    "address_min": "Adresa je povinná",
+    "postal_min": "PSČ je povinné",
+    "city_min": "Mesto je povinné",
+    "country_min": "Štát je povinný",
     "email_required": "Email je povinný",
     "email_invalid": "Zadaj platný email",
-    "password_min": "Heslo musí mať aspoň 6 znakov"
+    "password_min": "Heslo musí mať aspoň 8 znakov a obsahovať veľké písmeno, malé písmeno a číslo."
   },
   "forgotPasswordPage": {
     "title": "Zabudnuté heslo",
@@ -168,7 +168,7 @@
     "errorTitle": "Chyba pri obnove",
     "error": "Nepodarilo sa zmeniť heslo. Token je neplatný alebo expirovaný.",
     "errors": {
-      "shortPassword": "Heslo musí mať aspoň 6 znakov.",
+      "shortPassword": "Heslo musí mať aspoň 8 znakov a obsahovať veľké písmeno, malé písmeno a číslo.",
       "missingToken": "Token v URL chýba alebo je neplatný."
     }
   },
@@ -199,8 +199,8 @@
     "oldPasswordLabel": "Aktuálne heslo",
     "newPasswordLabel": "Nové heslo",
     "savePassword": "Uložiť nové heslo",
-    "oldPasswordRequired": "Zadajte svoje aktuálne heslo",
-    "newPasswordMin": "Nové heslo musí mať aspoň 6 znakov",
+    "oldPasswordRequired": "Aktuálne heslo je povinné",
+    "newPasswordMin": "Nové heslo musí mať aspoň 8 znakov a obsahovať veľké písmeno, malé písmeno a číslo",
     "passwordChangeSuccess": "Heslo bolo úspešne zmenené",
     "tabProfile": "Profil",
     "tabPurchases": "Nákupy",
@@ -255,12 +255,12 @@
     "productsSubtitle": "Pridávaj sezónne produkty a udržuj ceny aj limity aktuálne.",
     "addressLabel": "Adresa",
     "validation": {
-      "name": "Zadaj názov farmy aspoň s 2 znakmi.",
-      "city": "Mesto musí mať aspoň 2 znaky.",
-      "street": "Ulica musí mať aspoň 2 znaky.",
-      "region": "Kraj musí mať aspoň 2 znaky.",
-      "postalCode": "PSČ musí mať aspoň 2 znaky.",
-      "country": "Krajina musí mať aspoň 2 znaky."
+      "name": "Zadaj názov farmy.",
+      "city": "Mesto je povinné.",
+      "street": "Ulica je povinná.",
+      "region": "Kraj je povinný.",
+      "postalCode": "PSČ je povinné.",
+      "country": "Krajina je povinná."
     },
     "errorLoadingProducts": "Chyba pri načítaní produktov."
   },
@@ -589,15 +589,15 @@
       "success": "Správa bola odoslaná predajcovi.",
       "error": "Správu sa nepodarilo odoslať.",
       "emailError": "Zadaj platný e-mail.",
-      "messageError": "Správa by mala mať aspoň 10 znakov.",
+      "messageError": "Správa je povinná.",
       "messageMax": "Správa môže mať najviac 1000 znakov."
     },
     "errors": {
-      "titleRequired": "Zadaj názov ponuky (minimálne 3 znaky).",
-      "productNameRequired": "Zadaj názov produktu (minimálne 2 znaky).",
+      "titleRequired": "Zadaj názov ponuky.",
+      "productNameRequired": "Zadaj názov produktu.",
       "productCategoryRequired": "Vyber kategóriu produktu.",
       "productPriceRequired": "Zadaj cenu produktu.",
-      "productPriceMin": "Cena produktu nemôže byť záporná."
+      "productPriceMin": "Cena produktu musí byť vyššia než 0."
     },
     "create": "Vytvoriť",
     "createError": "Nepodarilo sa vytvoriť ponuku.",
@@ -678,7 +678,17 @@
     "secureProcess": "Bezpečný priebeh",
     "statusAwaiting": "Čaká",
     "statusCompleted": "Hotovo",
-    "statusInProgress": "Prebieha"
+    "statusInProgress": "Prebieha",
+    "errors": {
+      "contactNameRequired": "Zadaj svoje meno.",
+      "contactPhoneRequired": "Zadaj svoje telefónne číslo.",
+      "contactPhoneInvalid": "Zadaj platné telefónne číslo (6-15 číslic).",
+      "emailInvalid": "Zadaj platný email.",
+      "deliveryStreetRequired": "Ulica je povinná.",
+      "deliveryCityRequired": "Mesto je povinné.",
+      "deliveryPostalCodeRequired": "PSČ je povinné.",
+      "deliveryCountryRequired": "Krajina je povinná."
+    }
   },
   "cart": {
     "conflictTitle": "Vymazať položky z košíka?",

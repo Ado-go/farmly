@@ -24,24 +24,31 @@ import {
 import { User as UserIcon } from "lucide-react";
 
 const updateProfileSchema = z.object({
-  name: z.string().min(2, "registerPage.name_min"),
+  name: z.string().trim().min(1, "registerPage.name_min"),
   phone: z
     .string()
-    .min(6, "registerPage.phone_min")
+    .trim()
+    .min(1, "registerPage.phone_min")
     .regex(/^\+?\d{6,15}$/, "registerPage.phone_invalid"),
-  address: z.string().min(5, "registerPage.address_min"),
-  postalCode: z.string().min(3, "registerPage.postal_min"),
-  city: z.string().min(2, "registerPage.city_min"),
-  country: z.string().min(2, "registerPage.country_min"),
+  address: z.string().trim().min(1, "registerPage.address_min"),
+  postalCode: z.string().trim().min(1, "registerPage.postal_min"),
+  city: z.string().trim().min(1, "registerPage.city_min"),
+  country: z.string().trim().min(1, "registerPage.country_min"),
 });
 
 const deleteProfileSchema = z.object({
-  password: z.string().min(1, "profilePage.deletePasswordLabel"),
+  password: z.string().trim().min(1, "profilePage.deletePasswordLabel"),
 });
 
 const changePasswordSchema = z.object({
-  oldPassword: z.string().min(6, "profilePage.oldPasswordRequired"),
-  newPassword: z.string().min(6, "profilePage.newPasswordMin"),
+  oldPassword: z.string().trim().min(1, "profilePage.oldPasswordRequired"),
+  newPassword: z
+    .string()
+    .trim()
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$/,
+      "profilePage.newPasswordMin"
+    ),
 });
 
 type UpdateProfileForm = z.infer<typeof updateProfileSchema>;

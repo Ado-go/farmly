@@ -70,11 +70,11 @@ const buildEventProductSchema = (t: TFunction) => {
     .min(0, { message: t("eventProducts.errors.stockMin") });
 
   return z.object({
-    name: z.string().min(2, t("eventProducts.errors.name")),
+    name: z.string().trim().min(1, t("eventProducts.errors.name")),
     category: z.enum(PRODUCT_CATEGORIES, {
       message: t("eventProducts.errors.category"),
     }),
-    description: z.string().min(5, t("eventProducts.errors.description")),
+    description: z.string().trim().min(1, t("eventProducts.errors.description")),
     price: priceField,
     stock: stockField,
     eventId: z.number(),

@@ -63,12 +63,12 @@ const offerSchema = z.object({
   title: z
     .string({ message: "offersPage.errors.titleRequired" })
     .trim()
-    .min(3, { message: "offersPage.errors.titleRequired" }),
+    .min(1, { message: "offersPage.errors.titleRequired" }),
   description: z.string().optional(),
   productName: z
     .string({ message: "offersPage.errors.productNameRequired" })
     .trim()
-    .min(2, { message: "offersPage.errors.productNameRequired" }),
+    .min(1, { message: "offersPage.errors.productNameRequired" }),
   productDescription: z.string().optional(),
   productCategory: z.enum(PRODUCT_CATEGORIES, {
     message: "offersPage.errors.productCategoryRequired",

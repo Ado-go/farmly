@@ -38,7 +38,7 @@ describe("Auth routes", () => {
         email: "test@test.com",
         name: "John Johnson",
         phone: "+421940123456",
-        password: "123456",
+        password: "Password1",
         role: "FARMER",
         ...baseAddress,
       });
@@ -56,7 +56,7 @@ describe("Auth routes", () => {
   test("POST /api/auth/register - missing fields returns 400", async () => {
     const res = await request(app).post("/api/auth/register").send({
       email: "missing@test.com",
-      password: "123456",
+      password: "Password1",
       role: "FARMER",
     });
     expect(res.status).toBe(400);
@@ -79,7 +79,7 @@ describe("Auth routes", () => {
       .post("/api/auth/register")
       .send({
         email: "test@test.com",
-        password: "123456",
+        password: "Password1",
         role: "FARMER",
         name: "John",
         phone: "+421900000000",
@@ -92,7 +92,7 @@ describe("Auth routes", () => {
 
   // === LOGIN TESTS ===
   test("POST /api/auth/login - valid credentials", async () => {
-    const hashed = await argon2.hash("123456");
+    const hashed = await argon2.hash("Password1");
     await prisma.user.create({
       data: {
         email: "test@test.com",
@@ -106,7 +106,7 @@ describe("Auth routes", () => {
 
     const res = await request(app)
       .post("/api/auth/login")
-      .send({ email: "test@test.com", password: "123456" });
+      .send({ email: "test@test.com", password: "Password1" });
 
     expect(res.status).toBe(200);
     expect(res.body.user.email).toBe("test@test.com");
@@ -116,14 +116,14 @@ describe("Auth routes", () => {
   test("POST /api/auth/login - invalid email returns 401", async () => {
     const res = await request(app)
       .post("/api/auth/login")
-      .send({ email: "notfound@test.com", password: "123456" });
+      .send({ email: "notfound@test.com", password: "Password1" });
 
     expect(res.status).toBe(401);
     expect(res.body.error).toBe("Invalid credentials");
   });
 
   test("POST /api/auth/login - invalid password returns 401", async () => {
-    const hashed = await argon2.hash("correctpass");
+    const hashed = await argon2.hash("Correctpass1");
     await prisma.user.create({
       data: {
         email: "test@test.com",
@@ -137,7 +137,7 @@ describe("Auth routes", () => {
 
     const res = await request(app)
       .post("/api/auth/login")
-      .send({ email: "test@test.com", password: "wrongpass" });
+      .send({ email: "test@test.com", password: "wrongpass1A" });
 
     expect(res.status).toBe(401);
     expect(res.body.error).toBe("Invalid credentials");
@@ -197,7 +197,7 @@ describe("Auth routes", () => {
 
     const res = await request(app)
       .post("/api/auth/reset-password")
-      .send({ token, newPassword: "newpass123" });
+      .send({ token, newPassword: "Newpass123" });
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe("Password successfully reset");
@@ -218,7 +218,7 @@ describe("Auth routes", () => {
 
     const res = await request(app)
       .post("/api/auth/reset-password")
-      .send({ token: "invalid-token", newPassword: "pass123" });
+      .send({ token: "invalid-token", newPassword: "Pass1234A" });
 
     expect(res.status).toBe(403);
   });
@@ -308,7 +308,7 @@ describe("Auth routes", () => {
       .set("Cookie", [`accessToken=${accessToken}`])
       .send({
         oldPassword: "oldPassword123",
-        newPassword: "newPassword456",
+        newPassword: "NewPassword456",
       });
 
     expect(res.status).toBe(200);
@@ -352,7 +352,7 @@ describe("Auth routes", () => {
       .set("Cookie", [`accessToken=${accessToken}`])
       .send({
         oldPassword: "oldPass",
-        newPassword: "newPass",
+        newPassword: "Newpass123",
       });
 
     expect(res.status).toBe(401);
@@ -382,7 +382,7 @@ describe("Auth routes", () => {
       .set("Cookie", [`accessToken=${accessToken}`])
       .send({
         oldPassword: "wrongOldPassword",
-        newPassword: "newPassword",
+        newPassword: "Newpass123",
       });
 
     expect(res.status).toBe(401);

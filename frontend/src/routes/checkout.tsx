@@ -14,7 +14,7 @@ import { DeliveryForm } from "@/components/checkout/DeliveryForm";
 import { PaymentForm } from "@/components/checkout/PaymentForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import {
-  addressSchema,
+  createAddressSchema,
   paymentSchema,
   type AddressData,
   type DeliveryOption,
@@ -30,6 +30,7 @@ function CheckoutPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { cart, totalPrice, clearCart } = useCart();
+  const addressSchema = useMemo(() => createAddressSchema(t), [t]);
 
   const [step, setStep] = useState(1);
   const [selectedPickupId, setSelectedPickupId] = useState(

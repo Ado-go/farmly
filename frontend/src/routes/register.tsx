@@ -24,20 +24,28 @@ export const Route = createFileRoute("/register")({
 });
 
 const registerSchema = z.object({
-  name: z.string().min(2, "registerPage.name_min"),
+  name: z.string().trim().min(1, "registerPage.name_min"),
   phone: z
     .string()
-    .min(6, "registerPage.phone_min")
+    .trim()
+    .min(1, "registerPage.phone_min")
     .regex(/^\+?\d{6,15}$/, "registerPage.phone_invalid"),
-  address: z.string().min(5, "registerPage.address_min"),
-  postalCode: z.string().min(3, "registerPage.postal_min"),
-  city: z.string().min(2, "registerPage.city_min"),
-  country: z.string().min(2, "registerPage.country_min"),
+  address: z.string().trim().min(1, "registerPage.address_min"),
+  postalCode: z.string().trim().min(1, "registerPage.postal_min"),
+  city: z.string().trim().min(1, "registerPage.city_min"),
+  country: z.string().trim().min(1, "registerPage.country_min"),
   email: z
     .string()
+    .trim()
     .min(1, "registerPage.email_required")
-    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "registerPage.email_invalid"),
-  password: z.string().min(6, "registerPage.password_min"),
+    .email("registerPage.email_invalid"),
+  password: z
+    .string()
+    .trim()
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$/,
+      "registerPage.password_min"
+    ),
   role: z.enum(["CUSTOMER", "FARMER"]),
 });
 

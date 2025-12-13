@@ -131,16 +131,16 @@
     "highlight_trust_desc": "Verified profiles and clear communication for both customers and farmers.",
     "button": "Register",
     "loading": "Registering...",
-    "name_min": "Name must have at least 2 characters",
-    "phone_min": "Phone number must have at least 6 digits",
+    "name_min": "Name is required",
+    "phone_min": "Phone number is required",
     "phone_invalid": "Enter a valid phone number",
-    "address_min": "Address must have at least 5 characters",
-    "postal_min": "Postal code must have at least 3 characters",
-    "city_min": "City must have at least 2 characters",
-    "country_min": "Country must have at least 2 characters",
+    "address_min": "Address is required",
+    "postal_min": "Postal code is required",
+    "city_min": "City is required",
+    "country_min": "Country is required",
     "email_required": "Email is required",
     "email_invalid": "Enter a valid email",
-    "password_min": "Password must have at least 6 characters"
+    "password_min": "Password must be at least 8 characters and include uppercase, lowercase, and a number."
   },
   "forgotPasswordPage": {
     "title": "Forgot Password",
@@ -168,7 +168,7 @@
     "errorTitle": "Reset Error",
     "error": "Failed to change password. The token is invalid or expired.",
     "errors": {
-      "shortPassword": "Password must be at least 6 characters long.",
+      "shortPassword": "Password must be at least 8 characters and include uppercase, lowercase, and a number.",
       "missingToken": "Token in the URL is missing or invalid."
     }
   },
@@ -199,8 +199,8 @@
     "oldPasswordLabel": "Current password",
     "newPasswordLabel": "New password",
     "savePassword": "Save new password",
-    "oldPasswordRequired": "Please enter your current password",
-    "newPasswordMin": "New password must be at least 6 characters",
+    "oldPasswordRequired": "Current password is required",
+    "newPasswordMin": "New password must be at least 8 characters and include uppercase, lowercase, and a number",
     "passwordChangeSuccess": "Password changed successfully",
     "tabProfile": "Profile",
     "tabPurchases": "Purchases",
@@ -255,12 +255,12 @@
     "productsSubtitle": "Add seasonal products and keep prices and limits current.",
     "addressLabel": "Address",
     "validation": {
-      "name": "Please enter a farm name with at least 2 characters.",
-      "city": "City should be at least 2 characters long.",
-      "street": "Street should be at least 2 characters long.",
-      "region": "Region should be at least 2 characters long.",
-      "postalCode": "Postal code should be at least 2 characters long.",
-      "country": "Country should be at least 2 characters long."
+      "name": "Please enter a farm name.",
+      "city": "City is required.",
+      "street": "Street is required.",
+      "region": "Region is required.",
+      "postalCode": "Postal code is required.",
+      "country": "Country is required."
     },
     "errorLoadingProducts": "Error loading products."
   },
@@ -589,15 +589,15 @@
       "success": "Message sent to the seller.",
       "error": "Failed to send the message.",
       "emailError": "Please enter a valid email.",
-      "messageError": "Message should be at least 10 characters.",
+      "messageError": "Message is required.",
       "messageMax": "Message can be at most 1000 characters."
     },
     "errors": {
-      "titleRequired": "Please enter an offer title (at least 3 characters).",
-      "productNameRequired": "Please enter the product name (at least 2 characters).",
+      "titleRequired": "Please enter an offer title.",
+      "productNameRequired": "Please enter the product name.",
       "productCategoryRequired": "Select a category for the product.",
       "productPriceRequired": "Enter the product price.",
-      "productPriceMin": "Product price cannot be negative."
+      "productPriceMin": "Product price must be greater than 0."
     },
     "create": "Create",
     "createError": "Failed to create offer.",
@@ -678,7 +678,17 @@
     "secureProcess": "Secure process",
     "statusAwaiting": "Awaiting",
     "statusCompleted": "Completed",
-    "statusInProgress": "In progress"
+    "statusInProgress": "In progress",
+    "errors": {
+      "contactNameRequired": "Please enter your name.",
+      "contactPhoneRequired": "Please enter your phone number.",
+      "contactPhoneInvalid": "Enter a valid phone number (6-15 digits).",
+      "emailInvalid": "Please enter a valid email address.",
+      "deliveryStreetRequired": "Street is required.",
+      "deliveryCityRequired": "City is required.",
+      "deliveryPostalCodeRequired": "Postal code is required.",
+      "deliveryCountryRequired": "Country is required."
+    }
   },
   "cart": {
     "conflictTitle": "Replace cart items?",

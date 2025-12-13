@@ -2,7 +2,7 @@ import { z } from "zod";
 import { productCategorySchema } from "../constants/productCategories.ts";
 
 const imageSchema = z.object({
-  url: z.string("Image URL is required").url("Invalid image URL"),
+  url: z.string("Image URL is required").trim().url("Invalid image URL"),
   publicId: z.string().optional(),
 });
 
@@ -23,13 +23,15 @@ export const eventProductSchema = z.object({
 
   name: z
     .string("Product name is required")
-    .min(2, "Product name must be at least 2 characters long"),
+    .trim()
+    .min(1, "Product name is required"),
 
   category: productCategorySchema,
 
   description: z
     .string("Description is required")
-    .min(5, "Description must be at least 5 characters long"),
+    .trim()
+    .min(1, "Description is required"),
 
   price: priceSchema,
   stock: stockSchema,

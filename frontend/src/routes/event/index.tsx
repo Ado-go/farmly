@@ -55,15 +55,15 @@ const buildEventSchema = (t: TFunction) => {
       .transform((val) => val as Date);
 
   return z.object({
-    title: z.string().min(3, t("eventPage.errors.title")),
-    description: z.string().optional(),
+    title: z.string().trim().min(1, t("eventPage.errors.title")),
+    description: z.string().trim().optional(),
     startDate: dateField("eventPage.errors.startDate"),
     endDate: dateField("eventPage.errors.endDate"),
-    city: z.string().min(2, t("eventPage.errors.city")),
-    street: z.string().min(2, t("eventPage.errors.street")),
-    region: z.string().min(2, t("eventPage.errors.region")),
-    postalCode: z.string().min(2, t("eventPage.errors.postalCode")),
-    country: z.string().min(2, t("eventPage.errors.country")),
+    city: z.string().trim().min(1, t("eventPage.errors.city")),
+    street: z.string().trim().min(1, t("eventPage.errors.street")),
+    region: z.string().trim().min(1, t("eventPage.errors.region")),
+    postalCode: z.string().trim().min(1, t("eventPage.errors.postalCode")),
+    country: z.string().trim().min(1, t("eventPage.errors.country")),
   });
 };
 

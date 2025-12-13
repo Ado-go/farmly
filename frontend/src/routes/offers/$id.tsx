@@ -56,7 +56,7 @@ const buildRespondSchema = (t: TFunction) =>
     message: z
       .string()
       .trim()
-      .min(10, t("offersPage.respond.messageError"))
+      .min(1, t("offersPage.respond.messageError"))
       .max(1000, t("offersPage.respond.messageMax")),
   });
 

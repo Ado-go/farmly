@@ -31,9 +31,9 @@ import { Info } from "lucide-react";
 
 const createProductSchema = (t: ReturnType<typeof useTranslation>["t"]) =>
   z.object({
-    name: z.string().min(1, { message: t("product.validation.name") }),
+    name: z.string().trim().min(1, { message: t("product.validation.name") }),
     category: z.enum(PRODUCT_CATEGORIES),
-    description: z.string().optional(),
+    description: z.string().trim().optional(),
     price: z.number().positive({ message: t("product.validation.pricePositive") }),
     stock: z.number().min(0, { message: t("product.validation.stockNonNegative") }),
     isAvailable: z.boolean().default(true),

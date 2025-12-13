@@ -27,9 +27,10 @@ export const Route = createFileRoute("/login")({
 const loginSchema = z.object({
   email: z
     .string()
+    .trim()
     .min(1, "loginPage.required_email")
-    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "loginPage.invalid_email"),
-  password: z.string().min(1, "loginPage.required_password"),
+    .email("loginPage.invalid_email"),
+  password: z.string().trim().min(1, "loginPage.required_password"),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;

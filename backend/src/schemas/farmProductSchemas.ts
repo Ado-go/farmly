@@ -2,9 +2,9 @@ import { z } from "zod";
 import { productCategorySchema } from "../constants/productCategories.ts";
 
 export const productSchema = z.object({
-  name: z.string().min(1, "Product name is required"),
+  name: z.string().trim().min(1, "Product name is required"),
   category: productCategorySchema,
-  description: z.string().optional(),
+  description: z.string().trim().optional(),
   price: z.number("Price is required").positive("Price must be positive"),
   stock: z
     .number("Stock must be a number")
@@ -17,8 +17,8 @@ export const productSchema = z.object({
   images: z
     .array(
       z.object({
-        url: z.string().url("Invalid image URL"),
-        publicId: z.string().min(1, "Missing publicId"),
+        url: z.string().trim().url("Invalid image URL"),
+        publicId: z.string().trim().min(1, "Missing publicId"),
       })
     )
     .optional(),

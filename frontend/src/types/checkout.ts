@@ -1,24 +1,45 @@
+import type { TFunction } from "i18next";
 import { z } from "zod";
 
-export const addressSchema = z.object({
-  contactName: z.string().min(2, "Name is required"),
-  contactPhone: z
-    .string()
-    .min(6, "Phone number must have at least 6 digits")
-    .regex(/^\+?\d{6,15}$/, "Enter a valid phone number"),
-  email: z.string().email(),
-  deliveryOption: z.enum(["ADDRESS", "PICKUP"]),
-  deliveryCity: z.string().min(2, "City required"),
-  deliveryStreet: z.string().optional(),
-  deliveryPostalCode: z.string().min(2, "Postal code required"),
-  deliveryCountry: z.string().min(2, "Country required"),
-});
+export const createAddressSchema = (t: TFunction) =>
+  z.object({
+    contactName: z
+      .string()
+      .trim()
+      .min(1, t("checkoutPage.errors.contactNameRequired")),
+    contactPhone: z
+      .string()
+      .trim()
+      .min(1, t("checkoutPage.errors.contactPhoneRequired"))
+      .regex(/^\+?\d{6,15}$/, t("checkoutPage.errors.contactPhoneInvalid")),
+    email: z
+      .string()
+      .trim()
+      .email(t("checkoutPage.errors.emailInvalid")),
+    deliveryOption: z.enum(["ADDRESS", "PICKUP"]),
+    deliveryCity: z
+      .string()
+      .trim()
+      .min(1, t("checkoutPage.errors.deliveryCityRequired")),
+    deliveryStreet: z
+      .string()
+      .trim()
+      .min(1, t("checkoutPage.errors.deliveryStreetRequired")),
+    deliveryPostalCode: z
+      .string()
+      .trim()
+      .min(1, t("checkoutPage.errors.deliveryPostalCodeRequired")),
+    deliveryCountry: z
+      .string()
+      .trim()
+      .min(1, t("checkoutPage.errors.deliveryCountryRequired")),
+  });
 
 export const paymentSchema = z.object({
   paymentMethod: z.enum(["CASH", "CARD"]),
 });
 
-export type AddressData = z.infer<typeof addressSchema>;
+export type AddressData = z.infer<ReturnType<typeof createAddressSchema>>;
 export type PaymentData = z.infer<typeof paymentSchema>;
 export type DeliveryOption = AddressData["deliveryOption"];
 export type PaymentMethod = PaymentData["paymentMethod"];

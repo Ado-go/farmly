@@ -15,7 +15,13 @@ export const Route = createFileRoute("/reset-password")({
 });
 
 const resetSchema = z.object({
-  newPassword: z.string().min(6, "resetPasswordPage.errors.shortPassword"),
+  newPassword: z
+    .string()
+    .trim()
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$/,
+      "resetPasswordPage.errors.shortPassword"
+    ),
 });
 
 type ResetForm = z.infer<typeof resetSchema>;

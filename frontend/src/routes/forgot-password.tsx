@@ -17,11 +17,9 @@ export const Route = createFileRoute("/forgot-password")({
 const forgotPasswordSchema = z.object({
   email: z
     .string()
+    .trim()
     .min(1, "forgotPasswordPage.errors.requiredEmail")
-    .regex(
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-      "forgotPasswordPage.errors.invalidEmail"
-    ),
+    .email("forgotPasswordPage.errors.invalidEmail"),
 });
 
 type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;

@@ -424,7 +424,7 @@ async function main() {
   // ------------------ USERS ------------------
   const numFarmers = randomInt(5, 8);
   for (let i = 0; i < numFarmers; i++) {
-    const password = await argon2.hash("heslo123");
+    const password = await argon2.hash("Heslo123");
     const address = randomAddress();
     const farmer = await prisma.user.create({
       data: {
@@ -443,7 +443,7 @@ async function main() {
   }
 
   for (let i = 0; i < customerNames.length; i++) {
-    const password = await argon2.hash("heslo123");
+    const password = await argon2.hash("Heslo123");
     const address = randomAddress();
     const customer = await prisma.user.create({
       data: {
