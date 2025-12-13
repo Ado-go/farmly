@@ -1,8 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { CalendarDays, MapPin, Sparkles } from "lucide-react";
+import { z } from "zod";
+import type { TFunction } from "i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { FieldError } from "@/components/ui/field";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { apiFetch } from "@/lib/api";
@@ -26,6 +31,26 @@ type EventInfo = {
   country?: string;
 };
 
+const createPreorderSchema = (t: TFunction) =>
+  z.object({
+    contactName: z
+      .string()
+      .trim()
+      .min(1, t("checkoutPreoderPage.contactNameRequired")),
+    contactPhone: z
+      .string()
+      .trim()
+      .min(1, t("checkoutPreoderPage.contactPhoneRequired"))
+      .regex(/^\+?\d{6,15}$/, t("checkoutPreoderPage.contactPhoneInvalid")),
+    email: z
+      .string()
+      .trim()
+      .min(1, t("checkoutPreoderPage.contactEmailRequired"))
+      .email(t("checkoutPreoderPage.contactEmailInvalid")),
+  });
+
+type PreorderFormValues = z.infer<ReturnType<typeof createPreorderSchema>>;
+
 export const Route = createFileRoute("/checkout-preorder")({
   component: CheckoutPreorderPage,
 });
@@ -34,10 +59,15 @@ function CheckoutPreorderPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { cart, totalPrice, eventId, clearCart } = useCart();
-  const [contactName, setContactName] = useState(user?.name ?? "");
-  const [contactPhone, setContactPhone] = useState(user?.phone ?? "");
-  const [email, setEmail] = useState(user?.email ?? "");
-  const [submitting, setSubmitting] = useState(false);
+  const preorderSchema = useMemo(() => createPreorderSchema(t), [t]);
+  const form = useForm<PreorderFormValues>({
+    resolver: zodResolver(preorderSchema),
+    defaultValues: {
+      contactName: user?.name ?? "",
+      contactPhone: user?.phone ?? "",
+      email: user?.email ?? "",
+    },
+  });
 
   const { data: event, isLoading: isEventLoading } = useQuery<EventInfo>({
     queryKey: ["event", eventId],
@@ -47,11 +77,17 @@ function CheckoutPreorderPage() {
 
   useEffect(() => {
     if (user) {
-      setContactName((prev) => (prev ? prev : user.name ?? ""));
-      setContactPhone((prev) => (prev ? prev : user.phone ?? ""));
-      setEmail((prev) => (prev ? prev : user.email ?? ""));
+      if (!form.getValues("contactName")) {
+        form.setValue("contactName", user.name ?? "");
+      }
+      if (!form.getValues("contactPhone")) {
+        form.setValue("contactPhone", user.phone ?? "");
+      }
+      if (!form.getValues("email")) {
+        form.setValue("email", user.email ?? "");
+      }
     }
-  }, [user]);
+  }, [user, form]);
 
   const formattedEventDate = useMemo(() => {
     if (!event?.startDate) return null;
@@ -71,35 +107,13 @@ function CheckoutPreorderPage() {
   const inputTone =
     "bg-white/70 border-primary/20 focus:border-primary/50 focus-visible:ring-primary/40";
 
-  const handleConfirm = async () => {
+  const handleConfirm = async (values: PreorderFormValues) => {
     if (!eventId) {
       toast.error(t("cartPage.eventUnavailable"));
       return;
     }
 
-    if (!contactName.trim()) {
-      toast.error(t("checkoutPreoderPage.contactNameRequired"));
-      return;
-    }
-    if (!contactPhone.trim()) {
-      toast.error(t("checkoutPreoderPage.contactPhoneRequired"));
-      return;
-    }
-    if (!/^\+?\d{6,15}$/.test(contactPhone.trim())) {
-      toast.error(t("checkoutPreoderPage.contactPhoneInvalid"));
-      return;
-    }
-    if (!email.trim()) {
-      toast.error(t("checkoutPreoderPage.contactEmailRequired"));
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      toast.error(t("checkoutPreoderPage.contactEmailInvalid"));
-      return;
-    }
-
     try {
-      setSubmitting(true);
       await apiFetch("/checkout-preorder", {
         method: "POST",
         body: JSON.stringify({
@@ -107,19 +121,22 @@ function CheckoutPreorderPage() {
           cartItems: cart,
           userInfo: {
             buyerId: user?.id,
-            email: email.trim(),
-            contactName,
-            contactPhone: contactPhone.trim(),
+            email: values.email,
+            contactName: values.contactName,
+            contactPhone: values.contactPhone,
           },
         }),
       });
 
       toast.success(t("checkoutPreoderPage.success"));
       clearCart();
+      form.reset({
+        contactName: user?.name ?? "",
+        contactPhone: user?.phone ?? "",
+        email: user?.email ?? "",
+      });
     } catch {
       toast.error(t("checkoutPreoderPage.error"));
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -167,7 +184,11 @@ function CheckoutPreorderPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
+        <form
+          onSubmit={form.handleSubmit(handleConfirm)}
+          className="grid gap-6 lg:grid-cols-[1.15fr_1fr]"
+          noValidate
+        >
           <Card className="border-amber-200/60 bg-white/95 shadow-xl">
             <CardContent className="p-6 sm:p-8 space-y-6">
               <div className="space-y-2">
@@ -190,9 +211,15 @@ function CheckoutPreorderPage() {
                   <Input
                     id="contactName"
                     placeholder={t("checkoutPreoderPage.name")}
-                    value={contactName}
-                    onChange={(e) => setContactName(e.target.value)}
+                    {...form.register("contactName")}
                     className={inputTone}
+                  />
+                  <FieldError
+                    errors={
+                      form.formState.errors.contactName
+                        ? [form.formState.errors.contactName]
+                        : undefined
+                    }
                   />
                 </div>
 
@@ -203,9 +230,15 @@ function CheckoutPreorderPage() {
                   <Input
                     id="contactPhone"
                     placeholder="+421 900 000 000"
-                    value={contactPhone}
-                    onChange={(e) => setContactPhone(e.target.value)}
+                    {...form.register("contactPhone")}
                     className={inputTone}
+                  />
+                  <FieldError
+                    errors={
+                      form.formState.errors.contactPhone
+                        ? [form.formState.errors.contactPhone]
+                        : undefined
+                    }
                   />
                 </div>
 
@@ -215,9 +248,15 @@ function CheckoutPreorderPage() {
                     id="email"
                     type="email"
                     placeholder="email@farmly.sk"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    {...form.register("email")}
                     className={inputTone}
+                  />
+                  <FieldError
+                    errors={
+                      form.formState.errors.email
+                        ? [form.formState.errors.email]
+                        : undefined
+                    }
                   />
                 </div>
               </div>
@@ -319,17 +358,19 @@ function CheckoutPreorderPage() {
                 </p>
                 <Button
                   className="min-w-[180px]"
-                  onClick={handleConfirm}
-                  disabled={submitting || isEventLoading || !eventId}
+                  type="submit"
+                  disabled={
+                    form.formState.isSubmitting || isEventLoading || !eventId
+                  }
                 >
-                  {submitting
+                  {form.formState.isSubmitting
                     ? t("checkoutPreoderPage.loading")
                     : t("checkoutPreoderPage.confirm")}
                 </Button>
               </div>
             </CardContent>
           </Card>
-        </div>
+        </form>
       </div>
     </main>
   );
