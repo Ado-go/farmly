@@ -24,7 +24,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
-import { Loader2, Mail, Package, Sparkles, Tag, User } from "lucide-react";
+import { Loader2, Mail, Package, Tag, User } from "lucide-react";
 import {
   buildRespondSchema,
   type RespondForm,
@@ -317,8 +317,8 @@ function OfferDetailPage() {
           </div>
         </Card>
 
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <Card className="overflow-hidden border-primary/15 shadow-sm">
+        <div className="grid items-start gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <Card className="self-start overflow-hidden border-primary/15 shadow-sm">
             <ImageCarousel
               images={carouselImages}
               height="h-80"
@@ -328,36 +328,12 @@ function OfferDetailPage() {
 
           <Card className="space-y-5 border-primary/15 bg-white/90 p-5 shadow-sm">
             <div className="space-y-3">
-              <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                <Sparkles className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-semibold text-gray-900">
                 {t("offersPage.offerDetails")}
               </h3>
               <p className="text-sm leading-relaxed text-gray-700">
                 {offerDescription}
               </p>
-              <div className="rounded-lg border border-gray-100 bg-primary/5 px-4 py-3 text-sm text-gray-700">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-primary" />
-                    <div>
-                      <p className="font-semibold">
-                        {offer.user?.name ?? "—"}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {t("offersPage.seller")}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-500">
-                      {t("offersPage.categoryLabel")}
-                    </p>
-                    <p className="font-semibold text-primary">
-                      {productCategoryLabel}
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
 
             <div className="space-y-3">
@@ -380,16 +356,6 @@ function OfferDetailPage() {
                   </p>
                   <p className="font-semibold text-gray-800">
                     {productCategoryLabel}
-                  </p>
-                </div>
-                <div className="rounded-lg border border-gray-100 bg-white px-3 py-3 shadow-sm">
-                  <p className="text-xs text-gray-500">
-                    {t("offersPage.productBasePrice")}
-                  </p>
-                  <p className="font-semibold text-gray-800">
-                    {typeof offer.product?.basePrice === "number"
-                      ? `${offer.product.basePrice.toFixed(2)} €`
-                      : "—"}
                   </p>
                 </div>
                 <div className="rounded-lg border border-gray-100 bg-white px-3 py-3 shadow-sm">
