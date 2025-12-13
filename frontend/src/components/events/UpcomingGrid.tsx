@@ -46,7 +46,7 @@ export function UpcomingGrid({
             </span>
           </div>
           <div className="space-y-3 p-4">
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start justify-between gap-2 min-w-0">
               <div className="space-y-1">
                 <p className="text-xs uppercase tracking-wide text-primary">
                   {t("eventsPage.upcoming")}
@@ -55,7 +55,10 @@ export function UpcomingGrid({
                   {event.title}
                 </h3>
               </div>
-              <span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary dark:bg-emerald-900/60 dark:text-emerald-50">
+              <span
+                className="max-w-[140px] rounded-full bg-primary/10 px-2 py-0.5 text-[11px] leading-tight font-semibold text-primary truncate dark:bg-emerald-900/60 dark:text-emerald-50"
+                title={event.region || t("eventsPage.regionLabel")}
+              >
                 {event.region || t("eventsPage.regionLabel")}
               </span>
             </div>

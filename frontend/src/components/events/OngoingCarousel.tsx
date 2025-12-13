@@ -55,11 +55,14 @@ export function OngoingCarousel({ events }: OngoingCarouselProps) {
               </div>
             </div>
             <div className="space-y-2 p-4">
-              <div className="flex items-start justify-between gap-2">
+              <div className="flex items-start justify-between gap-2 min-w-0">
                 <h3 className="text-lg font-semibold leading-snug">
                   {event.title}
                 </h3>
-                <span className="rounded-full bg-white px-2 py-1 text-xs font-medium text-primary shadow-sm dark:bg-emerald-900/60 dark:text-emerald-50">
+                <span
+                  className="max-w-[140px] rounded-full bg-white px-2 py-0.5 text-[11px] leading-tight font-semibold text-primary shadow-sm truncate dark:bg-emerald-900/60 dark:text-emerald-50"
+                  title={event.region || t("eventsPage.regionLabel")}
+                >
                   {event.region || t("eventsPage.regionLabel")}
                 </span>
               </div>
