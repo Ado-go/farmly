@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/api";
 import { getCategoryLabel } from "@/lib/productCategories";
 import { ImageCarousel } from "@/components/ImageCarousel";
-import { ArrowLeft, CalendarDays, Clock, MapPin, Store } from "lucide-react";
+import { ArrowLeft, CalendarDays, MapPin, Store } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import type { EventDetail } from "@/types/events";
 import { toast } from "sonner";
@@ -245,20 +245,6 @@ function EventProductDetailPage() {
               <span>
                 {new Date(event.startDate).toLocaleDateString()} -{" "}
                 {new Date(event.endDate).toLocaleDateString()}
-              </span>
-            </div>
-            <div className="inline-flex items-center gap-2">
-              <Clock className="h-4 w-4 text-primary" />
-              <span>
-                {new Date(event.startDate).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}{" "}
-                -{" "}
-                {new Date(event.endDate).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
               </span>
             </div>
             <div className="inline-flex items-center gap-2">

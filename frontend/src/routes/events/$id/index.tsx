@@ -177,8 +177,8 @@ function EventPageDetail() {
               <CalendarDays className="h-5 w-5 text-primary" />
               <div>
                 <p className="font-semibold">
-                  {new Date(event.startDate).toLocaleString()} -{" "}
-                  {new Date(event.endDate).toLocaleString()}
+                  {new Date(event.startDate).toLocaleDateString()} -{" "}
+                  {new Date(event.endDate).toLocaleDateString()}
                 </p>
                 <p className="text-xs text-gray-500">
                   {eventHasNotStarted
