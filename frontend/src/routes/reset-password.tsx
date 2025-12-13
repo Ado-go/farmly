@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { apiFetch } from "../lib/api";
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
@@ -9,22 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import {
+  resetPasswordSchema,
+  type ResetPasswordForm,
+} from "@/schemas/authSchema";
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
 });
-
-const resetSchema = z.object({
-  newPassword: z
-    .string()
-    .trim()
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$/,
-      "resetPasswordPage.errors.shortPassword"
-    ),
-});
-
-type ResetForm = z.infer<typeof resetSchema>;
 
 function ResetPasswordPage() {
   const { t } = useTranslation();
@@ -36,7 +27,9 @@ function ResetPasswordPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<ResetForm>({ resolver: zodResolver(resetSchema) });
+  } = useForm<ResetPasswordForm>({
+    resolver: zodResolver(resetPasswordSchema),
+  });
 
   if (!token) {
     return (
@@ -46,7 +39,7 @@ function ResetPasswordPage() {
     );
   }
 
-  const onSubmit = async (values: ResetForm) => {
+  const onSubmit = async (values: ResetPasswordForm) => {
     try {
       await apiFetch("/auth/reset-password", {
         method: "POST",

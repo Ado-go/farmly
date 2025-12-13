@@ -35,7 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { REGION_OPTIONS } from "@/constants/regions";
-import { createFarmSchema, type FarmFormData } from "@/schemas/farm";
+import { createFarmSchema, type FarmFormData } from "@/schemas/farmSchema";
 export type { FarmFormData };
 
 export function FarmHeader({

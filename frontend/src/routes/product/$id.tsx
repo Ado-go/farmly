@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { apiFetch } from "../../lib/api";
@@ -25,17 +24,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { FarmProduct, ProductReview } from "@/types/farm";
-
-const productSchema = z.object({
-  name: z.string().trim().min(1, "Názov je povinný"),
-  category: productCategorySchema.optional(),
-  description: z.string().trim().optional(),
-  price: z.number().min(0, "Cena musí byť väčšia ako 0"),
-  stock: z.number().min(0, "Sklad musí byť nezáporný"),
-  isAvailable: z.boolean().default(true),
-});
-
-type ProductFormData = z.infer<typeof productSchema>;
+import {
+  productSchema,
+  type ProductEditFormData as ProductFormData,
+} from "@/schemas/productSchema";
 
 export const Route = createFileRoute("/product/$id")({
   component: ProductDetailPage,

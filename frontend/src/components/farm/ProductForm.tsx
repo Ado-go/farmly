@@ -1,6 +1,5 @@
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -26,19 +25,16 @@ import {
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
-
-const createProductSchema = (t: ReturnType<typeof useTranslation>["t"]) =>
-  z.object({
-    name: z.string().trim().min(1, { message: t("product.validation.name") }),
-    category: z.enum(PRODUCT_CATEGORIES),
-    description: z.string().trim().optional(),
-    price: z.number().positive({ message: t("product.validation.pricePositive") }),
-    stock: z.number().min(0, { message: t("product.validation.stockNonNegative") }),
-    isAvailable: z.boolean().default(true),
-  });
-type ProductFormData = z.infer<ReturnType<typeof createProductSchema>>;
+import {
+  createProductSchema,
+  type ProductCreateFormData as ProductFormData,
+} from "@/schemas/productSchema";
 
 export function ProductForm({
   farmId,

@@ -19,7 +19,7 @@ import {
   type AddressData,
   type DeliveryOption,
   type PaymentData,
-} from "@/types/checkout";
+} from "@/schemas/checkoutSchema";
 import { Card, CardContent } from "@/components/ui/card";
 
 export const Route = createFileRoute("/checkout")({

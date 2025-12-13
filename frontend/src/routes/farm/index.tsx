@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createFarmSchema, type FarmFormData } from "@/schemas/farm";
+import { createFarmSchema, type FarmFormData } from "@/schemas/farmSchema";
 import { REGION_OPTIONS } from "@/constants/regions";
 
 export const Route = createFileRoute("/farm/")({

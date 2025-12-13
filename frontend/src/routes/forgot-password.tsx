@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiFetch } from "../lib/api";
 import { Field } from "@/components/ui/field";
@@ -9,20 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import {
+  forgotPasswordSchema,
+  type ForgotPasswordForm,
+} from "@/schemas/authSchema";
 
 export const Route = createFileRoute("/forgot-password")({
   component: ForgotPasswordPage,
 });
-
-const forgotPasswordSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(1, "forgotPasswordPage.errors.requiredEmail")
-    .email("forgotPasswordPage.errors.invalidEmail"),
-});
-
-type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
 
 function ForgotPasswordPage() {
   const { t } = useTranslation();

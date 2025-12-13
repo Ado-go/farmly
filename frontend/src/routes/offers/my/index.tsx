@@ -27,7 +27,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
@@ -46,40 +45,16 @@ import {
 } from "@/components/ui/select";
 import { FieldError } from "@/components/ui/field";
 import { PaginationControls } from "@/components/PaginationControls";
+import {
+  offerSchema,
+  type OfferFormData,
+} from "@/schemas/offerSchema";
 
 export const Route = createFileRoute("/offers/my/")({
   component: OffersMyPage,
 });
 
 const OFFERS_PAGE_SIZE = 6;
-
-const nonNegativeNumber = (requiredKey: string, minKey: string) =>
-  z
-    .number({ message: requiredKey })
-    .refine((value) => Number.isFinite(value), { message: requiredKey })
-    .gt(0, { message: minKey });
-
-const offerSchema = z.object({
-  title: z
-    .string({ message: "offersPage.errors.titleRequired" })
-    .trim()
-    .min(1, { message: "offersPage.errors.titleRequired" }),
-  description: z.string().optional(),
-  productName: z
-    .string({ message: "offersPage.errors.productNameRequired" })
-    .trim()
-    .min(1, { message: "offersPage.errors.productNameRequired" }),
-  productDescription: z.string().optional(),
-  productCategory: z.enum(PRODUCT_CATEGORIES, {
-    message: "offersPage.errors.productCategoryRequired",
-  }),
-  productPrice: nonNegativeNumber(
-    "offersPage.errors.productPriceRequired",
-    "offersPage.errors.productPriceMin"
-  ),
-});
-
-type OfferFormData = z.infer<typeof offerSchema>;
 
 type Offer = {
   id: number;

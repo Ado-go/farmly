@@ -5,8 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { CalendarDays, MapPin, Sparkles } from "lucide-react";
-import { z } from "zod";
-import type { TFunction } from "i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +16,10 @@ import { FieldError } from "@/components/ui/field";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { apiFetch } from "@/lib/api";
+import {
+  createPreorderSchema,
+  type PreorderFormValues,
+} from "@/schemas/checkoutSchema";
 
 type EventInfo = {
   id: number;
@@ -30,26 +32,6 @@ type EventInfo = {
   postalCode?: string;
   country?: string;
 };
-
-const createPreorderSchema = (t: TFunction) =>
-  z.object({
-    contactName: z
-      .string()
-      .trim()
-      .min(1, t("checkoutPreoderPage.contactNameRequired")),
-    contactPhone: z
-      .string()
-      .trim()
-      .min(1, t("checkoutPreoderPage.contactPhoneRequired"))
-      .regex(/^\+?\d{6,15}$/, t("checkoutPreoderPage.contactPhoneInvalid")),
-    email: z
-      .string()
-      .trim()
-      .min(1, t("checkoutPreoderPage.contactEmailRequired"))
-      .email(t("checkoutPreoderPage.contactEmailInvalid")),
-  });
-
-type PreorderFormValues = z.infer<ReturnType<typeof createPreorderSchema>>;
 
 export const Route = createFileRoute("/checkout-preorder")({
   component: CheckoutPreorderPage,

@@ -15,7 +15,10 @@ import {
   FieldError,
   FieldLabel,
 } from "@/components/ui/field";
-import type { PaymentData, PaymentMethod } from "@/types/checkout";
+import type {
+  PaymentData,
+  PaymentMethod,
+} from "@/schemas/checkoutSchema";
 
 type PaymentFormProps = {
   form: UseFormReturn<PaymentData>;

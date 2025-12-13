@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { CartItem } from "@/context/CartContext";
-import type { AddressData, PaymentData } from "@/types/checkout";
+import type { AddressData, PaymentData } from "@/schemas/checkoutSchema";
 
 type OrderSummaryProps = {
   addressData: AddressData | null;

@@ -22,11 +22,13 @@ import { Label } from "@/components/ui/label";
 import { FieldError } from "@/components/ui/field";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
-import { type TFunction } from "i18next";
 import { Loader2, Mail, Package, Sparkles, Tag, User } from "lucide-react";
+import {
+  buildRespondSchema,
+  type RespondForm,
+} from "@/schemas/offerSchema";
 
 export const Route = createFileRoute("/offers/$id")({
   component: OfferDetailPage,
@@ -46,21 +48,6 @@ type Offer = {
     images?: { url: string; optimizedUrl?: string; publicId?: string }[];
   };
 };
-
-const buildRespondSchema = (t: TFunction) =>
-  z.object({
-    email: z
-      .string()
-      .trim()
-      .email(t("offersPage.respond.emailError")),
-    message: z
-      .string()
-      .trim()
-      .min(1, t("offersPage.respond.messageError"))
-      .max(1000, t("offersPage.respond.messageMax")),
-  });
-
-type RespondForm = z.infer<ReturnType<typeof buildRespondSchema>>;
 
 function OfferDetailPage() {
   const { t } = useTranslation();

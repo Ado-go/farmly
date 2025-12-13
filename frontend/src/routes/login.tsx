@@ -3,10 +3,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { User } from "@/types/user";
 import { useTranslation } from "react-i18next";
+import { loginSchema, type LoginForm } from "@/schemas/authSchema";
 
 import {
   Card,
@@ -23,17 +23,6 @@ import { AlertCircle, Leaf, Lock, ShieldCheck, Sparkles } from "lucide-react";
 export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
-
-const loginSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(1, "loginPage.required_email")
-    .email("loginPage.invalid_email"),
-  password: z.string().trim().min(1, "loginPage.required_password"),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
 
 function LoginPage() {
   const { t } = useTranslation();

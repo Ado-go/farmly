@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { apiFetch } from "@/lib/api";
@@ -30,7 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { TFunction } from "i18next";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,35 +50,10 @@ import {
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field";
-
-const buildEventProductSchema = (t: TFunction) => {
-  const priceField = z
-    .number()
-    .refine((val) => !Number.isNaN(val), {
-      message: t("eventProducts.errors.priceType"),
-    })
-    .min(0, { message: t("eventProducts.errors.priceMin") });
-
-  const stockField = z
-    .number()
-    .int()
-    .refine((val) => !Number.isNaN(val), {
-      message: t("eventProducts.errors.stockType"),
-    })
-    .min(0, { message: t("eventProducts.errors.stockMin") });
-
-  return z.object({
-    name: z.string().trim().min(1, t("eventProducts.errors.name")),
-    category: z.enum(PRODUCT_CATEGORIES, {
-      message: t("eventProducts.errors.category"),
-    }),
-    description: z.string().trim().min(1, t("eventProducts.errors.description")),
-    price: priceField,
-    stock: stockField,
-    eventId: z.number(),
-  });
-};
-type EventProductForm = z.infer<ReturnType<typeof buildEventProductSchema>>;
+import {
+  buildEventProductSchema,
+  type EventProductForm,
+} from "@/schemas/eventProductSchema";
 
 export function EventProductsSection({ eventId }: { eventId: number }) {
   const { t } = useTranslation();

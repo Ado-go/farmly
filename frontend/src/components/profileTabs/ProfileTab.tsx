@@ -3,12 +3,19 @@ import type React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "@tanstack/react-router";
 import { apiFetch } from "@/lib/api";
+import {
+  changePasswordSchema,
+  deleteProfileSchema,
+  updateProfileSchema,
+  type ChangePasswordForm,
+  type DeleteProfileForm,
+  type UpdateProfileForm,
+} from "@/schemas/profileSchema";
 
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,42 +30,11 @@ import {
 } from "@/components/ui/dialog";
 import { Lock, ShieldOff, User } from "lucide-react";
 
-const updateProfileSchema = z.object({
-  name: z.string().trim().min(1, "registerPage.name_min"),
-  phone: z
-    .string()
-    .trim()
-    .min(1, "registerPage.phone_min")
-    .regex(/^\+?\d{6,15}$/, "registerPage.phone_invalid"),
-  address: z.string().trim().min(1, "registerPage.address_min"),
-  postalCode: z.string().trim().min(1, "registerPage.postal_min"),
-  city: z.string().trim().min(1, "registerPage.city_min"),
-  country: z.string().trim().min(1, "registerPage.country_min"),
-});
-
-const deleteProfileSchema = z.object({
-  password: z.string().trim().min(1, "profilePage.deletePasswordLabel"),
-});
-
-const changePasswordSchema = z.object({
-  oldPassword: z.string().trim().min(1, "profilePage.oldPasswordRequired"),
-  newPassword: z
-    .string()
-    .trim()
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$/,
-      "profilePage.newPasswordMin"
-    ),
-});
-
-type UpdateProfileForm = z.infer<typeof updateProfileSchema>;
 type ProfileImagePayload = {
   profileImageUrl?: string | null;
   profileImagePublicId?: string | null;
 };
 type UpdateProfilePayload = UpdateProfileForm & ProfileImagePayload;
-type DeleteProfileForm = z.infer<typeof deleteProfileSchema>;
-type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 
 export default function ProfileTab() {
   const { t } = useTranslation();

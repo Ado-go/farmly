@@ -6,9 +6,8 @@ import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -46,18 +45,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-const createProductSchema = (t: ReturnType<typeof useTranslation>["t"]) =>
-  z.object({
-    name: z.string().trim().min(1, { message: t("product.validation.name") }),
-    category: z.enum(PRODUCT_CATEGORIES),
-    description: z.string().trim().optional(),
-    price: z.number().positive({ message: t("product.validation.pricePositive") }),
-    stock: z.number().min(0, { message: t("product.validation.stockNonNegative") }),
-    isAvailable: z.boolean().optional(),
-  });
-
-type ProductFormData = z.infer<ReturnType<typeof createProductSchema>>;
+import {
+  productSchema,
+  type ProductEditFormData as ProductFormData,
+} from "@/schemas/productSchema";
 
 export function FarmProductEditDialog({
   product,
@@ -73,12 +64,12 @@ export function FarmProductEditDialog({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const productSchema = useMemo(() => createProductSchema(t), [t]);
+  const productSchemaDef = useMemo(() => productSchema, []);
   const [images, setImages] = useState<UploadedImage[]>([]);
   const inputTone =
     "bg-white/80 border-emerald-100 focus-visible:ring-emerald-200 focus:border-emerald-400";
   const form = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productSchemaDef) as Resolver<ProductFormData>,
     defaultValues: {
       name: "",
       category: undefined,
@@ -173,7 +164,7 @@ export function FarmProductEditDialog({
         {product && (
           <form
             className="space-y-4 max-h-[70vh] overflow-y-auto pr-1"
-            onSubmit={form.handleSubmit((values) =>
+            onSubmit={form.handleSubmit((values: ProductFormData) =>
               updateProduct.mutate(values)
             )}
             noValidate

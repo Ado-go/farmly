@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
 import { useEffect, useMemo, useState } from "react";
@@ -23,7 +22,6 @@ import DatePicker from "@/components/date-picker";
 import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@/types/event";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
-import type { TFunction } from "i18next";
 import { PaginationControls } from "@/components/PaginationControls";
 import {
   Field,
@@ -40,34 +38,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { REGION_OPTIONS } from "@/constants/regions";
+import {
+  buildEventSchema,
+  type EventFormData,
+} from "@/schemas/eventSchema";
 
 const EVENT_LIMIT = 5;
 const EVENTS_PAGE_SIZE = 6;
-
-const buildEventSchema = (t: TFunction) => {
-  const dateField = (msgKey: string) =>
-    z
-      .any()
-      .refine(
-        (val) => val instanceof Date && !Number.isNaN((val as Date).getTime()),
-        { message: t(msgKey) }
-      )
-      .transform((val) => val as Date);
-
-  return z.object({
-    title: z.string().trim().min(1, t("eventPage.errors.title")),
-    description: z.string().trim().optional(),
-    startDate: dateField("eventPage.errors.startDate"),
-    endDate: dateField("eventPage.errors.endDate"),
-    city: z.string().trim().min(1, t("eventPage.errors.city")),
-    street: z.string().trim().min(1, t("eventPage.errors.street")),
-    region: z.string().trim().min(1, t("eventPage.errors.region")),
-    postalCode: z.string().trim().min(1, t("eventPage.errors.postalCode")),
-    country: z.string().trim().min(1, t("eventPage.errors.country")),
-  });
-};
-
-type EventFormData = z.infer<ReturnType<typeof buildEventSchema>>;
 
 export const Route = createFileRoute("/event/")({
   component: EventPage,

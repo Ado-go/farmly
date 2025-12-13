@@ -39,7 +39,26 @@ export const paymentSchema = z.object({
   paymentMethod: z.enum(["CASH", "CARD"]),
 });
 
+export const createPreorderSchema = (t: TFunction) =>
+  z.object({
+    contactName: z
+      .string()
+      .trim()
+      .min(1, t("checkoutPreoderPage.contactNameRequired")),
+    contactPhone: z
+      .string()
+      .trim()
+      .min(1, t("checkoutPreoderPage.contactPhoneRequired"))
+      .regex(/^\+?\d{6,15}$/, t("checkoutPreoderPage.contactPhoneInvalid")),
+    email: z
+      .string()
+      .trim()
+      .min(1, t("checkoutPreoderPage.contactEmailRequired"))
+      .email(t("checkoutPreoderPage.contactEmailInvalid")),
+  });
+
 export type AddressData = z.infer<ReturnType<typeof createAddressSchema>>;
 export type PaymentData = z.infer<typeof paymentSchema>;
 export type DeliveryOption = AddressData["deliveryOption"];
 export type PaymentMethod = PaymentData["paymentMethod"];
+export type PreorderFormValues = z.infer<ReturnType<typeof createPreorderSchema>>;

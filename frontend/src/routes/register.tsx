@@ -2,11 +2,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import type { User } from "@/types/user";
 import { useTranslation } from "react-i18next";
+import { registerSchema, type RegisterForm } from "@/schemas/authSchema";
 import {
   Card,
   CardDescription,
@@ -22,34 +22,6 @@ import { ShieldCheck, ShoppingBasket, Tractor } from "lucide-react";
 export const Route = createFileRoute("/register")({
   component: RegisterPage,
 });
-
-const registerSchema = z.object({
-  name: z.string().trim().min(1, "registerPage.name_min"),
-  phone: z
-    .string()
-    .trim()
-    .min(1, "registerPage.phone_min")
-    .regex(/^\+?\d{6,15}$/, "registerPage.phone_invalid"),
-  address: z.string().trim().min(1, "registerPage.address_min"),
-  postalCode: z.string().trim().min(1, "registerPage.postal_min"),
-  city: z.string().trim().min(1, "registerPage.city_min"),
-  country: z.string().trim().min(1, "registerPage.country_min"),
-  email: z
-    .string()
-    .trim()
-    .min(1, "registerPage.email_required")
-    .email("registerPage.email_invalid"),
-  password: z
-    .string()
-    .trim()
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$/,
-      "registerPage.password_min"
-    ),
-  role: z.enum(["CUSTOMER", "FARMER"]),
-});
-
-type RegisterForm = z.infer<typeof registerSchema>;
 
 function RegisterPage() {
   const { t } = useTranslation();

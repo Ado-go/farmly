@@ -18,7 +18,10 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import type { PickupLocation } from "@/lib/pickupLocations";
-import type { AddressData, DeliveryOption } from "@/types/checkout";
+import type {
+  AddressData,
+  DeliveryOption,
+} from "@/schemas/checkoutSchema";
 
 type DeliveryFormProps = {
   form: UseFormReturn<AddressData>;

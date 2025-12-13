@@ -14,10 +14,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { apiFetch } from "@/lib/api";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
@@ -25,7 +25,6 @@ import DatePicker from "@/components/date-picker";
 import { EventProductsSection } from "@/components/EventProductsSection";
 import { useAuth } from "@/context/AuthContext";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-import type { TFunction } from "i18next";
 import type { Event } from "@/types/event";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
 import {
@@ -37,31 +36,10 @@ import {
 } from "@/components/ui/select";
 import { REGION_OPTIONS } from "@/constants/regions";
 import { ImageCarousel } from "@/components/ImageCarousel";
-
-const buildEventSchema = (t: TFunction) => {
-  const dateField = (msgKey: string) =>
-    z
-      .any()
-      .refine(
-        (val) => val instanceof Date && !Number.isNaN((val as Date).getTime()),
-        { message: t(msgKey) }
-      )
-      .transform((val) => val as Date);
-
-  return z.object({
-    title: z.string().trim().min(1, t("eventPage.errors.title")),
-    description: z.string().trim().optional(),
-    startDate: dateField("eventPage.errors.startDate"),
-    endDate: dateField("eventPage.errors.endDate"),
-    city: z.string().trim().min(1, t("eventPage.errors.city")),
-    street: z.string().trim().min(1, t("eventPage.errors.street")),
-    region: z.string().trim().min(1, t("eventPage.errors.region")),
-    postalCode: z.string().trim().min(1, t("eventPage.errors.postalCode")),
-    country: z.string().trim().min(1, t("eventPage.errors.country")),
-  });
-};
-
-type EventFormData = z.infer<ReturnType<typeof buildEventSchema>>;
+import {
+  buildEventSchema,
+  type EventFormData,
+} from "@/schemas/eventSchema";
 
 export const Route = createFileRoute("/event/$id")({
   component: EventDetailPage,
