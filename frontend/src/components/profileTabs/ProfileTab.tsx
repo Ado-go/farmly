@@ -337,7 +337,11 @@ export default function ProfileTab() {
               {editableFields}
 
               <div className="flex flex-wrap justify-end gap-2">
-                <Button type="submit">{t("profilePage.save")}</Button>
+                <Button type="submit" disabled={updateMutation.isPending}>
+                  {updateMutation.isPending
+                    ? t("profilePage.saving")
+                    : t("profilePage.save")}
+                </Button>
                 <Button
                   type="button"
                   variant="secondary"

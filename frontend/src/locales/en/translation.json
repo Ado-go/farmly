@@ -186,6 +186,7 @@
     "photo_remove": "Remove photo",
     "edit": "Edit Profile",
     "save": "Save",
+    "saving": "Saving...",
     "cancel": "Cancel",
     "delete": "Delete Account",
     "deleteTitle": "Confirm Account Deletion",
