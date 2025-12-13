@@ -302,11 +302,11 @@ function EventPage() {
                     <div className="text-muted-foreground flex justify-between text-xs">
                       <span>
                         {t("eventPage.from")}:{" "}
-                        {format(new Date(event.startDate), "dd.MM.yyyy HH:mm")}
+                        {format(new Date(event.startDate), "dd.MM.yyyy")}
                       </span>
                       <span>
                         {t("eventPage.to")}:{" "}
-                        {format(new Date(event.endDate), "dd.MM.yyyy HH:mm")}
+                        {format(new Date(event.endDate), "dd.MM.yyyy")}
                       </span>
                     </div>
                     <div className="flex justify-end">

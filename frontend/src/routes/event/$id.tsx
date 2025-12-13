@@ -167,7 +167,7 @@ function EventDetailPage() {
         <CardHeader className="bg-gradient-to-r from-emerald-50 via-white to-lime-50 border-b">
           <p className="text-xs uppercase text-emerald-700 font-semibold">
             {t("eventPage.from")}:{" "}
-            {format(new Date(event.startDate), "dd.MM.yyyy HH:mm")}
+            {format(new Date(event.startDate), "dd.MM.yyyy")}
           </p>
           <CardTitle className="text-3xl leading-tight">
             {event.title}
@@ -218,17 +218,11 @@ function EventDetailPage() {
                   <div className="grid md:grid-cols-2 gap-3">
                     <InfoTile
                       label={t("eventPage.from")}
-                      value={format(
-                        new Date(event.startDate),
-                        "dd.MM.yyyy HH:mm"
-                      )}
+                      value={format(new Date(event.startDate), "dd.MM.yyyy")}
                     />
                     <InfoTile
                       label={t("eventPage.to")}
-                      value={format(
-                        new Date(event.endDate),
-                        "dd.MM.yyyy HH:mm"
-                      )}
+                      value={format(new Date(event.endDate), "dd.MM.yyyy")}
                     />
                     <InfoTile label={t("eventPage.city")} value={event.city} />
                     <InfoTile
