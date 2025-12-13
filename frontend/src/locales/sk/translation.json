@@ -547,6 +547,7 @@
   "offersPage": {
     "title": "Komunitné ponuky",
     "subtitle": "Prezri si ponuky od farmárov a lokálnych predajcov.",
+    "offerLabel": "Ponuka",
     "myTitle": "Moje ponuky",
     "loading": "Načítavam ponuky...",
     "errorLoading": "Nepodarilo sa načítať ponuky.",

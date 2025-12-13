@@ -284,7 +284,7 @@ function OffersAllPage() {
                   to="/offers/$id"
                   params={{ id: String(offer.id) }}
                 >
-                  <Card className="group h-full overflow-hidden border border-gray-100 bg-white/80 transition hover:-translate-y-1 hover:shadow-lg">
+                  <Card className="group flex h-full flex-col overflow-hidden border border-gray-100 bg-white/80 transition hover:-translate-y-1 hover:shadow-lg">
                     {offer.product?.images?.[0]?.url ? (
                       <div className="relative h-40 w-full overflow-hidden">
                         <img
@@ -303,7 +303,7 @@ function OffersAllPage() {
                         {t("offersPage.noImage")}
                       </div>
                     )}
-                    <div className="space-y-3 p-4">
+                    <div className="flex flex-1 flex-col p-4">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="text-lg font-semibold leading-tight">
                           {offer.title}
@@ -312,10 +312,10 @@ function OffersAllPage() {
                           {(offer.product?.basePrice ?? 0).toFixed(2)} €
                         </span>
                       </div>
-                      <p className="line-clamp-2 text-sm text-gray-600">
+                      <p className="mt-2 line-clamp-2 text-sm text-gray-600">
                         {offer.description || t("offersPage.noDescription")}
                       </p>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="mt-auto flex items-center justify-between pt-3 text-xs text-gray-500">
                         <span>
                           {t("offersPage.by")} {offer.user.name}
                         </span>

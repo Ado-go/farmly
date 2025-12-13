@@ -547,6 +547,7 @@
   "offersPage": {
     "title": "Marketplace Offers",
     "subtitle": "Browse deals from farmers and local sellers.",
+    "offerLabel": "Offer",
     "myTitle": "My Offers",
     "loading": "Loading offers...",
     "errorLoading": "Failed to load offers.",

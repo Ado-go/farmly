@@ -154,35 +154,54 @@ function OfferDetailPage() {
       <div className="mx-auto max-w-5xl space-y-6">
         <Card className="border-primary/20 bg-gradient-to-r from-primary/10 via-white to-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-semibold text-primary shadow-sm">
                 <Tag className="h-4 w-4" />
-                {productCategoryLabel}
+                {t("offersPage.offerLabel")}
               </div>
               <h1 className="text-3xl font-bold text-gray-900">
                 {offer.title}
               </h1>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
-                <span className="rounded-full bg-primary/10 px-3 py-1 font-semibold text-primary">
-                  {productCategoryLabel}
-                </span>
+              <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
+                <div className="flex items-center gap-2 rounded-lg border border-gray-100 bg-white px-3 py-2 shadow-sm">
+                  <User className="h-4 w-4 text-primary" />
+                  <div className="leading-tight">
+                    <p className="text-[11px] text-gray-500">
+                      {t("offersPage.seller")}
+                    </p>
+                    <p className="font-semibold text-gray-800">
+                      {offer.user?.name ?? "—"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 rounded-lg border border-gray-100 bg-primary/5 px-3 py-2 shadow-sm">
+                  <Tag className="h-4 w-4 text-primary" />
+                  <div className="leading-tight">
+                    <p className="text-[11px] text-gray-500">
+                      {t("offersPage.productCategory")}
+                    </p>
+                    <p className="font-semibold text-primary">
+                      {productCategoryLabel}
+                    </p>
+                  </div>
+                </div>
                 {offer.product?.name ? (
-                  <span className="rounded-full bg-white px-3 py-1 shadow-sm">
-                    {offer.product.name}
-                  </span>
+                  <div className="flex items-center gap-2 rounded-lg border border-gray-100 bg-white px-3 py-2 shadow-sm">
+                    <Package className="h-4 w-4 text-primary" />
+                    <div className="leading-tight">
+                      <p className="text-[11px] text-gray-500">
+                        {t("offersPage.productName")}
+                      </p>
+                      <p className="font-semibold text-gray-800">
+                        {offer.product.name}
+                      </p>
+                    </div>
+                  </div>
                 ) : null}
               </div>
             </div>
 
             <div className="flex w-full flex-col items-end gap-3 sm:w-auto">
-              <div className="w-full rounded-xl border border-primary/20 bg-white px-4 py-3 text-right shadow-sm sm:w-auto">
-                <p className="text-xs text-gray-500">
-                  {t("offersPage.priceLabel")}
-                </p>
-                <p className="text-3xl font-bold text-primary">
-                  {price.toFixed(2)} €
-                </p>
-              </div>
               <Dialog
                 open={respondOpen}
                 onOpenChange={(open) => {
@@ -294,12 +313,6 @@ function OfferDetailPage() {
                   </form>
                 </DialogContent>
               </Dialog>
-              <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
-                <User className="h-4 w-4 text-primary" />
-                <span>
-                  {t("offersPage.seller")}: {offer.user?.name ?? "—"}
-                </span>
-              </div>
             </div>
           </div>
         </Card>
