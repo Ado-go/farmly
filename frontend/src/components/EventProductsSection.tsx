@@ -380,7 +380,7 @@ export function EventProductsSection({ eventId }: { eventId: number }) {
                             value={field.value ?? undefined}
                             onValueChange={field.onChange}
                           >
-                            <SelectTrigger className={inputTone}>
+                            <SelectTrigger className={`${inputTone} w-full`}>
                               <SelectValue
                                 placeholder={t(
                                   "eventProducts.categoryPlaceholder"

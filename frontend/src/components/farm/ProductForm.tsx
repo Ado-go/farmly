@@ -153,7 +153,7 @@ export function ProductForm({
                   onValueChange={field.onChange}
                   value={field.value ?? undefined}
                 >
-                  <SelectTrigger className={inputTone}>
+                  <SelectTrigger className={`${inputTone} w-full`}>
                     <SelectValue placeholder={t("product.category")} />
                   </SelectTrigger>
                   <SelectContent>
