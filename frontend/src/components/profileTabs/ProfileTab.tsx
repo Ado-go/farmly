@@ -310,24 +310,26 @@ export default function ProfileTab() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {t("profilePage.photo_upload")}
-              </Button>
-              {(avatarPreview || removeAvatar) && (
+            {isEditing && (
+              <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
-                  variant="ghost"
-                  onClick={handleRemoveAvatar}
+                  variant="default"
+                  onClick={() => fileInputRef.current?.click()}
                 >
-                  {t("profilePage.photo_remove")}
+                  {t("profilePage.photo_upload")}
                 </Button>
-              )}
-            </div>
+                {(avatarPreview || removeAvatar) && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleRemoveAvatar}
+                  >
+                    {t("profilePage.photo_remove")}
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
           <input
             ref={fileInputRef}
@@ -362,110 +364,128 @@ export default function ProfileTab() {
               </div>
             </form>
           ) : (
-            <>
-              {readOnlyFields}
-              <div className="flex justify-end">
-                <Button type="button" onClick={() => setIsEditing(true)}>
-                  {t("profilePage.edit")}
-                </Button>
-              </div>
-            </>
+            <>{readOnlyFields}</>
           )}
 
-          <div className="mt-8 max-w-2xl rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50/40 via-white to-emerald-50/30 p-4 shadow-inner">
-            <div className="mb-3 space-y-1">
-              <p className="text-sm font-semibold text-emerald-900">
-                {t("profilePage.accountActionsTitle")}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t("profilePage.accountActionsDesc")}
-              </p>
-            </div>
+          <div className="mt-8 flex flex-col items-center gap-4 lg:flex-row lg:items-start lg:justify-center lg:gap-6">
+            <div className="w-full max-w-3xl rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50/40 via-white to-emerald-50/30 p-4 shadow-inner">
+              <div className="mb-3 space-y-1">
+                <p className="text-sm font-semibold text-emerald-900">
+                  {t("profilePage.accountActionsTitle")}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t("profilePage.accountActionsDesc")}
+                </p>
+              </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="h-full w-full justify-start gap-3 rounded-lg border-emerald-200 bg-white/80 text-emerald-900 shadow-sm hover:bg-emerald-50"
-                  >
-                    <Lock className="h-4 w-4 text-emerald-700" />
-                    <span className="flex flex-col items-start gap-0.5">
-                      <span className="text-sm font-semibold">
-                        {t("profilePage.changePassword")}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Dialog open={open} onOpenChange={setOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="h-full w-full justify-start gap-3 rounded-lg border-emerald-200 bg-white/80 text-emerald-900 shadow-sm hover:bg-emerald-50"
+                    >
+                      <Lock className="h-4 w-4 text-emerald-700" />
+                      <span className="flex flex-col items-start gap-0.5">
+                        <span className="text-sm font-semibold">
+                          {t("profilePage.changePassword")}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {t("profilePage.changePasswordTitle")}
+                        </span>
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>
                         {t("profilePage.changePasswordTitle")}
-                      </span>
-                    </span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>{t("profilePage.changePasswordTitle")}</DialogTitle>
-                  </DialogHeader>
-                  <form
-                    onSubmit={passwordForm.handleSubmit((v) =>
-                      passwordMutation.mutate(v)
-                    )}
-                    className="space-y-4"
-                  >
-                    <Input
-                      type="password"
-                      {...passwordForm.register("oldPassword")}
-                      placeholder={t("profilePage.oldPasswordLabel")}
-                    />
-                    <Input
-                      type="password"
-                      {...passwordForm.register("newPassword")}
-                      placeholder={t("profilePage.newPasswordLabel")}
-                    />
-                    <Button type="submit" className="w-full">
-                      {t("profilePage.savePassword")}
-                    </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                      </DialogTitle>
+                    </DialogHeader>
+                    <form
+                      onSubmit={passwordForm.handleSubmit((v) =>
+                        passwordMutation.mutate(v)
+                      )}
+                      className="space-y-4"
+                    >
+                      <Input
+                        type="password"
+                        {...passwordForm.register("oldPassword")}
+                        placeholder={t("profilePage.oldPasswordLabel")}
+                      />
+                      <Input
+                        type="password"
+                        {...passwordForm.register("newPassword")}
+                        placeholder={t("profilePage.newPasswordLabel")}
+                      />
+                      <Button type="submit" className="w-full">
+                        {t("profilePage.savePassword")}
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
 
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="h-full w-full justify-start gap-3 rounded-lg border-red-200 bg-white/80 text-red-800 shadow-sm hover:bg-red-50"
-                  >
-                    <ShieldOff className="h-4 w-4 text-red-600" />
-                    <span className="flex flex-col items-start gap-0.5">
-                      <span className="text-sm font-semibold">
-                        {t("profilePage.delete")}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="h-full w-full justify-start gap-3 rounded-lg border-red-200 bg-white/80 text-red-800 shadow-sm hover:bg-red-50"
+                    >
+                      <ShieldOff className="h-4 w-4 text-red-600" />
+                      <span className="flex flex-col items-start gap-0.5">
+                        <span className="text-sm font-semibold">
+                          {t("profilePage.delete")}
+                        </span>
+                        <span className="text-xs text-red-700 opacity-90">
+                          {t("profilePage.deleteTitle")}
+                        </span>
                       </span>
-                      <span className="text-xs text-red-700 opacity-90">
-                        {t("profilePage.deleteTitle")}
-                      </span>
-                    </span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>{t("profilePage.deleteTitle")}</DialogTitle>
-                  </DialogHeader>
-                  <form
-                    onSubmit={deleteForm.handleSubmit((v) =>
-                      deleteMutation.mutate(v)
-                    )}
-                    className="space-y-4"
-                  >
-                    <Input
-                      type="password"
-                      {...deleteForm.register("password")}
-                      placeholder={t("profilePage.deletePasswordLabel")}
-                    />
-                    <Button variant="destructive" type="submit" className="w-full">
-                      {t("profilePage.delete")}
                     </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{t("profilePage.deleteTitle")}</DialogTitle>
+                    </DialogHeader>
+                    <form
+                      onSubmit={deleteForm.handleSubmit((v) =>
+                        deleteMutation.mutate(v)
+                      )}
+                      className="space-y-4"
+                    >
+                      <Input
+                        type="password"
+                        {...deleteForm.register("password")}
+                        placeholder={t("profilePage.deletePasswordLabel")}
+                      />
+                      <Button
+                        variant="destructive"
+                        type="submit"
+                        className="w-full"
+                      >
+                        {t("profilePage.delete")}
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
+
+            {!isEditing && (
+              <Button
+                variant="outline"
+                className="w-full max-w-xs justify-start gap-3 rounded-lg border-emerald-200 bg-white/90 px-6 py-5 text-emerald-900 shadow-sm hover:bg-emerald-50 lg:self-stretch"
+                onClick={() => setIsEditing(true)}
+              >
+                <span className="flex flex-col items-start gap-1">
+                  <span className="text-sm font-semibold">
+                    {t("profilePage.edit")}
+                  </span>
+                  <span className="text-xs text-muted-foreground leading-relaxed">
+                    {t("profilePage.updateProfile")}
+                  </span>
+                </span>
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
