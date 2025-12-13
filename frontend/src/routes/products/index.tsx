@@ -19,8 +19,6 @@ import { Input } from "@/components/ui/input";
 import { PRODUCT_CATEGORIES, getCategoryLabel } from "@/lib/productCategories";
 import type { PaginatedResponse } from "@/types/pagination";
 import {
-  ArrowUpNarrowWide,
-  ArrowDownWideNarrow,
   Store,
   Apple,
   Carrot,
@@ -31,6 +29,7 @@ import {
   Package,
   Search,
   Filter,
+  ListFilter,
 } from "lucide-react";
 
 const SORT_OPTIONS = ["newest", "price", "rating", "popular"] as const;
@@ -310,7 +309,7 @@ function ProductsPage() {
               />
               <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             </div>
-            <div className="flex flex-wrap gap-2 sm:justify-end">
+            <div className="grid w-full grid-cols-[1fr_auto] gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-2">
               <Select
                 value={sort}
                 onValueChange={(v) => handleSortChange(v as SortOption)}
@@ -335,17 +334,15 @@ function ProductsPage() {
               </Select>
               <Button
                 variant="outline"
-                size="icon-sm"
-                className={`${order === "asc" ? "bg-primary/5 border-primary text-primary" : ""}`}
+                size="icon"
+                className="h-9 w-9 justify-center"
                 onClick={toggleOrder}
                 aria-label={t("productsPage.orderDirection")}
                 title={`${t("productsPage.orderDirection")}: ${t(`productsPage.orderOptions.${order}`)}`}
               >
-                {order === "asc" ? (
-                  <ArrowUpNarrowWide className="h-4 w-4" />
-                ) : (
-                  <ArrowDownWideNarrow className="h-4 w-4" />
-                )}
+                <ListFilter
+                  className={`h-5 w-5 transition-transform ${order === "asc" ? "rotate-180" : ""}`}
+                />
               </Button>
             </div>
           </div>
