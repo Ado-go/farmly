@@ -728,6 +728,8 @@
     "items": "Items",
     "sectionEmpty": "No orders in this section.",
     "searchPlaceholder": "Search by order number",
+    "filterByStatus": "Filter by status",
+    "filterStatusAll": "All statuses",
     "page": "Page",
     "prev": "Previous",
     "next": "Next",

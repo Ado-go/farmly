@@ -728,6 +728,8 @@
     "items": "Položky",
     "sectionEmpty": "Žiadne objednávky v tejto sekcii.",
     "searchPlaceholder": "Hľadať podľa čísla objednávky",
+    "filterByStatus": "Filtrovať podľa stavu",
+    "filterStatusAll": "Všetky stavy",
     "page": "Strana",
     "prev": "Predchádzajúca",
     "next": "Ďalšia",

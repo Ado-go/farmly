@@ -6,6 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -24,9 +31,11 @@ import type {
 } from "@/types/orders";
 
 type CancelTarget = { id: number; type: "STANDARD" | "PREORDER" };
+type StatusFilter = "all" | OrderStatus;
 
 const statusSteps: OrderStatus[] = ["PENDING", "ONWAY", "COMPLETED"];
 const PAGE_SIZE = 4;
+const STATUS_FILTER_OPTIONS: OrderStatus[] = ["PENDING", "ONWAY", "COMPLETED", "CANCELED"];
 
 export default function SalesTab() {
   const { t } = useTranslation();
@@ -34,6 +43,8 @@ export default function SalesTab() {
   const [cancelTarget, setCancelTarget] = useState<CancelTarget | null>(null);
   const [searchSales, setSearchSales] = useState("");
   const [searchEventSales, setSearchEventSales] = useState("");
+  const [salesFilter, setSalesFilter] = useState<StatusFilter>("all");
+  const [eventSalesFilter, setEventSalesFilter] = useState<StatusFilter>("all");
   const [salesPage, setSalesPage] = useState(1);
   const [eventSalesPage, setEventSalesPage] = useState(1);
 
@@ -78,18 +89,24 @@ export default function SalesTab() {
 
   const filteredSales = useMemo(() => {
     const term = searchSales.toLowerCase().trim();
-    return (sales ?? []).filter((o) => o.orderNumber.toLowerCase().includes(term));
-  }, [sales, searchSales]);
+    const bySearch = (sales ?? []).filter((o) =>
+      o.orderNumber.toLowerCase().includes(term)
+    );
+    return filterByStatus(bySearch, salesFilter);
+  }, [sales, searchSales, salesFilter]);
 
   const filteredEventSales = useMemo(() => {
     const term = searchEventSales.toLowerCase().trim();
-    return (eventSales ?? []).filter((o) =>
+    const bySearch = (eventSales ?? []).filter((o) =>
       o.orderNumber.toLowerCase().includes(term)
     );
-  }, [eventSales, searchEventSales]);
+    return filterByStatus(bySearch, eventSalesFilter);
+  }, [eventSales, searchEventSales, eventSalesFilter]);
 
   useEffect(() => setSalesPage(1), [searchSales]);
   useEffect(() => setEventSalesPage(1), [searchEventSales]);
+  useEffect(() => setSalesPage(1), [salesFilter]);
+  useEffect(() => setEventSalesPage(1), [eventSalesFilter]);
 
   useEffect(() => {
     const totalPages = Math.max(1, Math.ceil(filteredSales.length / PAGE_SIZE));
@@ -145,6 +162,8 @@ export default function SalesTab() {
           type="STANDARD"
           searchTerm={searchSales}
           onSearchChange={setSearchSales}
+          statusFilter={salesFilter}
+          onStatusFilterChange={setSalesFilter}
           onCancel={setCancelTarget}
           statusLabels={statusLabels}
           isCanceling={isCanceling}
@@ -161,6 +180,8 @@ export default function SalesTab() {
           type="PREORDER"
           searchTerm={searchEventSales}
           onSearchChange={setSearchEventSales}
+          statusFilter={eventSalesFilter}
+          onStatusFilterChange={setEventSalesFilter}
           onCancel={setCancelTarget}
           statusLabels={statusLabels}
           isCanceling={isCanceling}
@@ -209,6 +230,8 @@ type SalesSectionProps = {
   type: CancelTarget["type"];
   searchTerm: string;
   onSearchChange: (val: string) => void;
+  statusFilter: StatusFilter;
+  onStatusFilterChange: (val: StatusFilter) => void;
   onCancel: (target: CancelTarget) => void;
   statusLabels: Record<string, string>;
   isCanceling: boolean;
@@ -225,6 +248,8 @@ function SalesSection({
   type,
   searchTerm,
   onSearchChange,
+  statusFilter,
+  onStatusFilterChange,
   onCancel,
   statusLabels,
   isCanceling,
@@ -235,19 +260,39 @@ function SalesSection({
   return (
     <section className="space-y-3 rounded-2xl border border-blue-50 bg-gradient-to-br from-white to-blue-50/50 p-4 shadow-sm">
       <div className="flex flex-col gap-3">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
               {title}
             </p>
             <p className="text-sm text-muted-foreground">{description}</p>
           </div>
-          <Input
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={t("ordersPage.searchPlaceholder")}
-            className="h-9 max-w-[220px]"
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <Select
+              value={statusFilter}
+              onValueChange={(val) => onStatusFilterChange(val as StatusFilter)}
+            >
+              <SelectTrigger className="h-9 w-[200px]">
+                <SelectValue placeholder={t("ordersPage.filterByStatus")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  {t("ordersPage.filterStatusAll")}
+                </SelectItem>
+                {STATUS_FILTER_OPTIONS.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {statusLabels[status] ?? status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
+              value={searchTerm}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder={t("ordersPage.searchPlaceholder")}
+              className="h-9 w-[220px]"
+            />
+          </div>
         </div>
       </div>
 
@@ -505,7 +550,7 @@ function StatusProgress({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg bg-white/70 p-3 ring-1 ring-blue-100">
+    <div className="flex flex-wrap items-center gap-3 rounded-lg bg-white/70 p-3 ring-1 ring-primary/15">
       {statusSteps.map((step, index) => {
         const active = currentIndex >= index;
         const passed = currentIndex > index;
@@ -513,11 +558,11 @@ function StatusProgress({
         return (
           <div key={step} className="flex items-center gap-2">
             <span
-              className={`h-2.5 w-2.5 rounded-full ${active ? "bg-blue-600" : "bg-muted-foreground/30"}`}
+              className={`h-2.5 w-2.5 rounded-full ${active ? "bg-primary" : "bg-muted-foreground/30"}`}
             />
             <span
               className={`text-xs font-medium ${
-                active ? "text-blue-700" : "text-muted-foreground"
+                active ? "text-primary" : "text-muted-foreground"
               }`}
             >
               {labels[step] ?? step}
@@ -525,7 +570,7 @@ function StatusProgress({
             {index < statusSteps.length - 1 && (
               <span
                 className={`h-px w-10 ${
-                  passed ? "bg-blue-500" : "bg-muted-foreground/20"
+                  passed ? "bg-primary/70" : "bg-muted-foreground/20"
                 }`}
               />
             )}
@@ -579,6 +624,18 @@ function getPaymentLabel(method: string | undefined, t: (key: string) => string)
 function paginate<T>(items: T[], page: number, pageSize: number) {
   const start = (page - 1) * pageSize;
   return { items: items.slice(start, start + pageSize) };
+}
+
+function filterByStatus<T extends { status?: OrderStatus }>(
+  items: T[],
+  status: StatusFilter
+) {
+  if (status === "all") return items;
+
+  const target = status.toUpperCase();
+  return items.filter(
+    (item) => (item.status ?? "").toUpperCase() === target
+  );
 }
 
 function PaginationBar({

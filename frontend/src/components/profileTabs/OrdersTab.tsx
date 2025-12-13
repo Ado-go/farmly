@@ -5,6 +5,13 @@ import { useTranslation } from "react-i18next";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -24,9 +31,11 @@ import type {
 } from "@/types/orders";
 
 type CancelTarget = { id: number; type: "STANDARD" | "PREORDER" };
+type StatusFilter = "all" | OrderStatus;
 
 const statusSteps: OrderStatus[] = ["PENDING", "ONWAY", "COMPLETED"];
 const PAGE_SIZE = 4;
+const STATUS_FILTER_OPTIONS: OrderStatus[] = ["PENDING", "ONWAY", "COMPLETED", "CANCELED"];
 
 export default function OrdersTab() {
   const { t } = useTranslation();
@@ -34,6 +43,8 @@ export default function OrdersTab() {
   const [cancelTarget, setCancelTarget] = useState<CancelTarget | null>(null);
   const [searchOrders, setSearchOrders] = useState("");
   const [searchPreorders, setSearchPreorders] = useState("");
+  const [ordersFilter, setOrdersFilter] = useState<StatusFilter>("all");
+  const [preordersFilter, setPreordersFilter] = useState<StatusFilter>("all");
   const [ordersPage, setOrdersPage] = useState(1);
   const [preordersPage, setPreordersPage] = useState(1);
 
@@ -76,20 +87,24 @@ export default function OrdersTab() {
 
   const filteredOrders = useMemo(() => {
     const term = searchOrders.toLowerCase().trim();
-    return (orders ?? []).filter((o) =>
+    const bySearch = (orders ?? []).filter((o) =>
       o.orderNumber.toLowerCase().includes(term)
     );
-  }, [orders, searchOrders]);
+    return filterByStatus(bySearch, ordersFilter);
+  }, [orders, searchOrders, ordersFilter]);
 
   const filteredPreorders = useMemo(() => {
     const term = searchPreorders.toLowerCase().trim();
-    return (preorders ?? []).filter((o) =>
+    const bySearch = (preorders ?? []).filter((o) =>
       o.orderNumber.toLowerCase().includes(term)
     );
-  }, [preorders, searchPreorders]);
+    return filterByStatus(bySearch, preordersFilter);
+  }, [preorders, searchPreorders, preordersFilter]);
 
   useEffect(() => setOrdersPage(1), [searchOrders]);
   useEffect(() => setPreordersPage(1), [searchPreorders]);
+  useEffect(() => setOrdersPage(1), [ordersFilter]);
+  useEffect(() => setPreordersPage(1), [preordersFilter]);
 
   useEffect(() => {
     const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
@@ -105,11 +120,7 @@ export default function OrdersTab() {
   }, [filteredPreorders.length]);
 
   const paginatedOrders = paginate(filteredOrders, ordersPage, PAGE_SIZE);
-  const paginatedPreorders = paginate(
-    filteredPreorders,
-    preordersPage,
-    PAGE_SIZE
-  );
+  const paginatedPreorders = paginate(filteredPreorders, preordersPage, PAGE_SIZE);
 
   if (isLoading) return <p>{t("ordersPage.loading")}</p>;
   if (hasNoOrders)
@@ -146,6 +157,8 @@ export default function OrdersTab() {
           type="STANDARD"
           searchTerm={searchOrders}
           onSearchChange={setSearchOrders}
+          statusFilter={ordersFilter}
+          onStatusFilterChange={setOrdersFilter}
           statusLabels={statusLabels}
           onCancel={setCancelTarget}
           isCanceling={
@@ -164,6 +177,8 @@ export default function OrdersTab() {
           type="PREORDER"
           searchTerm={searchPreorders}
           onSearchChange={setSearchPreorders}
+          statusFilter={preordersFilter}
+          onStatusFilterChange={setPreordersFilter}
           statusLabels={statusLabels}
           onCancel={setCancelTarget}
           isCanceling={
@@ -213,6 +228,8 @@ type OrderSectionProps = {
   type: CancelTarget["type"];
   searchTerm: string;
   onSearchChange: (val: string) => void;
+  statusFilter: StatusFilter;
+  onStatusFilterChange: (val: StatusFilter) => void;
   statusLabels: Record<string, string>;
   onCancel: (target: CancelTarget) => void;
   isCanceling: boolean;
@@ -229,6 +246,8 @@ function OrderSection({
   type,
   searchTerm,
   onSearchChange,
+  statusFilter,
+  onStatusFilterChange,
   statusLabels,
   onCancel,
   isCanceling,
@@ -239,7 +258,7 @@ function OrderSection({
   return (
     <section className="space-y-3 rounded-2xl border border-emerald-50 bg-gradient-to-br from-white to-emerald-50/40 p-4 shadow-sm">
       <div className="flex flex-col gap-3">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
               {title}
@@ -247,12 +266,33 @@ function OrderSection({
             <p className="text-sm text-muted-foreground">{description}</p>
           </div>
 
-          <Input
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={t("ordersPage.searchPlaceholder")}
-            className="h-9 max-w-[220px]"
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <Select
+              value={statusFilter}
+              onValueChange={(val) => onStatusFilterChange(val as StatusFilter)}
+            >
+              <SelectTrigger className="h-9 w-[200px]">
+                <SelectValue placeholder={t("ordersPage.filterByStatus")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  {t("ordersPage.filterStatusAll")}
+                </SelectItem>
+                {STATUS_FILTER_OPTIONS.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {statusLabels[status] ?? status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Input
+              value={searchTerm}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder={t("ordersPage.searchPlaceholder")}
+              className="h-9 w-[220px]"
+            />
+          </div>
         </div>
       </div>
 
@@ -396,6 +436,18 @@ function getDestinationLines(
   ].filter(Boolean);
 
   return address.length ? address : [t("ordersPage.deliveryUnknown")];
+}
+
+function filterByStatus<T extends { status?: OrderStatus }>(
+  items: T[],
+  status: StatusFilter
+) {
+  if (status === "all") return items;
+
+  const target = status.toUpperCase();
+  return items.filter(
+    (item) => (item.status ?? "").toUpperCase() === target
+  );
 }
 
 function StatusBadge({
