@@ -103,7 +103,9 @@ export function EventsSection({
               params={{ id: String(event.id) }}
               className="group block h-full"
             >
-              <Card className={`h-full ${gradientCard} p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg`}>
+              <Card
+                className={`flex h-full flex-col ${gradientCard} p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg`}
+              >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 text-sm font-medium text-primary">
                     <CalendarDays className="h-4 w-4" />
@@ -122,7 +124,7 @@ export function EventsSection({
                 <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
                   {event.description || noDescriptionText}
                 </p>
-                <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="mt-auto flex items-center gap-2 pt-4 text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4 text-secondary" />
                   <span>
                     {[event.city, event.region].filter(Boolean).join(", ")}

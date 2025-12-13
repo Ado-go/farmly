@@ -58,17 +58,23 @@ function HomePage() {
   } = useQuery<PaginatedResponse<FarmProduct>>({
     queryKey: ["home-products"],
     queryFn: () =>
-      apiFetch(
-        "/public-farm-products?page=1&limit=3&sort=newest&order=desc"
-      ),
+      apiFetch("/public-farm-products?page=1&limit=3&sort=newest&order=desc"),
   });
 
   const events = eventsData?.items ?? [];
   const products = productsData?.items ?? [];
 
   const statsItems: StatItem[] = [
-    { icon: Sprout, label: t("homePage.metricsFarmers"), value: stats?.farmers },
-    { icon: Package, label: t("homePage.metricsPreorders"), value: stats?.preorders },
+    {
+      icon: Sprout,
+      label: t("homePage.metricsFarmers"),
+      value: stats?.farmers,
+    },
+    {
+      icon: Package,
+      label: t("homePage.metricsPreorders"),
+      value: stats?.preorders,
+    },
     { icon: Leaf, label: t("homePage.metricsOrders"), value: stats?.orders },
   ];
 
@@ -76,7 +82,10 @@ function HomePage() {
     typeof value === "number" ? numberFormatter.format(value) : "–";
 
   const formatDateRange = (startDate: string, endDate: string) => {
-    const fmt = new Intl.DateTimeFormat(locale, { day: "2-digit", month: "short" });
+    const fmt = new Intl.DateTimeFormat(locale, {
+      day: "2-digit",
+      month: "short",
+    });
     const start = fmt.format(new Date(startDate));
     const end = fmt.format(new Date(endDate));
     return start === end ? start : `${start} – ${end}`;
@@ -133,7 +142,6 @@ function HomePage() {
           />
 
           <TipsPanel
-            label={t("homePage.sideLabel")}
             title={t("homePage.sideTitle")}
             description={t("homePage.sideDescription")}
             tips={tipTexts}
