@@ -241,21 +241,21 @@ function RootLayout() {
                       <Link to="/profile">{t("profile")}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/offers/my">{t("my_offers")}</Link>
+                      <Link to="/offers/my">{t("myOffers")}</Link>
                     </DropdownMenuItem>
                     {user.role === "FARMER" && (
                       <DropdownMenuItem asChild>
-                        <Link to="/farm">{t("my_farms")}</Link>
+                        <Link to="/farm">{t("myFarms")}</Link>
                       </DropdownMenuItem>
                     )}
                     {user.role === "FARMER" && (
                       <DropdownMenuItem asChild>
-                        <Link to="/event">{t("my_events")}</Link>
+                        <Link to="/event">{t("myEvents")}</Link>
                       </DropdownMenuItem>
                     )}
                     {user.role === "FARMER" && (
                       <DropdownMenuItem asChild>
-                        <Link to="/farmer-stats">{t("farmer_stats")}</Link>
+                        <Link to="/farmer-stats">{t("farmerStats")}</Link>
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem asChild>

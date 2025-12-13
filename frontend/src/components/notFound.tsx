@@ -19,12 +19,12 @@ export function NotFound() {
           </div>
 
           <h1 className="text-4xl font-semibold tracking-tight text-foreground">
-            {t("page_not_found")}
+            {t("pageNotFound")}
           </h1>
 
           <div className="flex justify-center">
             <Button asChild>
-              <Link to="/">{t("go_home")}</Link>
+              <Link to="/">{t("goHome")}</Link>
             </Button>
           </div>
 

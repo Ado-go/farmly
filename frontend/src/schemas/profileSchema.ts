@@ -1,16 +1,16 @@
 import { z } from "zod";
 
 export const updateProfileSchema = z.object({
-  name: z.string().trim().min(1, "registerPage.name_min"),
+  name: z.string().trim().min(1, "registerPage.nameMin"),
   phone: z
     .string()
     .trim()
-    .min(1, "registerPage.phone_min")
-    .regex(/^\+?\d{6,15}$/, "registerPage.phone_invalid"),
-  address: z.string().trim().min(1, "registerPage.address_min"),
-  postalCode: z.string().trim().min(1, "registerPage.postal_min"),
-  city: z.string().trim().min(1, "registerPage.city_min"),
-  country: z.string().trim().min(1, "registerPage.country_min"),
+    .min(1, "registerPage.phoneMin")
+    .regex(/^\+?\d{6,15}$/, "registerPage.phoneInvalid"),
+  address: z.string().trim().min(1, "registerPage.addressMin"),
+  postalCode: z.string().trim().min(1, "registerPage.postalMin"),
+  city: z.string().trim().min(1, "registerPage.cityMin"),
+  country: z.string().trim().min(1, "registerPage.countryMin"),
 });
 
 export const deleteProfileSchema = z.object({

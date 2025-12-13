@@ -58,12 +58,12 @@ function LoginPage() {
         const message = (mutation.error as Error).message || "";
         const normalized = message.toLowerCase();
         if (normalized.includes("invalid or revoked refresh token")) {
-          return t("loginPage.invalid_credentials");
+          return t("loginPage.invalidCredentials");
         }
         if (normalized.includes("unauthorized") || normalized.includes("401")) {
-          return t("loginPage.invalid_credentials");
+          return t("loginPage.invalidCredentials");
         }
-        return message || t("loginPage.invalid_credentials");
+        return message || t("loginPage.invalidCredentials");
       })()
     : null;
 
@@ -86,7 +86,7 @@ function LoginPage() {
                       Farmly
                     </p>
                     <p className="text-lg font-semibold">
-                      {t("loginPage.welcome_back")}
+                      {t("loginPage.welcomeBack")}
                     </p>
                   </div>
                 </div>
@@ -97,9 +97,9 @@ function LoginPage() {
 
                 <div className="relative grid gap-4">
                   {[
-                    { icon: ShieldCheck, label: t("loginPage.benefit_fresh") },
-                    { icon: Sparkles, label: t("loginPage.benefit_plan") },
-                    { icon: Lock, label: t("loginPage.benefit_support") },
+                    { icon: ShieldCheck, label: t("loginPage.benefitFresh") },
+                    { icon: Sparkles, label: t("loginPage.benefitPlan") },
+                    { icon: Lock, label: t("loginPage.benefitSupport") },
                   ].map((item, idx) => (
                     <div
                       key={idx}
@@ -126,7 +126,7 @@ function LoginPage() {
                       Farmly
                     </p>
                     <p className="text-base font-semibold">
-                      {t("loginPage.welcome_back")}
+                      {t("loginPage.welcomeBack")}
                     </p>
                   </div>
                 </div>
@@ -156,7 +156,7 @@ function LoginPage() {
                 className="mt-6 space-y-5"
               >
                 <Field className="space-y-2">
-                  <Label htmlFor="email">{t("loginPage.email_label")}</Label>
+                  <Label htmlFor="email">{t("loginPage.emailLabel")}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -172,7 +172,7 @@ function LoginPage() {
 
                 <Field className="space-y-2">
                   <Label htmlFor="password">
-                    {t("loginPage.password_label")}
+                    {t("loginPage.passwordLabel")}
                   </Label>
                   <Input
                     id="password"
@@ -208,7 +208,7 @@ function LoginPage() {
 
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">
-                        {t("loginPage.cta_register_question")}
+                        {t("loginPage.ctaRegisterQuestion")}
                       </span>
                       <Button
                         variant="secondary"
@@ -216,7 +216,7 @@ function LoginPage() {
                         className="h-10 px-3 text-sm shadow-md"
                       >
                         <Link to="/register">
-                          {t("loginPage.cta_register_button")}
+                          {t("loginPage.ctaRegisterButton")}
                         </Link>
                       </Button>
                     </div>

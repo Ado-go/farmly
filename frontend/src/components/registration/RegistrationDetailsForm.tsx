@@ -29,20 +29,20 @@ export function RegistrationDetailsForm({
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-base font-semibold text-foreground">
-            {t("registerPage.details_title")}
+            {t("registerPage.detailsTitle")}
           </p>
           <p className="text-sm text-muted-foreground">
-            {t("registerPage.details_description")}
+            {t("registerPage.detailsDescription")}
           </p>
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field className="space-y-2">
-          <Label htmlFor="name">{t("registerPage.name_label")}</Label>
+          <Label htmlFor="name">{t("registerPage.nameLabel")}</Label>
           <Input
             id="name"
-            placeholder={t("registerPage.name_placeholder")}
+            placeholder={t("registerPage.namePlaceholder")}
             className="h-11 border-primary/25 bg-white shadow-sm focus:border-primary/50 focus-visible:ring-primary"
             {...register("name")}
           />
@@ -52,10 +52,10 @@ export function RegistrationDetailsForm({
         </Field>
 
         <Field className="space-y-2">
-          <Label htmlFor="phone">{t("registerPage.phone_label")}</Label>
+          <Label htmlFor="phone">{t("registerPage.phoneLabel")}</Label>
           <Input
             id="phone"
-            placeholder={t("registerPage.phone_placeholder")}
+            placeholder={t("registerPage.phonePlaceholder")}
             className="h-11 border-primary/25 bg-white shadow-sm focus:border-primary/50 focus-visible:ring-primary"
             {...register("phone")}
           />
@@ -65,11 +65,11 @@ export function RegistrationDetailsForm({
         </Field>
 
         <Field className="space-y-2 sm:col-span-2">
-          <Label htmlFor="email">{t("registerPage.email_label")}</Label>
+          <Label htmlFor="email">{t("registerPage.emailLabel")}</Label>
           <Input
             id="email"
             type="email"
-            placeholder={t("registerPage.email_placeholder")}
+            placeholder={t("registerPage.emailPlaceholder")}
             className="h-11 border-primary/25 bg-white shadow-sm focus:border-primary/50 focus-visible:ring-primary"
             {...register("email")}
           />
@@ -79,10 +79,10 @@ export function RegistrationDetailsForm({
         </Field>
 
         <Field className="space-y-2 sm:col-span-2">
-          <Label htmlFor="address">{t("registerPage.address_label")}</Label>
+          <Label htmlFor="address">{t("registerPage.addressLabel")}</Label>
           <Input
             id="address"
-            placeholder={t("registerPage.address_placeholder")}
+            placeholder={t("registerPage.addressPlaceholder")}
             className="h-11 border-primary/25 bg-white shadow-sm focus:border-primary/50 focus-visible:ring-primary"
             {...register("address")}
           />
@@ -92,10 +92,10 @@ export function RegistrationDetailsForm({
         </Field>
 
         <Field className="space-y-2">
-          <Label htmlFor="postalCode">{t("registerPage.postal_label")}</Label>
+          <Label htmlFor="postalCode">{t("registerPage.postalLabel")}</Label>
           <Input
             id="postalCode"
-            placeholder={t("registerPage.postal_placeholder")}
+            placeholder={t("registerPage.postalPlaceholder")}
             className="h-11 border-primary/25 bg-white shadow-sm focus:border-primary/50 focus-visible:ring-primary"
             {...register("postalCode")}
           />
@@ -107,10 +107,10 @@ export function RegistrationDetailsForm({
         </Field>
 
         <Field className="space-y-2">
-          <Label htmlFor="city">{t("registerPage.city_label")}</Label>
+          <Label htmlFor="city">{t("registerPage.cityLabel")}</Label>
           <Input
             id="city"
-            placeholder={t("registerPage.city_placeholder")}
+            placeholder={t("registerPage.cityPlaceholder")}
             className="h-11 border-primary/25 bg-white shadow-sm focus:border-primary/50 focus-visible:ring-primary"
             {...register("city")}
           />
@@ -120,10 +120,10 @@ export function RegistrationDetailsForm({
         </Field>
 
         <Field className="space-y-2">
-          <Label htmlFor="country">{t("registerPage.country_label")}</Label>
+          <Label htmlFor="country">{t("registerPage.countryLabel")}</Label>
           <Input
             id="country"
-            placeholder={t("registerPage.country_placeholder")}
+            placeholder={t("registerPage.countryPlaceholder")}
             className="h-11 border-primary/25 bg-white shadow-sm focus:border-primary/50 focus-visible:ring-primary"
             {...register("country")}
           />
@@ -133,11 +133,11 @@ export function RegistrationDetailsForm({
         </Field>
 
         <Field className="space-y-2">
-          <Label htmlFor="password">{t("registerPage.password_label")}</Label>
+          <Label htmlFor="password">{t("registerPage.passwordLabel")}</Label>
           <Input
             id="password"
             type="password"
-            placeholder={t("registerPage.password_placeholder")}
+            placeholder={t("registerPage.passwordPlaceholder")}
             className="h-11 border-primary/25 bg-white shadow-sm focus:border-primary/50 focus-visible:ring-primary"
             {...register("password")}
           />

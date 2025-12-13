@@ -81,7 +81,7 @@ function PaymentCancelledPage() {
                   {isRetrying ? t("payment.redirecting") : t("payment.retry")}
                 </Button>
                 <Button asChild variant="outline" className="min-w-[180px]">
-                  <Link to="/">{t("go_home")}</Link>
+                  <Link to="/">{t("goHome")}</Link>
                 </Button>
               </div>
             </div>

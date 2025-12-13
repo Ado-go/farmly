@@ -199,52 +199,52 @@ export default function ProfileTab() {
 
   const readOnlyFields = (
     <div className="grid gap-4 md:grid-cols-2">
-      <Field label={t("profilePage.name_label")} value={user?.name} />
-      <Field label={t("profilePage.email_label")} value={user?.email} />
-      <Field label={t("profilePage.phone_label")} value={user?.phone} />
+      <Field label={t("profilePage.nameLabel")} value={user?.name} />
+      <Field label={t("profilePage.emailLabel")} value={user?.email} />
+      <Field label={t("profilePage.phoneLabel")} value={user?.phone} />
       <Field
-        label={t("profilePage.role_label")}
+        label={t("profilePage.roleLabel")}
         value={roleLabel || user?.role}
       />
-      <Field label={t("profilePage.address_label")} value={user?.address} />
-      <Field label={t("profilePage.city_label")} value={user?.city} />
-      <Field label={t("profilePage.postal_label")} value={user?.postalCode} />
-      <Field label={t("profilePage.country_label")} value={user?.country} />
+      <Field label={t("profilePage.addressLabel")} value={user?.address} />
+      <Field label={t("profilePage.cityLabel")} value={user?.city} />
+      <Field label={t("profilePage.postalLabel")} value={user?.postalCode} />
+      <Field label={t("profilePage.countryLabel")} value={user?.country} />
     </div>
   );
 
   const editableFields = (
     <div className="grid gap-4 md:grid-cols-2">
-      <Field label={t("profilePage.name_label")} editing value={user?.name}>
+      <Field label={t("profilePage.nameLabel")} editing value={user?.name}>
         <Input {...updateForm.register("name")} />
       </Field>
-      <Field label={t("profilePage.email_label")} value={user?.email} />
-      <Field label={t("profilePage.phone_label")} editing value={user?.phone}>
+      <Field label={t("profilePage.emailLabel")} value={user?.email} />
+      <Field label={t("profilePage.phoneLabel")} editing value={user?.phone}>
         <Input {...updateForm.register("phone")} />
       </Field>
       <Field
-        label={t("profilePage.role_label")}
+        label={t("profilePage.roleLabel")}
         value={roleLabel || user?.role}
       />
       <Field
-        label={t("profilePage.address_label")}
+        label={t("profilePage.addressLabel")}
         editing
         value={user?.address}
       >
         <Input {...updateForm.register("address")} />
       </Field>
-      <Field label={t("profilePage.city_label")} editing value={user?.city}>
+      <Field label={t("profilePage.cityLabel")} editing value={user?.city}>
         <Input {...updateForm.register("city")} />
       </Field>
       <Field
-        label={t("profilePage.postal_label")}
+        label={t("profilePage.postalLabel")}
         editing
         value={user?.postalCode}
       >
         <Input {...updateForm.register("postalCode")} />
       </Field>
       <Field
-        label={t("profilePage.country_label")}
+        label={t("profilePage.countryLabel")}
         editing
         value={user?.country}
       >
@@ -263,7 +263,7 @@ export default function ProfileTab() {
                 {avatarPreview ? (
                   <img
                     src={avatarPreview}
-                    alt={t("profilePage.photo_label")}
+                    alt={t("profilePage.photoLabel")}
                     className="h-full w-full object-cover"
                   />
                 ) : (
@@ -293,7 +293,7 @@ export default function ProfileTab() {
                   variant="default"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  {t("profilePage.photo_upload")}
+                  {t("profilePage.photoUpload")}
                 </Button>
                 {(avatarPreview || removeAvatar) && (
                   <Button
@@ -301,7 +301,7 @@ export default function ProfileTab() {
                     variant="ghost"
                     onClick={handleRemoveAvatar}
                   >
-                    {t("profilePage.photo_remove")}
+                    {t("profilePage.photoRemove")}
                   </Button>
                 )}
               </div>

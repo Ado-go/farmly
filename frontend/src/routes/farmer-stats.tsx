@@ -88,7 +88,7 @@ function FarmerStatsPage() {
           </CardHeader>
           <CardContent className="flex justify-center">
             <Button asChild variant="outline">
-              <Link to="/">{t("go_home")}</Link>
+              <Link to="/">{t("goHome")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -223,7 +223,7 @@ function FarmerStatsPage() {
                 {t("farmerStatsPage.empty")}
               </p>
               <Button asChild>
-                <Link to="/farm">{t("my_farms")}</Link>
+                <Link to="/farm">{t("myFarms")}</Link>
               </Button>
             </CardContent>
           </Card>

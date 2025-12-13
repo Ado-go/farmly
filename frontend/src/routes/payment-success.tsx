@@ -63,7 +63,7 @@ function PaymentSuccessPage() {
 
               <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Button asChild className="min-w-[180px]">
-                  <Link to="/">{t("go_home")}</Link>
+                  <Link to="/">{t("goHome")}</Link>
                 </Button>
               </div>
             </div>

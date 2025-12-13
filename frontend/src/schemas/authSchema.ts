@@ -4,35 +4,35 @@ export const loginSchema = z.object({
   email: z
     .string()
     .trim()
-    .min(1, "loginPage.required_email")
-    .email("loginPage.invalid_email"),
-  password: z.string().trim().min(1, "loginPage.required_password"),
+    .min(1, "loginPage.requiredEmail")
+    .email("loginPage.invalidEmail"),
+  password: z.string().trim().min(1, "loginPage.requiredPassword"),
 });
 
 export type LoginForm = z.infer<typeof loginSchema>;
 
 export const registerSchema = z.object({
-  name: z.string().trim().min(1, "registerPage.name_min"),
+  name: z.string().trim().min(1, "registerPage.nameMin"),
   phone: z
     .string()
     .trim()
-    .min(1, "registerPage.phone_min")
-    .regex(/^\+?\d{6,15}$/, "registerPage.phone_invalid"),
-  address: z.string().trim().min(1, "registerPage.address_min"),
-  postalCode: z.string().trim().min(1, "registerPage.postal_min"),
-  city: z.string().trim().min(1, "registerPage.city_min"),
-  country: z.string().trim().min(1, "registerPage.country_min"),
+    .min(1, "registerPage.phoneMin")
+    .regex(/^\+?\d{6,15}$/, "registerPage.phoneInvalid"),
+  address: z.string().trim().min(1, "registerPage.addressMin"),
+  postalCode: z.string().trim().min(1, "registerPage.postalMin"),
+  city: z.string().trim().min(1, "registerPage.cityMin"),
+  country: z.string().trim().min(1, "registerPage.countryMin"),
   email: z
     .string()
     .trim()
-    .min(1, "registerPage.email_required")
-    .email("registerPage.email_invalid"),
+    .min(1, "registerPage.emailRequired")
+    .email("registerPage.emailInvalid"),
   password: z
     .string()
     .trim()
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
-      "registerPage.password_min"
+      "registerPage.passwordMin"
     ),
   role: z.enum(["CUSTOMER", "FARMER"]),
 });

@@ -89,24 +89,24 @@ function RegisterPage() {
 
               <RegistrationHero
                 brand={t("farmly")}
-                heading={t("registerPage.hero_heading")}
-                description={t("registerPage.hero_description")}
-                bulletsTitle={t("registerPage.hero_bullets_title")}
+                heading={t("registerPage.heroHeading")}
+                description={t("registerPage.heroDescription")}
+                bulletsTitle={t("registerPage.heroBulletsTitle")}
                 bullets={[
                   {
                     icon: ShoppingBasket,
-                    title: t("registerPage.highlight_shop"),
-                    description: t("registerPage.highlight_shop_desc"),
+                    title: t("registerPage.highlightShop"),
+                    description: t("registerPage.highlightShopDesc"),
                   },
                   {
                     icon: Tractor,
-                    title: t("registerPage.highlight_grow"),
-                    description: t("registerPage.highlight_grow_desc"),
+                    title: t("registerPage.highlightGrow"),
+                    description: t("registerPage.highlightGrowDesc"),
                   },
                   {
                     icon: ShieldCheck,
-                    title: t("registerPage.highlight_trust"),
-                    description: t("registerPage.highlight_trust_desc"),
+                    title: t("registerPage.highlightTrust"),
+                    description: t("registerPage.highlightTrustDesc"),
                   },
                 ]}
               />
@@ -124,24 +124,24 @@ function RegisterPage() {
 
               <div className="mt-6 space-y-6">
                 <RoleSelection
-                  label={t("registerPage.role_label")}
-                  description={t("registerPage.role_step_description")}
+                  label={t("registerPage.roleLabel")}
+                  description={t("registerPage.roleStepDescription")}
                   activeLabel={
                     selectedRole === "FARMER"
-                      ? t("registerPage.role_farmer")
-                      : t("registerPage.role_customer")
+                      ? t("registerPage.roleFarmer")
+                      : t("registerPage.roleCustomer")
                   }
                   roles={[
                     {
                       value: "CUSTOMER",
-                      title: t("registerPage.role_customer"),
-                      description: t("registerPage.role_customer_desc"),
+                      title: t("registerPage.roleCustomer"),
+                      description: t("registerPage.roleCustomerDesc"),
                       icon: ShoppingBasket,
                     },
                     {
                       value: "FARMER",
-                      title: t("registerPage.role_farmer"),
-                      description: t("registerPage.role_farmer_desc"),
+                      title: t("registerPage.roleFarmer"),
+                      description: t("registerPage.roleFarmerDesc"),
                       icon: Tractor,
                     },
                   ]}
