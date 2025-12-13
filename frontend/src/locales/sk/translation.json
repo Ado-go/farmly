@@ -189,6 +189,8 @@
     "saving": "Ukladám...",
     "cancel": "Zrušiť",
     "delete": "Zmazať účet",
+    "accountActionsTitle": "Bezpečnosť a prístup",
+    "accountActionsDesc": "Aktualizuj heslo alebo natrvalo odstráň svoj účet.",
     "deleteTitle": "Potvrdiť zmazanie účtu",
     "deletePasswordLabel": "Zadajte svoje heslo pre potvrdenie",
     "updateSuccess": "Profil bol úspešne aktualizovaný",

@@ -10,7 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "@tanstack/react-router";
 import { apiFetch } from "@/lib/api";
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { User as UserIcon } from "lucide-react";
+import { Lock, ShieldOff, User } from "lucide-react";
 
 const updateProfileSchema = z.object({
   name: z.string().trim().min(1, "registerPage.name_min"),
@@ -292,7 +292,7 @@ export default function ProfileTab() {
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-emerald-100 text-emerald-700">
-                    <UserIcon className="h-8 w-8" />
+                    <User className="h-8 w-8" />
                   </div>
                 )}
               </div>
@@ -371,85 +371,104 @@ export default function ProfileTab() {
               </div>
             </>
           )}
+
+          <div className="mt-8 max-w-2xl rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50/40 via-white to-emerald-50/30 p-4 shadow-inner">
+            <div className="mb-3 space-y-1">
+              <p className="text-sm font-semibold text-emerald-900">
+                {t("profilePage.accountActionsTitle")}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t("profilePage.accountActionsDesc")}
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-full w-full justify-start gap-3 rounded-lg border-emerald-200 bg-white/80 text-emerald-900 shadow-sm hover:bg-emerald-50"
+                  >
+                    <Lock className="h-4 w-4 text-emerald-700" />
+                    <span className="flex flex-col items-start gap-0.5">
+                      <span className="text-sm font-semibold">
+                        {t("profilePage.changePassword")}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {t("profilePage.changePasswordTitle")}
+                      </span>
+                    </span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{t("profilePage.changePasswordTitle")}</DialogTitle>
+                  </DialogHeader>
+                  <form
+                    onSubmit={passwordForm.handleSubmit((v) =>
+                      passwordMutation.mutate(v)
+                    )}
+                    className="space-y-4"
+                  >
+                    <Input
+                      type="password"
+                      {...passwordForm.register("oldPassword")}
+                      placeholder={t("profilePage.oldPasswordLabel")}
+                    />
+                    <Input
+                      type="password"
+                      {...passwordForm.register("newPassword")}
+                      placeholder={t("profilePage.newPasswordLabel")}
+                    />
+                    <Button type="submit" className="w-full">
+                      {t("profilePage.savePassword")}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-full w-full justify-start gap-3 rounded-lg border-red-200 bg-white/80 text-red-800 shadow-sm hover:bg-red-50"
+                  >
+                    <ShieldOff className="h-4 w-4 text-red-600" />
+                    <span className="flex flex-col items-start gap-0.5">
+                      <span className="text-sm font-semibold">
+                        {t("profilePage.delete")}
+                      </span>
+                      <span className="text-xs text-red-700 opacity-90">
+                        {t("profilePage.deleteTitle")}
+                      </span>
+                    </span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{t("profilePage.deleteTitle")}</DialogTitle>
+                  </DialogHeader>
+                  <form
+                    onSubmit={deleteForm.handleSubmit((v) =>
+                      deleteMutation.mutate(v)
+                    )}
+                    className="space-y-4"
+                  >
+                    <Input
+                      type="password"
+                      {...deleteForm.register("password")}
+                      placeholder={t("profilePage.deletePasswordLabel")}
+                    />
+                    <Button variant="destructive" type="submit" className="w-full">
+                      {t("profilePage.delete")}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
         </CardContent>
       </Card>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Card className="bg-secondary cursor-pointer border-muted-200 transition hover:-translate-y-0.5 hover:shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-base">
-                  {t("profilePage.changePassword")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                {t("profilePage.changePasswordTitle")}
-              </CardContent>
-            </Card>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t("profilePage.changePasswordTitle")}</DialogTitle>
-            </DialogHeader>
-            <form
-              onSubmit={passwordForm.handleSubmit((v) =>
-                passwordMutation.mutate(v)
-              )}
-              className="space-y-4"
-            >
-              <Input
-                type="password"
-                {...passwordForm.register("oldPassword")}
-                placeholder={t("profilePage.oldPasswordLabel")}
-              />
-              <Input
-                type="password"
-                {...passwordForm.register("newPassword")}
-                placeholder={t("profilePage.newPasswordLabel")}
-              />
-              <Button type="submit" className="w-full">
-                {t("profilePage.savePassword")}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <Card className="cursor-pointer border-red-200/80 bg-destructive transition hover:-translate-y-0.5 hover:shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-base text-white">
-                  {t("profilePage.delete")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-white">
-                {t("profilePage.deleteTitle")}
-              </CardContent>
-            </Card>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t("profilePage.deleteTitle")}</DialogTitle>
-            </DialogHeader>
-            <form
-              onSubmit={deleteForm.handleSubmit((v) =>
-                deleteMutation.mutate(v)
-              )}
-              className="space-y-4"
-            >
-              <Input
-                type="password"
-                {...deleteForm.register("password")}
-                placeholder={t("profilePage.deletePasswordLabel")}
-              />
-              <Button variant="destructive" type="submit" className="w-full">
-                {t("profilePage.delete")}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
     </div>
   );
 }

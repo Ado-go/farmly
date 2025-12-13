@@ -189,6 +189,8 @@
     "saving": "Saving...",
     "cancel": "Cancel",
     "delete": "Delete Account",
+    "accountActionsTitle": "Security & access",
+    "accountActionsDesc": "Update your password or permanently delete your account.",
     "deleteTitle": "Confirm Account Deletion",
     "deletePasswordLabel": "Enter your password to confirm",
     "updateSuccess": "Profile updated successfully",
