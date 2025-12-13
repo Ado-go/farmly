@@ -305,7 +305,7 @@ function OffersMyPage() {
     );
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-6xl space-y-8 p-6">
         <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-emerald-50 via-white to-lime-50 p-6 shadow-sm">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(34,197,94,0.08),transparent_38%),radial-gradient(circle_at_85%_10%,rgba(251,191,36,0.1),transparent_32%)]" />
