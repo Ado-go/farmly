@@ -116,7 +116,37 @@ npm run test
 
 ```
 farmly/
-├─ backend/   # Express + Prisma API
-├─ frontend/  # React + TanStack Router + Tailwind
-├─ package.json  # Root scripts for installing & running
+├─ backend/                     # Express + Prisma API
+│  ├─ src/
+│  │  ├─ routes/               # Auth, checkout, events, farms, offers, reviews, uploads
+│  │  ├─ middleware/           # Auth guard, error handler, Multer upload helpers
+│  │  ├─ schemas/              # Zod validation for API payloads
+│  │  ├─ constants/            # Shared constants (product categories)
+│  │  ├─ utils/                # Pagination helpers, email sending
+│  │  ├─ emailTemplates/       # Transactional email HTML
+│  │  ├─ types/                # Express typings and shared types
+│  │  ├─ __tests__/            # Backend tests (routes, middleware, utils)
+│  │  ├─ prisma.ts             # Prisma client instance
+│  │  └─ index.ts              # Express app bootstrap
+│  ├─ prisma/
+│  │  ├─ schema.prisma         # Database schema
+│  │  ├─ migrations/           # Generated SQL migrations
+│  │  └─ seed/                 # seed.ts + clear.ts scripts
+│  ├─ jest.config.ts           # Backend Jest configuration
+│  └─ package.json             # Backend scripts and deps
+├─ frontend/                    # React + TanStack Router + Tailwind
+│  ├─ src/
+│  │  ├─ routes/               # Route files (auth, cart, checkout, orders, profile, events…)
+│  │  ├─ components/           # UI primitives + feature components
+│  │  ├─ context/              # Auth/Cart providers
+│  │  ├─ schemas/              # Zod schemas for forms
+│  │  ├─ lib/                  # API client, i18n, helpers, enums
+│  │  ├─ locales/              # Translations (en, sk)
+│  │  ├─ constants/            # Static data (regions)
+│  │  ├─ css/                  # Global styles
+│  │  └─ types/                # Shared TypeScript models
+│  ├─ index.html               # Vite entry HTML
+│  ├─ vite.config.ts           # Vite + Tailwind setup
+│  └─ package.json             # Frontend scripts and deps
+└─ package.json                 # Root scripts orchestrating both apps
 ```
