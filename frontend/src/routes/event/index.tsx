@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import DatePicker from "@/components/date-picker";
@@ -24,6 +24,7 @@ import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@/types/event";
 import { ImageUploader, type UploadedImage } from "@/components/ImageUploader";
 import type { TFunction } from "i18next";
+import { PaginationControls } from "@/components/PaginationControls";
 import {
   Field,
   FieldContent,
@@ -41,6 +42,7 @@ import {
 import { REGION_OPTIONS } from "@/constants/regions";
 
 const EVENT_LIMIT = 5;
+const EVENTS_PAGE_SIZE = 6;
 
 const buildEventSchema = (t: TFunction) => {
   const dateField = (msgKey: string) =>
@@ -78,6 +80,9 @@ function EventPage() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [images, setImages] = useState<UploadedImage[]>([]);
+  const [myPage, setMyPage] = useState(1);
+  const [joinedPage, setJoinedPage] = useState(1);
+  const [otherPage, setOtherPage] = useState(1);
   const schema = useMemo(() => buildEventSchema(t), [t]);
   const inputTone =
     "bg-white/80 border-emerald-100 focus-visible:ring-emerald-200 focus:border-emerald-400";
@@ -152,6 +157,75 @@ function EventPage() {
     },
   });
 
+  const eventsList = events ?? [];
+  const myEvents = eventsList.filter((e) => e.organizer.id === user?.id);
+  const joinedEvents = eventsList.filter(
+    (e) =>
+      e.participants.some((p) => p.id === user?.id) &&
+      e.organizer.id !== user?.id
+  );
+  const otherEvents = eventsList.filter(
+    (e) =>
+      e.organizer.id !== user?.id &&
+      !e.participants.some((p) => p.id === user?.id)
+  );
+
+  const myTotalPages = Math.max(
+    1,
+    Math.ceil((myEvents.length || 0) / EVENTS_PAGE_SIZE)
+  );
+  const joinedTotalPages = Math.max(
+    1,
+    Math.ceil((joinedEvents.length || 0) / EVENTS_PAGE_SIZE)
+  );
+  const otherTotalPages = Math.max(
+    1,
+    Math.ceil((otherEvents.length || 0) / EVENTS_PAGE_SIZE)
+  );
+
+  const paginatedMyEvents = myEvents.slice(
+    (myPage - 1) * EVENTS_PAGE_SIZE,
+    myPage * EVENTS_PAGE_SIZE
+  );
+  const paginatedJoinedEvents = joinedEvents.slice(
+    (joinedPage - 1) * EVENTS_PAGE_SIZE,
+    joinedPage * EVENTS_PAGE_SIZE
+  );
+  const paginatedOtherEvents = otherEvents.slice(
+    (otherPage - 1) * EVENTS_PAGE_SIZE,
+    otherPage * EVENTS_PAGE_SIZE
+  );
+
+  useEffect(() => {
+    if (myPage > myTotalPages) setMyPage(myTotalPages);
+  }, [myPage, myTotalPages]);
+
+  useEffect(() => {
+    if (joinedPage > joinedTotalPages) setJoinedPage(joinedTotalPages);
+  }, [joinedPage, joinedTotalPages]);
+
+  useEffect(() => {
+    if (otherPage > otherTotalPages) setOtherPage(otherTotalPages);
+  }, [otherPage, otherTotalPages]);
+
+  const clampPage = (next: number, total: number) =>
+    Math.min(Math.max(1, next), total);
+
+  const handleMyPageChange = (next: number) => {
+    const clamped = clampPage(next, myTotalPages);
+    if (clamped !== myPage) setMyPage(clamped);
+  };
+
+  const handleJoinedPageChange = (next: number) => {
+    const clamped = clampPage(next, joinedTotalPages);
+    if (clamped !== joinedPage) setJoinedPage(clamped);
+  };
+
+  const handleOtherPageChange = (next: number) => {
+    const clamped = clampPage(next, otherTotalPages);
+    if (clamped !== otherPage) setOtherPage(clamped);
+  };
+
   if (isLoading)
     return (
       <div className="flex justify-center items-center h-64 text-gray-500">
@@ -166,18 +240,6 @@ function EventPage() {
       </div>
     );
 
-  const myEvents = events.filter((e) => e.organizer.id === user?.id);
-  const joinedEvents = events.filter(
-    (e) =>
-      e.participants.some((p) => p.id === user?.id) &&
-      e.organizer.id !== user?.id
-  );
-  const otherEvents = events.filter(
-    (e) =>
-      e.organizer.id !== user?.id &&
-      !e.participants.some((p) => p.id === user?.id)
-  );
-
   const usedSlots = myEvents.length;
   const limitReached = usedSlots >= EVENT_LIMIT;
   const remainingSlots = Math.max(0, EVENT_LIMIT - usedSlots);
@@ -191,7 +253,19 @@ function EventPage() {
     createEvent.mutate(data);
   };
 
-  const Section = ({ title, items }: { title: string; items: Event[] }) => (
+  const Section = ({
+    title,
+    items,
+    page,
+    totalPages,
+    onPageChange,
+  }: {
+    title: string;
+    items: Event[];
+    page?: number;
+    totalPages?: number;
+    onPageChange?: (page: number) => void;
+  }) => (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <h2 className="text-xl font-semibold">{title}</h2>
@@ -202,74 +276,88 @@ function EventPage() {
           {t("eventPage.noEvents")}
         </p>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((event) => {
-            const cover =
-              event.images?.[0]?.optimizedUrl || event.images?.[0]?.url;
-            return (
-              <Card
-                key={event.id}
-                onClick={() =>
-                  navigate({
-                    to: "/event/$id",
-                    params: { id: String(event.id) },
-                  })
-                }
-                className="group cursor-pointer hover:-translate-y-0.5 hover:shadow-lg transition overflow-hidden border-2 border-transparent hover:border-emerald-100"
-              >
-                {cover ? (
-                  <img
-                    src={cover}
-                    alt={event.title}
-                    className="h-36 w-full object-cover"
-                  />
-                ) : (
-                  <div className="h-36 w-full bg-muted flex items-center justify-center text-muted-foreground text-sm">
-                    {t("eventsDetail.noImage")}
-                  </div>
-                )}
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg leading-tight">
-                    {event.title}
-                  </CardTitle>
-                  <p className="text-xs text-muted-foreground">
-                    {format(new Date(event.startDate), "dd.MM.yyyy")} •{" "}
-                    {event.city}
-                  </p>
-                </CardHeader>
-                <CardContent className="text-sm space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-md bg-emerald-50 text-emerald-800 px-2 py-1 text-xs font-semibold">
-                      {event.region}
+        <>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {items.map((event) => {
+              const cover =
+                event.images?.[0]?.optimizedUrl || event.images?.[0]?.url;
+              return (
+                <Card
+                  key={event.id}
+                  onClick={() =>
+                    navigate({
+                      to: "/event/$id",
+                      params: { id: String(event.id) },
+                    })
+                  }
+                  className="group cursor-pointer hover:-translate-y-0.5 hover:shadow-lg transition overflow-hidden border-2 border-transparent hover:border-emerald-100"
+                >
+                  {cover ? (
+                    <img
+                      src={cover}
+                      alt={event.title}
+                      className="h-36 w-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-36 w-full bg-muted flex items-center justify-center text-muted-foreground text-sm">
+                      {t("eventsDetail.noImage")}
                     </div>
-                    <div className="rounded-md bg-slate-50 text-slate-700 px-2 py-1 text-xs font-semibold text-right">
-                      {t("eventPage.participants")}: {event.participants.length}
+                  )}
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg leading-tight">
+                      {event.title}
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(event.startDate), "dd.MM.yyyy")} •{" "}
+                      {event.city}
+                    </p>
+                  </CardHeader>
+                  <CardContent className="text-sm space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="rounded-md bg-emerald-50 text-emerald-800 px-2 py-1 text-xs font-semibold">
+                        {event.region}
+                      </div>
+                      <div className="rounded-md bg-slate-50 text-slate-700 px-2 py-1 text-xs font-semibold text-right">
+                        {t("eventPage.participants")}:{" "}
+                        {event.participants.length}
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-muted-foreground flex justify-between text-xs">
-                    <span>
-                      {t("eventPage.from")}:{" "}
-                      {format(new Date(event.startDate), "dd.MM.yyyy HH:mm")}
-                    </span>
-                    <span>
-                      {t("eventPage.to")}:{" "}
-                      {format(new Date(event.endDate), "dd.MM.yyyy HH:mm")}
-                    </span>
-                  </div>
-                  <div className="flex justify-end">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-emerald-700 hover:text-emerald-800"
-                    >
-                      {t("eventPage.openDetail")}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                    <div className="text-muted-foreground flex justify-between text-xs">
+                      <span>
+                        {t("eventPage.from")}:{" "}
+                        {format(new Date(event.startDate), "dd.MM.yyyy HH:mm")}
+                      </span>
+                      <span>
+                        {t("eventPage.to")}:{" "}
+                        {format(new Date(event.endDate), "dd.MM.yyyy HH:mm")}
+                      </span>
+                    </div>
+                    <div className="flex justify-end">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-emerald-700 hover:text-emerald-800"
+                      >
+                        {t("eventPage.openDetail")}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {totalPages && totalPages > 1 && onPageChange ? (
+            <PaginationControls
+              page={page ?? 1}
+              totalPages={totalPages}
+              onPageChange={onPageChange}
+              prevLabel={t("pagination.previous")}
+              nextLabel={t("pagination.next")}
+              className="pt-2"
+            />
+          ) : null}
+        </>
       )}
     </div>
   );
@@ -579,9 +667,27 @@ function EventPage() {
         </div>
       </div>
 
-      <Section title={t("eventPage.myEvents")} items={myEvents} />
-      <Section title={t("eventPage.joinedEvents")} items={joinedEvents} />
-      <Section title={t("eventPage.otherEvents")} items={otherEvents} />
+      <Section
+        title={t("eventPage.myEvents")}
+        items={paginatedMyEvents}
+        page={myPage}
+        totalPages={myTotalPages}
+        onPageChange={handleMyPageChange}
+      />
+      <Section
+        title={t("eventPage.joinedEvents")}
+        items={paginatedJoinedEvents}
+        page={joinedPage}
+        totalPages={joinedTotalPages}
+        onPageChange={handleJoinedPageChange}
+      />
+      <Section
+        title={t("eventPage.otherEvents")}
+        items={paginatedOtherEvents}
+        page={otherPage}
+        totalPages={otherTotalPages}
+        onPageChange={handleOtherPageChange}
+      />
     </div>
   );
 }

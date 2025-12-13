@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { FarmHeader, type FarmFormData } from "@/components/farm/FarmHeader";
 import { FarmProductEditDialog } from "@/components/farm/FarmProductEditDialog";
@@ -17,10 +17,13 @@ import {
 } from "@/components/ui/dialog";
 import type { Farm, FarmProduct } from "@/types/farm";
 import type { UploadedImage } from "@/components/ImageUploader";
+import { PaginationControls } from "@/components/PaginationControls";
 
 export const Route = createFileRoute("/farm/$id")({
   component: FarmDetailPage,
 });
+
+const FARM_PRODUCTS_PAGE_SIZE = 6;
 
 function FarmDetailPage() {
   const { id } = Route.useParams();
@@ -34,6 +37,7 @@ function FarmDetailPage() {
   );
   const [showEdit, setShowEdit] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [page, setPage] = useState(1);
 
   // Queries
   const {
@@ -53,6 +57,29 @@ function FarmDetailPage() {
     queryKey: ["farmProducts", id],
     queryFn: async () => await apiFetch(`/farm-product/farm/${id}`),
   });
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil((farmProducts?.length ?? 0) / FARM_PRODUCTS_PAGE_SIZE)
+  );
+
+  const paginatedProducts = farmProducts.slice(
+    (page - 1) * FARM_PRODUCTS_PAGE_SIZE,
+    page * FARM_PRODUCTS_PAGE_SIZE
+  );
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
+
+  const handlePageChange = (nextPage: number) => {
+    const clamped = Math.min(Math.max(1, nextPage), totalPages);
+    if (clamped !== page) {
+      setPage(clamped);
+    }
+  };
 
   // Mutations
   const editFarm = useMutation({
@@ -139,60 +166,73 @@ function FarmDetailPage() {
           {t("farmPage.noProducts")}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {farmProducts.map((fp) => (
-            <div
-              key={fp.id}
-              className="group rounded-2xl border border-emerald-100 bg-gradient-to-br from-white via-emerald-50/30 to-white p-4 shadow-sm cursor-pointer transition hover:-translate-y-1 hover:shadow-md"
-              onClick={() => {
-                setSelectedProduct(fp);
-                setShowEdit(true);
-              }}
-            >
-              <div className="relative mb-3 overflow-hidden rounded-xl border border-emerald-50">
-                {fp.product.images?.[0] ? (
-                  <img
-                    src={fp.product.images[0].url}
-                    alt={fp.product.name}
-                    className="h-32 w-full object-cover transition duration-300 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="h-32 w-full bg-gray-100 text-gray-500 flex items-center justify-center">
-                    {t("farmPage.noImage")}
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {paginatedProducts.map((fp) => (
+              <div
+                key={fp.id}
+                className="group rounded-2xl border border-emerald-100 bg-gradient-to-br from-white via-emerald-50/30 to-white p-4 shadow-sm cursor-pointer transition hover:-translate-y-1 hover:shadow-md"
+                onClick={() => {
+                  setSelectedProduct(fp);
+                  setShowEdit(true);
+                }}
+              >
+                <div className="relative mb-3 overflow-hidden rounded-xl border border-emerald-50">
+                  {fp.product.images?.[0] ? (
+                    <img
+                      src={fp.product.images[0].url}
+                      alt={fp.product.name}
+                      className="h-32 w-full object-cover transition duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="h-32 w-full bg-gray-100 text-gray-500 flex items-center justify-center">
+                      {t("farmPage.noImage")}
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent" />
+                  {fp.isAvailable === false && (
+                    <div className="absolute left-2 top-2 rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white shadow">
+                      {t("product.unavailable")}
+                    </div>
+                  )}
+                  <div className="absolute bottom-2 right-2 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-emerald-700 shadow-sm backdrop-blur">
+                    {fp.price} €
                   </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent" />
-                {fp.isAvailable === false && (
-                  <div className="absolute left-2 top-2 rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white shadow">
-                    {t("product.unavailable")}
-                  </div>
-                )}
-                <div className="absolute bottom-2 right-2 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-emerald-700 shadow-sm backdrop-blur">
-                  {fp.price} €
+                </div>
+                <h3 className="font-semibold text-lg text-emerald-900">
+                  {fp.product.name}
+                </h3>
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {fp.product.description ||
+                    t(`productCategories.${fp.product.category}`, {
+                      defaultValue: fp.product.category,
+                    })}
+                </p>
+                <div className="flex items-center justify-between pt-3 text-sm">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700">
+                    {t("product.stock")}: {fp.stock}
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100/70 px-3 py-1 text-xs font-semibold text-emerald-900">
+                    {t(`productCategories.${fp.product.category}`, {
+                      defaultValue: fp.product.category,
+                    })}
+                  </span>
                 </div>
               </div>
-              <h3 className="font-semibold text-lg text-emerald-900">
-                {fp.product.name}
-              </h3>
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {fp.product.description ||
-                  t(`productCategories.${fp.product.category}`, {
-                    defaultValue: fp.product.category,
-                  })}
-              </p>
-              <div className="flex items-center justify-between pt-3 text-sm">
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700">
-                  {t("product.stock")}: {fp.stock}
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100/70 px-3 py-1 text-xs font-semibold text-emerald-900">
-                  {t(`productCategories.${fp.product.category}`, {
-                    defaultValue: fp.product.category,
-                  })}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          {farmProducts.length > FARM_PRODUCTS_PAGE_SIZE ? (
+            <PaginationControls
+              page={page}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              prevLabel={t("pagination.previous")}
+              nextLabel={t("pagination.next")}
+              className="pt-2"
+            />
+          ) : null}
+        </>
       )}
 
       <FarmProductEditDialog

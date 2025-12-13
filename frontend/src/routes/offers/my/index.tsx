@@ -45,10 +45,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FieldError } from "@/components/ui/field";
+import { PaginationControls } from "@/components/PaginationControls";
 
 export const Route = createFileRoute("/offers/my/")({
   component: OffersMyPage,
 });
+
+const OFFERS_PAGE_SIZE = 6;
 
 const nonNegativeNumber = (requiredKey: string, minKey: string) =>
   z
@@ -100,6 +103,7 @@ function OffersMyPage() {
   const [open, setOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
   const [images, setImages] = useState<UploadedImage[]>([]);
+  const [page, setPage] = useState(1);
 
   const {
     data: offers = [],
@@ -293,6 +297,27 @@ function OffersMyPage() {
     setImages([]);
     form.reset();
     setOpen(true);
+  };
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil((offers?.length ?? 0) / OFFERS_PAGE_SIZE)
+  );
+
+  const paginatedOffers = offers.slice(
+    (page - 1) * OFFERS_PAGE_SIZE,
+    page * OFFERS_PAGE_SIZE
+  );
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
+
+  const handlePageChange = (nextPage: number) => {
+    const clamped = Math.min(Math.max(1, nextPage), totalPages);
+    if (clamped !== page) setPage(clamped);
   };
 
   if (isLoading)
@@ -552,96 +577,109 @@ function OffersMyPage() {
             <p className="text-muted-foreground">{t("offersPage.noOffers")}</p>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {offers.map((offer) => (
-              <Card
-                key={offer.id}
-                className="group relative overflow-hidden border-primary/15 bg-white/80 p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div className="absolute inset-x-4 top-0 h-1 rounded-b-full bg-gradient-to-r from-primary via-emerald-500 to-amber-400 opacity-80" />
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="space-y-1">
-                      <h3 className="text-lg font-semibold text-slate-900">
-                        {offer.title}
-                      </h3>
-                      {offer.product?.name && (
-                        <p className="text-sm text-muted-foreground">
-                          {offer.product.name}
+          <>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {paginatedOffers.map((offer) => (
+                <Card
+                  key={offer.id}
+                  className="group relative overflow-hidden border-primary/15 bg-white/80 p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="absolute inset-x-4 top-0 h-1 rounded-b-full bg-gradient-to-r from-primary via-emerald-500 to-amber-400 opacity-80" />
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="space-y-1">
+                        <h3 className="text-lg font-semibold text-slate-900">
+                          {offer.title}
+                        </h3>
+                        {offer.product?.name && (
+                          <p className="text-sm text-muted-foreground">
+                            {offer.product.name}
+                          </p>
+                        )}
+                      </div>
+                      <span className="rounded-full border border-primary/25 bg-primary/5 px-2 py-1 text-xs font-medium text-primary">
+                        {offer.product?.category
+                          ? getCategoryLabel(offer.product.category, t)
+                          : t("offersPage.categoryPlaceholder")}
+                      </span>
+                    </div>
+                    <ImageCarousel
+                      images={offer.product?.images ?? []}
+                      height="h-40"
+                      emptyLabel={t("offersPage.noImage")}
+                    />
+                    <div className="flex items-center justify-between">
+                      <p className="text-2xl font-semibold text-slate-900">
+                        {(offer.product?.basePrice ?? 0).toFixed(2)} €
+                      </p>
+                      {offer.product?.description && (
+                        <p className="line-clamp-2 text-xs text-muted-foreground">
+                          {offer.product.description}
                         </p>
                       )}
                     </div>
-                    <span className="rounded-full border border-primary/25 bg-primary/5 px-2 py-1 text-xs font-medium text-primary">
-                      {offer.product?.category
-                        ? getCategoryLabel(offer.product.category, t)
-                        : t("offersPage.categoryPlaceholder")}
-                    </span>
-                  </div>
-                  <ImageCarousel
-                    images={offer.product?.images ?? []}
-                    height="h-40"
-                    emptyLabel={t("offersPage.noImage")}
-                  />
-                  <div className="flex items-center justify-between">
-                    <p className="text-2xl font-semibold text-slate-900">
-                      {(offer.product?.basePrice ?? 0).toFixed(2)} €
-                    </p>
-                    {offer.product?.description && (
-                      <p className="line-clamp-2 text-xs text-muted-foreground">
-                        {offer.product.description}
-                      </p>
-                    )}
-                  </div>
 
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      variant="secondary"
-                      onClick={() => {
-                        setEditingOffer(offer);
-                        setOpen(true);
-                      }}
-                    >
-                      {t("offersPage.edit")}
-                    </Button>
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          setEditingOffer(offer);
+                          setOpen(true);
+                        }}
+                      >
+                        {t("offersPage.edit")}
+                      </Button>
 
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="destructive"
-                          disabled={deleteOffer.isPending}
-                        >
-                          {deleteOffer.isPending
-                            ? t("offersPage.deleting")
-                            : t("offersPage.delete")}
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            {t("offersPage.confirmDeleteTitle")}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {t("offersPage.confirmDeleteText")}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>
-                            {t("offersPage.cancel")}
-                          </AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => deleteOffer.mutate(offer.id)}
-                            className="bg-red-600 hover:bg-red-700"
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            disabled={deleteOffer.isPending}
                           >
-                            {t("offersPage.delete")}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            {deleteOffer.isPending
+                              ? t("offersPage.deleting")
+                              : t("offersPage.delete")}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {t("offersPage.confirmDeleteTitle")}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t("offersPage.confirmDeleteText")}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>
+                              {t("offersPage.cancel")}
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteOffer.mutate(offer.id)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              {t("offersPage.delete")}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              ))}
+            </div>
+
+            {offers.length > OFFERS_PAGE_SIZE ? (
+              <PaginationControls
+                page={page}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                prevLabel={t("pagination.previous")}
+                nextLabel={t("pagination.next")}
+                className="pt-2"
+              />
+            ) : null}
+          </>
         )}
       </div>
     </div>
