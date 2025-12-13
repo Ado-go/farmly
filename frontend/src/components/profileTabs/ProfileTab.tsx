@@ -276,9 +276,6 @@ export default function ProfileTab() {
                 <h2 className="text-2xl font-semibold text-emerald-900">
                   {user?.name || t("profile")}
                 </h2>
-                <p className="text-sm text-muted-foreground break-words">
-                  {user?.email}
-                </p>
                 <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
                   <span className="h-2 w-2 rounded-full bg-emerald-500" />
                   {roleLabel}
