@@ -33,6 +33,7 @@ import type {
 
 type CancelTarget = { id: number; type: "STANDARD" | "PREORDER" };
 type StatusFilter = "all" | OrderStatus;
+type PreorderDateFilter = "all" | "upcoming" | "ongoing" | "past";
 type Translator = (key: string, options?: Record<string, unknown>) => string;
 
 const statusSteps: OrderStatus[] = ["PENDING", "ONWAY", "COMPLETED"];
@@ -46,6 +47,8 @@ export default function OrdersTab() {
   const [searchOrders, setSearchOrders] = useState("");
   const [searchPreorders, setSearchPreorders] = useState("");
   const [ordersFilter, setOrdersFilter] = useState<StatusFilter>("all");
+  const [preordersDateFilter, setPreordersDateFilter] =
+    useState<PreorderDateFilter>("all");
   const [ordersPage, setOrdersPage] = useState(1);
   const [preordersPage, setPreordersPage] = useState(1);
 
@@ -96,14 +99,16 @@ export default function OrdersTab() {
 
   const filteredPreorders = useMemo(() => {
     const term = searchPreorders.toLowerCase().trim();
-    return (preorders ?? []).filter((o) =>
+    const bySearch = (preorders ?? []).filter((o) =>
       o.orderNumber.toLowerCase().includes(term)
     );
-  }, [preorders, searchPreorders]);
+    return filterByPreorderDate(bySearch, preordersDateFilter);
+  }, [preorders, searchPreorders, preordersDateFilter]);
 
   useEffect(() => setOrdersPage(1), [searchOrders]);
   useEffect(() => setPreordersPage(1), [searchPreorders]);
   useEffect(() => setOrdersPage(1), [ordersFilter]);
+  useEffect(() => setPreordersPage(1), [preordersDateFilter]);
 
   useEffect(() => {
     const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
@@ -182,6 +187,8 @@ export default function OrdersTab() {
             cancelOrderMutation.isPending || cancelPreorderMutation.isPending
           }
           showStatusFilter={false}
+          preorderDateFilter={preordersDateFilter}
+          onPreorderDateFilterChange={setPreordersDateFilter}
           t={t}
         />
       </div>
@@ -232,6 +239,8 @@ type OrderSectionProps = {
   statusLabels: Record<string, string>;
   onCancel: (target: CancelTarget) => void;
   isCanceling: boolean;
+  preorderDateFilter?: PreorderDateFilter;
+  onPreorderDateFilterChange?: (val: PreorderDateFilter) => void;
   t: Translator;
 };
 
@@ -251,6 +260,8 @@ function OrderSection({
   statusLabels,
   onCancel,
   isCanceling,
+  preorderDateFilter,
+  onPreorderDateFilterChange,
   t,
 }: OrderSectionProps) {
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -286,6 +297,33 @@ function OrderSection({
                       {statusLabels[status] ?? status}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {type === "PREORDER" && preorderDateFilter && (
+              <Select
+                value={preorderDateFilter}
+                onValueChange={(val) =>
+                  onPreorderDateFilterChange?.(val as PreorderDateFilter)
+                }
+              >
+                <SelectTrigger className="h-9 w-[200px]">
+                  <SelectValue placeholder={t("ordersPage.filterByDate")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    {t("ordersPage.filterDateAll")}
+                  </SelectItem>
+                  <SelectItem value="upcoming">
+                    {t("ordersPage.filterDateUpcoming")}
+                  </SelectItem>
+                  <SelectItem value="ongoing">
+                    {t("ordersPage.filterDateOngoing")}
+                  </SelectItem>
+                  <SelectItem value="past">
+                    {t("ordersPage.filterDatePast")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -469,6 +507,30 @@ function filterByStatus<T extends { status?: OrderStatus }>(
   return items.filter(
     (item) => (item.status ?? "").toUpperCase() === target
   );
+}
+
+function filterByPreorderDate(
+  items: EventOrder[],
+  filter: PreorderDateFilter
+) {
+  if (filter === "all") return items;
+
+  const now = Date.now();
+
+  return items.filter((order) => {
+    const start = order.event?.startDate
+      ? Date.parse(order.event.startDate)
+      : undefined;
+    const end = order.event?.endDate ? Date.parse(order.event.endDate) : start;
+
+    if (!start || Number.isNaN(start)) return true;
+    const effectiveEnd = end && !Number.isNaN(end) ? end : start;
+
+    if (filter === "upcoming") return start > now;
+    if (filter === "ongoing")
+      return start <= now && effectiveEnd >= now;
+    return effectiveEnd < now;
+  });
 }
 
 function formatPreorderDate(
