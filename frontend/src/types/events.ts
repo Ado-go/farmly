@@ -2,6 +2,7 @@ export type EventProduct = {
   id: number;
   price: number;
   stock: number;
+  stallName?: string | null;
   product: {
     id: number;
     name: string;
@@ -11,6 +12,13 @@ export type EventProduct = {
     images?: { url: string }[];
   };
   user: { id: number; name: string };
+};
+
+export type EventAttendee = {
+  id: number;
+  name: string;
+  profileImageUrl?: string | null;
+  stallName?: string | null;
 };
 
 export type Event = {
@@ -23,6 +31,7 @@ export type Event = {
   street?: string;
   region: string;
   organizer: { id: number; name: string };
+  participants?: EventAttendee[];
   eventProducts?: EventProduct[];
   images?: { url: string; optimizedUrl?: string }[];
 };

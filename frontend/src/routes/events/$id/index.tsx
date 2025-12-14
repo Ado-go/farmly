@@ -42,28 +42,51 @@ function EventPageDetail() {
     () => event?.eventProducts ?? [],
     [event?.eventProducts]
   );
+  const stallMap = useMemo(
+    () =>
+      new Map(
+        (event?.participants ?? []).map((p) => {
+          const normalized = p.stallName?.trim();
+          return [p.id, normalized || null];
+        })
+      ),
+    [event?.participants]
+  );
 
   const groupedProducts = useMemo(() => {
     const map = new Map<
       number,
-      { farmerId: number; farmerName: string; products: EventProductDetail[] }
+      {
+        farmerId: number;
+        farmerName: string;
+        stallName?: string | null;
+        products: EventProductDetail[];
+      }
     >();
 
     for (const ep of products) {
+      const stallNameValue = ep.stallName ?? stallMap.get(ep.user.id) ?? null;
+      const normalizedStallName =
+        stallNameValue && typeof stallNameValue === "string"
+          ? stallNameValue.trim() || null
+          : stallNameValue ?? null;
+      const enrichedProduct = { ...ep, stallName: normalizedStallName };
       const existing = map.get(ep.user.id);
       if (existing) {
-        existing.products.push(ep);
+        existing.products.push(enrichedProduct);
+        existing.stallName = existing.stallName ?? normalizedStallName;
       } else {
         map.set(ep.user.id, {
           farmerId: ep.user.id,
           farmerName: ep.user.name,
-          products: [ep],
+          stallName: normalizedStallName,
+          products: [enrichedProduct],
         });
       }
     }
 
     return Array.from(map.values());
-  }, [products]);
+  }, [products, stallMap]);
 
   if (isLoading)
     return (
@@ -108,6 +131,7 @@ function EventPageDetail() {
         productId: ep.product.id,
         productName: ep.product.name,
         sellerName: ep.user.name,
+        stallName: ep.stallName ?? stallMap.get(ep.user.id) ?? undefined,
         unitPrice,
         quantity,
         stock: ep.stock,
@@ -251,7 +275,11 @@ function EventPageDetail() {
                           {group.farmerName}
                         </h4>
                         <p className="text-sm text-gray-500">
-                          {t("eventsDetail.soldBy")} {group.farmerName}
+                          {group.stallName
+                            ? t("eventsDetail.stallLabel", {
+                                stall: group.stallName,
+                              })
+                            : `${t("eventsDetail.soldBy")} ${group.farmerName}`}
                         </p>
                       </div>
                     </div>

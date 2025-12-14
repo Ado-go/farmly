@@ -405,7 +405,8 @@
       "postalCode": "PSČ je povinné",
       "country": "Krajina je povinná",
       "startDate": "Zadaj dátum začiatku",
-      "endDate": "Zadaj dátum konca"
+      "endDate": "Zadaj dátum konca",
+      "stallName": "Názov stánku je povinný"
     },
     "limitTitle": "Limit udalostí",
     "limitRemaining": "Voľné miesta: {{remaining}} / {{limit}}",
@@ -416,6 +417,8 @@
     "newEvent": "Nová udalosť",
     "formIntro": "Vyplň detaily udalosti a pozvi komunitu.",
     "name": "Názov udalosti",
+    "stallName": "Názov stánku",
+    "stallNameRequired": "Zadaj názov stánku.",
     "description": "Popis",
     "images": "Obrázky",
     "city": "Mesto",
@@ -441,9 +444,11 @@
     "to": "Do",
     "organizer": "Organizátor",
     "join": "Pridať sa",
+    "joining": "Pripájam sa...",
     "leave": "Odísť",
     "joined": "Úspešne si sa pridal na udalosť",
     "left": "Úspešne si opustil udalosť",
+    "errorJoining": "Nepodarilo sa pridať na udalosť.",
     "edit": "Upraviť",
     "save": "Uložiť",
     "saving": "Ukladám...",
@@ -535,6 +540,7 @@
     "availableProducts": "Produkty dostupné na udalosti",
     "noProducts": "Na tejto udalosti zatiaľ nie sú žiadne produkty.",
     "soldBy": "Predáva",
+    "stallLabel": "Stánok: {{stall}}",
     "noImage": "Bez obrázka",
     "viewProduct": "Zobraziť detail",
     "productDetailsTitle": "Detail produktu",
@@ -729,6 +735,7 @@
     "statusCanceled": "Zrušená",
     "total": "Celková cena",
     "items": "Položky",
+    "stallLabel": "Stánok",
     "sectionEmpty": "Žiadne objednávky v tejto sekcii.",
     "searchPlaceholder": "Hľadať podľa čísla objednávky",
     "filterByStatus": "Filtrovať podľa stavu",
@@ -798,7 +805,8 @@
     "destination": "Kam doručiť",
     "customer": "Zákazník",
     "payment": "Platba",
-    "itemsHeading": "Položky"
+    "itemsHeading": "Položky",
+    "stallLabel": "Stánok"
   },
   "checkoutPreoderPage": {
     "emptyCart": "Váš košík je prázdny.",

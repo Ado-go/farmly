@@ -223,6 +223,7 @@ model OrderItem {
   sellerName   String
   productName  String
 
+  stallName    String?
   status       OrderItemStatus   @default(ACTIVE)
   createdAt    DateTime          @default(now())
 }
@@ -263,11 +264,12 @@ model Event {
 }
 
 model EventParticipant {
-  id        Int     @id @default(autoincrement())
-  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId   Int
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
+  stallName String   @default("")
   createdAt DateTime @default(now())
 }
 

@@ -6,6 +6,7 @@ export const preorderItemSchema = z.object({
   unitPrice: z.number().min(0),
   productName: z.string().trim().min(1, "Product name is required"),
   sellerName: z.string().trim().min(1, "Seller name is required"),
+  stallName: z.string().trim().min(1).optional(),
 });
 
 export const preorderSchema = z.object({

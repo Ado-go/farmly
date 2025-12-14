@@ -461,6 +461,8 @@ function OrderSection({
                       key={item.id}
                       item={item}
                       canceledLabel={t("ordersPage.statusCanceled")}
+                      stallLabel={t("ordersPage.stallLabel")}
+                      stallName={item.stallName}
                     />
                   ))}
                 </div>
@@ -716,9 +718,13 @@ function InfoGroup({ title, lines }: { title: string; lines: (string | null | un
 function ItemRow({
   item,
   canceledLabel,
+  stallLabel,
+  stallName,
 }: {
   item: OrderItem;
   canceledLabel: string;
+  stallLabel?: string;
+  stallName?: string | null;
 }) {
   const isCanceled = item.status === "CANCELED";
 
@@ -734,6 +740,11 @@ function ItemRow({
         >
           {item.productName}
         </p>
+        {stallName && (
+          <p className="text-[11px] text-emerald-700 break-words">
+            {(stallLabel ?? "Stall") + ": "} {stallName}
+          </p>
+        )}
         <p className="text-xs text-muted-foreground break-words">
           {item.quantity}× {item.unitPrice} €
         </p>

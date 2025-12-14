@@ -13,6 +13,7 @@ export type OrderItem = {
   quantity: number;
   unitPrice: number;
   status: OrderStatus;
+  stallName?: string | null;
 };
 
 export type Buyer = {

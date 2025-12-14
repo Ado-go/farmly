@@ -464,6 +464,8 @@ function SalesSection({
                       item.status === "ACTIVE" &&
                       !preorderEnded
                     }
+                    stallLabel={t("salesPage.stallLabel")}
+                    stallName={item.stallName}
                   />
                 ))}
               </div>
@@ -498,6 +500,8 @@ function ItemRow({
   canceledLabel,
   isCanceling,
   canCancel,
+  stallLabel,
+  stallName,
 }: {
   item: OrderItem;
   onCancel: () => void;
@@ -505,6 +509,8 @@ function ItemRow({
   canceledLabel: string;
   isCanceling: boolean;
   canCancel: boolean;
+  stallLabel?: string;
+  stallName?: string | null;
 }) {
   const isCanceled = item.status === "CANCELED";
 
@@ -518,6 +524,11 @@ function ItemRow({
         >
           {item.productName}
         </p>
+        {stallName && (
+          <p className="text-[11px] text-blue-700 break-words">
+            {(stallLabel ?? "Stall") + ": "} {stallName}
+          </p>
+        )}
         <p className="text-xs text-muted-foreground break-words">
           {item.quantity}× {item.unitPrice} €
         </p>

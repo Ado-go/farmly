@@ -57,6 +57,7 @@ router.get("/:orderNumber", async (req, res) => {
         quantity: i.quantity,
         unitPrice: i.unitPrice,
         sellerName: i.sellerName,
+        stallName: i.stallName,
         status: i.status,
       })),
     });

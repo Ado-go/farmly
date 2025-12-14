@@ -13,6 +13,7 @@ const dateField = (t: TFunction, msgKey: string) =>
 export const buildEventSchema = (t: TFunction) =>
   z.object({
     title: z.string().trim().min(1, t("eventPage.errors.title")),
+    stallName: z.string().trim().min(1, t("eventPage.errors.stallName")),
     description: z.string().trim().optional(),
     startDate: dateField(t, "eventPage.errors.startDate"),
     endDate: dateField(t, "eventPage.errors.endDate"),

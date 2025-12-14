@@ -405,7 +405,8 @@
       "postalCode": "Postal code is required",
       "country": "Country is required",
       "startDate": "Please choose a start date",
-      "endDate": "Please choose an end date"
+      "endDate": "Please choose an end date",
+      "stallName": "Stall name is required"
     },
     "limitTitle": "Event limit",
     "limitRemaining": "Slots left: {{remaining}} / {{limit}}",
@@ -416,6 +417,8 @@
     "newEvent": "New Event",
     "formIntro": "Fill in the details to invite people to your event.",
     "name": "Event Name",
+    "stallName": "Stall name",
+    "stallNameRequired": "Please enter your stall name.",
     "description": "Description",
     "images": "Images",
     "city": "City",
@@ -441,9 +444,11 @@
     "to": "To",
     "organizer": "Organizer",
     "join": "Join",
+    "joining": "Joining...",
     "leave": "Leave",
     "joined": "You have successfully joined the event",
     "left": "You have successfully left the event",
+    "errorJoining": "Failed to join the event.",
     "edit": "Edit",
     "save": "Save",
     "saving": "Saving...",
@@ -535,6 +540,7 @@
     "availableProducts": "Products available at this event",
     "noProducts": "There are no products available for this event yet.",
     "soldBy": "Sold by",
+    "stallLabel": "Stall: {{stall}}",
     "noImage": "No image",
     "viewProduct": "View details",
     "productDetailsTitle": "Product details",
@@ -729,6 +735,7 @@
     "statusCanceled": "Canceled",
     "total": "Total",
     "items": "Items",
+    "stallLabel": "Stall",
     "sectionEmpty": "No orders in this section.",
     "searchPlaceholder": "Search by order number",
     "filterByStatus": "Filter by status",
@@ -798,7 +805,8 @@
     "destination": "Destination",
     "customer": "Customer",
     "payment": "Payment",
-    "itemsHeading": "Items"
+    "itemsHeading": "Items",
+    "stallLabel": "Stall"
   },
   "checkoutPreoderPage": {
     "emptyCart": "Your cart is empty.",

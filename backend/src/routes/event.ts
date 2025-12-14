@@ -33,9 +33,12 @@ router.post(
           .json({ message: "You can create a maximum of 5 events." });
       }
 
-      const { images = [], ...eventData } = req.body as {
+      const { images = [], stallName, ...eventData } = req.body as {
         images?: { url: string; publicId: string }[];
+        stallName: string;
       } & Omit<Prisma.EventCreateInput, "organizer" | "images">;
+
+      const normalizedStallName = stallName?.trim() ?? "";
 
       const createData: Prisma.EventCreateInput = {
         ...eventData,
@@ -57,6 +60,7 @@ router.post(
         data: {
           eventId: event.id,
           userId: userId!,
+          stallName: normalizedStallName,
         },
       });
 
@@ -102,7 +106,7 @@ router.get(
 
           participants: {
             select: {
-              id: true,
+              stallName: true,
               user: {
                 select: {
                   id: true,
@@ -120,7 +124,10 @@ router.get(
 
       const formatted = events.map((event) => ({
         ...event,
-        participants: event.participants.map((p) => p.user),
+        participants: event.participants.map((p) => ({
+          ...p.user,
+          stallName: p.stallName,
+        })),
       }));
 
       res.json(formatted);
@@ -172,7 +179,7 @@ router.get(
 
           participants: {
             select: {
-              id: true,
+              stallName: true,
               user: {
                 select: {
                   id: true,
@@ -193,7 +200,10 @@ router.get(
 
       const formattedEvent = {
         ...event,
-        participants: event.participants.map((p) => p.user),
+        participants: event.participants.map((p) => ({
+          ...p.user,
+          stallName: p.stallName,
+        })),
       };
 
       res.json(formattedEvent);
@@ -215,6 +225,10 @@ router.put(
       const userId = req.user?.id;
       const eventId = parseInt(req.params.id, 10);
 
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
       if (isNaN(eventId)) {
         return res.status(400).json({ message: "Invalid event ID" });
       }
@@ -233,10 +247,14 @@ router.put(
           .json({ message: "Event not found or unauthorized" });
       }
 
-      const { images = [], ...data } = req.body as {
+      const { images = [], stallName, ...data } = req.body as {
         images?: { url: string; publicId: string }[];
+        stallName?: string;
         [k: string]: any;
       };
+
+      const normalizedStallName =
+        typeof stallName === "string" ? stallName.trim() : undefined;
 
       const existingPublicIds = existingEvent.images.map((i) => i.publicId);
       const newPublicIds = (images || [])
@@ -284,6 +302,13 @@ router.put(
           where: { id: eventId },
           data,
         });
+
+        if (normalizedStallName) {
+          await tx.eventParticipant.updateMany({
+            where: { eventId, userId },
+            data: { stallName: normalizedStallName },
+          });
+        }
       });
 
       const updatedEvent = await prisma.event.findUnique({
@@ -370,6 +395,10 @@ router.post(
     try {
       const userId = req.user?.id;
       const eventId = parseInt(req.params.id, 10);
+      const stallName =
+        typeof req.body?.stallName === "string"
+          ? req.body.stallName.trim()
+          : "";
 
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -377,6 +406,12 @@ router.post(
 
       if (isNaN(eventId)) {
         return res.status(400).json({ message: "Invalid event ID" });
+      }
+
+      if (!stallName) {
+        return res
+          .status(400)
+          .json({ message: "Stall name is required to join the event" });
       }
 
       const event = await prisma.event.findUnique({
@@ -401,6 +436,7 @@ router.post(
         data: {
           eventId,
           userId,
+          stallName,
         },
       });
 

@@ -20,6 +20,7 @@ export interface CartItem {
   productId: number;
   productName: string;
   sellerName: string;
+  stallName?: string | null;
   unitPrice: number;
   quantity: number;
   stock?: number | null;
@@ -115,6 +116,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const existing = prev.items.find((i) => i.productId === item.productId);
 
       const resolvedStock = item.stock ?? existing?.stock ?? null;
+      const resolvedStallName =
+        item.stallName ?? existing?.stallName ?? null;
 
       if (
         resolvedStock !== null &&
@@ -143,6 +146,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                   ...i,
                   quantity: newQuantity,
                   stock: resolvedStock ?? i.stock ?? null,
+                  stallName: resolvedStallName,
                 }
               : i
           ),
@@ -162,7 +166,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         eventId: type === "PREORDER" ? (eventId ?? null) : null,
         items: [
           ...prev.items,
-          { ...item, quantity: normalizedQuantity, stock: resolvedStock },
+          {
+            ...item,
+            quantity: normalizedQuantity,
+            stock: resolvedStock,
+            stallName: resolvedStallName,
+          },
         ],
       };
     });

@@ -14,6 +14,12 @@ export const eventSchema = z
       .max(1000, "Description must not exceed 1000 characters")
       .optional(),
 
+    stallName: z
+      .string()
+      .trim()
+      .min(1, "Stall name is required")
+      .max(100, "Stall name must not exceed 100 characters"),
+
     startDate: z
       .string()
       .trim()

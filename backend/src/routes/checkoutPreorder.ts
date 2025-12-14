@@ -106,6 +106,40 @@ router.post("/", validateRequest(preorderSchema), async (req, res) => {
 
     if (!event) return res.status(404).json({ message: "Event not found" });
 
+    const cartProductIds = cartItems
+      .map((item: any) => item.productId)
+      .filter((id: any): id is number => typeof id === "number");
+
+    const [eventProductsForCart, participantEntries] = await Promise.all([
+      prisma.eventProduct.findMany({
+        where: { eventId, productId: { in: cartProductIds } },
+        include: {
+          user: { select: { id: true, email: true, name: true, phone: true } },
+        },
+      }),
+      prisma.eventParticipant.findMany({
+        where: { eventId },
+        select: { userId: true, stallName: true },
+      }),
+    ]);
+
+    const eventProductMap = new Map(
+      eventProductsForCart.map((ep) => [ep.productId, ep])
+    );
+    const stallMap = new Map(
+      participantEntries.map((p) => [p.userId, p.stallName])
+    );
+
+    const hasMissingProduct = cartProductIds.some(
+      (id: number) => !eventProductMap.has(id)
+    );
+
+    if (hasMissingProduct) {
+      return res
+        .status(400)
+        .json({ message: "Some products are not available for this event" });
+    }
+
     const totalPrice = cartItems.reduce(
       (sum: number, item: any) => sum + item.unitPrice * item.quantity,
       0
@@ -129,14 +163,25 @@ router.post("/", validateRequest(preorderSchema), async (req, res) => {
         isDelivered: false,
         status: "PENDING",
         items: {
-          create: cartItems.map((item: any) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            productName: item.productName,
-            sellerName: item.sellerName,
-            status: "ACTIVE",
-          })),
+          create: cartItems.map((item: any) => {
+            const eventProduct = item.productId
+              ? eventProductMap.get(item.productId)
+              : undefined;
+            const sellerName = eventProduct?.user?.name ?? item.sellerName;
+            const stallName = eventProduct
+              ? stallMap.get(eventProduct.userId) ?? null
+              : null;
+
+            return {
+              productId: item.productId,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              productName: item.productName,
+              sellerName,
+              stallName,
+              status: "ACTIVE",
+            };
+          }),
         },
       },
       include: {
@@ -290,6 +335,7 @@ router.get("/my-orders", authenticateToken, async (req, res) => {
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           sellerName: item.sellerName,
+          stallName: item.stallName,
           status: item.status,
         })),
       }))
@@ -375,6 +421,7 @@ router.get(
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             sellerName: item.sellerName,
+            stallName: item.stallName,
             status: item.status,
           })),
         }))

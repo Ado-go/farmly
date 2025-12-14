@@ -68,6 +68,7 @@ function EventPage() {
     resolver: zodResolver(schema),
     defaultValues: {
       title: "",
+      stallName: "",
       description: "",
       startDate: new Date(),
       endDate: new Date(),
@@ -461,6 +462,24 @@ function EventPage() {
                       />
                       <FieldError
                         errors={errors.title ? [errors.title] : undefined}
+                      />
+                    </FieldContent>
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="stallName">
+                      {t("eventPage.stallName")}
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id="stallName"
+                        placeholder={t("eventPage.stallName")}
+                        className={inputTone}
+                        {...form.register("stallName")}
+                      />
+                      <FieldError
+                        errors={
+                          errors.stallName ? [errors.stallName] : undefined
+                        }
                       />
                     </FieldContent>
                   </Field>

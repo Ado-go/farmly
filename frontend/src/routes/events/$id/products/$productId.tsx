@@ -32,11 +32,30 @@ function EventProductDetailPage() {
     queryFn: async () => apiFetch(`/public-events/${id}`),
   });
 
+  const stallMap = useMemo(
+    () =>
+      new Map(
+        (event?.participants ?? []).map((p) => {
+          const normalized = p.stallName?.trim();
+          return [p.id, normalized || null];
+        })
+      ),
+    [event?.participants]
+  );
+
   const eventProduct = useMemo(
     () =>
       event?.eventProducts?.find((ep) => String(ep.id) === productId) ?? null,
     [event?.eventProducts, productId]
   );
+  const stallNameValue =
+    eventProduct && eventProduct.user
+      ? eventProduct.stallName ?? stallMap.get(eventProduct.user.id) ?? null
+      : null;
+  const stallName =
+    stallNameValue && typeof stallNameValue === "string"
+      ? stallNameValue.trim() || null
+      : stallNameValue ?? null;
 
   useEffect(() => {
     if (eventProduct?.product.name) {
@@ -105,6 +124,7 @@ function EventProductDetailPage() {
         productId: eventProduct.product.id,
         productName: eventProduct.product.name,
         sellerName: eventProduct.user.name,
+        stallName: stallName ?? undefined,
         unitPrice: price,
         quantity: finalQuantity,
         stock: eventProduct.stock,
@@ -160,8 +180,15 @@ function EventProductDetailPage() {
                 </h1>
                 <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
                   <Store className="h-4 w-4 text-primary" />
-                  <span>
-                    {t("eventsDetail.soldBy")} {eventProduct.user.name}
+                  <span className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                    <span>
+                      {t("eventsDetail.soldBy")} {eventProduct.user.name}
+                    </span>
+                    {stallName ? (
+                      <span className="text-xs text-primary">
+                        {t("eventsDetail.stallLabel", { stall: stallName })}
+                      </span>
+                    ) : null}
                   </span>
                 </div>
               </div>

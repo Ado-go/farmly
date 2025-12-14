@@ -106,6 +106,16 @@ const farmNamePool = [
   "Modrý potok",
 ];
 
+const stallAdjectives = [
+  "Rodinný",
+  "Sezónny",
+  "Farmársky",
+  "Tradičný",
+  "Regionálny",
+  "Lokálny",
+  "Domáci",
+];
+
 const eventTitleTemplates = [
   (city: string) => "Banskobystrický jarmok",
   (city: string) => `Farmársky deň v ${city}`,
@@ -229,6 +239,14 @@ const pickFarmName = (city: string) =>
 
 const pickEventTitle = (city: string) =>
   eventTitleTemplates[randomInt(0, eventTitleTemplates.length - 1)](city);
+
+const buildStallName = (participant: User) => {
+  const firstName = participant.name.split(" ")[0] || "Farmár";
+  const adjective =
+    stallAdjectives[randomInt(0, stallAdjectives.length - 1)];
+  const suffix = randomInt(1, 99);
+  return `${adjective} stánok ${firstName} #${suffix}`;
+};
 
 type EventTiming = "past" | "ongoing" | "future";
 
@@ -565,7 +583,11 @@ async function main() {
 
       for (const participant of participants) {
         await prisma.eventParticipant.create({
-          data: { eventId: event.id, userId: participant.id },
+          data: {
+            eventId: event.id,
+            userId: participant.id,
+            stallName: buildStallName(participant),
+          },
         });
       }
 

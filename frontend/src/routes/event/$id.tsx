@@ -53,6 +53,9 @@ function EventDetailPage() {
   const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+  const [joinStallName, setJoinStallName] = useState("");
+  const [joinError, setJoinError] = useState<string | null>(null);
   const [images, setImages] = useState<UploadedImage[]>([]);
 
   const { data: event, isLoading } = useQuery<Event>({
@@ -78,12 +81,26 @@ function EventDetailPage() {
 
   const isOrganizer = event?.organizer.id === user?.id;
   const isParticipant = event?.participants.some((p) => p.id === user?.id);
+  const organizerStallName =
+    event?.participants.find((p) => p.id === event.organizer.id)?.stallName ??
+    "";
 
   const joinEvent = useMutation({
-    mutationFn: () => apiFetch(`/event/${id}/join`, { method: "POST" }),
+    mutationFn: (stallName: string) =>
+      apiFetch(`/event/${id}/join`, {
+        method: "POST",
+        body: JSON.stringify({ stallName }),
+      }),
     onSuccess: () => {
       toast.success(t("eventPage.joined"));
+      setJoinDialogOpen(false);
+      setJoinStallName("");
+      setJoinError(null);
       queryClient.invalidateQueries({ queryKey: ["event", id] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+    },
+    onError: () => {
+      toast.error(t("eventPage.errorJoining"));
     },
   });
 
@@ -92,8 +109,21 @@ function EventDetailPage() {
     onSuccess: () => {
       toast.success(t("eventPage.left"));
       queryClient.invalidateQueries({ queryKey: ["event", id] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
     },
   });
+
+  const handleJoin = () => {
+    const trimmed = joinStallName.trim();
+
+    if (!trimmed) {
+      setJoinError(t("eventPage.stallNameRequired"));
+      return;
+    }
+
+    setJoinError(null);
+    joinEvent.mutate(trimmed);
+  };
 
   const updateEvent = useMutation({
     mutationFn: async (data: EventFormData & { images: UploadedImage[] }) => {
@@ -264,6 +294,11 @@ function EventDetailPage() {
                         <p className="text-xs text-muted-foreground">
                           {event.organizer.email}
                         </p>
+                        {organizerStallName && (
+                          <p className="text-xs text-emerald-700">
+                            {t("eventPage.stallName")}: {organizerStallName}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -332,9 +367,52 @@ function EventDetailPage() {
                           {t("eventPage.leave")}
                         </Button>
                       ) : (
-                        <Button onClick={() => joinEvent.mutate()}>
-                          {t("eventPage.join")}
-                        </Button>
+                        <Dialog
+                          open={joinDialogOpen}
+                          onOpenChange={(open) => {
+                            setJoinDialogOpen(open);
+                            if (!open) setJoinError(null);
+                          }}
+                        >
+                          <DialogTrigger asChild>
+                            <Button>{t("eventPage.join")}</Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-md w-[min(92vw,26rem)]">
+                            <DialogHeader>
+                              <DialogTitle>{t("eventPage.join")}</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-2 py-2">
+                              <Label htmlFor="join-stall">
+                                {t("eventPage.stallName")}
+                              </Label>
+                              <Input
+                                id="join-stall"
+                                value={joinStallName}
+                                onChange={(e) => setJoinStallName(e.target.value)}
+                                placeholder={t("eventPage.stallName")}
+                              />
+                              {joinError && (
+                                <p className="text-xs text-destructive">{joinError}</p>
+                              )}
+                            </div>
+                            <DialogFooter className="mt-2 flex justify-end gap-2">
+                              <Button
+                                variant="secondary"
+                                onClick={() => setJoinDialogOpen(false)}
+                              >
+                                {t("eventPage.cancel")}
+                              </Button>
+                              <Button
+                                onClick={handleJoin}
+                                disabled={joinEvent.isPending}
+                              >
+                                {joinEvent.isPending
+                                  ? t("eventPage.joining")
+                                  : t("eventPage.join")}
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                       )}
                     </div>
                   </div>
@@ -366,6 +444,11 @@ function EventDetailPage() {
                 />
                 <div>
                   <p className="font-medium">{p.name}</p>
+                  {p.stallName && (
+                    <p className="text-xs text-emerald-700">
+                      {t("eventPage.stallName")}: {p.stallName}
+                    </p>
+                  )}
                   <p className="text-xs text-gray-500">{p.email}</p>
                 </div>
               </div>
@@ -409,10 +492,14 @@ function EditForm({
   isSaving,
 }: EditFormProps) {
   const schema = useMemo(() => buildEventSchema(t), [t]);
+  const organizerStallName =
+    event.participants.find((p) => p.id === event.organizer.id)?.stallName ??
+    "";
   const form = useForm<EventFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: event.title,
+      stallName: organizerStallName,
       description: event.description ?? undefined,
       startDate: new Date(event.startDate),
       endDate: new Date(event.endDate),
@@ -457,6 +544,19 @@ function EditForm({
         />
         {errors.title?.message && (
           <p className="text-xs text-destructive">{errors.title.message}</p>
+        )}
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="edit-stall">{t("eventPage.stallName")}</Label>
+        <Input
+          id="edit-stall"
+          {...form.register("stallName")}
+          placeholder={t("eventPage.stallName")}
+        />
+        {errors.stallName?.message && (
+          <p className="text-xs text-destructive">
+            {errors.stallName.message}
+          </p>
         )}
       </div>
       <div className="space-y-1.5">

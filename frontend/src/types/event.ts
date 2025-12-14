@@ -5,6 +5,7 @@ export type EventParticipant = {
   name: string;
   email?: string | null;
   profileImageUrl?: string | null;
+  stallName?: string | null;
 };
 
 export type Event = {

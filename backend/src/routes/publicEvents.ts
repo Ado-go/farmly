@@ -35,6 +35,8 @@ router.get("/", async (req, res) => {
           images: true,
           participants: {
             select: {
+              userId: true,
+              stallName: true,
               user: {
                 select: { id: true, name: true, profileImageUrl: true },
               },
@@ -65,7 +67,25 @@ router.get("/", async (req, res) => {
       prisma.event.count({ where }),
     ]);
 
-    res.json(buildPaginationResponse(events, page, pageSize, total));
+    const formattedEvents = events.map((event) => {
+      const stallMap = new Map(
+        event.participants.map((p) => [p.userId, p.stallName])
+      );
+
+      return {
+        ...event,
+        participants: event.participants.map((p) => ({
+          ...p.user,
+          stallName: p.stallName,
+        })),
+        eventProducts: event.eventProducts.map((ep) => ({
+          ...ep,
+          stallName: stallMap.get(ep.user.id) ?? null,
+        })),
+      };
+    });
+
+    res.json(buildPaginationResponse(formattedEvents, page, pageSize, total));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Unable to fetch public events." });
@@ -94,6 +114,8 @@ router.get("/:id", async (req, res) => {
         images: true,
         participants: {
           select: {
+            userId: true,
+            stallName: true,
             user: {
               select: { id: true, name: true, profileImageUrl: true },
             },
@@ -130,7 +152,23 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    res.json(event);
+    const stallMap = new Map(
+      event.participants.map((p) => [p.userId, p.stallName])
+    );
+
+    const formattedEvent = {
+      ...event,
+      participants: event.participants.map((p) => ({
+        ...p.user,
+        stallName: p.stallName,
+      })),
+      eventProducts: event.eventProducts.map((ep) => ({
+        ...ep,
+        stallName: stallMap.get(ep.user.id) ?? null,
+      })),
+    };
+
+    res.json(formattedEvent);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Unable to fetch event details." });
