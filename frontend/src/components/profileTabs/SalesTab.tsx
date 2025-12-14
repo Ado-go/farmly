@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { CalendarDays } from "lucide-react";
 import type {
   EventOrder,
   Order,
@@ -32,6 +33,7 @@ import type {
 
 type CancelTarget = { id: number; type: "STANDARD" | "PREORDER" };
 type StatusFilter = "all" | OrderStatus;
+type Translator = (key: string, options?: Record<string, unknown>) => string;
 
 const statusSteps: OrderStatus[] = ["PENDING", "ONWAY", "COMPLETED"];
 const PAGE_SIZE = 4;
@@ -44,7 +46,6 @@ export default function SalesTab() {
   const [searchSales, setSearchSales] = useState("");
   const [searchEventSales, setSearchEventSales] = useState("");
   const [salesFilter, setSalesFilter] = useState<StatusFilter>("all");
-  const [eventSalesFilter, setEventSalesFilter] = useState<StatusFilter>("all");
   const [salesPage, setSalesPage] = useState(1);
   const [eventSalesPage, setEventSalesPage] = useState(1);
 
@@ -97,16 +98,14 @@ export default function SalesTab() {
 
   const filteredEventSales = useMemo(() => {
     const term = searchEventSales.toLowerCase().trim();
-    const bySearch = (eventSales ?? []).filter((o) =>
+    return (eventSales ?? []).filter((o) =>
       o.orderNumber.toLowerCase().includes(term)
     );
-    return filterByStatus(bySearch, eventSalesFilter);
-  }, [eventSales, searchEventSales, eventSalesFilter]);
+  }, [eventSales, searchEventSales]);
 
   useEffect(() => setSalesPage(1), [searchSales]);
   useEffect(() => setEventSalesPage(1), [searchEventSales]);
   useEffect(() => setSalesPage(1), [salesFilter]);
-  useEffect(() => setEventSalesPage(1), [eventSalesFilter]);
 
   useEffect(() => {
     const totalPages = Math.max(1, Math.ceil(filteredSales.length / PAGE_SIZE));
@@ -180,11 +179,10 @@ export default function SalesTab() {
           type="PREORDER"
           searchTerm={searchEventSales}
           onSearchChange={setSearchEventSales}
-          statusFilter={eventSalesFilter}
-          onStatusFilterChange={setEventSalesFilter}
           onCancel={setCancelTarget}
           statusLabels={statusLabels}
           isCanceling={isCanceling}
+          showStatusFilter={false}
           t={t}
         />
       </div>
@@ -230,12 +228,13 @@ type SalesSectionProps = {
   type: CancelTarget["type"];
   searchTerm: string;
   onSearchChange: (val: string) => void;
-  statusFilter: StatusFilter;
-  onStatusFilterChange: (val: StatusFilter) => void;
+  statusFilter?: StatusFilter;
+  onStatusFilterChange?: (val: StatusFilter) => void;
+  showStatusFilter?: boolean;
   onCancel: (target: CancelTarget) => void;
   statusLabels: Record<string, string>;
   isCanceling: boolean;
-  t: (key: string) => string;
+  t: Translator;
 };
 
 function SalesSection({
@@ -248,8 +247,9 @@ function SalesSection({
   type,
   searchTerm,
   onSearchChange,
-  statusFilter,
+  statusFilter = "all",
   onStatusFilterChange,
+  showStatusFilter = true,
   onCancel,
   statusLabels,
   isCanceling,
@@ -268,24 +268,28 @@ function SalesSection({
             <p className="text-sm text-muted-foreground">{description}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Select
-              value={statusFilter}
-              onValueChange={(val) => onStatusFilterChange(val as StatusFilter)}
-            >
-              <SelectTrigger className="h-9 w-[200px]">
-                <SelectValue placeholder={t("ordersPage.filterByStatus")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">
-                  {t("ordersPage.filterStatusAll")}
-                </SelectItem>
-                {STATUS_FILTER_OPTIONS.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {statusLabels[status] ?? status}
+            {showStatusFilter && (
+              <Select
+                value={statusFilter}
+                onValueChange={(val) =>
+                  onStatusFilterChange?.(val as StatusFilter)
+                }
+              >
+                <SelectTrigger className="h-9 w-[200px]">
+                  <SelectValue placeholder={t("ordersPage.filterByStatus")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    {t("ordersPage.filterStatusAll")}
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  {STATUS_FILTER_OPTIONS.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {statusLabels[status] ?? status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Input
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
@@ -331,17 +335,30 @@ function SalesSection({
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <StatusBadge status={order.status} labels={statusLabels} />
-                <PaymentBadge
-                  isPaid={order.isPaid}
-                  method={order.paymentMethod}
-                  t={t}
-                />
+                {type === "PREORDER" ? (
+                  <PreorderDatePill
+                    startDate={(order as EventOrder).event?.startDate}
+                    endDate={(order as EventOrder).event?.endDate}
+                    t={t}
+                    labelKey="ordersPage.preorderDateDeliver"
+                  />
+                ) : (
+                  <>
+                    <StatusBadge status={order.status} labels={statusLabels} />
+                    <PaymentBadge
+                      isPaid={order.isPaid}
+                      method={order.paymentMethod}
+                      t={t}
+                    />
+                  </>
+                )}
               </div>
             </CardHeader>
 
             <CardContent className="space-y-4">
-              <StatusProgress status={order.status} labels={statusLabels} />
+              {type !== "PREORDER" && (
+                <StatusProgress status={order.status} labels={statusLabels} />
+              )}
 
               <div className="grid gap-3 md:grid-cols-2">
                 <InfoGroup
@@ -362,13 +379,17 @@ function SalesSection({
                   ]}
                 />
 
-                <InfoGroup
-                  title={t("salesPage.payment")}
-                  lines={[
-                    getPaymentLabel(order.paymentMethod, t),
-                    order.isPaid ? t("ordersPage.paid") : t("ordersPage.unpaid"),
-                  ]}
-                />
+                {type !== "PREORDER" && (
+                  <InfoGroup
+                    title={t("salesPage.payment")}
+                    lines={[
+                      getPaymentLabel(order.paymentMethod, t),
+                      order.isPaid
+                        ? t("ordersPage.paid")
+                        : t("ordersPage.unpaid"),
+                    ]}
+                  />
+                )}
               </div>
 
               <div className="space-y-2">
@@ -517,7 +538,7 @@ function PaymentBadge({
 }: {
   isPaid?: boolean;
   method?: string;
-  t: (key: string) => string;
+  t: Translator;
 }) {
   return (
     <div className="flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-50">
@@ -584,7 +605,7 @@ function StatusProgress({
 function getDestinationLines(
   order: Order | EventOrder,
   type: CancelTarget["type"],
-  t: (key: string) => string
+  t: Translator
 ) {
   if (type === "PREORDER" && "event" in order) {
     const { event } = order as EventOrder;
@@ -610,7 +631,7 @@ function isCancelable(status: OrderStatus) {
   return normalized !== "COMPLETED" && normalized !== "CANCELED";
 }
 
-function getPaymentLabel(method: string | undefined, t: (key: string) => string) {
+function getPaymentLabel(method: string | undefined, t: Translator) {
   if (!method) return t("ordersPage.paymentUnknown");
 
   const map: Record<string, string> = {
@@ -638,6 +659,48 @@ function filterByStatus<T extends { status?: OrderStatus }>(
   );
 }
 
+function formatPreorderDate(
+  startDate: string | undefined,
+  endDate: string | undefined,
+  t: Translator,
+  labelKey = "ordersPage.preorderDateLabel"
+) {
+  if (!startDate) return t("ordersPage.preorderDateUnknown");
+
+  const formatter = new Intl.DateTimeFormat(undefined, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  const start = formatter.format(new Date(startDate));
+  const end = endDate ? formatter.format(new Date(endDate)) : null;
+  const dateLabel = end && end !== start ? `${start} – ${end}` : start;
+
+  return t(labelKey, { date: dateLabel });
+}
+
+function PreorderDatePill({
+  startDate,
+  endDate,
+  t,
+  labelKey,
+}: {
+  startDate?: string;
+  endDate?: string;
+  t: Translator;
+  labelKey?: string;
+}) {
+  const label = formatPreorderDate(startDate, endDate, t, labelKey);
+
+  return (
+    <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
+      <CalendarDays className="h-4 w-4" />
+      <span>{label}</span>
+    </div>
+  );
+}
+
 function PaginationBar({
   page,
   totalPages,
@@ -647,7 +710,7 @@ function PaginationBar({
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  t: (key: string) => string;
+  t: Translator;
 }) {
   return (
     <div className="flex items-center justify-between text-sm text-muted-foreground">

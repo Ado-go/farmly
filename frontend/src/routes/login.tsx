@@ -42,6 +42,7 @@ function LoginPage() {
     mutationFn: async (values: LoginForm) =>
       apiFetch("/auth/login", {
         method: "POST",
+        skipAuthRefresh: true,
         body: JSON.stringify(values),
       }),
     onSuccess: (data: { user: User }) => {
@@ -57,6 +58,9 @@ function LoginPage() {
     ? (() => {
         const message = (mutation.error as Error).message || "";
         const normalized = message.toLowerCase();
+        if (normalized.includes("invalid credentials")) {
+          return t("loginPage.invalidCredentials");
+        }
         if (normalized.includes("invalid or revoked refresh token")) {
           return t("loginPage.invalidCredentials");
         }

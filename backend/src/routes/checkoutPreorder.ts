@@ -275,6 +275,8 @@ router.get("/my-orders", authenticateToken, async (req, res) => {
         event: order.event
           ? {
               title: order.event.title,
+              startDate: order.event.startDate,
+              endDate: order.event.endDate,
               city: order.event.city,
               street: order.event.street,
               postalCode: order.event.postalCode,
@@ -358,6 +360,8 @@ router.get(
           event: order.event
             ? {
                 title: order.event.title,
+                startDate: order.event.startDate,
+                endDate: order.event.endDate,
                 city: order.event.city,
                 street: order.event.street,
                 postalCode: order.event.postalCode,

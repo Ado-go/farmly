@@ -55,10 +55,7 @@ type OrderItemSeed = {
   quantity: number;
 };
 
-const paymentOptions = [
-  PaymentMethod.CASH,
-  PaymentMethod.CARD,
-];
+const paymentOptions = [PaymentMethod.CASH, PaymentMethod.CARD];
 
 const orderStatuses = [
   OrderStatus.PENDING,
@@ -139,7 +136,10 @@ const productTemplates: ProductTemplate[] = [
 ];
 
 type DescriptionLength = "none" | "short" | "medium" | "long";
-type DescriptionsByLength = Record<Exclude<DescriptionLength, "none">, string[]>;
+type DescriptionsByLength = Record<
+  Exclude<DescriptionLength, "none">,
+  string[]
+>;
 
 const descriptionLibrary: Record<
   "farm" | "product" | "event" | "offer",
@@ -328,12 +328,10 @@ async function createOrderWithItems({
         }
       : randomAddress();
   const status = isPreorder
-    ? [OrderStatus.PENDING, OrderStatus.COMPLETED][randomInt(0, 1)]
+    ? OrderStatus.PENDING
     : orderStatuses[randomInt(0, orderStatuses.length - 1)];
   const totalPrice = parseFloat(
-    items
-      .reduce((sum, item) => sum + item.price * item.quantity, 0)
-      .toFixed(2)
+    items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)
   );
 
   const order = await prisma.order.create({
@@ -349,8 +347,10 @@ async function createOrderWithItems({
       eventId: event?.id ?? null,
       isDelivered: status === OrderStatus.COMPLETED,
       isPaid: isPreorder
-        ? status === OrderStatus.COMPLETED
-        : status === OrderStatus.COMPLETED || Math.random() > 0.4,
+        ? false
+        : status === OrderStatus.COMPLETED
+        ? true
+        : Math.random() > 0.4,
       paymentMethod: isPreorder
         ? PaymentMethod.CASH
         : paymentOptions[randomInt(0, paymentOptions.length - 1)],
@@ -684,10 +684,9 @@ async function main() {
         product: record.product,
         sellerName: record.seller.name,
         price: parseFloat(
-          (
-            (record.product.basePrice ?? 5) *
-            (1 + Math.random() * 0.2)
-          ).toFixed(2)
+          ((record.product.basePrice ?? 5) * (1 + Math.random() * 0.2)).toFixed(
+            2
+          )
         ),
         quantity: randomInt(1, 2),
       }));

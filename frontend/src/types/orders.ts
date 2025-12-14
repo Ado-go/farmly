@@ -57,6 +57,8 @@ export type EventInfo = {
   city?: string;
   postalCode?: string;
   country?: string;
+  startDate?: string;
+  endDate?: string;
 };
 
 export type EventOrder = Order & {

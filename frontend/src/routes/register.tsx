@@ -54,6 +54,7 @@ function RegisterPage() {
     mutationFn: async (values: { email: string; password: string }) =>
       apiFetch("/auth/login", {
         method: "POST",
+        skipAuthRefresh: true,
         body: JSON.stringify(values),
       }),
     onSuccess: (data: { user: User }) => {
