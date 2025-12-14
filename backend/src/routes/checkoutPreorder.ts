@@ -127,7 +127,11 @@ router.post("/", validateRequest(preorderSchema), async (req, res) => {
       eventProductsForCart.map((ep) => [ep.productId, ep])
     );
     const stallMap = new Map(
-      participantEntries.map((p) => [p.userId, p.stallName])
+      participantEntries.map((p) => {
+        const normalized =
+          typeof p.stallName === "string" ? p.stallName.trim() || null : null;
+        return [p.userId, normalized];
+      })
     );
 
     const hasMissingProduct = cartProductIds.some(
@@ -458,19 +462,21 @@ router.patch("/:id/cancel", authenticateToken, async (req, res) => {
     if (order.orderType !== "PREORDER")
       return res
         .status(400)
-        .json({ message: "Objednávku nie je možné zrušiť" });
+        .json({ message: "This order cannot be canceled" });
 
     const eventEndDate = order.event?.endDate;
 
     if (!eventEndDate)
       return res
         .status(400)
-        .json({ message: "Udalosť pre predobjednávku nebola nájdená" });
+        .json({ message: "Event for this preorder was not found" });
 
     if (eventEndDate.getTime() <= Date.now()) {
       return res
         .status(400)
-        .json({ message: "Predobjednávku už po skončení udalosti zrušiť nejde" });
+        .json({
+          message: "Preorders cannot be canceled after the event has ended",
+        });
     }
 
     await prisma.$transaction([
@@ -501,7 +507,7 @@ router.patch("/:id/cancel", authenticateToken, async (req, res) => {
         const { subject, html } = buildOrderCancellationEmail({
           orderNumber: order.orderNumber,
           isPreorder: true,
-          reason: "Predobjednávku si zrušil.",
+          reason: "You canceled the preorder.",
         });
         await sendEmail(recipientEmail, subject, html);
       } catch (emailErr) {
@@ -525,7 +531,7 @@ router.patch("/:id/cancel", authenticateToken, async (req, res) => {
           eventTitle: order.event?.title ?? undefined,
           items: group.items,
           totalPrice: group.totalPrice,
-          reason: "Zákazník zrušil predobjednávku.",
+          reason: "Customer canceled the preorder.",
         });
 
         try {
@@ -586,18 +592,18 @@ router.patch(
       if (item.order.orderType !== "PREORDER")
         return res
           .status(400)
-          .json({ message: "Túto položku nie je možné zrušiť" });
+          .json({ message: "This item cannot be canceled" });
 
       const eventEndDate = item.order.event?.endDate;
 
       if (!eventEndDate)
         return res
           .status(400)
-          .json({ message: "Udalosť pre predobjednávku nebola nájdená" });
+          .json({ message: "Event for this preorder was not found" });
 
       if (eventEndDate.getTime() <= Date.now())
         return res.status(400).json({
-          message: "Položku po skončení udalosti farmár zrušiť nemôže",
+          message: "Farmer cannot cancel items after the event has ended",
         });
 
       await prisma.orderItem.update({
@@ -643,7 +649,7 @@ router.patch(
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             isPreorder: true,
-            reason: "Položku zrušil farmár.",
+            reason: "Farmer canceled the preorder item.",
             remainingTotal: newTotal,
           });
 

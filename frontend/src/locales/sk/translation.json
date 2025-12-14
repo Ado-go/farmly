@@ -777,6 +777,7 @@
     "unpaid": "Nezaplatené",
     "deliveryUnknown": "Miesto doručenia nie je známe",
     "paymentUnknown": "Neznáma platba",
+    "sellerLabel": "Predajca",
     "paymentMethod": {
       "cash": "Hotovosť",
       "card": "Karta"
@@ -806,7 +807,8 @@
     "customer": "Zákazník",
     "payment": "Platba",
     "itemsHeading": "Položky",
-    "stallLabel": "Stánok"
+    "stallLabel": "Stánok",
+    "sellerLabel": "Predajca"
   },
   "checkoutPreoderPage": {
     "emptyCart": "Váš košík je prázdny.",

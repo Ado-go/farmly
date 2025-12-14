@@ -777,6 +777,7 @@
     "unpaid": "Unpaid",
     "deliveryUnknown": "Delivery location unknown",
     "paymentUnknown": "Payment unknown",
+    "sellerLabel": "Seller",
     "paymentMethod": {
       "cash": "Cash",
       "card": "Card"
@@ -806,7 +807,8 @@
     "customer": "Customer",
     "payment": "Payment",
     "itemsHeading": "Items",
-    "stallLabel": "Stall"
+    "stallLabel": "Stall",
+    "sellerLabel": "Seller"
   },
   "checkoutPreoderPage": {
     "emptyCart": "Your cart is empty.",

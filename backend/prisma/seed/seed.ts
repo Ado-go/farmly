@@ -48,9 +48,15 @@ type EventProductRecord = {
   product: Product;
 };
 
+type EventParticipantSeed = {
+  user: User;
+  stallName: string;
+};
+
 type OrderItemSeed = {
   product: Product;
   sellerName: string;
+  stallName?: string | null;
   price: number;
   quantity: number;
 };
@@ -391,6 +397,7 @@ async function createOrderWithItems({
         unitPrice: item.price,
         sellerName: item.sellerName,
         productName: item.product.name,
+        stallName: item.stallName ?? null,
         status: itemStatus,
       },
     });
@@ -437,7 +444,8 @@ async function main() {
   const allProducts: Product[] = [];
   const farmProductRecords: FarmProductRecord[] = [];
   const eventProductRecords: EventProductRecord[] = [];
-  const eventsData: { event: Event; participants: User[] }[] = [];
+  const eventsData: { event: Event; participants: EventParticipantSeed[] }[] =
+    [];
 
   // ------------------ USERS ------------------
   const numFarmers = randomInt(5, 8);
@@ -579,16 +587,18 @@ async function main() {
       for (const participant of chosenFarmers) {
         participantMap.set(participant.id, participant);
       }
-      const participants = Array.from(participantMap.values());
+      const participants: EventParticipantSeed[] = [];
 
-      for (const participant of participants) {
+      for (const participant of participantMap.values()) {
+        const stallName = buildStallName(participant);
         await prisma.eventParticipant.create({
           data: {
             eventId: event.id,
             userId: participant.id,
-            stallName: buildStallName(participant),
+            stallName,
           },
         });
+        participants.push({ user: participant, stallName });
       }
 
       const numProducts = randomInt(2, 5);
@@ -599,8 +609,10 @@ async function main() {
       );
 
       for (const template of chosenTemplates) {
-        const seller =
-          participants[randomInt(0, participants.length - 1)] ?? farmer;
+        const sellerEntry =
+          participants[randomInt(0, participants.length - 1)] ??
+          participants[0];
+        const seller = sellerEntry?.user ?? farmer;
         const price = parseFloat((randomInt(100, 800) / 100).toFixed(2));
         const stock = randomInt(10, 60);
         const product = await prisma.product.create({
@@ -690,11 +702,15 @@ async function main() {
   // ------------------- PREORDERS FOR EVENTS -------------------
   if (eventProductRecords.length && customers.length) {
     console.log("📦 Creating preorders tied to events...");
-    for (const { event } of eventsData) {
+    for (const { event, participants } of eventsData) {
       const eventProducts = eventProductRecords.filter(
         (record) => record.event.id === event.id
       );
       if (!eventProducts.length) continue;
+
+      const stallMap = new Map<number, string | null>(
+        participants.map((p) => [p.user.id, p.stallName])
+      );
 
       const buyer = customers[randomInt(0, customers.length - 1)];
       const maxItems = Math.min(2, eventProducts.length);
@@ -705,6 +721,7 @@ async function main() {
       const items: OrderItemSeed[] = chosenProducts.map((record) => ({
         product: record.product,
         sellerName: record.seller.name,
+        stallName: stallMap.get(record.seller.id) ?? null,
         price: parseFloat(
           ((record.product.basePrice ?? 5) * (1 + Math.random() * 0.2)).toFixed(
             2

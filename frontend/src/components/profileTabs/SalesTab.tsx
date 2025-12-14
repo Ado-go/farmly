@@ -24,12 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { CalendarDays } from "lucide-react";
-import type {
-  EventOrder,
-  Order,
-  OrderItem,
-  OrderStatus,
-} from "@/types/orders";
+import type { EventOrder, Order, OrderItem, OrderStatus } from "@/types/orders";
 
 type CancelTarget = { id: number; type: "STANDARD" | "PREORDER" };
 type StatusFilter = "all" | OrderStatus;
@@ -38,7 +33,12 @@ type Translator = (key: string, options?: Record<string, unknown>) => string;
 
 const statusSteps: OrderStatus[] = ["PENDING", "ONWAY", "COMPLETED"];
 const PAGE_SIZE = 4;
-const STATUS_FILTER_OPTIONS: OrderStatus[] = ["PENDING", "ONWAY", "COMPLETED", "CANCELED"];
+const STATUS_FILTER_OPTIONS: OrderStatus[] = [
+  "PENDING",
+  "ONWAY",
+  "COMPLETED",
+  "CANCELED",
+];
 
 function isPreorderFinished(event?: EventOrder["event"]) {
   if (!event?.endDate) return false;
@@ -64,11 +64,12 @@ export default function SalesTab() {
     queryFn: () => apiFetch("/checkout/farmer-orders"),
   });
 
-  const { data: eventSales, isLoading: loadingEventSales } =
-    useQuery<EventOrder[]>({
-      queryKey: ["farmerEventOrders"],
-      queryFn: () => apiFetch("/checkout-preorder/farmer-orders"),
-    });
+  const { data: eventSales, isLoading: loadingEventSales } = useQuery<
+    EventOrder[]
+  >({
+    queryKey: ["farmerEventOrders"],
+    queryFn: () => apiFetch("/checkout-preorder/farmer-orders"),
+  });
 
   const cancelItemMutation = useMutation({
     mutationFn: (itemId: number) =>
@@ -140,7 +141,10 @@ export default function SalesTab() {
   );
 
   if (isLoading) return <p>{t("salesPage.loading")}</p>;
-  if ((!sales || sales.length === 0) && (!eventSales || eventSales.length === 0))
+  if (
+    (!sales || sales.length === 0) &&
+    (!eventSales || eventSales.length === 0)
+  )
     return <p className="text-gray-500">{t("salesPage.emptyCombined")}</p>;
 
   const statusLabels: Record<string, string> = {
@@ -376,7 +380,9 @@ function SalesSection({
                     </CardTitle>
                   </div>
                   <div className="text-right text-sm">
-                    <p className="text-muted-foreground">{t("salesPage.total")}</p>
+                    <p className="text-muted-foreground">
+                      {t("salesPage.total")}
+                    </p>
                     <p className="font-semibold text-blue-700">
                       {order.totalPrice} €
                     </p>
@@ -398,7 +404,10 @@ function SalesSection({
                     </>
                   ) : (
                     <>
-                      <StatusBadge status={order.status} labels={statusLabels} />
+                      <StatusBadge
+                        status={order.status}
+                        labels={statusLabels}
+                      />
                       <PaymentBadge
                         isPaid={order.isPaid}
                         method={order.paymentMethod}
@@ -451,24 +460,30 @@ function SalesSection({
                     {t("salesPage.itemsHeading")}
                   </p>
 
-                {order.items.map((item) => (
-                  <ItemRow
-                    key={item.id}
-                    item={item}
-                    onCancel={() => onCancel({ id: item.id, type })}
-                    cancelLabel={t("salesPage.cancelItem")}
-                    canceledLabel={t("salesPage.canceled")}
-                    isCanceling={isCanceling}
-                    canCancel={
-                      isCancelable(order.status) &&
-                      item.status === "ACTIVE" &&
-                      !preorderEnded
-                    }
-                    stallLabel={t("salesPage.stallLabel")}
-                    stallName={item.stallName}
-                  />
-                ))}
-              </div>
+                  {order.items.map((item) => (
+                    <ItemRow
+                      key={item.id}
+                      item={item}
+                      onCancel={() => onCancel({ id: item.id, type })}
+                      cancelLabel={t("salesPage.cancelItem")}
+                      canceledLabel={t("salesPage.canceled")}
+                      isCanceling={isCanceling}
+                      canCancel={
+                        isCancelable(order.status) &&
+                        item.status === "ACTIVE" &&
+                        !preorderEnded
+                      }
+                      stallLabel={t("salesPage.stallLabel")}
+                      stallName={
+                        type === "PREORDER"
+                          ? item.stallName?.trim() || undefined
+                          : undefined
+                      }
+                      sellerLabel={t("salesPage.sellerLabel")}
+                      sellerName={item.sellerName}
+                    />
+                  ))}
+                </div>
 
                 {type === "PREORDER" &&
                   preorderEnded &&
@@ -502,6 +517,8 @@ function ItemRow({
   canCancel,
   stallLabel,
   stallName,
+  sellerLabel,
+  sellerName,
 }: {
   item: OrderItem;
   onCancel: () => void;
@@ -511,6 +528,8 @@ function ItemRow({
   canCancel: boolean;
   stallLabel?: string;
   stallName?: string | null;
+  sellerLabel?: string;
+  sellerName?: string | null;
 }) {
   const isCanceled = item.status === "CANCELED";
 
@@ -527,6 +546,11 @@ function ItemRow({
         {stallName && (
           <p className="text-[11px] text-blue-700 break-words">
             {(stallLabel ?? "Stall") + ": "} {stallName}
+          </p>
+        )}
+        {sellerName && (
+          <p className="text-[11px] text-muted-foreground break-words">
+            {(sellerLabel ?? "Seller") + ": "} {sellerName}
           </p>
         )}
         <p className="text-xs text-muted-foreground break-words">
@@ -691,7 +715,9 @@ function getDestinationLines(
 
   const address = [
     order.delivery?.street,
-    [order.delivery?.city, order.delivery?.postalCode].filter(Boolean).join(" "),
+    [order.delivery?.city, order.delivery?.postalCode]
+      .filter(Boolean)
+      .join(" "),
     order.delivery?.country,
   ].filter(Boolean);
 
@@ -735,15 +761,10 @@ function filterByStatus<T extends { status?: OrderStatus }>(
   if (status === "all") return items;
 
   const target = status.toUpperCase();
-  return items.filter(
-    (item) => (item.status ?? "").toUpperCase() === target
-  );
+  return items.filter((item) => (item.status ?? "").toUpperCase() === target);
 }
 
-function filterByPreorderDate(
-  items: EventOrder[],
-  filter: PreorderDateFilter
-) {
+function filterByPreorderDate(items: EventOrder[], filter: PreorderDateFilter) {
   if (filter === "all") return items;
 
   const now = Date.now();
@@ -758,8 +779,7 @@ function filterByPreorderDate(
     const effectiveEnd = end && !Number.isNaN(end) ? end : start;
 
     if (filter === "upcoming") return start > now;
-    if (filter === "ongoing")
-      return start <= now && effectiveEnd >= now;
+    if (filter === "ongoing") return start <= now && effectiveEnd >= now;
     return effectiveEnd < now;
   });
 }

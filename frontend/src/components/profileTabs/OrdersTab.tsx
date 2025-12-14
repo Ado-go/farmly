@@ -462,7 +462,13 @@ function OrderSection({
                       item={item}
                       canceledLabel={t("ordersPage.statusCanceled")}
                       stallLabel={t("ordersPage.stallLabel")}
-                      stallName={item.stallName}
+                      stallName={
+                        type === "PREORDER"
+                          ? item.stallName?.trim() || undefined
+                          : undefined
+                      }
+                      sellerLabel={t("ordersPage.sellerLabel")}
+                      sellerName={item.sellerName}
                     />
                   ))}
                 </div>
@@ -720,11 +726,15 @@ function ItemRow({
   canceledLabel,
   stallLabel,
   stallName,
+  sellerLabel,
+  sellerName,
 }: {
   item: OrderItem;
   canceledLabel: string;
   stallLabel?: string;
   stallName?: string | null;
+  sellerLabel?: string;
+  sellerName?: string | null;
 }) {
   const isCanceled = item.status === "CANCELED";
 
@@ -743,6 +753,11 @@ function ItemRow({
         {stallName && (
           <p className="text-[11px] text-emerald-700 break-words">
             {(stallLabel ?? "Stall") + ": "} {stallName}
+          </p>
+        )}
+        {sellerName && (
+          <p className="text-[11px] text-muted-foreground break-words">
+            {(sellerLabel ?? "Farmer") + ": "} {sellerName}
           </p>
         )}
         <p className="text-xs text-muted-foreground break-words">
