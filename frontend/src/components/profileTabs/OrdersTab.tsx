@@ -40,6 +40,13 @@ const statusSteps: OrderStatus[] = ["PENDING", "ONWAY", "COMPLETED"];
 const PAGE_SIZE = 4;
 const STATUS_FILTER_OPTIONS: OrderStatus[] = ["PENDING", "ONWAY", "COMPLETED", "CANCELED"];
 
+function isPreorderFinished(event?: EventOrder["event"]) {
+  if (!event?.endDate) return false;
+
+  const end = Date.parse(event.endDate);
+  return Number.isFinite(end) && end <= Date.now();
+}
+
 export default function OrdersTab() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -347,118 +354,133 @@ function OrderSection({
           </Card>
         )}
 
-        {orders.map((order) => (
-          <Card
-            key={order.id}
-            className="border-emerald-50 bg-gradient-to-br from-white via-white to-emerald-50 shadow-sm"
-          >
-            <CardHeader className="flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    {type === "PREORDER"
-                      ? t("ordersPage.orderTypePreorder")
-                      : t("ordersPage.orderTypeStandard")}
-                  </p>
-                  <CardTitle className="text-lg break-words">
-                    {t("ordersPage.order")} #{order.orderNumber}
-                  </CardTitle>
+        {orders.map((order) => {
+          const preorderEnded =
+            type === "PREORDER" &&
+            isPreorderFinished((order as EventOrder).event);
+          const canCancel =
+            type === "PREORDER"
+              ? isCancelable(order.status) && !preorderEnded
+              : isCancelable(order.status);
+
+          return (
+            <Card
+              key={order.id}
+              className="border-emerald-50 bg-gradient-to-br from-white via-white to-emerald-50 shadow-sm"
+            >
+              <CardHeader className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      {type === "PREORDER"
+                        ? t("ordersPage.orderTypePreorder")
+                        : t("ordersPage.orderTypeStandard")}
+                    </p>
+                    <CardTitle className="text-lg break-words">
+                      {t("ordersPage.order")} #{order.orderNumber}
+                    </CardTitle>
+                  </div>
+                  <div className="text-right text-sm">
+                    <p className="text-muted-foreground">{t("ordersPage.total")}</p>
+                    <p className="font-semibold text-emerald-700">
+                      {order.totalPrice} €
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right text-sm">
-                  <p className="text-muted-foreground">{t("ordersPage.total")}</p>
-                  <p className="font-semibold text-emerald-700">
-                    {order.totalPrice} €
-                  </p>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  {type === "PREORDER" ? (
+                    <>
+                      <PreorderDatePill
+                        startDate={(order as EventOrder).event?.startDate}
+                        endDate={(order as EventOrder).event?.endDate}
+                        t={t}
+                        labelKey="ordersPage.preorderDatePickup"
+                      />
+                      {preorderEnded && (
+                        <EndedBadge label={t("ordersPage.preorderEnded")} />
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <StatusBadge status={order.status} labels={statusLabels} />
+                      <PaymentBadge
+                        isPaid={order.isPaid}
+                        method={order.paymentMethod}
+                        t={t}
+                      />
+                    </>
+                  )}
                 </div>
-              </div>
+              </CardHeader>
 
-              <div className="flex flex-wrap items-center gap-2">
-                {type === "PREORDER" ? (
-                  <PreorderDatePill
-                    startDate={(order as EventOrder).event?.startDate}
-                    endDate={(order as EventOrder).event?.endDate}
-                    t={t}
-                    labelKey="ordersPage.preorderDatePickup"
-                  />
-                ) : (
-                  <>
-                    <StatusBadge status={order.status} labels={statusLabels} />
-                    <PaymentBadge
-                      isPaid={order.isPaid}
-                      method={order.paymentMethod}
-                      t={t}
-                    />
-                  </>
-                )}
-              </div>
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-              {type !== "PREORDER" && (
-                <StatusProgress status={order.status} labels={statusLabels} />
-              )}
-
-              <div className="grid gap-3 md:grid-cols-2">
-                <InfoGroup
-                  title={
-                    type === "PREORDER"
-                      ? t("ordersPage.pickupTitle")
-                      : t("ordersPage.deliveryTitle")
-                  }
-                  lines={getDestinationLines(order, type, t)}
-                />
-
-                <InfoGroup
-                  title={t("ordersPage.contactTitle")}
-                  lines={[
-                    order.contact?.name,
-                    order.contact?.phone,
-                    order.contact?.email,
-                  ]}
-                />
-
+              <CardContent className="space-y-4">
                 {type !== "PREORDER" && (
+                  <StatusProgress status={order.status} labels={statusLabels} />
+                )}
+
+                <div className="grid gap-3 md:grid-cols-2">
                   <InfoGroup
-                    title={t("ordersPage.paymentLabel")}
+                    title={
+                      type === "PREORDER"
+                        ? t("ordersPage.pickupTitle")
+                        : t("ordersPage.deliveryTitle")
+                    }
+                    lines={getDestinationLines(order, type, t)}
+                  />
+
+                  <InfoGroup
+                    title={t("ordersPage.contactTitle")}
                     lines={[
-                      getPaymentLabel(order.paymentMethod, t),
-                      order.isPaid
-                        ? t("ordersPage.paid")
-                        : t("ordersPage.unpaid"),
+                      order.contact?.name,
+                      order.contact?.phone,
+                      order.contact?.email,
                     ]}
                   />
+
+                  {type !== "PREORDER" && (
+                    <InfoGroup
+                      title={t("ordersPage.paymentLabel")}
+                      lines={[
+                        getPaymentLabel(order.paymentMethod, t),
+                        order.isPaid
+                          ? t("ordersPage.paid")
+                          : t("ordersPage.unpaid"),
+                      ]}
+                    />
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-900">
+                    {t("ordersPage.items")}
+                  </p>
+
+                  {order.items.map((item: OrderItem) => (
+                    <ItemRow
+                      key={item.id}
+                      item={item}
+                      canceledLabel={t("ordersPage.statusCanceled")}
+                    />
+                  ))}
+                </div>
+
+                {canCancel && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => onCancel({ id: order.id, type })}
+                    disabled={isCanceling}
+                  >
+                    {type === "PREORDER"
+                      ? t("ordersPage.cancelPreorder")
+                      : t("ordersPage.cancel")}
+                  </Button>
                 )}
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-900">
-                  {t("ordersPage.items")}
-                </p>
-
-                {order.items.map((item: OrderItem) => (
-                  <ItemRow
-                    key={item.id}
-                    item={item}
-                    canceledLabel={t("ordersPage.statusCanceled")}
-                  />
-                ))}
-              </div>
-
-              {isCancelable(order.status) && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => onCancel({ id: order.id, type })}
-                  disabled={isCanceling}
-                >
-                  {type === "PREORDER"
-                    ? t("ordersPage.cancelPreorder")
-                    : t("ordersPage.cancel")}
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {totalCount > PAGE_SIZE && (
@@ -729,6 +751,15 @@ function ItemRow({
 function isCancelable(status: OrderStatus) {
   const normalized = (status ?? "").toUpperCase();
   return normalized !== "COMPLETED" && normalized !== "CANCELED";
+}
+
+function EndedBadge({ label }: { label: string }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+      <span className="h-2 w-2 rounded-full bg-slate-500" />
+      {label}
+    </span>
+  );
 }
 
 function getPaymentLabel(method: string | undefined, t: Translator) {

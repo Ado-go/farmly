@@ -5,11 +5,13 @@ process.env.ACCESS_TOKEN_SECRET =
 import request from "supertest";
 import app from "../../index.ts";
 import prisma from "../../prisma.ts";
+import jwt from "jsonwebtoken";
 
 describe("Preorder Checkout Routes", () => {
   let CUSTOMER_ID: number;
   let EVENT_ID: number;
   let PRODUCT_ID: number;
+  let CUSTOMER_TOKEN: string;
   const baseAddress = {
     address: "Main Street 1",
     postalCode: "01001",
@@ -35,6 +37,10 @@ describe("Preorder Checkout Routes", () => {
       },
     });
     CUSTOMER_ID = customer.id;
+    CUSTOMER_TOKEN = jwt.sign(
+      { id: CUSTOMER_ID, role: "CUSTOMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
 
     const event = await prisma.event.create({
       data: {
@@ -183,5 +189,169 @@ describe("Preorder Checkout Routes", () => {
     expect(res.statusCode).toBe(400);
     expect(res.body.error).toBe("Invalid request data");
     expect(res.body.details[0].path).toBe("eventId");
+  });
+
+  it("PATCH /checkout-preorder/:id/cancel - should block cancel after event end", async () => {
+    const pastEvent = await prisma.event.create({
+      data: {
+        title: "Finished Event",
+        description: "Ended already",
+        startDate: new Date(Date.now() - 1000 * 60 * 60 * 6),
+        endDate: new Date(Date.now() - 1000 * 60 * 60),
+        city: "Trnava",
+        street: "Market 1",
+        region: "Trnavský",
+        postalCode: "91701",
+        country: "Slovensko",
+        organizerId: CUSTOMER_ID,
+      },
+    });
+
+    const order = await prisma.order.create({
+      data: {
+        buyerId: CUSTOMER_ID,
+        orderType: "PREORDER",
+        contactName: "Customer 2",
+        contactPhone: "+421900000333",
+        deliveryCity: "Trnava",
+        deliveryStreet: "Market 1",
+        deliveryPostalCode: "91701",
+        deliveryCountry: "Slovensko",
+        eventId: pastEvent.id,
+        isDelivered: false,
+        isPaid: false,
+        paymentMethod: "CASH",
+        totalPrice: 10,
+        status: "PENDING",
+      },
+    });
+
+    await prisma.orderItem.create({
+      data: {
+        orderId: order.id,
+        productId: PRODUCT_ID,
+        quantity: 1,
+        unitPrice: 10,
+        sellerName: "Seller",
+        productName: "Honey Jar",
+        status: "ACTIVE",
+      },
+    });
+
+    const res = await request(app)
+      .patch(`/api/checkout-preorder/${order.id}/cancel`)
+      .set("Cookie", [`accessToken=${CUSTOMER_TOKEN}`]);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toBe(
+      "Predobjednávku už po skončení udalosti zrušiť nejde"
+    );
+
+    const persistedOrder = await prisma.order.findUnique({
+      where: { id: order.id },
+      include: { items: true },
+    });
+
+    expect(persistedOrder?.status).toBe("PENDING");
+    expect(
+      persistedOrder?.items.every((item) => item.status === "ACTIVE")
+    ).toBe(true);
+  });
+
+  it("PATCH /checkout-preorder/item/:id/cancel - should block farmer cancel after event end", async () => {
+    const farmer = await prisma.user.create({
+      data: {
+        email: "farmercancel@test.com",
+        password: "hashedpassword",
+        name: "Farmer Cancel",
+        phone: "+421900000444",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+    const farmerToken = jwt.sign(
+      { id: farmer.id, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
+
+    const pastEvent = await prisma.event.create({
+      data: {
+        title: "Past Event",
+        description: "Cannot cancel after this",
+        startDate: new Date(Date.now() - 1000 * 60 * 60 * 5),
+        endDate: new Date(Date.now() - 1000 * 60 * 60),
+        city: "Nitra",
+        street: "Old Street 2",
+        region: "Nitriansky",
+        postalCode: "94901",
+        country: "Slovensko",
+        organizerId: farmer.id,
+      },
+    });
+
+    const product = await prisma.product.create({
+      data: {
+        name: "Jam",
+        category: "Other",
+        description: "Sweet jam",
+        basePrice: 5,
+      },
+    });
+
+    await prisma.eventProduct.create({
+      data: {
+        eventId: pastEvent.id,
+        productId: product.id,
+        userId: farmer.id,
+        price: 5,
+        stock: 10,
+      },
+    });
+
+    const order = await prisma.order.create({
+      data: {
+        buyerId: CUSTOMER_ID,
+        orderType: "PREORDER",
+        contactName: "Customer 2",
+        contactPhone: "+421900000333",
+        deliveryCity: "Nitra",
+        deliveryStreet: "Old Street 2",
+        deliveryPostalCode: "94901",
+        deliveryCountry: "Slovensko",
+        eventId: pastEvent.id,
+        isDelivered: false,
+        isPaid: false,
+        paymentMethod: "CASH",
+        totalPrice: 12,
+        status: "PENDING",
+      },
+    });
+
+    const item = await prisma.orderItem.create({
+      data: {
+        orderId: order.id,
+        productId: product.id,
+        quantity: 2,
+        unitPrice: 6,
+        sellerName: farmer.name,
+        productName: "Jam",
+        status: "ACTIVE",
+      },
+    });
+
+    const res = await request(app)
+      .patch(`/api/checkout-preorder/item/${item.id}/cancel`)
+      .set("Cookie", [`accessToken=${farmerToken}`]);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toBe(
+      "Položku po skončení udalosti farmár zrušiť nemôže"
+    );
+
+    const persistedItem = await prisma.orderItem.findUnique({
+      where: { id: item.id },
+    });
+
+    expect(persistedItem?.status).toBe("ACTIVE");
   });
 });

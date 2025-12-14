@@ -408,6 +408,24 @@ router.patch("/:id/cancel", authenticateToken, async (req, res) => {
     if (order.buyerId !== userId)
       return res.status(403).json({ message: "Unauthorized" });
 
+    if (order.orderType !== "PREORDER")
+      return res
+        .status(400)
+        .json({ message: "Objednávku nie je možné zrušiť" });
+
+    const eventEndDate = order.event?.endDate;
+
+    if (!eventEndDate)
+      return res
+        .status(400)
+        .json({ message: "Udalosť pre predobjednávku nebola nájdená" });
+
+    if (eventEndDate.getTime() <= Date.now()) {
+      return res
+        .status(400)
+        .json({ message: "Predobjednávku už po skončení udalosti zrušiť nejde" });
+    }
+
     await prisma.$transaction([
       prisma.order.update({
         where: { id: orderId },
@@ -495,7 +513,10 @@ router.patch(
         where: { id: itemId },
         include: {
           order: {
-            include: { buyer: { select: { email: true, name: true } } },
+            include: {
+              buyer: { select: { email: true, name: true } },
+              event: true,
+            },
           },
           product: { include: { eventLinks: true } },
         },
@@ -514,6 +535,23 @@ router.patch(
 
       if (!ownsProduct)
         return res.status(403).json({ message: "Unauthorized" });
+
+      if (item.order.orderType !== "PREORDER")
+        return res
+          .status(400)
+          .json({ message: "Túto položku nie je možné zrušiť" });
+
+      const eventEndDate = item.order.event?.endDate;
+
+      if (!eventEndDate)
+        return res
+          .status(400)
+          .json({ message: "Udalosť pre predobjednávku nebola nájdená" });
+
+      if (eventEndDate.getTime() <= Date.now())
+        return res.status(400).json({
+          message: "Položku po skončení udalosti farmár zrušiť nemôže",
+        });
 
       await prisma.orderItem.update({
         where: { id: itemId },
