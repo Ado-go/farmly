@@ -58,40 +58,58 @@ export function OrderSummary({
               <strong>{t("checkoutPage.email")}:</strong> {addressData?.email}
             </p>
           </div>
-          <div className="space-y-1 text-sm text-foreground">
-            <p className="font-semibold">
-              {t("checkoutPage.deliveryType")}
-            </p>
-            <p>
-              <strong>{t("checkoutPage.deliveryOption")}:</strong>{" "}
-              {addressData?.deliveryOption === "ADDRESS"
-                ? t("checkoutPage.toAddress")
-                : t("checkoutPage.pickupPoint")}
-            </p>
-            <p>
-              <strong>{t("checkoutPage.paymentMethod")}:</strong>{" "}
-              {paymentData?.paymentMethod === "CARD"
-                ? t("checkoutPage.card")
-                : t("checkoutPage.cash")}
-            </p>
-            {addressData?.deliveryOption === "ADDRESS" ? (
-              <p>
-                <strong>{t("checkoutPage.street")}:</strong>{" "}
-                {addressData.deliveryStreet}
-                <br />
-                {addressData.deliveryPostalCode} {addressData.deliveryCity}
-                <br />
-                {addressData.deliveryCountry}
+          <div className="space-y-3 text-sm text-foreground">
+            <div className="space-y-1">
+              <p className="font-semibold">
+                {t("checkoutPage.deliveryType")}
               </p>
-            ) : (
               <p>
-                {addressData?.deliveryStreet}
-                <br />
-                {addressData?.deliveryPostalCode} {addressData?.deliveryCity}
-                <br />
-                {addressData?.deliveryCountry}
+                <strong>{t("checkoutPage.deliveryOption")}:</strong>{" "}
+                {addressData?.deliveryOption === "ADDRESS"
+                  ? t("checkoutPage.toAddress")
+                  : t("checkoutPage.pickupPoint")}
               </p>
-            )}
+              <p>
+                <strong>{t("checkoutPage.paymentMethod")}:</strong>{" "}
+                {paymentData?.paymentMethod === "CARD"
+                  ? t("checkoutPage.card")
+                  : t("checkoutPage.cash")}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-primary/15 bg-white/80 px-3 py-2 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                {addressData?.deliveryOption === "ADDRESS"
+                  ? t("checkoutPage.deliveryInfo")
+                  : t("checkoutPage.pickupPoint")}
+              </p>
+              <div className="mt-2 space-y-1">
+                {addressData?.deliveryOption === "ADDRESS" ? (
+                  <>
+                    <p className="font-medium">{addressData.deliveryStreet}</p>
+                    <p className="text-muted-foreground">
+                      {addressData.deliveryPostalCode} {addressData.deliveryCity}
+                    </p>
+                    <p className="text-muted-foreground">
+                      {addressData.deliveryCountry}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-medium">
+                      {addressData?.deliveryStreet}
+                    </p>
+                    <p className="text-muted-foreground">
+                      {addressData?.deliveryPostalCode}{" "}
+                      {addressData?.deliveryCity}
+                    </p>
+                    <p className="text-muted-foreground">
+                      {addressData?.deliveryCountry}
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
