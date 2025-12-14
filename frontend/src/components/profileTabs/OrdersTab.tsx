@@ -23,7 +23,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Download } from "lucide-react";
+import { downloadOrderPdf } from "@/lib/orderPdf";
 import type {
   EventOrder,
   Order,
@@ -144,6 +145,18 @@ export default function OrdersTab() {
     CANCELED: t("ordersPage.statusCanceled"),
   };
 
+  const handleDownload = async (
+    order: Order | EventOrder,
+    type: CancelTarget["type"]
+  ) => {
+    try {
+      await downloadOrderPdf({ order, t, statusLabels, type });
+    } catch (err) {
+      console.error("Failed to generate PDF", err);
+      toast.error(t("ordersPage.downloadPdfError"));
+    }
+  };
+
   const handleCancel = () => {
     if (!cancelTarget) return;
 
@@ -175,6 +188,7 @@ export default function OrdersTab() {
           isCanceling={
             cancelOrderMutation.isPending || cancelPreorderMutation.isPending
           }
+          onDownload={handleDownload}
           t={t}
         />
 
@@ -193,6 +207,7 @@ export default function OrdersTab() {
           isCanceling={
             cancelOrderMutation.isPending || cancelPreorderMutation.isPending
           }
+          onDownload={handleDownload}
           showStatusFilter={false}
           preorderDateFilter={preordersDateFilter}
           onPreorderDateFilterChange={setPreordersDateFilter}
@@ -248,6 +263,10 @@ type OrderSectionProps = {
   isCanceling: boolean;
   preorderDateFilter?: PreorderDateFilter;
   onPreorderDateFilterChange?: (val: PreorderDateFilter) => void;
+  onDownload: (
+    order: Order | EventOrder,
+    type: CancelTarget["type"]
+  ) => Promise<void>;
   t: Translator;
 };
 
@@ -269,6 +288,7 @@ function OrderSection({
   isCanceling,
   preorderDateFilter,
   onPreorderDateFilterChange,
+  onDownload,
   t,
 }: OrderSectionProps) {
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -380,11 +400,25 @@ function OrderSection({
                       {t("ordersPage.order")} #{order.orderNumber}
                     </CardTitle>
                   </div>
-                  <div className="text-right text-sm">
-                    <p className="text-muted-foreground">{t("ordersPage.total")}</p>
-                    <p className="font-semibold text-emerald-700">
-                      {order.totalPrice} €
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <div className="text-right text-sm">
+                      <p className="text-muted-foreground">{t("ordersPage.total")}</p>
+                      <p className="font-semibold text-emerald-700">
+                        {order.totalPrice} €
+                      </p>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="gap-2 px-2 sm:px-3"
+                      onClick={() => void onDownload(order, type)}
+                      aria-label={t("ordersPage.downloadPdf")}
+                    >
+                      <Download className="h-4 w-4" />
+                      <span className="hidden sm:inline">
+                        {t("ordersPage.downloadPdf")}
+                      </span>
+                    </Button>
                   </div>
                 </div>
 

@@ -23,8 +23,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Download } from "lucide-react";
 import type { EventOrder, Order, OrderItem, OrderStatus } from "@/types/orders";
+import { downloadOrderPdf } from "@/lib/orderPdf";
 
 type CancelTarget = { id: number; type: "STANDARD" | "PREORDER" };
 type StatusFilter = "all" | OrderStatus;
@@ -154,6 +155,18 @@ export default function SalesTab() {
     CANCELED: t("ordersPage.statusCanceled"),
   };
 
+  const handleDownload = async (
+    order: Order | EventOrder,
+    type: CancelTarget["type"]
+  ) => {
+    try {
+      await downloadOrderPdf({ order, t, statusLabels, type });
+    } catch (err) {
+      console.error("Failed to generate PDF", err);
+      toast.error(t("salesPage.downloadPdfError"));
+    }
+  };
+
   const handleCancel = () => {
     if (!cancelTarget) return;
     if (cancelTarget.type === "PREORDER") {
@@ -182,6 +195,7 @@ export default function SalesTab() {
           onCancel={setCancelTarget}
           statusLabels={statusLabels}
           isCanceling={isCanceling}
+          onDownload={handleDownload}
           t={t}
         />
 
@@ -201,6 +215,7 @@ export default function SalesTab() {
           preorderDateFilter={eventSalesDateFilter}
           onPreorderDateFilterChange={setEventSalesDateFilter}
           showStatusFilter={false}
+          onDownload={handleDownload}
           t={t}
         />
       </div>
@@ -254,6 +269,10 @@ type SalesSectionProps = {
   isCanceling: boolean;
   preorderDateFilter?: PreorderDateFilter;
   onPreorderDateFilterChange?: (val: PreorderDateFilter) => void;
+  onDownload: (
+    order: Order | EventOrder,
+    type: CancelTarget["type"]
+  ) => Promise<void>;
   t: Translator;
 };
 
@@ -275,6 +294,7 @@ function SalesSection({
   isCanceling,
   preorderDateFilter,
   onPreorderDateFilterChange,
+  onDownload,
   t,
 }: SalesSectionProps) {
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -379,13 +399,27 @@ function SalesSection({
                       {t("salesPage.order")} #{order.orderNumber}
                     </CardTitle>
                   </div>
-                  <div className="text-right text-sm">
-                    <p className="text-muted-foreground">
-                      {t("salesPage.total")}
-                    </p>
-                    <p className="font-semibold text-blue-700">
-                      {order.totalPrice} €
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <div className="text-right text-sm">
+                      <p className="text-muted-foreground">
+                        {t("salesPage.total")}
+                      </p>
+                      <p className="font-semibold text-blue-700">
+                        {order.totalPrice} €
+                      </p>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="gap-2 px-2 sm:px-3"
+                      onClick={() => void onDownload(order, type)}
+                      aria-label={t("salesPage.downloadPdf")}
+                    >
+                      <Download className="h-4 w-4" />
+                      <span className="hidden sm:inline">
+                        {t("salesPage.downloadPdf")}
+                      </span>
+                    </Button>
                   </div>
                 </div>
 
