@@ -667,7 +667,7 @@
     "paymentMethod": "Payment Method",
     "selectPayment": "Select payment method",
     "cash": "Cash on delivery",
-    "card": "Credit card",
+    "card": "Credit card online",
     "summary": "Order Summary",
     "deliveryType": "Delivery Type",
     "total": "Total",

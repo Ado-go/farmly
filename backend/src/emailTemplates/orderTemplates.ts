@@ -78,7 +78,9 @@ export const buildOrderConfirmationEmail = ({
   paymentLink?: string;
 }) => {
   const paymentLabel =
-    paymentMethod === "CARD" ? "Platba kartou" : "Platba v hotovosti";
+    paymentMethod === "CARD"
+      ? "Platba kartou online"
+      : "Platba v hotovosti";
 
   const payLinkHtml =
     paymentMethod === "CARD" && paymentLink
@@ -149,7 +151,9 @@ export const buildPaymentSuccessEmail = ({
   paymentMethod: PaymentMethod;
 }) => {
   const paymentLabel =
-    paymentMethod === "CARD" ? "Platba kartou" : "Platba v hotovosti";
+    paymentMethod === "CARD"
+      ? "Platba kartou online"
+      : "Platba v hotovosti";
 
   const content = `
     <p style="margin: 0 0 10px; color: #374151; line-height: 1.6;">Číslo objednávky: <strong>${orderNumber}</strong></p>
