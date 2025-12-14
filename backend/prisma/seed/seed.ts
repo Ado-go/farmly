@@ -327,9 +327,17 @@ async function createOrderWithItems({
           postalCode: event.postalCode,
         }
       : randomAddress();
-  const status = isPreorder
-    ? OrderStatus.PENDING
-    : orderStatuses[randomInt(0, orderStatuses.length - 1)];
+  const now = Date.now();
+  const eventEnd = event?.endDate ?? event?.startDate;
+  let status: OrderStatus;
+
+  if (isPreorder && eventEnd && eventEnd.getTime() < now) {
+    status = [OrderStatus.COMPLETED, OrderStatus.CANCELED][randomInt(0, 1)];
+  } else if (isPreorder) {
+    status = OrderStatus.PENDING;
+  } else {
+    status = orderStatuses[randomInt(0, orderStatuses.length - 1)];
+  }
   const totalPrice = parseFloat(
     items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)
   );
