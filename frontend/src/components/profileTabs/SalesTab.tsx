@@ -160,7 +160,7 @@ export default function SalesTab() {
     type: CancelTarget["type"]
   ) => {
     try {
-      await downloadOrderPdf({ order, t, statusLabels, type });
+      await downloadOrderPdf({ order, t, type });
     } catch (err) {
       console.error("Failed to generate PDF", err);
       toast.error(t("salesPage.downloadPdfError"));
