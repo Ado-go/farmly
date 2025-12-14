@@ -67,6 +67,16 @@ describe("Preorder Checkout Routes", () => {
       },
     });
     PRODUCT_ID = product.id;
+
+    await prisma.eventProduct.create({
+      data: {
+        eventId: EVENT_ID,
+        productId: PRODUCT_ID,
+        userId: CUSTOMER_ID,
+        price: 8,
+        stock: 100,
+      },
+    });
   });
 
   afterAll(async () => {
@@ -244,7 +254,7 @@ describe("Preorder Checkout Routes", () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toBe(
-      "Predobjednávku už po skončení udalosti zrušiť nejde"
+      "Preorders cannot be canceled after the event has ended"
     );
 
     const persistedOrder = await prisma.order.findUnique({
@@ -345,7 +355,7 @@ describe("Preorder Checkout Routes", () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toBe(
-      "Položku po skončení udalosti farmár zrušiť nemôže"
+      "Farmer cannot cancel items after the event has ended"
     );
 
     const persistedItem = await prisma.orderItem.findUnique({

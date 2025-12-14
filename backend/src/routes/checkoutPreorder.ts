@@ -472,11 +472,9 @@ router.patch("/:id/cancel", authenticateToken, async (req, res) => {
         .json({ message: "Event for this preorder was not found" });
 
     if (eventEndDate.getTime() <= Date.now()) {
-      return res
-        .status(400)
-        .json({
-          message: "Preorders cannot be canceled after the event has ended",
-        });
+      return res.status(400).json({
+        message: "Preorders cannot be canceled after the event has ended",
+      });
     }
 
     await prisma.$transaction([

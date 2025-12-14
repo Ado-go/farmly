@@ -75,6 +75,7 @@ describe("Event Routes", () => {
         region: "Bratislavský",
         postalCode: "81101",
         country: "Slovakia",
+        stallName: "Farmer Stall",
       });
 
     expect(res.statusCode).toBe(201);
@@ -112,6 +113,7 @@ describe("Event Routes", () => {
         region: "Praha",
         postalCode: "11000",
         country: "Czech Republic",
+        stallName: "Farmer Stall",
       });
 
     expect(res.statusCode).toBe(400);
@@ -153,6 +155,7 @@ describe("Event Routes", () => {
         region: "Trnavský",
         postalCode: "91701",
         country: "Slovakia",
+        stallName: "Updated Stall",
       });
 
     expect(res.statusCode).toBe(200);
@@ -174,6 +177,7 @@ describe("Event Routes", () => {
         region: "Košický",
         postalCode: "04001",
         country: "Slovakia",
+        stallName: "Unauthorized Stall",
       });
 
     expect(res.statusCode).toBe(404);
@@ -186,7 +190,8 @@ describe("Event Routes", () => {
   it("POST /event/:id/join - should allow farmer to join event", async () => {
     const res = await request(app)
       .post(`/api/event/${eventId}/join`)
-      .set("Cookie", [`accessToken=${otherAccessToken}`]);
+      .set("Cookie", [`accessToken=${otherAccessToken}`])
+      .send({ stallName: "Other Farmer Stall" });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty(
@@ -203,7 +208,8 @@ describe("Event Routes", () => {
   it("POST /event/:id/join - should fail when already joined", async () => {
     const res = await request(app)
       .post(`/api/event/${eventId}/join`)
-      .set("Cookie", [`accessToken=${otherAccessToken}`]);
+      .set("Cookie", [`accessToken=${otherAccessToken}`])
+      .send({ stallName: "Other Farmer Stall" });
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toHaveProperty(
