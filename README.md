@@ -30,7 +30,6 @@ npm run install:all          # installs frontend + backend dependencies
   ```bash
   DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/farmly
   PORT=5000
-  CLIENT_URL=http://localhost:5173
   FRONTEND_URL=http://localhost:5173
   BACKEND_URL=http://localhost:5000
 

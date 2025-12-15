@@ -123,7 +123,7 @@ router.post("/register", validateRequest(registerSchema), async (req, res) => {
       },
     });
 
-    const dashboardUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL;
+    const dashboardUrl = process.env.FRONTEND_URL;
     try {
       const { subject, html } = buildRegistrationEmail({
         name: user.name,
@@ -196,7 +196,7 @@ router.post("/forgot-password", async (req, res) => {
     },
   });
 
-  const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
   const { subject, html } = buildResetPasswordEmail(resetLink);
 
   try {
@@ -273,10 +273,7 @@ router.post("/change-password", authenticateToken, async (req, res) => {
     });
 
     try {
-      const loginUrl =
-        (process.env.CLIENT_URL || process.env.FRONTEND_URL)?.concat(
-          "/login"
-        ) ?? undefined;
+      const loginUrl = process.env.FRONTEND_URL?.concat("/login") ?? undefined;
       const { subject, html } = buildPasswordChangedEmail({
         name: user.name,
         loginUrl,
@@ -350,6 +347,8 @@ router.post("/logout", async (req, res) => {
   }
 
   res.clearCookie("refreshToken", refreshCookieOptions);
-  res.clearCookie("accessToken", accessCookieOptions).json({ message: "Logged out" });
+  res
+    .clearCookie("accessToken", accessCookieOptions)
+    .json({ message: "Logged out" });
 });
 export default router;

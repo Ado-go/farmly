@@ -5,7 +5,7 @@ process.env.REFRESH_TOKEN_SECRET =
   process.env.REFRESH_TOKEN_SECRET ?? "refresh-secret";
 process.env.RESET_TOKEN_SECRET =
   process.env.RESET_TOKEN_SECRET ?? "reset-secret";
-process.env.CLIENT_URL = process.env.CLIENT_URL ?? "https://client.com";
+process.env.CLIENT_URL = process.env.FRONTEND_URL ?? "https://client.com";
 
 import request from "supertest";
 import argon2 from "argon2";

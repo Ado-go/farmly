@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 const RESEND_API_URL = "https://api.resend.com/emails";
 const isLocalhost =
   process.env.NODE_ENV !== "production" ||
-  process.env.CLIENT_URL?.includes("localhost");
+  process.env.FRONTEND_URL?.includes("localhost");
 
 const sendWithSmtp = async (
   to: string,
