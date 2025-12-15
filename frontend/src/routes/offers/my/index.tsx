@@ -103,25 +103,28 @@ function OffersMyPage() {
 
   const { errors } = form.formState;
 
+  const fieldTone =
+    "shadow-sm text-foreground placeholder:text-muted-foreground border-primary/25 bg-white focus-visible:border-primary/40 focus-visible:ring-primary/40 dark:bg-background/60 dark:border-primary/30";
+
   const getInputClass = (hasError?: boolean) =>
-    `h-11 border-primary/25 bg-white shadow-sm ${
+    `h-11 ${fieldTone} ${
       hasError
-        ? "border-red-500 focus-visible:ring-red-500"
-        : "focus-visible:ring-primary/40"
+        ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500"
+        : ""
     }`;
 
   const getTextareaClass = (hasError?: boolean) =>
-    `min-h-[110px] border-primary/25 bg-white shadow-sm ${
+    `min-h-[110px] ${fieldTone} ${
       hasError
-        ? "border-red-500 focus-visible:ring-red-500"
-        : "focus-visible:ring-primary/40"
+        ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500"
+        : ""
     }`;
 
   const getSelectClass = (hasError?: boolean) =>
-    `w-full h-11 border-primary/25 bg-white shadow-sm ${
+    `w-full h-11 ${fieldTone} ${
       hasError
-        ? "border-red-500 focus-visible:ring-red-500"
-        : "focus-visible:ring-primary/40"
+        ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500"
+        : ""
     }`;
 
   const renderError = (error?: { message?: string }) =>
@@ -315,7 +318,7 @@ function OffersMyPage() {
                 {t("offersPage.title")}
               </p>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-                <h2 className="text-3xl font-bold text-slate-900">
+                <h2 className="text-3xl font-bold text-slate-900 dark:text-emerald-50">
                   {t("offersPage.myTitle")}
                 </h2>
                 <span className="w-fit rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
@@ -333,9 +336,9 @@ function OffersMyPage() {
                   {t("offersPage.createButton")}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-primary/10 bg-white/95 shadow-2xl sm:max-h-[85vh]">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-primary/15 sm:max-h-[85vh] dark:border-primary/25">
                 <DialogHeader className="space-y-1">
-                  <DialogTitle className="text-2xl">
+                  <DialogTitle className="text-2xl dark:text-emerald-50">
                     {editingOffer
                       ? t("offersPage.editTitle")
                       : t("offersPage.createTitle")}
@@ -354,10 +357,10 @@ function OffersMyPage() {
                   className="space-y-5"
                   noValidate
                 >
-                  <div className="space-y-4 rounded-xl border border-primary/10 bg-white/70 p-4 shadow-sm">
+                  <div className="space-y-4 rounded-xl border border-primary/15 bg-primary/5 p-4 shadow-sm dark:border-primary/25 dark:bg-primary/10">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-primary/70" />
-                      <h4 className="text-sm font-semibold text-slate-800">
+                      <h4 className="text-sm font-semibold text-foreground dark:text-emerald-50">
                         {t("offersPage.offerDetails")}
                       </h4>
                     </div>
@@ -366,7 +369,7 @@ function OffersMyPage() {
                       <div className="space-y-2 sm:col-span-2">
                         <Label
                           htmlFor="title"
-                          className="text-sm font-semibold text-slate-800"
+                          className="text-sm font-semibold text-foreground dark:text-emerald-50"
                         >
                           {t("offersPage.titleLabel")}
                         </Label>
@@ -383,7 +386,7 @@ function OffersMyPage() {
                       <div className="space-y-2 sm:col-span-2">
                         <Label
                           htmlFor="description"
-                          className="text-sm font-semibold text-slate-800"
+                          className="text-sm font-semibold text-foreground dark:text-emerald-50"
                         >
                           {t("offersPage.descriptionLabel")}
                         </Label>
@@ -399,16 +402,16 @@ function OffersMyPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-4 rounded-xl border border-primary/10 bg-white/70 p-4 shadow-sm">
+                  <div className="space-y-4 rounded-xl border border-primary/15 bg-primary/5 p-4 shadow-sm dark:border-primary/25 dark:bg-primary/10">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-amber-500" />
-                      <h4 className="text-sm font-semibold text-slate-800">
+                      <h4 className="text-sm font-semibold text-foreground dark:text-emerald-50">
                         {t("offersPage.productDetails")}
                       </h4>
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-slate-800">
+                      <Label className="text-sm font-semibold text-foreground dark:text-emerald-50">
                         {t("offersPage.productImagesLabel")}
                       </Label>
                       <ImageUploader
@@ -423,7 +426,7 @@ function OffersMyPage() {
                       <div className="space-y-2 sm:col-span-2">
                         <Label
                           htmlFor="productName"
-                          className="text-sm font-semibold text-slate-800"
+                          className="text-sm font-semibold text-foreground dark:text-emerald-50"
                         >
                           {t("offersPage.productNameLabel")}
                         </Label>
@@ -440,7 +443,7 @@ function OffersMyPage() {
                       <div className="space-y-2 sm:col-span-2">
                         <Label
                           htmlFor="productDescription"
-                          className="text-sm font-semibold text-slate-800"
+                          className="text-sm font-semibold text-foreground dark:text-emerald-50"
                         >
                           {t("offersPage.productDescriptionLabel")}
                         </Label>
@@ -461,7 +464,7 @@ function OffersMyPage() {
                       <div className="space-y-2">
                         <Label
                           htmlFor="productCategory"
-                          className="text-sm font-semibold text-slate-800"
+                          className="text-sm font-semibold text-foreground dark:text-emerald-50"
                         >
                           {t("offersPage.productCategoryLabel")}
                         </Label>
@@ -502,7 +505,7 @@ function OffersMyPage() {
                       <div className="space-y-2">
                         <Label
                           htmlFor="productPrice"
-                          className="text-sm font-semibold text-slate-800"
+                          className="text-sm font-semibold text-foreground dark:text-emerald-50"
                         >
                           {t("offersPage.productPriceLabel")}
                         </Label>
@@ -563,7 +566,7 @@ function OffersMyPage() {
                   <div className="space-y-3 pt-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="space-y-1">
-                        <h3 className="text-lg font-semibold text-slate-900">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-emerald-50">
                           {offer.title}
                         </h3>
                         {offer.product?.name && (
@@ -584,7 +587,7 @@ function OffersMyPage() {
                       emptyLabel={t("offersPage.noImage")}
                     />
                     <div className="flex items-center justify-between">
-                      <p className="text-2xl font-semibold text-slate-900">
+                      <p className="text-2xl font-semibold text-emerald-700 dark:text-emerald-100">
                         {(offer.product?.basePrice ?? 0).toFixed(2)} €
                       </p>
                       {offer.product?.description && (

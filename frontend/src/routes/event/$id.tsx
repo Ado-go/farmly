@@ -199,7 +199,7 @@ function EventDetailPage() {
             {t("eventPage.from")}:{" "}
             {format(new Date(event.startDate), "dd.MM.yyyy")}
           </p>
-          <CardTitle className="text-3xl leading-tight">
+          <CardTitle className="text-3xl leading-tight text-foreground dark:text-emerald-50">
             {event.title}
           </CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -237,7 +237,7 @@ function EventDetailPage() {
               <div className="grid gap-4 lg:grid-cols-[1.25fr,0.9fr]">
                 <div className="space-y-4">
                   <div className="rounded-lg border bg-muted/40 p-4 space-y-2">
-                    <p className="text-sm font-semibold text-slate-900">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-emerald-50">
                       {t("eventPage.description")}
                     </p>
                     <p className="text-muted-foreground leading-relaxed">
@@ -467,7 +467,9 @@ function InfoTile({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-lg border bg-muted/40 px-3 py-2">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="font-medium text-sm text-slate-900">{value}</p>
+      <p className="font-medium text-sm text-slate-900 dark:text-emerald-50">
+        {value}
+      </p>
     </div>
   );
 }

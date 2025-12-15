@@ -176,7 +176,7 @@ function EventProductDetailPage() {
                 <p className="text-xs uppercase tracking-wide text-primary">
                   {t("eventsDetail.productDetailsTitle")}
                 </p>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-emerald-50">
                   {eventProduct.product.name}
                 </h1>
                 <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
