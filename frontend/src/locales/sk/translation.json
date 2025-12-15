@@ -308,6 +308,8 @@
     "available": "Dostupný",
     "unavailable": "Nedostupný",
     "unavailableForSale": "Tento produkt je momentálne nedostupný a nemožno ho objednať.",
+    "soldOut": "Vypredané",
+    "outOfStock": "Tento produkt je vypredaný a nedá sa objednať.",
     "validation": {
       "name": "Zadaj názov produktu.",
       "pricePositive": "Cena musí byť vyššia než 0.",
@@ -353,6 +355,7 @@
     "price": "Cena",
     "farmName": "Farma",
     "addToCart": "Pridať do košíka",
+    "soldOut": "Vypredané",
     "noRating": "Bez hodnotenia",
     "stock": "Sklad",
     "addedToCart": "Produkt {{name}} bol pridaný do košíka.",

@@ -308,6 +308,8 @@
     "available": "Available",
     "unavailable": "Unavailable",
     "unavailableForSale": "This product is currently unavailable and cannot be ordered.",
+    "soldOut": "Sold out",
+    "outOfStock": "This product is sold out and cannot be ordered.",
     "validation": {
       "name": "Please enter a product name.",
       "pricePositive": "Price must be higher than 0.",
@@ -353,6 +355,7 @@
     "price": "Price",
     "farmName": "Farm",
     "addToCart": "Add to Cart",
+    "soldOut": "Sold out",
     "noRating": "No rating",
     "stock": "Stock",
     "addedToCart": "Product {{name}} has been added to the cart.",

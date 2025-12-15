@@ -9,6 +9,7 @@ import { buildOrderCancellationEmail } from "../emailTemplates/orderCancellation
 import { buildOrderItemCancellationEmail } from "../emailTemplates/orderItemCancellationTemplate.ts";
 import { buildFarmerOrderNotificationEmail } from "../emailTemplates/farmerOrderNotificationTemplate.ts";
 import { buildFarmerOrderCancellationEmail } from "../emailTemplates/farmerOrderCancellationTemplate.ts";
+import { buildProductSoldOutEmail } from "../emailTemplates/productSoldOutTemplate.ts";
 
 const router = Router();
 
@@ -24,6 +25,13 @@ type FarmerGroup = {
   farmerName?: string | null;
   items: FarmerGroupItem[];
   totalPrice: number;
+};
+
+type SoldOutProductNotice = {
+  productId: number;
+  productName: string;
+  farmerEmail?: string | null;
+  farmerName?: string | null;
 };
 
 const buildPickupInfo = (
@@ -49,6 +57,7 @@ const fetchEventProductsWithUsers = async (
   return prisma.eventProduct.findMany({
     where: { eventId, productId: { in: productIds } },
     include: {
+      product: { select: { id: true, name: true } },
       user: { select: { id: true, email: true, name: true, phone: true } },
     },
   });
@@ -149,60 +158,130 @@ router.post("/", validateRequest(preorderSchema), async (req, res) => {
       0
     );
 
-    const order = await prisma.order.create({
-      data: {
-        eventId,
-        orderType: "PREORDER",
-        buyerId: userInfo.buyerId || null,
-        anonymousEmail: userInfo.email,
-        contactName: userInfo.contactName,
-        contactPhone: userInfo.contactPhone,
-        paymentMethod: "CASH",
-        deliveryCity: event.city,
-        deliveryStreet: event.street,
-        deliveryPostalCode: event.postalCode,
-        deliveryCountry: event.country,
-        totalPrice,
-        isPaid: false,
-        isDelivered: false,
-        status: "PENDING",
-        items: {
-          create: cartItems.map((item: any) => {
-            const eventProduct = item.productId
-              ? eventProductMap.get(item.productId)
-              : undefined;
-            const sellerName = eventProduct?.user?.name ?? item.sellerName;
-            const stallName = eventProduct
-              ? stallMap.get(eventProduct.userId) ?? null
-              : null;
+    const insufficientStock = cartItems
+      .map((item: any) => {
+        const eventProduct = item.productId
+          ? eventProductMap.get(item.productId)
+          : undefined;
+        const available = eventProduct?.stock ?? 0;
+        return { ...item, available };
+      })
+      .filter(
+        (item: any) =>
+          typeof item.available !== "number" || item.available < item.quantity
+      )
+      .map((item: any) => ({
+        productId: item.productId,
+        requested: item.quantity,
+        available: item.available ?? 0,
+      }));
 
-            return {
+    if (insufficientStock.length > 0) {
+      return res.status(400).json({
+        message: "Insufficient stock for some products",
+        insufficientStock,
+      });
+    }
+
+    const { order, soldOutProducts } = await prisma.$transaction(
+      async (tx) => {
+        const soldOutNotices: SoldOutProductNotice[] = [];
+
+        for (const item of cartItems) {
+          if (!item.productId) continue;
+
+          const updateResult = await tx.eventProduct.updateMany({
+            where: {
+              eventId,
               productId: item.productId,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-              productName: item.productName,
-              sellerName,
-              stallName,
-              status: "ACTIVE",
-            };
-          }),
-        },
-      },
-      include: {
-        items: true,
-        buyer: { select: { email: true, name: true, phone: true } },
-        event: true,
-      },
-    });
+              stock: { gte: item.quantity },
+            },
+            data: { stock: { decrement: item.quantity } },
+          });
 
-    await prisma.orderHistory.create({
-      data: {
-        orderId: order.id,
-        userId: userInfo.buyerId ?? null,
-        action: "ORDER_CREATED",
-        message: `Preorder #${order.orderNumber.slice(0, 8)} created.`,
-      },
-    });
+          if (updateResult.count === 0) {
+            const err: any = new Error("INSUFFICIENT_STOCK");
+            err.code = "INSUFFICIENT_STOCK";
+            err.productId = item.productId;
+            throw err;
+          }
+
+          const updated = await tx.eventProduct.findFirst({
+            where: { eventId, productId: item.productId },
+            include: {
+              product: { select: { name: true } },
+              user: { select: { email: true, name: true } },
+            },
+          });
+
+          if (updated && updated.stock === 0) {
+            soldOutNotices.push({
+              productId: item.productId,
+              productName: updated.product?.name ?? item.productName,
+              farmerEmail: updated.user?.email,
+              farmerName: updated.user?.name,
+            });
+          }
+        }
+
+        const createdOrder = await tx.order.create({
+          data: {
+            eventId,
+            orderType: "PREORDER",
+            buyerId: userInfo.buyerId || null,
+            anonymousEmail: userInfo.email,
+            contactName: userInfo.contactName,
+            contactPhone: userInfo.contactPhone,
+            paymentMethod: "CASH",
+            deliveryCity: event.city,
+            deliveryStreet: event.street,
+            deliveryPostalCode: event.postalCode,
+            deliveryCountry: event.country,
+            totalPrice,
+            isPaid: false,
+            isDelivered: false,
+            status: "PENDING",
+            items: {
+              create: cartItems.map((item: any) => {
+                const eventProduct = item.productId
+                  ? eventProductMap.get(item.productId)
+                  : undefined;
+                const sellerName = eventProduct?.user?.name ?? item.sellerName;
+                const stallName = eventProduct
+                  ? stallMap.get(eventProduct.userId) ?? null
+                  : null;
+
+                return {
+                  productId: item.productId,
+                  quantity: item.quantity,
+                  unitPrice: item.unitPrice,
+                  productName: item.productName,
+                  sellerName,
+                  stallName,
+                  status: "ACTIVE",
+                };
+              }),
+            },
+          },
+          include: {
+            items: true,
+            buyer: { select: { email: true, name: true, phone: true } },
+            event: true,
+          },
+        });
+
+        await tx.orderHistory.create({
+          data: {
+            orderId: createdOrder.id,
+            userId: userInfo.buyerId ?? null,
+            action: "ORDER_CREATED",
+            message: `Preorder #${createdOrder.orderNumber.slice(0, 8)} created.`,
+          },
+        });
+
+        return { order: createdOrder, soldOutProducts: soldOutNotices };
+      }
+    );
 
     const recipientEmail =
       order.anonymousEmail ?? order.buyer?.email ?? null;
@@ -272,11 +351,37 @@ router.post("/", validateRequest(preorderSchema), async (req, res) => {
       })
     );
 
+    if (soldOutProducts.length > 0) {
+      for (const product of soldOutProducts) {
+        if (!product.farmerEmail) continue;
+        try {
+          const { subject, html } = buildProductSoldOutEmail({
+            productName: product.productName,
+            farmerName: product.farmerName ?? undefined,
+            isPreorder: true,
+            eventTitle: event.title ?? undefined,
+          });
+          await sendEmail(product.farmerEmail, subject, html);
+        } catch (emailErr) {
+          console.error(
+            "Failed to send sold-out notification for preorder:",
+            emailErr
+          );
+        }
+      }
+    }
+
     return res.json({
       message: "Preorder created",
       orderId: order.id,
     });
   } catch (err) {
+    if ((err as any)?.code === "INSUFFICIENT_STOCK") {
+      return res.status(400).json({
+        message: "Insufficient stock for some products",
+      });
+    }
+
     console.error(err);
     return res.status(500).json({ message: "Internal server error" });
   }
@@ -477,7 +582,25 @@ router.patch("/:id/cancel", authenticateToken, async (req, res) => {
       });
     }
 
+    if (order.status === "CANCELED") {
+      return res.status(400).json({ message: "Order already canceled" });
+    }
+
+    const itemsToRestock = order.items
+      .filter((i) => i.status === "ACTIVE" && i.productId !== null)
+      .reduce<Map<number, number>>((map, item) => {
+        const current = map.get(item.productId!) ?? 0;
+        map.set(item.productId!, current + item.quantity);
+        return map;
+      }, new Map());
+
     await prisma.$transaction([
+      ...Array.from(itemsToRestock.entries()).map(([productId, quantity]) =>
+        prisma.eventProduct.updateMany({
+          where: { eventId: order.eventId!, productId },
+          data: { stock: { increment: quantity } },
+        })
+      ),
       prisma.order.update({
         where: { id: orderId },
         data: {
@@ -604,32 +727,47 @@ router.patch(
           message: "Farmer cannot cancel items after the event has ended",
         });
 
-      await prisma.orderItem.update({
-        where: { id: itemId },
-        data: { status: "CANCELED" },
-      });
+      if (item.status === "CANCELED") {
+        return res.status(400).json({ message: "Item already canceled" });
+      }
 
-      const activeItems = await prisma.orderItem.findMany({
-        where: { orderId: item.orderId, status: "ACTIVE" },
-      });
+      const newTotal = await prisma.$transaction(async (tx) => {
+        if (item.productId) {
+          await tx.eventProduct.updateMany({
+            where: { eventId: item.order.eventId!, productId: item.productId },
+            data: { stock: { increment: item.quantity } },
+          });
+        }
 
-      const newTotal = activeItems.reduce(
-        (sum, i) => sum + i.unitPrice * i.quantity,
-        0
-      );
+        await tx.orderItem.update({
+          where: { id: itemId },
+          data: { status: "CANCELED" },
+        });
 
-      await prisma.order.update({
-        where: { id: item.orderId },
-        data: { totalPrice: newTotal },
-      });
+        const activeItems = await tx.orderItem.findMany({
+          where: { orderId: item.orderId, status: "ACTIVE" },
+        });
 
-      await prisma.orderHistory.create({
-        data: {
-          orderId: item.orderId,
-          userId,
-          action: "ITEM_CANCELED",
-          message: `Farmer canceled preorder item "${item.productName}"`,
-        },
+        const calculatedTotal = activeItems.reduce(
+          (sum, i) => sum + i.unitPrice * i.quantity,
+          0
+        );
+
+        await tx.order.update({
+          where: { id: item.orderId },
+          data: { totalPrice: calculatedTotal },
+        });
+
+        await tx.orderHistory.create({
+          data: {
+            orderId: item.orderId,
+            userId,
+            action: "ITEM_CANCELED",
+            message: `Farmer canceled preorder item "${item.productName}"`,
+          },
+        });
+
+        return calculatedTotal;
       });
 
       res.json({

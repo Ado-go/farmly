@@ -34,6 +34,8 @@ export function ProductMediaSection({
   t,
 }: ProductMediaSectionProps) {
   const isUnavailable = farmProduct.isAvailable === false;
+  const isSoldOut = (farmProduct.stock ?? 0) <= 0;
+  const isDisabled = isUnavailable || isSoldOut;
 
   const handleQuantityInput = (value: number) => {
     if (Number.isNaN(value)) return;
@@ -100,7 +102,11 @@ export function ProductMediaSection({
                 <p className="text-xs text-gray-500">
                   {t("productCard.stock")}
                 </p>
-                <p className="text-lg font-semibold text-gray-800">
+                <p
+                  className={`text-lg font-semibold ${
+                    isSoldOut ? "text-red-600" : "text-gray-800"
+                  }`}
+                >
                   {farmProduct.stock ?? "—"}
                 </p>
               </div>
@@ -109,6 +115,11 @@ export function ProductMediaSection({
             {isUnavailable && (
               <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {t("product.unavailableForSale")}
+              </div>
+            )}
+            {isSoldOut && !isUnavailable && (
+              <div className="rounded-lg border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                {t("product.outOfStock")}
               </div>
             )}
 
@@ -123,11 +134,13 @@ export function ProductMediaSection({
                   max={farmProduct.stock ?? undefined}
                   value={quantity}
                   className="w-28"
-                  disabled={isUnavailable}
+                  disabled={isDisabled}
                   onChange={(e) => handleQuantityInput(e.target.valueAsNumber)}
                 />
-                <Button onClick={onAddToCart} disabled={isUnavailable}>
-                  {t("productCard.addToCart")}
+                <Button onClick={onAddToCart} disabled={isDisabled}>
+                  {isSoldOut
+                    ? t("product.soldOut")
+                    : t("productCard.addToCart")}
                 </Button>
               </div>
             </div>

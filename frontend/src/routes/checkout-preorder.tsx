@@ -117,8 +117,10 @@ function CheckoutPreorderPage() {
         contactPhone: user?.phone ?? "",
         email: user?.email ?? "",
       });
-    } catch {
-      toast.error(t("checkoutPreoderPage.error"));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "";
+      const outOfStock = message.toLowerCase().includes("stock");
+      toast.error(outOfStock ? t("product.outOfStock") : t("checkoutPreoderPage.error"));
     }
   };
 

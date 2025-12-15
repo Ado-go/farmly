@@ -20,6 +20,7 @@ describe("Preorder Checkout Routes", () => {
   };
 
   beforeAll(async () => {
+    await prisma.orderHistory.deleteMany({});
     await prisma.orderItem.deleteMany({});
     await prisma.order.deleteMany({});
     await prisma.event.deleteMany({});
@@ -79,7 +80,18 @@ describe("Preorder Checkout Routes", () => {
     });
   });
 
+  beforeEach(async () => {
+    await prisma.orderHistory.deleteMany({});
+    await prisma.orderItem.deleteMany({});
+    await prisma.order.deleteMany({});
+    await prisma.eventProduct.updateMany({
+      where: { eventId: EVENT_ID, productId: PRODUCT_ID },
+      data: { stock: 100 },
+    });
+  });
+
   afterAll(async () => {
+    await prisma.orderHistory.deleteMany({});
     await prisma.orderItem.deleteMany({});
     await prisma.order.deleteMany({});
     await prisma.event.deleteMany({});
@@ -113,6 +125,42 @@ describe("Preorder Checkout Routes", () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty("orderId");
     expect(res.body).toHaveProperty("message", "Preorder created");
+
+    const eventProduct = await prisma.eventProduct.findFirst({
+      where: { eventId: EVENT_ID, productId: PRODUCT_ID },
+    });
+    expect(eventProduct?.stock).toBe(99);
+  });
+
+  it("POST /checkout-preorder - fails when stock is insufficient", async () => {
+    await prisma.eventProduct.updateMany({
+      where: { eventId: EVENT_ID, productId: PRODUCT_ID },
+      data: { stock: 0 },
+    });
+
+    const res = await request(app)
+      .post("/api/checkout-preorder")
+      .send({
+        cartItems: [
+          {
+            productId: PRODUCT_ID,
+            quantity: 1,
+            unitPrice: 8,
+            productName: "Honey Jar",
+            sellerName: "Farmer A",
+          },
+        ],
+        userInfo: {
+          buyerId: CUSTOMER_ID,
+          contactName: "Customer 2",
+          contactPhone: "+421900000333",
+          email: "customer2@test.com",
+        },
+        eventId: EVENT_ID,
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toBe("Insufficient stock for some products");
   });
 
   it("POST /checkout-preorder - should fail if preorder cart is empty", async () => {

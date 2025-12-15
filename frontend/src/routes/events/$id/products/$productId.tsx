@@ -103,6 +103,7 @@ function EventProductDetailPage() {
 
   const price = eventProduct.price ?? eventProduct.product.basePrice ?? 0;
   const eventHasNotStarted = new Date(event.startDate) > new Date();
+  const isSoldOut = (eventProduct.stock ?? 0) <= 0;
 
   const normalizeQuantity = (value: number) => {
     const maxQty =
@@ -197,7 +198,11 @@ function EventProductDetailPage() {
                 <span className="rounded-full bg-primary/10 px-3 py-1 text-primary">
                   {getCategoryLabel(eventProduct.product.category, t)}
                 </span>
-                <span className="rounded-full bg-gray-100 px-3 py-1">
+                <span
+                  className={`rounded-full px-3 py-1 ${
+                    isSoldOut ? "bg-red-50 text-red-700" : "bg-gray-100"
+                  }`}
+                >
                   {t("productCard.stock")}: {eventProduct.stock ?? 0}
                 </span>
               </div>
@@ -228,6 +233,7 @@ function EventProductDetailPage() {
                       max={eventProduct.stock ?? undefined}
                       value={quantity}
                       className="w-24"
+                      disabled={isSoldOut || !eventHasNotStarted}
                       onChange={(e) =>
                         handleQuantityChange(e.target.valueAsNumber)
                       }
@@ -238,27 +244,25 @@ function EventProductDetailPage() {
                 <div className="flex flex-col gap-2">
                   <Button
                     onClick={handleAddToPreorder}
-                    disabled={
-                      !eventHasNotStarted || (eventProduct.stock ?? 0) === 0
-                    }
+                    disabled={!eventHasNotStarted || isSoldOut}
                     className="w-full"
                   >
-                    {eventHasNotStarted
-                      ? t("eventsDetail.preorder")
-                      : t("eventsDetail.eventStarted")}
+                    {!eventHasNotStarted
+                      ? t("eventsDetail.eventStarted")
+                      : isSoldOut
+                      ? t("product.soldOut")
+                      : t("eventsDetail.preorder")}
                   </Button>
                   {!eventHasNotStarted && (
                     <p className="text-center text-xs text-red-500">
                       {t("eventsDetail.eventStarted")}
                     </p>
                   )}
-                  {eventProduct.stock !== undefined &&
-                    eventProduct.stock !== null &&
-                    eventProduct.stock <= 0 && (
-                      <p className="text-center text-xs text-red-500">
-                        {t("productCard.stock")}: 0
-                      </p>
-                    )}
+                  {isSoldOut && (
+                    <p className="text-center text-xs text-red-500">
+                      {t("product.soldOut")}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

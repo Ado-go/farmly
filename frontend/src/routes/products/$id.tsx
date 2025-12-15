@@ -97,6 +97,10 @@ function ProductDetailPage() {
       toast.error(t("product.unavailableForSale"));
       return;
     }
+    if (fp.stock !== undefined && fp.stock !== null && fp.stock <= 0) {
+      toast.error(t("product.outOfStock"));
+      return;
+    }
 
     const normalizedQuantity = Math.max(1, Math.floor(quantity));
     const finalQuantity =

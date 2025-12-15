@@ -113,6 +113,13 @@ describe("Checkout Routes", () => {
     PRODUCT_ID = product.id;
   });
 
+  beforeEach(async () => {
+    await prisma.orderHistory.deleteMany({});
+    await prisma.orderItem.deleteMany({});
+    await prisma.order.deleteMany({});
+    await prisma.farmProduct.updateMany({ data: { stock: 50, isAvailable: true } });
+  });
+
   afterAll(async () => {
     await prisma.orderHistory.deleteMany({});
     await prisma.orderItem.deleteMany({});
@@ -160,6 +167,45 @@ describe("Checkout Routes", () => {
     expect(order?.status).toBe("PENDING");
     expect(order?.items.length).toBe(1);
     expect(order?.items[0].status).toBe("ACTIVE");
+
+    const farmProduct = await prisma.farmProduct.findFirst({
+      where: { productId: PRODUCT_ID },
+    });
+    expect(farmProduct?.stock).toBe(48);
+  });
+
+  it("POST /checkout - fails when stock is insufficient", async () => {
+    await prisma.farmProduct.updateMany({
+      where: { productId: PRODUCT_ID },
+      data: { stock: 1 },
+    });
+
+    const res = await request(app)
+      .post("/api/checkout")
+      .send({
+        cartItems: [
+          {
+            productId: PRODUCT_ID,
+            quantity: 2,
+            unitPrice: 3.5,
+            productName: "Test Product",
+            sellerName: "Farmer",
+          },
+        ],
+        userInfo: {
+          buyerId: CUSTOMER_ID,
+          contactName: "Customer",
+          contactPhone: "+421900000003",
+          deliveryCity: "Bratislava",
+          deliveryStreet: "Main 1",
+          deliveryPostalCode: "81101",
+          deliveryCountry: "Slovensko",
+          paymentMethod: "CASH",
+        },
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toBe("Insufficient stock for some products");
   });
 
   it("GET /checkout/my-orders - returns customer's orders", async () => {
@@ -227,6 +273,11 @@ describe("Checkout Routes", () => {
     });
     expect(updated?.status).toBe("CANCELED");
     expect(updated?.items[0].status).toBe("CANCELED");
+
+    const farmProduct = await prisma.farmProduct.findFirst({
+      where: { productId: PRODUCT_ID },
+    });
+    expect(farmProduct?.stock).toBe(52);
   });
 
   it("PATCH /checkout/:id/cancel - fails with 403 for another customer", async () => {
@@ -324,6 +375,11 @@ describe("Checkout Routes", () => {
       where: { id: order.id },
     });
     expect(updatedOrder?.totalPrice).toBe(0);
+
+    const farmProduct = await prisma.farmProduct.findFirst({
+      where: { productId: PRODUCT_ID },
+    });
+    expect(farmProduct?.stock).toBe(52);
   });
 
   it("PATCH /checkout/item/:id/cancel - fails with 403 if another farmer tries", async () => {

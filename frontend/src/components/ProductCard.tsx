@@ -19,6 +19,8 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
 
   const { product: inner } = product;
   const isUnavailable = product.isAvailable === false;
+  const isSoldOut = (product.stock ?? 0) <= 0;
+  const isDisabled = isUnavailable || isSoldOut;
   const ratingValue =
     inner.rating !== undefined && inner.rating !== null
       ? Number(inner.rating)
@@ -33,6 +35,10 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
   const handleAddToCart = (fp: FarmProduct) => {
     if (fp.isAvailable === false) {
       toast.error(t("product.unavailableForSale"));
+      return;
+    }
+    if (isSoldOut) {
+      toast.error(t("product.outOfStock"));
       return;
     }
 
@@ -80,6 +86,13 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
           <span className="absolute right-3 top-3 rounded-full bg-primary/90 px-3 py-1 text-xs font-semibold text-white shadow">
             {product.price} €
           </span>
+          {isSoldOut && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/35">
+              <span className="rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white shadow">
+                {t("product.soldOut")}
+              </span>
+            </div>
+          )}
         </div>
 
         <CardContent className="space-y-3 p-5">
@@ -100,7 +113,13 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
               ) : null}
             </div>
             {product.stock !== undefined ? (
-              <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600 dark:bg-emerald-900/50 dark:text-emerald-50">
+              <span
+                className={`rounded-full px-2 py-1 text-xs ${
+                  isSoldOut
+                    ? "bg-red-50 text-red-700 dark:bg-rose-900/50 dark:text-rose-50"
+                    : "bg-gray-100 text-gray-600 dark:bg-emerald-900/50 dark:text-emerald-50"
+                }`}
+              >
                 {t("productCard.stock")}: {product.stock}
               </span>
             ) : null}
@@ -122,9 +141,13 @@ export function ProductCard({ product, sellerNameOverride }: ProductCardProps) {
           variant="outline"
           className="w-full"
           onClick={() => handleAddToCart(product)}
-          disabled={isUnavailable}
+          disabled={isDisabled}
         >
-          {isUnavailable ? t("product.unavailable") : t("productCard.addToCart")}
+          {isSoldOut
+            ? t("product.soldOut")
+            : isUnavailable
+            ? t("product.unavailable")
+            : t("productCard.addToCart")}
         </Button>
       </div>
     </Card>

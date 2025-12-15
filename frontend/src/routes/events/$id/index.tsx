@@ -333,23 +333,36 @@ function EventPageDetail() {
                                 {t("eventsDetail.viewProduct")}
                               </Link>
                             </div>
-                            {ep.product.images?.[0]?.url ? (
-                              <img
-                                src={ep.product.images[0].url}
-                                alt={ep.product.name}
-                                className="w-full h-32 object-cover rounded"
-                              />
-                            ) : (
-                              <div className="w-full h-32 bg-primary/5 text-primary flex items-center justify-center rounded">
-                                {t("eventsDetail.noImage")}
-                              </div>
-                            )}
+                            <div className="relative">
+                              {ep.product.images?.[0]?.url ? (
+                                <img
+                                  src={ep.product.images[0].url}
+                                  alt={ep.product.name}
+                                  className="w-full h-32 object-cover rounded"
+                                />
+                              ) : (
+                                <div className="w-full h-32 bg-primary/5 text-primary flex items-center justify-center rounded">
+                                  {t("eventsDetail.noImage")}
+                                </div>
+                              )}
+                              {(ep.stock ?? 0) <= 0 && (
+                                <div className="absolute left-2 top-2 rounded-full bg-red-600 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow">
+                                  {t("product.soldOut")}
+                                </div>
+                              )}
+                            </div>
                             <div className="flex items-center justify-between text-sm text-gray-600">
                               <div className="flex items-center gap-2">
                                 <span className="rounded-full bg-primary/10 px-3 py-1 text-primary inline-flex items-center gap-2">
                                   {getCategoryLabel(ep.product.category, t)}
                                 </span>
-                                <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
+                                <span
+                                  className={`rounded-full px-3 py-1 text-xs ${
+                                    (ep.stock ?? 0) <= 0
+                                      ? "bg-red-50 text-red-700"
+                                      : "bg-gray-100 text-gray-600"
+                                  }`}
+                                >
                                   {t("productCard.stock")}: {ep.stock ?? 0}
                                 </span>
                               </div>
@@ -368,6 +381,12 @@ function EventPageDetail() {
                           </div>
 
                           {eventHasNotStarted ? (
+                            <>
+                              {(ep.stock ?? 0) <= 0 && (
+                                <p className="text-xs text-red-600">
+                                  {t("product.soldOut")}
+                                </p>
+                              )}
                             <div className="flex flex-col gap-2">
                               <div className="flex items-center gap-2">
                                 <label className="text-sm font-medium text-gray-700">
@@ -379,6 +398,7 @@ function EventPageDetail() {
                                   max={ep.stock ?? undefined}
                                   value={quantities[ep.id] ?? 1}
                                   className="w-24"
+                                  disabled={(ep.stock ?? 0) <= 0}
                                   onChange={(e) =>
                                     handleQuantityChange(
                                       ep,
@@ -390,10 +410,14 @@ function EventPageDetail() {
                               <Button
                                 className="w-full"
                                 onClick={() => handleAddToPreorder(ep)}
+                                disabled={(ep.stock ?? 0) <= 0}
                               >
-                                {t("eventsDetail.preorder")}
+                                {(ep.stock ?? 0) <= 0
+                                  ? t("product.soldOut")
+                                  : t("eventsDetail.preorder")}
                               </Button>
                             </div>
+                            </>
                           ) : (
                             <p className="text-center text-red-500 text-xs">
                               {t("eventsDetail.eventStarted")}

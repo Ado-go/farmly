@@ -194,8 +194,13 @@ function CheckoutPage() {
       const message =
         err instanceof Error ? err.message : t("checkoutPage.error");
       const unavailable = message.toLowerCase().includes("unavailable");
+      const outOfStock = message.toLowerCase().includes("stock");
       toast.error(
-        unavailable ? t("product.unavailableForSale") : t("checkoutPage.error")
+        unavailable
+          ? t("product.unavailableForSale")
+          : outOfStock
+          ? t("product.outOfStock")
+          : t("checkoutPage.error")
       );
     }
   };
