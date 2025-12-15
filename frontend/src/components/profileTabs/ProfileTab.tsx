@@ -255,11 +255,11 @@ export default function ProfileTab() {
 
   return (
     <div className="space-y-6">
-      <Card className="overflow-hidden border-none shadow-lg ring-1 ring-emerald-100 bg-gradient-to-br from-emerald-50 to-white">
+      <Card className="overflow-hidden border-none shadow-lg ring-1 ring-emerald-100 bg-gradient-to-br from-emerald-50 to-white dark:bg-popover dark:from-popover dark:to-popover dark:ring-emerald-400/30">
         <CardHeader className="relative pb-2">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-emerald-200 bg-white shadow-sm">
+              <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-emerald-200 bg-white shadow-sm dark:border-emerald-500/40 dark:bg-popover">
                 {avatarPreview ? (
                   <img
                     src={avatarPreview}
@@ -267,17 +267,17 @@ export default function ProfileTab() {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-emerald-100 text-emerald-700">
+                  <div className="flex h-full w-full items-center justify-center bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-100">
                     <User className="h-8 w-8" />
                   </div>
                 )}
               </div>
               <div className="space-y-1">
-                <h2 className="text-2xl font-semibold text-emerald-900">
+                <h2 className="text-2xl font-semibold text-emerald-900 dark:text-white">
                   {user?.name || t("profile")}
                 </h2>
-                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-50">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-300" />
                   {roleLabel}
                 </span>
               </div>
@@ -341,9 +341,9 @@ export default function ProfileTab() {
           )}
 
           <div className="mt-8 flex flex-col items-center gap-4 lg:flex-row lg:items-start lg:justify-center lg:gap-6">
-            <div className="w-full max-w-3xl rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50/40 via-white to-emerald-50/30 p-4 shadow-inner">
+            <div className="w-full max-w-3xl rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50/40 via-white to-emerald-50/30 p-4 shadow-inner dark:border-border dark:from-popover dark:via-popover dark:to-popover">
               <div className="mb-3 space-y-1">
-                <p className="text-sm font-semibold text-emerald-900">
+                <p className="text-sm font-semibold text-emerald-900 dark:text-white">
                   {t("profilePage.accountActionsTitle")}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -356,7 +356,7 @@ export default function ProfileTab() {
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
-                      className="h-full w-full justify-start gap-3 rounded-lg border-emerald-200 bg-white/80 text-emerald-900 shadow-sm hover:bg-emerald-50"
+                      className="h-full w-full justify-start gap-3 rounded-lg border-emerald-200 bg-white/80 text-emerald-900 shadow-sm hover:bg-emerald-50 dark:border-emerald-300/30 dark:bg-popover dark:text-white dark:hover:bg-emerald-900/30"
                     >
                       <Lock className="h-4 w-4 text-emerald-700" />
                       <span className="flex flex-col items-start gap-0.5">
@@ -402,7 +402,7 @@ export default function ProfileTab() {
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
-                      className="h-full w-full justify-start gap-3 rounded-lg border-red-200 bg-white/80 text-red-800 shadow-sm hover:bg-red-50"
+                      className="h-full w-full justify-start gap-3 rounded-lg border-red-200 bg-white/80 text-red-800 shadow-sm hover:bg-red-50 dark:border-red-400/40 dark:bg-popover dark:text-red-100 dark:hover:bg-red-900/30"
                     >
                       <ShieldOff className="h-4 w-4 text-red-600" />
                       <span className="flex flex-col items-start gap-0.5">
@@ -446,7 +446,7 @@ export default function ProfileTab() {
             {!isEditing && (
               <Button
                 variant="outline"
-                className="w-full max-w-xs justify-start gap-3 rounded-lg border-emerald-200 bg-white/90 px-6 py-5 text-emerald-900 shadow-sm hover:bg-emerald-50 lg:self-stretch"
+                className="w-full max-w-xs justify-start gap-3 rounded-lg border-emerald-200 bg-white/90 px-6 py-5 text-emerald-900 shadow-sm hover:bg-emerald-50 lg:self-stretch dark:border-emerald-300/30 dark:bg-popover dark:text-white dark:hover:bg-emerald-900/30"
                 onClick={() => setIsEditing(true)}
               >
                 <span className="flex flex-col items-start gap-1">
@@ -478,11 +478,11 @@ function Field({
   editing?: boolean;
 }) {
   return (
-    <div className="rounded-lg border bg-white/70 p-3 shadow-sm">
+    <div className="rounded-lg border bg-white/70 p-3 shadow-sm dark:border-border dark:bg-popover">
       <Label className="text-xs uppercase tracking-wide text-muted-foreground">
         {label}
       </Label>
-      <div className="mt-1 text-sm text-gray-900">
+      <div className="mt-1 text-sm text-gray-900 dark:text-white">
         {editing && children ? (
           <div className="mt-1">{children}</div>
         ) : (

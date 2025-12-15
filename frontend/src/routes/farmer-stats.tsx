@@ -165,11 +165,11 @@ function FarmerStatsPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-6xl space-y-8 px-4 py-10">
-        <div className="relative overflow-hidden rounded-3xl border bg-gradient-to-r from-emerald-50 via-white to-lime-50 p-6 shadow-sm">
+        <div className="relative overflow-hidden rounded-3xl border bg-gradient-to-r from-emerald-50 via-white to-lime-50 p-6 shadow-sm dark:border-border dark:from-popover dark:via-popover dark:to-popover">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(34,197,94,0.08),transparent_38%),radial-gradient(circle_at_85%_10%,rgba(251,191,36,0.1),transparent_32%)]" />
           <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700 dark:text-emerald-100">
                 {t("farmerStatsPage.lastUpdated")}
               </p>
               <h1 className="text-3xl font-semibold">
@@ -179,7 +179,7 @@ function FarmerStatsPage() {
                 {t("farmerStatsPage.subtitle")}
               </p>
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-emerald-100 bg-white/80 px-3 py-2 text-xs font-medium text-emerald-800 shadow-sm">
+            <div className="flex items-center gap-2 rounded-full border border-emerald-100 bg-white/80 px-3 py-2 text-xs font-medium text-emerald-800 shadow-sm dark:border-emerald-400/30 dark:bg-popover dark:text-emerald-50">
               <Star className="h-4 w-4 fill-emerald-500 text-emerald-600" />
               <span>
                 {t("farmerStatsPage.averageRating")}{" "}
@@ -194,13 +194,13 @@ function FarmerStatsPage() {
             {metrics.map((metric) => (
               <Card
                 key={metric.label}
-                className="overflow-hidden border-emerald-50 bg-white/85 shadow-sm"
+                className="overflow-hidden border-emerald-50 bg-white/85 shadow-sm dark:border-border/60 dark:bg-popover"
               >
                 <CardContent className="flex items-center gap-4 p-4">
                   <div
                     className={`rounded-xl bg-gradient-to-br ${metric.tone} p-3 shadow-inner`}
                   >
-                    <metric.icon className="h-5 w-5 text-emerald-700" />
+                    <metric.icon className="h-5 w-5 text-emerald-700 dark:text-emerald-100" />
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">
@@ -217,9 +217,9 @@ function FarmerStatsPage() {
         {stats.totals.orders === 0 &&
         stats.totals.preorders === 0 &&
         bestSellers.length === 0 ? (
-          <Card className="border-dashed border-emerald-200 bg-emerald-50/50">
+          <Card className="border-dashed border-emerald-200 bg-emerald-50/50 dark:border-emerald-400/40 dark:bg-popover">
             <CardContent className="space-y-3 p-6 text-center">
-              <p className="text-lg font-semibold text-emerald-900">
+              <p className="text-lg font-semibold text-emerald-900 dark:text-white">
                 {t("farmerStatsPage.empty")}
               </p>
               <Button asChild>
@@ -229,7 +229,7 @@ function FarmerStatsPage() {
           </Card>
         ) : (
           <div className="grid gap-6 lg:grid-cols-[1.2fr,0.9fr]">
-            <Card className="border-emerald-100 bg-white/80 shadow-sm">
+            <Card className="border-emerald-100 bg-white/80 shadow-sm dark:border-border/60 dark:bg-popover">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg font-semibold">
@@ -246,7 +246,7 @@ function FarmerStatsPage() {
                     {t("farmerStatsPage.emptyBestSellers")}
                   </p>
                 ) : (
-                  <div className="divide-y divide-emerald-50">
+                  <div className="divide-y divide-emerald-50 dark:divide-border/60">
                     {bestSellers.map((item) => (
                       <div
                         key={item.productId}
@@ -264,7 +264,7 @@ function FarmerStatsPage() {
                             {numberFormatter.format(item.quantity)}
                           </span>
                         </div>
-                        <div className="text-right text-sm font-semibold text-emerald-700">
+                        <div className="text-right text-sm font-semibold text-emerald-700 dark:text-emerald-100">
                           {currencyFormatter.format(item.revenue)}
                         </div>
                       </div>
@@ -274,13 +274,13 @@ function FarmerStatsPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-emerald-100 bg-white/80 shadow-sm">
+            <Card className="border-emerald-100 bg-white/80 shadow-sm dark:border-border/60 dark:bg-popover">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg font-semibold">
                     {t("farmerStatsPage.ratings")}
                   </CardTitle>
-                  <div className="flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800">
+                  <div className="flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 dark:bg-amber-500/10 dark:text-amber-100">
                     <Star className="h-4 w-4 fill-amber-400 text-amber-500" />
                     <span>
                       {stats.ratings.average
@@ -292,7 +292,7 @@ function FarmerStatsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-baseline gap-3">
-                  <p className="text-4xl font-semibold text-amber-600">
+                  <p className="text-4xl font-semibold text-amber-600 dark:text-amber-200">
                     {stats.ratings.average
                       ? stats.ratings.average.toFixed(2)
                       : "–"}
@@ -311,7 +311,7 @@ function FarmerStatsPage() {
                     topRated.map((product) => (
                       <div
                         key={product.productId}
-                        className="flex items-center justify-between rounded-xl border border-amber-50 bg-amber-50/60 px-3 py-2"
+                        className="flex items-center justify-between rounded-xl border border-amber-50 bg-amber-50/60 px-3 py-2 dark:border-amber-400/30 dark:bg-amber-500/10"
                       >
                         <div>
                           <p className="font-medium">{product.name}</p>

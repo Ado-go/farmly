@@ -241,21 +241,37 @@ h1 {
     color: color-mix(in srgb, #b91c1c 72%, white 28%);
   }
 
-  /* Neutralize light-only surfaces in dark mode */
+  /* Neutralize light-only surfaces in dark mode and align them to popover tone */
   .dark .bg-white {
-    background-color: color-mix(in oklab, var(--background) 60%, white 40%);
+    background-color: var(--popover);
   }
   .dark .bg-white\/95 {
-    background-color: color-mix(in oklab, var(--background) 58%, white 42%);
+    background-color: color-mix(
+      in oklab,
+      var(--popover) 95%,
+      var(--background) 5%
+    );
   }
   .dark .bg-white\/90 {
-    background-color: color-mix(in oklab, var(--background) 62%, white 38%);
+    background-color: color-mix(
+      in oklab,
+      var(--popover) 90%,
+      var(--background) 10%
+    );
   }
   .dark .bg-white\/80 {
-    background-color: color-mix(in oklab, var(--background) 70%, white 30%);
+    background-color: color-mix(
+      in oklab,
+      var(--popover) 80%,
+      var(--background) 20%
+    );
   }
   .dark .bg-white\/70 {
-    background-color: color-mix(in oklab, var(--background) 75%, white 25%);
+    background-color: color-mix(
+      in oklab,
+      var(--popover) 70%,
+      var(--background) 30%
+    );
   }
 
   /* Softer borders on dark backgrounds */

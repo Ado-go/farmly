@@ -116,9 +116,6 @@ export function UpcomingGrid({
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">
             {t("eventsPage.upcoming")}
           </p>
-          <h2 className="text-xl font-bold text-gray-900">
-            {t("eventsPage.upcoming")}
-          </h2>
           <p className="text-sm text-gray-600">
             {t("eventsPage.upcomingDescription")}
           </p>

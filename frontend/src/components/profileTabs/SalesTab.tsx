@@ -300,11 +300,11 @@ function SalesSection({
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   return (
-    <section className="space-y-3 rounded-2xl border border-blue-50 bg-gradient-to-br from-white to-blue-50/50 p-4 shadow-sm">
+    <section className="space-y-3 rounded-2xl border border-blue-50 bg-gradient-to-br from-white to-blue-50/50 p-4 shadow-sm dark:border-blue-200/25 dark:from-popover dark:via-popover dark:to-popover">
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700 dark:text-emerald-100">
               {title}
             </p>
             <p className="text-sm text-muted-foreground">{description}</p>
@@ -385,7 +385,7 @@ function SalesSection({
           return (
             <Card
               key={order.id}
-              className="border-blue-50 bg-gradient-to-br from-white via-white to-blue-50 shadow-sm"
+              className="border-blue-50 bg-gradient-to-br from-white via-white to-blue-50 shadow-sm dark:border-blue-200/25 dark:bg-popover dark:bg-none"
             >
               <CardHeader className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-2">
@@ -404,7 +404,7 @@ function SalesSection({
                       <p className="text-muted-foreground">
                         {t("salesPage.total")}
                       </p>
-                      <p className="font-semibold text-blue-700">
+                      <p className="font-semibold text-blue-700 dark:text-emerald-100">
                         {order.totalPrice} €
                       </p>
                     </div>
@@ -490,7 +490,7 @@ function SalesSection({
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
                     {t("salesPage.itemsHeading")}
                   </p>
 
@@ -568,26 +568,32 @@ function ItemRow({
   const isCanceled = item.status === "CANCELED";
 
   return (
-    <div className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
+    <div
+      className={`flex items-center justify-between rounded-md border px-3 py-2 text-sm ${
+        isCanceled ? "bg-muted dark:bg-muted/30" : "bg-white dark:bg-popover"
+      } dark:border-border`}
+    >
       <div>
         <p
           className={`font-medium break-words ${
-            isCanceled ? "line-through text-muted-foreground" : "text-gray-900"
+            isCanceled
+              ? "line-through text-muted-foreground"
+              : "text-gray-900 dark:text-white"
           }`}
         >
           {item.productName}
         </p>
         {stallName && (
-          <p className="text-[11px] text-blue-700 break-words">
+          <p className="text-[11px] text-emerald-700 break-words dark:text-emerald-200">
             {(stallLabel ?? "Stall") + ": "} {stallName}
           </p>
         )}
         {sellerName && (
-          <p className="text-[11px] text-muted-foreground break-words">
+          <p className="text-[11px] text-muted-foreground break-words dark:text-muted-foreground">
             {(sellerLabel ?? "Seller") + ": "} {sellerName}
           </p>
         )}
-        <p className="text-xs text-muted-foreground break-words">
+        <p className="text-xs text-muted-foreground break-words dark:text-muted-foreground">
           {item.quantity}× {item.unitPrice} €
         </p>
       </div>
@@ -602,7 +608,7 @@ function ItemRow({
           {cancelLabel}
         </Button>
       ) : isCanceled ? (
-        <span className="text-xs font-semibold text-red-600">
+        <span className="text-xs font-semibold text-red-600 dark:text-red-200">
           {canceledLabel}
         </span>
       ) : null}
@@ -621,11 +627,11 @@ function InfoGroup({
   if (!filtered.length) return null;
 
   return (
-    <div className="rounded-lg bg-white/70 p-3 ring-1 ring-gray-100">
+    <div className="rounded-lg bg-white/70 p-3 ring-1 ring-gray-100 dark:bg-popover dark:ring-border">
       <p className="text-xs uppercase tracking-wide text-muted-foreground">
         {title}
       </p>
-      <div className="mt-1 space-y-1 text-sm text-gray-800 break-words">
+      <div className="mt-1 space-y-1 text-sm text-gray-800 break-words dark:text-white">
         {filtered.map((line, idx) => (
           <p key={`${line}-${idx}`} className="break-words">
             {line}
@@ -645,10 +651,10 @@ function StatusBadge({
 }) {
   const normalized = (status ?? "").toUpperCase();
   const colors: Record<string, string> = {
-    PENDING: "bg-amber-100 text-amber-800",
-    ONWAY: "bg-blue-100 text-blue-800",
-    COMPLETED: "bg-emerald-100 text-emerald-800",
-    CANCELED: "bg-red-100 text-red-700",
+    PENDING: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-100",
+    ONWAY: "bg-blue-100 text-blue-800 dark:bg-emerald-500/15 dark:text-emerald-100",
+    COMPLETED: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-100",
+    CANCELED: "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-100",
   };
 
   return (

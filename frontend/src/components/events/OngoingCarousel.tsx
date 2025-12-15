@@ -69,7 +69,7 @@ export function OngoingCarousel({ events }: OngoingCarouselProps) {
               <p className="line-clamp-2 text-sm text-gray-600">
                 {event.description || t("eventsPage.noDescription")}
               </p>
-                  {event.eventProducts?.length ? (
+              {event.eventProducts?.length ? (
                 <div className="flex flex-wrap gap-2">
                   {event.eventProducts.slice(0, 3).map((p) => (
                     <span
@@ -104,9 +104,6 @@ export function OngoingCarousel({ events }: OngoingCarouselProps) {
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">
             {t("eventsPage.ongoing")}
           </p>
-          <h2 className="text-xl font-bold text-gray-900">
-            {t("eventsPage.liveNow")}
-          </h2>
           <p className="text-sm text-gray-600">
             {t("eventsPage.ongoingDescription")}
           </p>
