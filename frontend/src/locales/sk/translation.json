@@ -848,6 +848,8 @@
   "payment": {
     "redirecting": "Presmerovávam na platbu...",
     "cannotLoad": "Objednávku sa nepodarilo načítať.",
+    "alreadyPaid": "Táto objednávka je už zaplatená alebo uzavretá.",
+    "notFound": "Objednávka neexistuje.",
     "cancelledTitle": "Platba bola zrušená ❌",
     "cancelledDescription": "Platbu sa nepodarilo dokončiť. Objednávka stále čaká na úhradu.",
     "retry": "Skúsiť znova zaplatiť",

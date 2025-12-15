@@ -848,6 +848,8 @@
   "payment": {
     "redirecting": "Redirecting to payment...",
     "cannotLoad": "Failed to load the order.",
+    "alreadyPaid": "This order is already paid or closed.",
+    "notFound": "This order does not exist.",
     "cancelledTitle": "Payment was cancelled ❌",
     "cancelledDescription": "The payment was not completed. Your order is still awaiting payment.",
     "retry": "Try paying again",
