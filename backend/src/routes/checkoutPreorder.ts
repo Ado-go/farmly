@@ -725,48 +725,69 @@ router.patch(
         return res.status(400).json({ message: "Item already canceled" });
       }
 
-      const newTotal = await prisma.$transaction(async (tx) => {
-        if (item.productId) {
-          await tx.eventProduct.updateMany({
-            where: { eventId: item.order.eventId!, productId: item.productId },
-            data: { stock: { increment: item.quantity } },
+      const { calculatedTotal, orderCanceled } = await prisma.$transaction(
+        async (tx) => {
+          if (item.productId) {
+            await tx.eventProduct.updateMany({
+              where: { eventId: item.order.eventId!, productId: item.productId },
+              data: { stock: { increment: item.quantity } },
+            });
+          }
+
+          await tx.orderItem.update({
+            where: { id: itemId },
+            data: { status: "CANCELED" },
           });
+
+          const activeItems = await tx.orderItem.findMany({
+            where: { orderId: item.orderId, status: "ACTIVE" },
+          });
+
+          const calculatedTotal = activeItems.reduce(
+            (sum, i) => sum + i.unitPrice * i.quantity,
+            0
+          );
+
+          await tx.order.update({
+            where: { id: item.orderId },
+            data: {
+              totalPrice: calculatedTotal,
+              ...(activeItems.length === 0 ? { status: "CANCELED" } : {}),
+            },
+          });
+
+          await tx.orderHistory.create({
+            data: {
+              orderId: item.orderId,
+              userId,
+              action: "ITEM_CANCELED",
+              message: `Farmer canceled preorder item "${item.productName}"`,
+            },
+          });
+
+          if (activeItems.length === 0) {
+            await tx.orderHistory.create({
+              data: {
+                orderId: item.orderId,
+                userId,
+                action: "ORDER_CANCELED",
+                message:
+                  "All items were canceled by farmers, preorder was canceled.",
+              },
+            });
+          }
+
+          return {
+            calculatedTotal,
+            orderCanceled: activeItems.length === 0,
+          };
         }
-
-        await tx.orderItem.update({
-          where: { id: itemId },
-          data: { status: "CANCELED" },
-        });
-
-        const activeItems = await tx.orderItem.findMany({
-          where: { orderId: item.orderId, status: "ACTIVE" },
-        });
-
-        const calculatedTotal = activeItems.reduce(
-          (sum, i) => sum + i.unitPrice * i.quantity,
-          0
-        );
-
-        await tx.order.update({
-          where: { id: item.orderId },
-          data: { totalPrice: calculatedTotal },
-        });
-
-        await tx.orderHistory.create({
-          data: {
-            orderId: item.orderId,
-            userId,
-            action: "ITEM_CANCELED",
-            message: `Farmer canceled preorder item "${item.productName}"`,
-          },
-        });
-
-        return calculatedTotal;
-      });
+      );
 
       res.json({
         message: "Preorder item canceled",
-        newTotalPrice: newTotal,
+        newTotalPrice: calculatedTotal,
+        orderCanceled,
       });
 
       const recipientEmail =
@@ -780,7 +801,7 @@ router.patch(
             unitPrice: item.unitPrice,
             isPreorder: true,
             reason: "Farmer canceled the preorder item.",
-            remainingTotal: newTotal,
+            remainingTotal: calculatedTotal,
           });
 
           await sendEmail(recipientEmail, subject, html);
@@ -789,6 +810,24 @@ router.patch(
             "Failed to send preorder item cancellation email:",
             emailErr
           );
+        }
+
+        if (orderCanceled) {
+          try {
+            const { subject, html } = buildOrderCancellationEmail({
+              orderNumber: item.order.orderNumber,
+              isPreorder: true,
+              reason:
+                "Všetky položky z tvojej predobjednávky farmári zrušili, preto sme zrušili celú predobjednávku.",
+            });
+
+            await sendEmail(recipientEmail, subject, html);
+          } catch (emailErr) {
+            console.error(
+              "Failed to send preorder cancellation email after all items canceled:",
+              emailErr
+            );
+          }
         }
       }
     } catch (err) {

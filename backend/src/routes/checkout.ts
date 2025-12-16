@@ -632,48 +632,69 @@ router.patch(
         return res.status(400).json({ message: "Item already canceled" });
       }
 
-      const newTotal = await prisma.$transaction(async (tx) => {
-        if (item.productId) {
-          await tx.farmProduct.updateMany({
-            where: { productId: item.productId },
-            data: { stock: { increment: item.quantity } },
+      const { calculatedTotal, orderCanceled } = await prisma.$transaction(
+        async (tx) => {
+          if (item.productId) {
+            await tx.farmProduct.updateMany({
+              where: { productId: item.productId },
+              data: { stock: { increment: item.quantity } },
+            });
+          }
+
+          await tx.orderItem.update({
+            where: { id: itemId },
+            data: { status: "CANCELED" },
           });
+
+          const activeItems = await tx.orderItem.findMany({
+            where: { orderId: item.orderId, status: "ACTIVE" },
+          });
+
+          const calculatedTotal = activeItems.reduce(
+            (sum, i) => sum + i.unitPrice * i.quantity,
+            0
+          );
+
+          await tx.order.update({
+            where: { id: item.orderId },
+            data: {
+              totalPrice: calculatedTotal,
+              ...(activeItems.length === 0 ? { status: "CANCELED" } : {}),
+            },
+          });
+
+          await tx.orderHistory.create({
+            data: {
+              orderId: item.orderId,
+              userId,
+              action: "ITEM_CANCELED",
+              message: `Farmer canceled item "${item.productName}"`,
+            },
+          });
+
+          if (activeItems.length === 0) {
+            await tx.orderHistory.create({
+              data: {
+                orderId: item.orderId,
+                userId,
+                action: "ORDER_CANCELED",
+                message:
+                  "All items were canceled by farmers, order was canceled.",
+              },
+            });
+          }
+
+          return {
+            calculatedTotal,
+            orderCanceled: activeItems.length === 0,
+          };
         }
-
-        await tx.orderItem.update({
-          where: { id: itemId },
-          data: { status: "CANCELED" },
-        });
-
-        const activeItems = await tx.orderItem.findMany({
-          where: { orderId: item.orderId, status: "ACTIVE" },
-        });
-
-        const calculatedTotal = activeItems.reduce(
-          (sum, i) => sum + i.unitPrice * i.quantity,
-          0
-        );
-
-        await tx.order.update({
-          where: { id: item.orderId },
-          data: { totalPrice: calculatedTotal },
-        });
-
-        await tx.orderHistory.create({
-          data: {
-            orderId: item.orderId,
-            userId,
-            action: "ITEM_CANCELED",
-            message: `Farmer canceled item "${item.productName}"`,
-          },
-        });
-
-        return calculatedTotal;
-      });
+      );
 
       res.json({
         message: "Product from order canceled successfully",
-        newTotalPrice: newTotal,
+        newTotalPrice: calculatedTotal,
+        orderCanceled,
       });
 
       const recipientEmail =
@@ -687,7 +708,7 @@ router.patch(
             unitPrice: item.unitPrice,
             isPreorder: false,
             reason: "Položku zrušil farmár.",
-            remainingTotal: newTotal,
+            remainingTotal: calculatedTotal,
           });
 
           await sendEmail(recipientEmail, subject, html);
@@ -696,6 +717,24 @@ router.patch(
             "Failed to send order item cancellation email:",
             emailErr
           );
+        }
+
+        if (orderCanceled) {
+          try {
+            const { subject, html } = buildOrderCancellationEmail({
+              orderNumber: item.order.orderNumber,
+              isPreorder: false,
+              reason:
+                "Všetky položky z tvojej objednávky farmári zrušili, preto sme zrušili celú objednávku.",
+            });
+
+            await sendEmail(recipientEmail, subject, html);
+          } catch (emailErr) {
+            console.error(
+              "Failed to send order cancellation email after all items canceled:",
+              emailErr
+            );
+          }
         }
       }
     } catch (err) {

@@ -368,6 +368,7 @@ describe("Checkout Routes", () => {
       "message",
       "Product from order canceled successfully"
     );
+    expect(res.body).toHaveProperty("orderCanceled", true);
 
     const canceledItem = await prisma.orderItem.findUnique({
       where: { id: order.items[0].id },
@@ -377,12 +378,69 @@ describe("Checkout Routes", () => {
     const updatedOrder = await prisma.order.findUnique({
       where: { id: order.id },
     });
+    expect(updatedOrder?.status).toBe("CANCELED");
     expect(updatedOrder?.totalPrice).toBe(0);
 
     const farmProduct = await prisma.farmProduct.findFirst({
       where: { productId: PRODUCT_ID },
     });
     expect(farmProduct?.stock).toBe(52);
+  });
+
+  it("PATCH /checkout/item/:id/cancel - keeps order active if other items remain", async () => {
+    const order = await prisma.order.create({
+      data: {
+        buyerId: CUSTOMER_ID,
+        contactName: "Customer",
+        contactPhone: "+421900000003",
+        deliveryCity: "Košice",
+        deliveryStreet: "Main 5",
+        deliveryPostalCode: "04001",
+        deliveryCountry: "Slovensko",
+        paymentMethod: "CASH",
+        totalPrice: 7.0,
+        items: {
+          create: [
+            {
+              productId: PRODUCT_ID,
+              farmerId: FARMER_ID,
+              quantity: 1,
+              unitPrice: 3.5,
+              productName: "Test Product",
+              sellerName: "Farmer",
+            },
+            {
+              productId: PRODUCT_ID,
+              farmerId: FARMER_ID,
+              quantity: 1,
+              unitPrice: 3.5,
+              productName: "Test Product",
+              sellerName: "Farmer",
+            },
+          ],
+        },
+      },
+      include: { items: true },
+    });
+
+    const res = await request(app)
+      .patch(`/api/checkout/item/${order.items[0].id}/cancel`)
+      .set("Cookie", [`accessToken=${farmerToken}`]);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty("orderCanceled", false);
+    expect(res.body).toHaveProperty("newTotalPrice", 3.5);
+
+    const updatedOrder = await prisma.order.findUnique({
+      where: { id: order.id },
+      include: { items: true },
+    });
+
+    expect(updatedOrder?.status).toBe("PENDING");
+    expect(updatedOrder?.totalPrice).toBe(3.5);
+    expect(
+      updatedOrder?.items.filter((i) => i.status === "ACTIVE").length
+    ).toBe(1);
   });
 
   it("PATCH /checkout/item/:id/cancel - fails with 403 if another farmer tries", async () => {

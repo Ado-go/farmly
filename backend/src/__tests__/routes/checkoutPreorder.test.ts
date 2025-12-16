@@ -414,4 +414,225 @@ describe("Preorder Checkout Routes", () => {
 
     expect(persistedItem?.status).toBe("ACTIVE");
   });
+
+  it("PATCH /checkout-preorder/item/:id/cancel - cancels last item and whole preorder", async () => {
+    const farmer = await prisma.user.create({
+      data: {
+        email: "preorderfarmer@test.com",
+        password: "hashedpassword",
+        name: "Preorder Farmer",
+        phone: "+421900000555",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+    const farmerToken = jwt.sign(
+      { id: farmer.id, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
+
+    const event = await prisma.event.create({
+      data: {
+        title: "Future Event",
+        description: "Cancelable items",
+        startDate: new Date(Date.now() + 1000 * 60 * 30),
+        endDate: new Date(Date.now() + 1000 * 60 * 60 * 2),
+        city: "Žilina",
+        street: "Future 1",
+        region: "Žilinský",
+        postalCode: "01001",
+        country: "Slovensko",
+        organizerId: farmer.id,
+      },
+    });
+
+    const product = await prisma.product.create({
+      data: {
+        name: "Cheese",
+        category: "Other",
+        description: "Fresh cheese",
+        basePrice: 6,
+      },
+    });
+
+    await prisma.eventProduct.create({
+      data: {
+        eventId: event.id,
+        productId: product.id,
+        userId: farmer.id,
+        price: 6,
+        stock: 5,
+      },
+    });
+
+    const order = await prisma.order.create({
+      data: {
+        buyerId: CUSTOMER_ID,
+        orderType: "PREORDER",
+        contactName: "Customer 2",
+        contactPhone: "+421900000333",
+        deliveryCity: "Žilina",
+        deliveryStreet: "Future 1",
+        deliveryPostalCode: "01001",
+        deliveryCountry: "Slovensko",
+        eventId: event.id,
+        isDelivered: false,
+        isPaid: false,
+        paymentMethod: "CASH",
+        totalPrice: 6,
+        status: "PENDING",
+      },
+    });
+
+    const item = await prisma.orderItem.create({
+      data: {
+        orderId: order.id,
+        productId: product.id,
+        farmerId: farmer.id,
+        quantity: 1,
+        unitPrice: 6,
+        sellerName: farmer.name,
+        productName: product.name,
+        status: "ACTIVE",
+      },
+    });
+
+    const res = await request(app)
+      .patch(`/api/checkout-preorder/item/${item.id}/cancel`)
+      .set("Cookie", [`accessToken=${farmerToken}`]);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty("orderCanceled", true);
+    expect(res.body).toHaveProperty("newTotalPrice", 0);
+
+    const updatedOrder = await prisma.order.findUnique({
+      where: { id: order.id },
+      include: { items: true },
+    });
+
+    expect(updatedOrder?.status).toBe("CANCELED");
+    expect(updatedOrder?.items.every((i) => i.status === "CANCELED")).toBe(
+      true
+    );
+
+    const eventProduct = await prisma.eventProduct.findFirst({
+      where: { eventId: event.id, productId: product.id },
+    });
+    expect(eventProduct?.stock).toBe(6);
+  });
+
+  it("PATCH /checkout-preorder/item/:id/cancel - keeps preorder active when other items remain", async () => {
+    const farmer = await prisma.user.create({
+      data: {
+        email: "preorderfarmer2@test.com",
+        password: "hashedpassword",
+        name: "Preorder Farmer 2",
+        phone: "+421900000556",
+        role: "FARMER",
+        ...baseAddress,
+      },
+    });
+    const farmerToken = jwt.sign(
+      { id: farmer.id, role: "FARMER" },
+      process.env.ACCESS_TOKEN_SECRET!
+    );
+
+    const event = await prisma.event.create({
+      data: {
+        title: "Future Event 2",
+        description: "Multiple items",
+        startDate: new Date(Date.now() + 1000 * 60 * 30),
+        endDate: new Date(Date.now() + 1000 * 60 * 60 * 2),
+        city: "Žilina",
+        street: "Future 2",
+        region: "Žilinský",
+        postalCode: "01001",
+        country: "Slovensko",
+        organizerId: farmer.id,
+      },
+    });
+
+    const product = await prisma.product.create({
+      data: {
+        name: "Milk",
+        category: "Other",
+        description: "Fresh milk",
+        basePrice: 3,
+      },
+    });
+
+    await prisma.eventProduct.create({
+      data: {
+        eventId: event.id,
+        productId: product.id,
+        userId: farmer.id,
+        price: 3,
+        stock: 10,
+      },
+    });
+
+    const order = await prisma.order.create({
+      data: {
+        buyerId: CUSTOMER_ID,
+        orderType: "PREORDER",
+        contactName: "Customer 2",
+        contactPhone: "+421900000333",
+        deliveryCity: "Žilina",
+        deliveryStreet: "Future 2",
+        deliveryPostalCode: "01001",
+        deliveryCountry: "Slovensko",
+        eventId: event.id,
+        isDelivered: false,
+        isPaid: false,
+        paymentMethod: "CASH",
+        totalPrice: 6,
+        status: "PENDING",
+        items: {
+          create: [
+            {
+              productId: product.id,
+              farmerId: farmer.id,
+              quantity: 1,
+              unitPrice: 3,
+              sellerName: farmer.name,
+              productName: product.name,
+            },
+            {
+              productId: product.id,
+              farmerId: farmer.id,
+              quantity: 1,
+              unitPrice: 3,
+              sellerName: farmer.name,
+              productName: product.name,
+            },
+          ],
+        },
+      },
+      include: { items: true },
+    });
+
+    const res = await request(app)
+      .patch(`/api/checkout-preorder/item/${order.items[0].id}/cancel`)
+      .set("Cookie", [`accessToken=${farmerToken}`]);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty("orderCanceled", false);
+    expect(res.body).toHaveProperty("newTotalPrice", 3);
+
+    const updatedOrder = await prisma.order.findUnique({
+      where: { id: order.id },
+      include: { items: true },
+    });
+
+    expect(updatedOrder?.status).toBe("PENDING");
+    expect(updatedOrder?.totalPrice).toBe(3);
+    expect(
+      updatedOrder?.items.filter((i) => i.status === "ACTIVE").length
+    ).toBe(1);
+
+    const eventProduct = await prisma.eventProduct.findFirst({
+      where: { eventId: event.id, productId: product.id },
+    });
+    expect(eventProduct?.stock).toBe(11);
+  });
 });
