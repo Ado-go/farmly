@@ -681,6 +681,7 @@
     "deliveryType": "Delivery Type",
     "total": "Total",
     "confirm": "Confirm Order",
+    "submitting": "Placing order...",
     "next": "Next",
     "back": "Back",
     "emptyCart": "Your cart is empty.",

@@ -11,6 +11,7 @@ type OrderSummaryProps = {
   cart: CartItem[];
   totalPrice: number;
   loadingPayment?: boolean;
+  submittingOrder?: boolean;
   onBack: () => void;
   onConfirm: () => void;
 };
@@ -21,10 +22,17 @@ export function OrderSummary({
   cart,
   totalPrice,
   loadingPayment,
+  submittingOrder,
   onBack,
   onConfirm,
 }: OrderSummaryProps) {
   const { t } = useTranslation();
+  const isConfirming = Boolean(loadingPayment || submittingOrder);
+  const confirmLabel = loadingPayment
+    ? t("checkoutPage.paymentStep")
+    : submittingOrder
+    ? t("checkoutPage.submitting")
+    : t("checkoutPage.confirm");
 
   return (
     <Card className="border-primary/15 shadow-xl">
@@ -149,10 +157,8 @@ export function OrderSummary({
             <Button variant="outline" onClick={onBack}>
               {t("checkoutPage.back")}
             </Button>
-            <Button disabled={loadingPayment} onClick={onConfirm}>
-              {loadingPayment
-                ? t("checkoutPage.paymentStep")
-                : t("checkoutPage.confirm")}
+            <Button disabled={isConfirming} onClick={onConfirm}>
+              {confirmLabel}
             </Button>
           </div>
         </div>

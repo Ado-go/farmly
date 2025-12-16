@@ -681,6 +681,7 @@
     "deliveryType": "Typ doručenia",
     "total": "Spolu",
     "confirm": "Potvrdiť objednávku",
+    "submitting": "Odosielam objednávku...",
     "next": "Ďalej",
     "back": "Späť",
     "emptyCart": "Váš košík je prázdny.",

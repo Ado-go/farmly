@@ -189,7 +189,7 @@ function CartPage() {
         </Card>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr]">
         <Card className="h-full">
           <CardHeader className="border-b pb-4">
             <CardTitle>
@@ -288,15 +288,18 @@ function CartPage() {
               <span>{t("cartPage.total")}</span>
               <span>{totalPrice.toFixed(2)} €</span>
             </div>
-            <div className="flex w-full gap-2">
+            <div className="flex w-full flex-col gap-2 sm:flex-row">
               <Button
                 variant="outline"
-                className="flex-1"
+                className="flex-1 whitespace-normal leading-tight"
                 onClick={clearCart}
               >
                 {t("cartPage.clear")}
               </Button>
-              <Button className="flex-1" onClick={goToCheckout}>
+              <Button
+                className="flex-1 whitespace-normal leading-tight"
+                onClick={goToCheckout}
+              >
                 {isPreorder
                   ? t("cartPage.continuePreorder")
                   : t("cartPage.continueCheckout")}

@@ -308,9 +308,9 @@ function EventPageDetail() {
                       {paginatedProducts.map((ep) => (
                         <Card
                           key={ep.id}
-                          className="p-4 border border-gray-100 bg-white/95 shadow-sm flex flex-col gap-3"
+                          className="flex h-full flex-col gap-3 border border-gray-100 bg-white/95 p-4 shadow-sm"
                         >
-                          <div className="space-y-2">
+                          <div className="flex flex-1 flex-col space-y-2">
                             <div className="flex items-start justify-between gap-3">
                               <Link
                                 to="/events/$id/products/$productId"
@@ -381,13 +381,12 @@ function EventPageDetail() {
                           </div>
 
                           {eventHasNotStarted ? (
-                            <>
+                            <div className="mt-auto flex flex-col gap-2">
                               {(ep.stock ?? 0) <= 0 && (
                                 <p className="text-xs text-red-600">
                                   {t("product.soldOut")}
                                 </p>
                               )}
-                            <div className="flex flex-col gap-2">
                               <div className="flex items-center gap-2">
                                 <label className="text-sm font-medium text-gray-700">
                                   {t("cartPage.quantity")}
@@ -417,9 +416,8 @@ function EventPageDetail() {
                                   : t("eventsDetail.preorder")}
                               </Button>
                             </div>
-                            </>
                           ) : (
-                            <p className="text-center text-red-500 text-xs">
+                            <p className="mt-auto text-center text-xs text-red-500">
                               {t("eventsDetail.eventStarted")}
                             </p>
                           )}

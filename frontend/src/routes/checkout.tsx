@@ -38,6 +38,7 @@ function CheckoutPage() {
   );
   const [addressData, setAddressData] = useState<AddressData | null>(null);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
+  const [submittingOrder, setSubmittingOrder] = useState(false);
   const [loadingPayment, setLoadingPayment] = useState(false);
 
   const addressForm = useForm<AddressData>({
@@ -134,8 +135,23 @@ function CheckoutPage() {
     }
   }, [user, addressForm]);
 
+  const showOrderError = (err: unknown) => {
+    const message =
+      err instanceof Error ? err.message : t("checkoutPage.error");
+    const unavailable = message.toLowerCase().includes("unavailable");
+    const outOfStock = message.toLowerCase().includes("stock");
+    toast.error(
+      unavailable
+        ? t("product.unavailableForSale")
+        : outOfStock
+        ? t("product.outOfStock")
+        : t("checkoutPage.error")
+    );
+  };
+
   const handleConfirmOrder = async () => {
-    if (!addressData || !paymentData) return;
+    if (!addressData || !paymentData || submittingOrder || loadingPayment)
+      return;
 
     try {
       const payload = {
@@ -154,9 +170,10 @@ function CheckoutPage() {
       };
 
       if (paymentData.paymentMethod === "CARD") {
-        try {
-          setLoadingPayment(true);
+        setSubmittingOrder(true);
+        setLoadingPayment(true);
 
+        try {
           const orderRes = await apiFetch("/checkout", {
             method: "POST",
             body: JSON.stringify(payload),
@@ -177,11 +194,17 @@ function CheckoutPage() {
           );
 
           window.location.href = paymentRes.url;
-        } finally {
+          return;
+        } catch (err) {
+          showOrderError(err);
           setLoadingPayment(false);
+          setSubmittingOrder(false);
         }
+
         return;
       }
+
+      setSubmittingOrder(true);
 
       await apiFetch("/checkout", {
         method: "POST",
@@ -191,17 +214,9 @@ function CheckoutPage() {
       toast.success(t("checkoutPage.success"));
       cleanupCheckout();
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : t("checkoutPage.error");
-      const unavailable = message.toLowerCase().includes("unavailable");
-      const outOfStock = message.toLowerCase().includes("stock");
-      toast.error(
-        unavailable
-          ? t("product.unavailableForSale")
-          : outOfStock
-          ? t("product.outOfStock")
-          : t("checkoutPage.error")
-      );
+      showOrderError(err);
+    } finally {
+      setSubmittingOrder(false);
     }
   };
 
@@ -289,6 +304,7 @@ function CheckoutPage() {
             cart={cart}
             totalPrice={totalPrice}
             loadingPayment={loadingPayment}
+            submittingOrder={submittingOrder}
             onBack={() => setStep(2)}
             onConfirm={handleConfirmOrder}
           />
