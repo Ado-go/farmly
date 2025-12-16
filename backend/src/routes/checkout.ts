@@ -287,21 +287,25 @@ router.post("/", validateRequest(checkoutSchema), async (req, res) => {
         : null);
 
     if (recipientEmail) {
-      const { subject, html } = buildOrderConfirmationEmail({
-        orderNumber: order.orderNumber,
-        totalPrice,
-        delivery: {
-          deliveryStreet,
-          deliveryCity,
-          deliveryPostalCode,
-          deliveryCountry,
-        },
-        items: order.items,
-        paymentMethod,
-        paymentLink,
-      });
+      try {
+        const { subject, html } = buildOrderConfirmationEmail({
+          orderNumber: order.orderNumber,
+          totalPrice,
+          delivery: {
+            deliveryStreet,
+            deliveryCity,
+            deliveryPostalCode,
+            deliveryCountry,
+          },
+          items: order.items,
+          paymentMethod,
+          paymentLink,
+        });
 
-      await sendEmail(recipientEmail, subject, html);
+        await sendEmail(recipientEmail, subject, html);
+      } catch (emailErr) {
+        console.error("Failed to send order confirmation email:", emailErr);
+      }
     }
 
     const farmerGroups = groupItemsByFarmer(order.items, farmProducts);
