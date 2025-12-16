@@ -348,7 +348,7 @@ function CheckoutPreorderPage() {
                   }
                 >
                   {form.formState.isSubmitting
-                    ? t("checkoutPreoderPage.loading")
+                    ? t("checkoutPreoderPage.submitting")
                     : t("checkoutPreoderPage.confirm")}
                 </Button>
               </div>

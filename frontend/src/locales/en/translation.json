@@ -843,6 +843,7 @@
     "total": "Total",
     "confirm": "Confirm preorder",
     "loading": "Loading...",
+    "submitting": "Sending preorder...",
     "success": "Preorder was successfully created",
     "error": "Failed to create preorder"
   },

@@ -843,6 +843,7 @@
     "total": "Celkom",
     "confirm": "Potvrdiť predobjednávku",
     "loading": "Načítavam...",
+    "submitting": "Posielam predobjednávku...",
     "success": "Predobjednávka bola vytvorená",
     "error": "Nepodarilo sa vytvoriť predobjednávku"
   },
