@@ -179,6 +179,7 @@ describe("Farmer stats routes", () => {
             {
               productId: productA.id,
               productName: productA.name,
+              farmerId: farmer.id,
               quantity: 2,
               unitPrice: 10,
               sellerName: "Stat Farmer",
@@ -206,6 +207,7 @@ describe("Farmer stats routes", () => {
             {
               productId: productB.id,
               productName: productB.name,
+              farmerId: farmer.id,
               quantity: 3,
               unitPrice: 7,
               sellerName: "Stat Farmer",
@@ -232,6 +234,7 @@ describe("Farmer stats routes", () => {
             {
               productId: productA.id,
               productName: productA.name,
+              farmerId: farmer.id,
               quantity: 5,
               unitPrice: 4,
               sellerName: "Stat Farmer",

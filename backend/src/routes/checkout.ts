@@ -141,6 +141,9 @@ router.post("/", validateRequest(checkoutSchema), async (req, res) => {
 
     const productIds = cartItems.map((item: any) => item.productId);
     const farmProducts = await fetchFarmProductsWithFarm(productIds);
+    const farmerIdByProduct = new Map(
+      farmProducts.map((fp) => [fp.productId, fp.farm?.farmer?.id ?? null])
+    );
 
     const availabilityByProduct = new Map(
       farmProducts.map((fp) => [fp.productId, fp.isAvailable])
@@ -250,6 +253,9 @@ router.post("/", validateRequest(checkoutSchema), async (req, res) => {
             items: {
               create: cartItems.map((item: any) => ({
                 productId: item.productId,
+                farmerId: item.productId
+                  ? farmerIdByProduct.get(item.productId) ?? null
+                  : null,
                 quantity: item.quantity,
                 unitPrice: item.unitPrice,
                 productName: item.productName,
@@ -435,27 +441,14 @@ router.get(
     const userId = req.user?.id;
 
     try {
-      const farms = await prisma.farm.findMany({
-        where: { farmerId: userId },
-        include: { farmProducts: true },
-      });
-
-      const productIds = farms.flatMap((f) =>
-        f.farmProducts.map((p) => p.productId)
-      );
-
-      if (productIds.length === 0)
-        return res.json({ message: "No products found for this farmer." });
-
       const orders = await prisma.order.findMany({
         where: {
-          items: {
-            some: { productId: { in: productIds } },
-          },
+          orderType: "STANDARD",
+          items: { some: { farmerId: userId } },
         },
         include: {
           items: {
-            where: { productId: { in: productIds } },
+            where: { farmerId: userId },
           },
           buyer: { select: { id: true, email: true, name: true, phone: true } },
         },
@@ -630,9 +623,9 @@ router.patch(
       if (!item)
         return res.status(404).json({ message: "Order item not found" });
 
-      const isFarmerOwner = item.product?.farmLinks.some(
-        (fp) => fp.farm.farmerId === userId
-      );
+      const isFarmerOwner =
+        item.farmerId === userId ||
+        item.product?.farmLinks.some((fp) => fp.farm.farmerId === userId);
       if (!isFarmerOwner)
         return res.status(403).json({ message: "Not your product" });
       if (item.status === "CANCELED") {

@@ -288,6 +288,7 @@ describe("Preorder Checkout Routes", () => {
       data: {
         orderId: order.id,
         productId: PRODUCT_ID,
+        farmerId: CUSTOMER_ID,
         quantity: 1,
         unitPrice: 10,
         sellerName: "Seller",
@@ -389,6 +390,7 @@ describe("Preorder Checkout Routes", () => {
       data: {
         orderId: order.id,
         productId: product.id,
+        farmerId: farmer.id,
         quantity: 2,
         unitPrice: 6,
         sellerName: farmer.name,

@@ -13,47 +13,9 @@ router.get(
     try {
       const userId = req.user?.id;
 
-      const [farmProducts, eventProducts] = await Promise.all([
-        prisma.farmProduct.findMany({
-          where: { farm: { farmerId: userId } },
-          select: { productId: true },
-        }),
-        prisma.eventProduct.findMany({
-          where: { userId },
-          select: { productId: true },
-        }),
-      ]);
-
-      const productIds = Array.from(
-        new Set([
-          ...farmProducts.map((p) => p.productId),
-          ...eventProducts.map((p) => p.productId),
-        ])
-      );
-
-      if (productIds.length === 0) {
-        return res.json({
-          totals: {
-            orders: 0,
-            preorders: 0,
-            totalRevenue: 0,
-            standardRevenue: 0,
-            preorderRevenue: 0,
-            itemsSold: 0,
-            avgTicket: 0,
-          },
-          bestSellers: [],
-          ratings: {
-            average: null,
-            totalReviews: 0,
-            topRated: [],
-          },
-        });
-      }
-
       const orderItems = await prisma.orderItem.findMany({
         where: {
-          productId: { in: productIds },
+          farmerId: userId,
           status: OrderItemStatus.ACTIVE,
         },
         select: {
@@ -81,8 +43,6 @@ router.get(
       >();
 
       for (const item of orderItems) {
-        if (!item.productId) continue;
-
         const lineTotal = item.unitPrice * item.quantity;
         itemsSold += item.quantity;
 
@@ -97,6 +57,8 @@ router.get(
           preorderRevenue += lineTotal;
         }
 
+        if (!item.productId) continue;
+
         const current = bestSellerMap.get(item.productId) || {
           name: productName,
           quantity: 0,
@@ -110,6 +72,14 @@ router.get(
         });
       }
 
+      const productIds = Array.from(
+        new Set(
+          orderItems
+            .map((item) => item.productId)
+            .filter((id): id is number => typeof id === "number")
+        )
+      );
+
       const bestSellers = Array.from(bestSellerMap.entries())
         .map(([productId, data]) => ({
           productId,
@@ -118,17 +88,23 @@ router.get(
         .sort((a, b) => b.quantity - a.quantity || b.revenue - a.revenue)
         .slice(0, 5);
 
-      const ratingGroups = await prisma.review.groupBy({
-        by: ["productId"],
-        where: { productId: { in: productIds } },
-        _avg: { rating: true },
-        _count: { rating: true },
-      });
+      const ratingGroups =
+        productIds.length > 0
+          ? await prisma.review.groupBy({
+              by: ["productId"],
+              where: { productId: { in: productIds } },
+              _avg: { rating: true },
+              _count: { rating: true },
+            })
+          : [];
 
-      const productNames = await prisma.product.findMany({
-        where: { id: { in: productIds } },
-        select: { id: true, name: true },
-      });
+      const productNames =
+        productIds.length > 0
+          ? await prisma.product.findMany({
+              where: { id: { in: productIds } },
+              select: { id: true, name: true },
+            })
+          : [];
       const nameMap = new Map(productNames.map((p) => [p.id, p.name]));
 
       const totalReviews = ratingGroups.reduce(

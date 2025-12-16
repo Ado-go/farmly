@@ -158,6 +158,10 @@ router.post("/", validateRequest(preorderSchema), async (req, res) => {
       0
     );
 
+    const farmerIdByProduct = new Map(
+      eventProductsForCart.map((ep) => [ep.productId, ep.user?.id ?? null])
+    );
+
     const insufficientStock = cartItems
       .map((item: any) => {
         const eventProduct = item.productId
@@ -253,6 +257,9 @@ router.post("/", validateRequest(preorderSchema), async (req, res) => {
 
                 return {
                   productId: item.productId,
+                  farmerId: item.productId
+                    ? farmerIdByProduct.get(item.productId) ?? null
+                    : null,
                   quantity: item.quantity,
                   unitPrice: item.unitPrice,
                   productName: item.productName,
@@ -464,21 +471,13 @@ router.get(
     const userId = req.user?.id;
 
     try {
-      const farmerProducts = await prisma.product.findMany({
-        where: { eventLinks: { some: { userId } } },
-      });
-
-      const productIds = farmerProducts.map((p) => p.id);
-
       const orders = await prisma.order.findMany({
         where: {
           orderType: "PREORDER",
-          items: {
-            some: { productId: { in: productIds } },
-          },
+          items: { some: { farmerId: userId } },
         },
         include: {
-          items: true,
+          items: { where: { farmerId: userId } },
           event: true,
           buyer: { select: { email: true, name: true, phone: true } },
         },
@@ -698,14 +697,9 @@ router.patch(
 
       if (!item) return res.status(404).json({ message: "Item not found" });
 
-      if (!item.product)
-        return res
-          .status(404)
-          .json({ message: "Product not found for this item" });
-
-      const ownsProduct = item.product.eventLinks.some(
-        (p) => p.userId === userId
-      );
+      const ownsProduct =
+        item.farmerId === userId ||
+        item.product?.eventLinks.some((p) => p.userId === userId);
 
       if (!ownsProduct)
         return res.status(403).json({ message: "Unauthorized" });

@@ -56,6 +56,7 @@ type EventParticipantSeed = {
 type OrderItemSeed = {
   product: Product;
   sellerName: string;
+  farmerId: number;
   stallName?: string | null;
   price: number;
   quantity: number;
@@ -393,6 +394,7 @@ async function createOrderWithItems({
       data: {
         orderId: order.id,
         productId: item.product.id,
+        farmerId: item.farmerId,
         quantity: item.quantity,
         unitPrice: item.price,
         sellerName: item.sellerName,
@@ -689,6 +691,7 @@ async function main() {
       const items: OrderItemSeed[] = selection.map((record) => ({
         product: record.product,
         sellerName: record.farmer.name,
+        farmerId: record.farmer.id,
         price: parseFloat(
           (record.price * (0.9 + Math.random() * 0.3)).toFixed(2)
         ),
@@ -721,6 +724,7 @@ async function main() {
       const items: OrderItemSeed[] = chosenProducts.map((record) => ({
         product: record.product,
         sellerName: record.seller.name,
+        farmerId: record.seller.id,
         stallName: stallMap.get(record.seller.id) ?? null,
         price: parseFloat(
           ((record.product.basePrice ?? 5) * (1 + Math.random() * 0.2)).toFixed(

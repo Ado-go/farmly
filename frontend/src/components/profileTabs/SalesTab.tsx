@@ -72,6 +72,15 @@ export default function SalesTab() {
     queryFn: () => apiFetch("/checkout-preorder/farmer-orders"),
   });
 
+  const safeSales = useMemo(
+    () => (Array.isArray(sales) ? sales : []),
+    [sales]
+  );
+  const safeEventSales = useMemo(
+    () => (Array.isArray(eventSales) ? eventSales : []),
+    [eventSales]
+  );
+
   const cancelItemMutation = useMutation({
     mutationFn: (itemId: number) =>
       apiFetch(`/checkout/item/${itemId}/cancel`, { method: "PATCH" }),
@@ -102,19 +111,19 @@ export default function SalesTab() {
 
   const filteredSales = useMemo(() => {
     const term = searchSales.toLowerCase().trim();
-    const bySearch = (sales ?? []).filter((o) =>
+    const bySearch = safeSales.filter((o) =>
       o.orderNumber.toLowerCase().includes(term)
     );
     return filterByStatus(bySearch, salesFilter);
-  }, [sales, searchSales, salesFilter]);
+  }, [safeSales, searchSales, salesFilter]);
 
   const filteredEventSales = useMemo(() => {
     const term = searchEventSales.toLowerCase().trim();
-    const bySearch = (eventSales ?? []).filter((o) =>
+    const bySearch = safeEventSales.filter((o) =>
       o.orderNumber.toLowerCase().includes(term)
     );
     return filterByPreorderDate(bySearch, eventSalesDateFilter);
-  }, [eventSales, searchEventSales, eventSalesDateFilter]);
+  }, [safeEventSales, searchEventSales, eventSalesDateFilter]);
 
   useEffect(() => setSalesPage(1), [searchSales]);
   useEffect(() => setEventSalesPage(1), [searchEventSales]);
@@ -143,8 +152,8 @@ export default function SalesTab() {
 
   if (isLoading) return <p>{t("salesPage.loading")}</p>;
   if (
-    (!sales || sales.length === 0) &&
-    (!eventSales || eventSales.length === 0)
+    safeSales.length === 0 &&
+    safeEventSales.length === 0
   )
     return <p className="text-gray-500">{t("salesPage.emptyCombined")}</p>;
 

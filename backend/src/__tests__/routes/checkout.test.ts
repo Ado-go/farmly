@@ -250,6 +250,7 @@ describe("Checkout Routes", () => {
           create: [
             {
               productId: PRODUCT_ID,
+              farmerId: FARMER_ID,
               quantity: 2,
               unitPrice: 3.5,
               productName: "Test Product",
@@ -311,6 +312,7 @@ describe("Checkout Routes", () => {
           create: [
             {
               productId: PRODUCT_ID,
+              farmerId: FARMER_ID,
               quantity: 1,
               unitPrice: 3.5,
               productName: "Test Product",
@@ -345,6 +347,7 @@ describe("Checkout Routes", () => {
           create: [
             {
               productId: PRODUCT_ID,
+              farmerId: FARMER_ID,
               quantity: 2,
               unitPrice: 3.5,
               productName: "Test Product",
@@ -398,6 +401,7 @@ describe("Checkout Routes", () => {
           create: [
             {
               productId: PRODUCT_ID,
+              farmerId: FARMER_ID,
               quantity: 1,
               unitPrice: 3.5,
               productName: "Test Product",

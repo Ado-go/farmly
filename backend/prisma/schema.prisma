@@ -83,6 +83,7 @@ model User {
   organizedEvents      Event[]           @relation("OrganizedEvents")
   eventParticipations  EventParticipant[]
   eventProducts        EventProduct[]
+  farmerOrderItems     OrderItem[]       @relation("FarmerOrderItems")
 }
 
 // ------------------- FARM -------------------
@@ -214,6 +215,9 @@ model OrderItem {
   id           Int               @id @default(autoincrement())
   order        Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId      Int
+
+  farmer       User?             @relation("FarmerOrderItems", fields: [farmerId], references: [id], onDelete: SetNull)
+  farmerId     Int?
 
   product      Product?          @relation(fields: [productId], references: [id], onDelete: SetNull)
   productId    Int?
