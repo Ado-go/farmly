@@ -7,6 +7,7 @@ import app from "../../index.ts";
 import prisma from "../../prisma.ts";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
+import { PaymentMethod } from "@prisma/client";
 
 describe("Profile Routes", () => {
   let accessToken: string;
@@ -149,6 +150,57 @@ describe("Profile Routes", () => {
     expect(res.body).toHaveProperty("message", "Incorrect password");
 
     await prisma.user.delete({ where: { id: user.id } });
+  });
+
+  it("DELETE /profile - should keep existing orders and null buyer", async () => {
+    const hashedPassword = await argon2.hash("password123");
+    const user = await prisma.user.create({
+      data: {
+        email: "profile-order@test.com",
+        password: hashedPassword,
+        name: "Order Owner",
+        phone: "+421940123458",
+        role: "CUSTOMER",
+        ...baseAddress,
+      },
+    });
+
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.ACCESS_TOKEN_SECRET!,
+      { expiresIn: "15m" }
+    );
+
+    const order = await prisma.order.create({
+      data: {
+        buyerId: user.id,
+        contactName: "Order Owner",
+        contactPhone: "+421940123458",
+        deliveryCity: "Bratislava",
+        deliveryStreet: "Order Street 10",
+        deliveryPostalCode: "81101",
+        deliveryCountry: "Slovakia",
+        paymentMethod: PaymentMethod.CASH,
+      },
+    });
+
+    const res = await request(app)
+      .delete("/api/profile")
+      .set("Cookie", [`accessToken=${token}`])
+      .send({ password: "password123" });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty("message", "User deleted successfully");
+
+    const existingOrder = await prisma.order.findUnique({
+      where: { id: order.id },
+    });
+
+    expect(existingOrder).not.toBeNull();
+    expect(existingOrder?.buyerId).toBeNull();
+    expect(existingOrder?.contactName).toBe("Order Owner");
+
+    await prisma.order.deleteMany({ where: { id: order.id } });
   });
 
   it("GET /profile - should return 401 without token", async () => {

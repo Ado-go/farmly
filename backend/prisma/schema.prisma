@@ -183,7 +183,7 @@ model Order {
   orderNumber        String         @unique @default(uuid())
   createdAt          DateTime       @default(now())
 
-  buyer              User?          @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+  buyer              User?          @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: SetNull)
   buyerId            Int?
   anonymousEmail     String?
   contactName        String
