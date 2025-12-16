@@ -409,6 +409,7 @@
       "country": "Country is required",
       "startDate": "Please choose a start date",
       "endDate": "Please choose an end date",
+      "endAfterStart": "End date must be after start date",
       "stallName": "Stall name is required"
     },
     "limitTitle": "Event limit",

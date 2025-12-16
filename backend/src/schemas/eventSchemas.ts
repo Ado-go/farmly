@@ -77,11 +77,16 @@ export const eventSchema = z
   .superRefine((data, ctx) => {
     const start = Date.parse(data.startDate);
     const end = Date.parse(data.endDate);
+
+    if (Number.isNaN(start) || Number.isNaN(end)) {
+      return;
+    }
+
     if (end <= start) {
       ctx.addIssue({
         path: ["endDate"],
         code: z.ZodIssueCode.custom,
-        message: "End date must be after start date",
+        message: "Event must end after it starts.",
       });
     }
   });

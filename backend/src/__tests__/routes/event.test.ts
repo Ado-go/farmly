@@ -84,6 +84,35 @@ describe("Event Routes", () => {
     eventId = res.body.id;
   });
 
+  it("POST /event - should return clear error when end date is before start date", async () => {
+    const res = await request(app)
+      .post("/api/event")
+      .set("Cookie", [`accessToken=${accessToken}`])
+      .send({
+        title: "Backwards Event",
+        description: "Ends before it starts",
+        startDate: "2025-12-05T10:00:00.000Z",
+        endDate: "2025-12-04T10:00:00.000Z",
+        city: "Bratislava",
+        street: "Main Street 1",
+        region: "Bratislavský",
+        postalCode: "81101",
+        country: "Slovakia",
+        stallName: "Farmer Stall",
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty("error", "Invalid request data");
+    expect(res.body.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: "endDate",
+          message: "Event must end after it starts.",
+        }),
+      ])
+    );
+  });
+
   it("POST /event - should fail when creating more than 5 events", async () => {
     for (let i = 0; i < 5; i++) {
       await prisma.event.create({

@@ -264,7 +264,7 @@ const buildEventDates = (timing: EventTiming) => {
     const startDate = new Date(now);
     startDate.setDate(startDate.getDate() - randomInt(7, 20));
     const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + randomInt(4, 24));
+    endDate.setHours(endDate.getHours() + randomInt(24, 72));
     return { startDate, endDate };
   }
 
@@ -272,14 +272,14 @@ const buildEventDates = (timing: EventTiming) => {
     const startDate = new Date(now);
     startDate.setHours(startDate.getHours() - randomInt(1, 12));
     const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + randomInt(16, 48));
+    endDate.setHours(endDate.getHours() + randomInt(24, 72));
     return { startDate, endDate };
   }
 
   const startDate = new Date(now);
   startDate.setDate(startDate.getDate() + randomInt(3, 20));
   const endDate = new Date(startDate);
-  endDate.setHours(endDate.getHours() + randomInt(4, 24));
+  endDate.setHours(endDate.getHours() + randomInt(24, 72));
   return { startDate, endDate };
 };
 

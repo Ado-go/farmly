@@ -409,6 +409,7 @@
       "country": "Krajina je povinná",
       "startDate": "Zadaj dátum začiatku",
       "endDate": "Zadaj dátum konca",
+      "endAfterStart": "Koniec musí byť po začiatku",
       "stallName": "Názov stánku je povinný"
     },
     "limitTitle": "Limit udalostí",

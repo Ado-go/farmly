@@ -31,8 +31,6 @@ import {
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -277,19 +275,8 @@ export function FarmProductEditDialog({
                 <Field>
                   <FieldLabel
                     htmlFor="stock"
-                    className="flex items-center gap-2"
                   >
                     {t("product.stock")}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
-                          <Info className="h-3.5 w-3.5" />
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {t("product.stockTooltip")}
-                      </TooltipContent>
-                    </Tooltip>
                   </FieldLabel>
                   <FieldContent>
                     <Input
