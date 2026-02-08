@@ -4,7 +4,7 @@ Farmly is a full-stack e-commerce platform that connects farms with customers th
 
 ---
 
-## 🛠️ Tech & Requirements
+## Tech & Requirements
 
 - Node.js v22.x and npm for running both apps.
 - PostgreSQL v15+ for the Prisma database.
@@ -13,7 +13,7 @@ Farmly is a full-stack e-commerce platform that connects farms with customers th
 
 ---
 
-## ⚡ Quick Start (Localhost)
+## Quick Start (Localhost)
 
 ### 1. Clone & install
 
@@ -88,7 +88,7 @@ If you prefer to avoid Stripe while developing other parts, run `npm run start:f
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
 cd backend
@@ -97,7 +97,7 @@ npm run test
 
 ---
 
-## 🔧 Useful scripts
+## Useful scripts
 
 | Command                                        | Description                                                      |
 | ---------------------------------------------- | ---------------------------------------------------------------- |
@@ -111,7 +111,7 @@ npm run test
 
 ---
 
-## 🧱 Project Structure
+## Project Structure
 
 ```
 farmly/
