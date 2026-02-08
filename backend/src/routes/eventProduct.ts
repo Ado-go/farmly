@@ -50,36 +50,38 @@ router.post(
         ): img is { url: string; publicId: string } => Boolean(img.url && img.publicId)
       );
 
-      const product = await prisma.product.create({
-        data: {
-          ...productData,
-          basePrice: price,
-          images: sanitizedImages
-            ? {
-                create: sanitizedImages.map(
-                  (img: { url: string; publicId: string }) => ({
-                    url: img.url,
-                    publicId: img.publicId,
-                  })
-                ),
-              }
-            : undefined,
-        },
-        include: { images: true },
-      });
+      const eventProduct = await prisma.$transaction(async (tx) => {
+        const product = await tx.product.create({
+          data: {
+            ...productData,
+            basePrice: price,
+            images: sanitizedImages
+              ? {
+                  create: sanitizedImages.map(
+                    (img: { url: string; publicId: string }) => ({
+                      url: img.url,
+                      publicId: img.publicId,
+                    })
+                  ),
+                }
+              : undefined,
+          },
+          include: { images: true },
+        });
 
-      const eventProduct = await prisma.eventProduct.create({
-        data: {
-          event: { connect: { id: eventId } },
-          product: { connect: { id: product.id } },
-          user: { connect: { id: userId! } },
-          price,
-          stock,
-        },
-        include: {
-          product: { include: { images: true } },
-          event: { select: { id: true, title: true } },
-        },
+        return tx.eventProduct.create({
+          data: {
+            event: { connect: { id: eventId } },
+            product: { connect: { id: product.id } },
+            user: { connect: { id: userId! } },
+            price,
+            stock,
+          },
+          include: {
+            product: { include: { images: true } },
+            event: { select: { id: true, title: true } },
+          },
+        });
       });
 
       res.status(201).json(eventProduct);
@@ -161,36 +163,37 @@ router.put(
         .map((img) => img.publicId)
         .filter(Boolean) as string[];
 
+      const toDelete: string[] = [];
+
       if (incomingImages) {
         const incomingIds = incomingImages
           .map((img) => img.publicId)
           .filter(Boolean) as string[];
 
-        const toDelete = existingImages.filter(
+        const toDeleteImages = existingImages.filter(
           (img) => img.publicId && !incomingIds.includes(img.publicId)
+        );
+
+        toDelete.push(
+          ...toDeleteImages.map((img) => img.publicId!).filter(Boolean)
         );
 
         if (toDelete.length) {
           await Promise.all(
-            toDelete.map(async (img) => {
+            toDelete.map(async (publicId) => {
               try {
-                if (img.publicId) {
-                  await cloudinary.uploader.destroy(img.publicId, {
-                    resource_type: "image",
-                  });
-                }
+                await cloudinary.uploader.destroy(publicId, {
+                  resource_type: "image",
+                });
               } catch (e) {
-                console.error("Failed to delete Cloudinary image:", img.publicId, e);
+                console.error(
+                  "Failed to delete Cloudinary image:",
+                  publicId,
+                  e
+                );
               }
             })
           );
-
-          await prisma.productImage.deleteMany({
-            where: {
-              productId: eventProduct.productId,
-              publicId: { in: toDelete.map((img) => img.publicId!) },
-            },
-          });
         }
 
         const toAdd = incomingImages.filter(
@@ -225,18 +228,29 @@ router.put(
         return res.status(400).json({ error: "No fields to update" });
       }
 
-      const updated = await prisma.eventProduct.update({
-        where: { id },
-        data: {
-          ...eventProductUpdateData,
-          ...(Object.keys(productUpdateData).length
-            ? { product: { update: productUpdateData } }
-            : {}),
-        },
-        include: {
-          product: { include: { images: true } },
-          event: { select: { id: true, title: true } },
-        },
+      const updated = await prisma.$transaction(async (tx) => {
+        if (incomingImages && toDelete.length) {
+          await tx.productImage.deleteMany({
+            where: {
+              productId: eventProduct.productId,
+              publicId: { in: toDelete },
+            },
+          });
+        }
+
+        return tx.eventProduct.update({
+          where: { id },
+          data: {
+            ...eventProductUpdateData,
+            ...(Object.keys(productUpdateData).length
+              ? { product: { update: productUpdateData } }
+              : {}),
+          },
+          include: {
+            product: { include: { images: true } },
+            event: { select: { id: true, title: true } },
+          },
+        });
       });
 
       res.json(updated);
@@ -289,8 +303,10 @@ router.delete(
         );
       }
 
-      await prisma.eventProduct.delete({ where: { id } });
-      await prisma.product.delete({ where: { id: eventProduct.product.id } });
+      await prisma.$transaction(async (tx) => {
+        await tx.eventProduct.delete({ where: { id } });
+        await tx.product.delete({ where: { id: eventProduct.product.id } });
+      });
 
       res.json({ message: "Event product deleted" });
     } catch (error: any) {
@@ -339,10 +355,18 @@ router.delete(
               })
           );
         }
-        await prisma.product.delete({ where: { id: ep.product.id } });
       }
 
-      await prisma.eventProduct.deleteMany({ where: { eventId, userId } });
+      const productIds = Array.from(
+        new Set(eventProducts.map((ep) => ep.product.id))
+      );
+
+      await prisma.$transaction(async (tx) => {
+        await tx.eventProduct.deleteMany({ where: { eventId, userId } });
+        if (productIds.length > 0) {
+          await tx.product.deleteMany({ where: { id: { in: productIds } } });
+        }
+      });
       res.json({ message: "All your event products deleted" });
     } catch (error: any) {
       res

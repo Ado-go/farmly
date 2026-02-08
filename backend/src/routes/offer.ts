@@ -33,35 +33,39 @@ router.post(
       const { product, ...offerPayload } = req.body;
       const productImages = product.images || [];
 
-      const newProduct = await prisma.product.create({
-        data: {
-          name: product.name,
-          category: product.category,
-          description: product.description || "",
-          basePrice: product.basePrice,
-          images: productImages.length
-            ? {
-                create: productImages.map((img: { url: string; publicId: string }) => ({
-                  url: img.url,
-                  publicId: img.publicId,
-                })),
-              }
-            : undefined,
-        },
-        include: { images: true },
-      });
+      const offer = await prisma.$transaction(async (tx) => {
+        const newProduct = await tx.product.create({
+          data: {
+            name: product.name,
+            category: product.category,
+            description: product.description || "",
+            basePrice: product.basePrice,
+            images: productImages.length
+              ? {
+                  create: productImages.map(
+                    (img: { url: string; publicId: string }) => ({
+                      url: img.url,
+                      publicId: img.publicId,
+                    })
+                  ),
+                }
+              : undefined,
+          },
+          include: { images: true },
+        });
 
-      const offer = await prisma.offer.create({
-        data: {
-          title: offerPayload.title,
-          description: offerPayload.description,
-          userId,
-          productId: newProduct.id,
-        },
-        include: {
-          product: { include: { images: true } },
-          user: { select: { id: true, name: true } },
-        },
+        return tx.offer.create({
+          data: {
+            title: offerPayload.title,
+            description: offerPayload.description,
+            userId,
+            productId: newProduct.id,
+          },
+          include: {
+            product: { include: { images: true } },
+            user: { select: { id: true, name: true } },
+          },
+        });
       });
 
       res.status(201).json(offer);

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import prisma from "../prisma.ts";
+import type { Prisma } from "@prisma/client";
 import { authenticateToken } from "../middleware/auth.ts";
 import { validateRequest } from "../middleware/validateRequest.ts";
 import {
@@ -9,13 +10,16 @@ import {
 
 const router = Router();
 
-const recomputeProductRating = async (productId: number) => {
-  const agg = await prisma.review.aggregate({
+const recomputeProductRating = async (
+  tx: Prisma.TransactionClient,
+  productId: number
+) => {
+  const agg = await tx.review.aggregate({
     where: { productId },
     _avg: { rating: true },
   });
 
-  await prisma.product.update({
+  await tx.product.update({
     where: { id: productId },
     data: { rating: agg._avg.rating ?? 0 },
   });
@@ -70,16 +74,20 @@ router.post(
       return res.status(400).json({ error: "Product ID is required" });
 
     try {
-      const review = await prisma.review.create({
-        data: {
-          rating,
-          comment,
-          productId: Number(productId),
-          userId,
-        },
-      });
+      const review = await prisma.$transaction(async (tx) => {
+        const created = await tx.review.create({
+          data: {
+            rating,
+            comment,
+            productId: Number(productId),
+            userId,
+          },
+        });
 
-      await recomputeProductRating(Number(productId));
+        await recomputeProductRating(tx, Number(productId));
+
+        return created;
+      });
 
       res.status(201).json(review);
     } catch (error) {
@@ -106,12 +114,16 @@ router.put(
       if (existing.userId !== req.user.id)
         return res.status(403).json({ error: "Not authorized" });
 
-      const updated = await prisma.review.update({
-        where: { id },
-        data: { rating, comment },
-      });
+      const updated = await prisma.$transaction(async (tx) => {
+        const saved = await tx.review.update({
+          where: { id },
+          data: { rating, comment },
+        });
 
-      await recomputeProductRating(existing.productId);
+        await recomputeProductRating(tx, existing.productId);
+
+        return saved;
+      });
 
       res.json(updated);
     } catch (error) {
@@ -132,8 +144,10 @@ router.delete("/:id", authenticateToken, async (req: any, res) => {
     if (review.userId !== req.user.id)
       return res.status(403).json({ error: "Not authorized" });
 
-    await prisma.review.delete({ where: { id } });
-    await recomputeProductRating(review.productId);
+    await prisma.$transaction(async (tx) => {
+      await tx.review.delete({ where: { id } });
+      await recomputeProductRating(tx, review.productId);
+    });
 
     res.json({ message: "Review deleted" });
   } catch (error) {

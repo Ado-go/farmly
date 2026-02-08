@@ -51,17 +51,21 @@ router.post(
         },
       };
 
-      const event = await prisma.event.create({
-        data: createData,
-        include: { images: true },
-      });
+      const event = await prisma.$transaction(async (tx) => {
+        const createdEvent = await tx.event.create({
+          data: createData,
+          include: { images: true },
+        });
 
-      await prisma.eventParticipant.create({
-        data: {
-          eventId: event.id,
-          userId: userId!,
-          stallName: normalizedStallName,
-        },
+        await tx.eventParticipant.create({
+          data: {
+            eventId: createdEvent.id,
+            userId: userId!,
+            stallName: normalizedStallName,
+          },
+        });
+
+        return createdEvent;
       });
 
       res.status(201).json(event);

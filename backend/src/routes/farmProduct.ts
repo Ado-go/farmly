@@ -46,36 +46,38 @@ router.post(
 
       await checkFarmOwnership(farmId, req.user?.id);
 
-      const product = await prisma.product.create({
-        data: {
-          ...productData,
-          basePrice: price,
-          images: images
-            ? {
-                create: images.map(
-                  (img: { url: string; publicId: string }) => ({
-                    url: img.url,
-                    publicId: img.publicId,
-                  })
-                ),
-              }
-            : undefined,
-        },
-        include: { images: true },
-      });
+      const farmProduct = await prisma.$transaction(async (tx) => {
+        const product = await tx.product.create({
+          data: {
+            ...productData,
+            basePrice: price,
+            images: images
+              ? {
+                  create: images.map(
+                    (img: { url: string; publicId: string }) => ({
+                      url: img.url,
+                      publicId: img.publicId,
+                    })
+                  ),
+                }
+              : undefined,
+          },
+          include: { images: true },
+        });
 
-      const farmProduct = await prisma.farmProduct.create({
-        data: {
-          farm: { connect: { id: farmId } },
-          product: { connect: { id: product.id } },
-          price: price ?? 0,
-          stock: stock ?? 0,
-          isAvailable: isAvailable ?? true,
-        },
-        include: {
-          product: { include: { images: true } },
-          farm: { select: { id: true, name: true } },
-        },
+        return tx.farmProduct.create({
+          data: {
+            farm: { connect: { id: farmId } },
+            product: { connect: { id: product.id } },
+            price: price ?? 0,
+            stock: stock ?? 0,
+            isAvailable: isAvailable ?? true,
+          },
+          include: {
+            product: { include: { images: true } },
+            farm: { select: { id: true, name: true } },
+          },
+        });
       });
 
       res.status(201).json(farmProduct);
@@ -211,41 +213,52 @@ router.put(
 
       const toDelete = oldIds.filter((pid) => !newIds.includes(pid));
 
-      for (const publicId of toDelete) {
-        try {
-          await cloudinary.uploader.destroy(publicId);
-          await prisma.productImage.deleteMany({ where: { publicId } });
-        } catch (e) {
-          console.warn(`Could not delete ${publicId}:`, e);
-        }
+      if (toDelete.length > 0) {
+        await Promise.all(
+          toDelete.map(async (publicId) => {
+            try {
+              await cloudinary.uploader.destroy(publicId);
+            } catch (e) {
+              console.warn(`Could not delete ${publicId}:`, e);
+            }
+          })
+        );
       }
 
       const toAdd = images.filter((img: any) => !oldIds.includes(img.publicId));
 
-      const updated = await prisma.farmProduct.update({
-        where: { id },
-        data: {
-          price: price ?? farmProduct.price,
-          stock: stock ?? farmProduct.stock,
-          ...(isAvailable !== undefined && { isAvailable }),
-          product: {
-            update: {
-              ...(name && { name }),
-              ...(category && { category }),
-              ...(description && { description }),
-              images: {
-                create: toAdd.map((img: any) => ({
-                  url: img.url,
-                  publicId: img.publicId,
-                })),
+      const updated = await prisma.$transaction(async (tx) => {
+        if (toDelete.length > 0) {
+          await tx.productImage.deleteMany({
+            where: { publicId: { in: toDelete } },
+          });
+        }
+
+        return tx.farmProduct.update({
+          where: { id },
+          data: {
+            price: price ?? farmProduct.price,
+            stock: stock ?? farmProduct.stock,
+            ...(isAvailable !== undefined && { isAvailable }),
+            product: {
+              update: {
+                ...(name && { name }),
+                ...(category && { category }),
+                ...(description && { description }),
+                images: {
+                  create: toAdd.map((img: any) => ({
+                    url: img.url,
+                    publicId: img.publicId,
+                  })),
+                },
               },
             },
           },
-        },
-        include: {
-          product: { include: { images: true } },
-          farm: { select: { id: true, name: true } },
-        },
+          include: {
+            product: { include: { images: true } },
+            farm: { select: { id: true, name: true } },
+          },
+        });
       });
 
       res.json(updated);
@@ -283,8 +296,10 @@ router.delete(
         }
       }
 
-      await prisma.farmProduct.delete({ where: { id } });
-      await prisma.product.delete({ where: { id: farmProduct.product.id } });
+      await prisma.$transaction(async (tx) => {
+        await tx.farmProduct.delete({ where: { id } });
+        await tx.product.delete({ where: { id: farmProduct.product.id } });
+      });
 
       res.json({ message: "Farm product deleted" });
     } catch (error: any) {
