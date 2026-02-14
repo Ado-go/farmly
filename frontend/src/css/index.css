@@ -177,6 +177,9 @@ h1 {
   .dark .text-gray-600 {
     color: oklch(0.88 0.02 115);
   }
+  .dark .text-gray-900 {
+    color: oklch(0.98 0.02 115);
+  }
   .dark .text-gray-500 {
     color: oklch(0.82 0.02 115);
   }
